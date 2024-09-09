@@ -1,6 +1,7 @@
-<a href="/docs/page1.md">page 1</a>
-
-- [page1](/docs/page1.md)
+---
+layout: default
+title: page1
+---
 
 # Data Scientist
 
