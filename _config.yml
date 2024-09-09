@@ -3,4 +3,4 @@ logo: /assets/images.png
 #description: text below image
 show_downloads: true
 processors: kramdown
-theme: jekyll-remote-theme
+theme: jekyll-theme-minimal
