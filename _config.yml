@@ -2,5 +2,5 @@ title: Afza Azzindani
 logo: /assets/images.png
 #description: text below image
 show_downloads: true
-processors: kramdown
+processors: GFM
 theme: jekyll-theme-minimal
