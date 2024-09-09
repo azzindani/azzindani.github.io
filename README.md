@@ -1,5 +1,7 @@
 <a href="/docs/page1.md">page 1</a>
 
+- [page1](/docs/page1.md)
+
 # Data Scientist
 
 #### Technical Skills: Python, SQL, AWS, Snowflake, MATLAB
