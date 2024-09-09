@@ -4,4 +4,4 @@ logo: /assets/images.png
 show_downloads: true
 remote_theme: pages-themes/architect@v0.2.0
 plugins:
-    - jekyll-theme-minimal
+- jekyll-remote-theme
