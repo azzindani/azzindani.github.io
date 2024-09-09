@@ -1,3 +1,5 @@
+<a href="/docs/page1.md">page 1</a>
+
 # Data Scientist
 
 #### Technical Skills: Python, SQL, AWS, Snowflake, MATLAB
