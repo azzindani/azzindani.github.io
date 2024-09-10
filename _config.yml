@@ -2,7 +2,8 @@ title: Afza Azzindani
 logo: /assets/images.png
 #description: text below image
 show_downloads: true
-processors: GFM
+#processors: GFM
+markdown: GFM
 #theme: jekyll-theme-minimal
 remote_theme: pages-themes/cayman@v0.2.0
 plugins:
