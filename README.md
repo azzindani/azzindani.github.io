@@ -1,4 +1,5 @@
 [page1](/docs/page1.md)
+[page2](/docs/page2.md)
 
 # Data Scientist
 
