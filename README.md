@@ -27,6 +27,7 @@
 - B.S., Public Health | UIN Syarif Hidayatullah Jakarta (_December 2017_)
 
 ## Work Experience
+
 **Quality Process Administrative Specialist @ PT DSV Transport Indonesia (_December 2023 - Present_)**
 - 
 - 
