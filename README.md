@@ -30,17 +30,17 @@
 
 ## Work Experience
 
-Quality Process Administrative Specialist @ PT DSV Transport Indonesia (_December 2023 - Present_)
-* 
-*
+**Quality Process Administrative Specialist @ PT DSV Transport Indonesia (_December 2023 - Present_)**
+* desc1
+* desc2
 
-Back Office of Customer Service Department @ PT BSH Home Appliances (_November 2018 - November 2023_)
-*
-*
+**Back Office of Customer Service Department @ PT BSH Home Appliances (_November 2018 - November 2023_)**
+* desc1
+* desc2
 
-Project Administrative @ PT Mekatrika Karya Sinergi (_February 2018 - October 2018_)
-*
-*
+**Project Administrative @ PT Mekatrika Karya Sinergi (_February 2018 - October 2018_)**
+* desc1
+* desc2
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -118,7 +118,7 @@ Below are my personal projects that I expliained the process only
 
 ## Publications
 
-- [Analysis of Climate Parameters Changes and Mosquito-borne Disease in Jakarta 2009-2016](https://repository.uinjkt.ac.id/dspace/bitstream/123456789/38295/1/AFZA%20AZZINDANI-FKIK.pdf)
+* [Analysis of Climate Parameters Changes and Mosquito-borne Disease in Jakarta 2009-2016](https://repository.uinjkt.ac.id/dspace/bitstream/123456789/38295/1/AFZA%20AZZINDANI-FKIK.pdf)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
