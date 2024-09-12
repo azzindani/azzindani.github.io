@@ -32,15 +32,15 @@
 
 **Quality Process Administrative Specialist @ PT DSV Transport Indonesia (_December 2023 - Present_)**
 * desc1
-* desc2
+* desc2 
 
 **Back Office of Customer Service Department @ PT BSH Home Appliances (_November 2018 - November 2023_)**
 * desc1
-* desc2
+* desc2 
 
 **Project Administrative @ PT Mekatrika Karya Sinergi (_February 2018 - October 2018_)**
 * desc1
-* desc2
+* desc2 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -103,16 +103,16 @@ Below are my personal projects that I shared with entire source code
 Below are my personal projects that I expliained the process only
 |No   |Project Name     |Link     |
 |-------|---------------------------|-----------|
-|1     |Lungs Object Detection (Computer Vision) |[page1](/docs/page1.md)  |
-|2   |Covid 19 Object Detection (Computer Vision) |[page2](/docs/page2.md) |
-|3     |Lung Abnormalities Object Detection (Computer Vision) |      |
-|4     |Covid 19 Deep Learning |        |
-|5     |Minor Face Recognition Deep Learning |    |
-|6     |Major Face Recognition Deep Learning |     |
-|7     |IDX Financial Statement Data Mining (All Documents Available) |     |
-|8     |IDX Financial Statement Data Mining (Only Excel Files) |      |
-|9     |Broker Mining |     |
-|10   |Broker Analytic |    |
+|1     |Lungs Object Detection (Computer Vision) |[Click Here](/docs/page1.md)  |
+|2   |Covid 19 Object Detection (Computer Vision) |[Click Here](/docs/page2.md) |
+|3     |Lung Abnormalities Object Detection (Computer Vision) |[Click Here](/docs/page2.md) |
+|4     |Covid 19 Deep Learning |[Click Here](/docs/page2.md) |
+|5     |Minor Face Recognition Deep Learning |[Click Here](/docs/page2.md) |
+|6     |Major Face Recognition Deep Learning |[Click Here](/docs/page2.md) |
+|7     |IDX Financial Statement Data Mining (All Documents Available) |[Click Here](/docs/page2.md) |
+|8     |IDX Financial Statement Data Mining (Only Excel Files) |[Click Here](/docs/page2.md) |
+|9     |Broker Mining |[Click Here](/docs/page2.md) |
+|10   |Broker Analytic |[Click Here](/docs/page2.md) |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -135,7 +135,7 @@ Below are my personal projects that I expliained the process only
 |No |Organization Name |Position |Period |
 |-----|--------------------------------|--------------|-----------|
 |1 |PAMI Jakarta Raya |Coordinator Unit of K3KL P2K |2015-2016 |
-|2 |DEMA FKIK UIN Jakarta |Head of Media and Information |Department |2015 |
+|2 |DEMA FKIK UIN Jakarta |Head of Media and Information Department |2015 |
 |3 |CSSMoRA UIN Jakarta |Staff of the Education and Profession Department |2015-2016 |
 |4 |PAMI Jakarta Raya |Staff of the Communications and Information Department |2014-2015 |
 |5 |CSSMoRA UIN Jakarta |Staff of the Communications and Information Department |2014-2015 |
