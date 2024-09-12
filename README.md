@@ -15,6 +15,8 @@
       </ul>
     </li>
     <li><a href="#publications">Publications</a></li>
+    <li><a href="#research-experience">Research Experience</a></li>
+    <li><a href="#organizations">Organizations</a></li>
     <li><a href="#contact">Contact</a></li>
   </ol>
 </details>
@@ -24,21 +26,21 @@
 #### Technical Skills: Python, Data Analysis, Machine Learning, Deep Learning, Artificial Intelligence, Web Scrapping, Automation, Project Management, Administration, Customer Service
 
 ## Education	 			        		
-- B.S., Public Health | UIN Syarif Hidayatullah Jakarta (_December 2017_)
+* B.S., Public Health | UIN Syarif Hidayatullah Jakarta (_December 2017_)
 
 ## Work Experience
 
 Quality Process Administrative Specialist @ PT DSV Transport Indonesia (_December 2023 - Present_)
-- 
-- 
+* 
+*
 
 Back Office of Customer Service Department @ PT BSH Home Appliances (_November 2018 - November 2023_)
-- 
-- 
+*
+*
 
 Project Administrative @ PT Mekatrika Karya Sinergi (_February 2018 - October 2018_)
--
--
+*
+*
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
