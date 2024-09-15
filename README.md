@@ -25,64 +25,6 @@
 
 #### Technical Skills: Python, Data Analysis, Machine Learning, Deep Learning, Artificial Intelligence, Web Scrapping, Automation, Project Management, Administration, Customer Service
 
-## Education	 			        		
-* B.S., Public Health | UIN Syarif Hidayatullah Jakarta (_December 2017_)
-
-## Work Experience
-
-**Quality Process Administrative Specialist @ PT DSV Transport Indonesia (_December 2023 - Present_)**
-* desc1
-* desc2 
-
-**Back Office of Customer Service Department @ PT BSH Home Appliances (_November 2018 - November 2023_)**
-* desc1
-* desc2 
-
-**Project Administrative @ PT Mekatrika Karya Sinergi (_February 2018 - October 2018_)**
-* desc1
-* desc2 
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Certificates
-|No    |Certificate Name   |Link    |
-|--------|------------------------------|----------|
-|1       |Microsoft 365 Fundamentals |https://coursera.org/verify/specialization/L42EZSKWS9UT  |
-|2       |Excel Skills for Business |https://coursera.org/verify/specialization/3YPLW27GNSW8  |
-|3      |IBM Data Analyst |https://coursera.org/verify/professional-cert/FCQX2JBTENM7 |
-|4      |IBM Data Science |https://coursera.org/verify/professional-cert/TJ5DUCETW8JW |
-|5      |IBM Machine Learning |https://coursera.org/verify/professional-cert/7FETW8DHHGFX |
-|6      |IBM AI Engineering |https://coursera.org/verify/professional-cert/XL8BH22P3ZJ8 |
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Projects
-|No    |Project Name    |Period  |Type    |Qty (Units)   |Qty (Appliances) |Brand  |
-|--------|-------------------------|------------|------------|--------------------|---------------------------|-----------|
-|1 |Park Royal Tower Thamrin Nine |Q3 2023 - Q4 2023 |1 Tower Hotel |150 + |280 + |Bosch |
-|2 |Savyavasa |Q1 2023 - Q4 2023 |3 Towers Apartment |0 |Meeting Only |Gaggenau & Bosch |
-|3 |Lyndon Navapark |Q3 2022 - Q4 2023 |1 Housing Cluster |130 + |650 + |Bosch |
-|4 |Magran Living Showroom |Q1 2023 - Q4 2023 |Showroom |1 |60 + |Gaggenau & Bosch |
-|5 |Layton Navapark |Q4 2022 - Q1 2023 |Housing Show Unit |2 |7 |Bosch |
-|6 |Sun & Moon Dharmawangsa |Q3 2022 - Q1 2023 |Apartment Show Unit |2 |20 |Gaggenau & Bosch |
-|7 |Bosch Brand Store Wijaya |Q4 2022 |Showroom |1 |50 + |Bosch |
-|8 |The Stature |Q4 2021 - Q3 2022 |1 Tower Apartment |100 + |500 + |Bosch |
-|9 |Oakwood Premiere District 8 SCBD |Q2 2021 - Q3 2022 |1 Tower Apartment |130 + |130 + |Bosch |
-|10 |Regent Residence Mangkuluhur City |Q1 2019 - Q3 2022 |1 Tower Apartment |30 + |120 + |Gaggenau & Bosch |
-|11 |Langham President Suite Room |Q3 2021 - Q2 2022 |Hotel |1 |5 |Gaggenau |
-|12 |The Grange |Q2 2021 - Q2 2022 |Apartment Show Unit |1 |9 |Gaggenau |
-|13 |Park Royal Thamrin Nine |Q2 2022 |Apartment Show Unit |1 |3 |Bosch |
-|14 |Laurel Navapark |Q4 2021 - Q1 2022 |Housing Show Unit |2 |6 |Bosch |
-|15 |Pakubuwono Menteng |Q3 2020 - Q4 2021 |1 Tower Apartment |180 + |1400 + |Gaggenau & Bosch |
-|16 |Andaz Sanur Bali (Garden Villa & Beach Villa) |Q3 2020 - Q4 2021 |Hotel & Resort |22 |38 |Gaggenau & Bosch |
-|17 |Lyndon Navapark |Q4 2020 |Housing Show Unit |3 |10 + |Bosch |
-|18 |Millenium Village |Q1 2020 - Q3 2020 |1 Tower Apartment |36 |100 + |Bosch |
-|19 |Maluku 9 |Q1 2020 |Luxury House |1 |10 |Gaggenau |
-|20 |Savyavasa |Q4 2019 - Q1 2020 |Apartment Show Unit |3 |19 |Gaggenau & Bosch|
-|21 |Anandamaya Residence Tower 1, 2 & 3 |Q1 2018 - Q4 2019 |3 Towers Apartment |500 + |2500 + |Gaggenau |
-|22 |South Hills |Q1 2019 - Q3 2019 |1 Tower Apartment |500 + |2000 + |Bosch |
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Portofolios
 ### Github Repository Portofolios
@@ -145,6 +87,7 @@ Below are my personal projects that I expliained the process only
 
 <!-- CONTACT -->
 ## Contact
+[About Me](/aboutme.md)
 
 <div id="badges">
   <a href="your.422indani@gmail.com">
