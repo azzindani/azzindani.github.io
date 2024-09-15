@@ -58,33 +58,6 @@ Below are my personal projects that I expliained the process only
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Publications
-
-* [Analysis of Climate Parameters Changes and Mosquito-borne Disease in Jakarta 2009-2016](https://repository.uinjkt.ac.id/dspace/bitstream/123456789/38295/1/AFZA%20AZZINDANI-FKIK.pdf)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Research Experience
-|No |Research Title |Position |Period |
-|-----|------------------------|--------------|-----------|
-|1 |System Analysis by Priority Target Disease for Children Under Five Years in Rural Islamic Community in Indonesia |Enumerator |2017 |
-|2 |Analysis of Climate Parameters Changes and Mosquito-Borne Disease in DKI Jakarta Province Regency Year 2009-2016 |Researcher |2017 |
-|3 |Description of Solid Medical Waste Management in dr. Suyoto Hospital Pusrehab Kemhan |Researcher |2017 |
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Organizations
-|No |Organization Name |Position |Period |
-|-----|--------------------------------|--------------|-----------|
-|1 |PAMI Jakarta Raya |Coordinator Unit of K3KL P2K |2015-2016 |
-|2 |DEMA FKIK UIN Jakarta |Head of Media and Information Department |2015 |
-|3 |CSSMoRA UIN Jakarta |Staff of the Education and Profession Department |2015-2016 |
-|4 |PAMI Jakarta Raya |Staff of the Communications and Information Department |2014-2015 |
-|5 |CSSMoRA UIN Jakarta |Staff of the Communications and Information Department |2014-2015 |
-|6 |BEM FKIK UIN Jakarta |Staff of the Student Affairs Department |2014 |
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 <!-- CONTACT -->
 ## Contact
 [About Me](/aboutme.md)
