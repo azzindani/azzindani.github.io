@@ -1,11 +1,11 @@
 title: Afza Azzindani
 logo: /assets/images.png
+
 #description: text below image
 show_downloads: true
 markdown: GFM
-#baseurl: /mediumish-theme-jekyll
 #theme: jekyll-theme-minimal
-remote_theme: wowthemesnet/mediumish-theme-jekyll
+remote_theme: zerostaticthemes/jekyll-serif-theme
 #remote_theme: pages-themes/architect@v0.2.0
 #remote_theme: pages-themes/cayman@v0.2.0
 #remote_theme: pages-themes/dinky@v0.2.0
@@ -27,14 +27,6 @@ plugins:
   - jekyll-feed
   - jekyll-seo-tag
   - jekyll-archives
-
-# Archives
-jekyll-archives:
-  enabled:
-    - categories
-  layout: archive
-  permalinks:
-    category: '/category/:name/'
     
 # Pagination 
 paginate: 6
