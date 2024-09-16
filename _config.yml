@@ -5,9 +5,9 @@ logo: /assets/images.png
 show_downloads: true
 markdown: GFM
 #theme: jekyll-theme-minimal
-#remote_theme: wowthemesnet/mediumish-theme-jekyll
+remote_theme: - jekyll-remote-theme
 #remote_theme: pages-themes/architect@v0.2.0
-remote_theme: pages-themes/cayman@v0.2.0
+#remote_theme: pages-themes/cayman@v0.2.0
 #remote_theme: pages-themes/dinky@v0.2.0
 #remote_theme: pages-themes/hacker@v0.2.0
 #remote_theme: pages-themes/leap-day@v0.2.0
