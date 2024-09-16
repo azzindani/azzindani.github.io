@@ -23,8 +23,20 @@ remote_theme: zerostaticthemes/jekyll-serif-theme
 
 # Plugins
 plugins:
-  - jekyll-environment-variables
-#  - jekyll-sitemap
-#  - jekyll-feed
-#  - jekyll-seo-tag
-#  - jekyll-archives
+- jekyll-paginate
+- jekyll-sitemap
+- jekyll-feed
+- jekyll-seo-tag
+- jekyll-archives
+
+# Archives
+jekyll-archives:
+  enabled:
+    - categories
+  layout: archive
+  permalinks:
+    category: '/category/:name/'
+    
+# Pagination 
+paginate: 6
+paginate_path: /page:num/
