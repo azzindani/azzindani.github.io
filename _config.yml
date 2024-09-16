@@ -5,7 +5,7 @@ logo: /assets/images.png
 show_downloads: true
 markdown: GFM
 #theme: jekyll-theme-minimal
-remote_theme: wowthemesnet/mundana-theme-jekyll
+#remote_theme: wowthemesnet/mundana-theme-jekyll
 #remote_theme: pages-themes/architect@v0.2.0
 #remote_theme: pages-themes/cayman@v0.2.0
 #remote_theme: pages-themes/dinky@v0.2.0
@@ -13,7 +13,7 @@ remote_theme: wowthemesnet/mundana-theme-jekyll
 #remote_theme: pages-themes/leap-day@v0.2.0
 #remote_theme: pages-themes/merlot@v0.2.0
 #remote_theme: pages-themes/midnight@v0.2.0
-#remote_theme: pages-themes/minimal@v0.2.0
+remote_theme: pages-themes/minimal@v0.2.0
 #remote_theme: pages-themes/modernist@v0.2.0
 #remote_theme: pages-themes/slate@v0.2.0
 #remote_theme: pages-themes/tactile@v0.2.0
