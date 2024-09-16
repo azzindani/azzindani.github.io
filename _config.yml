@@ -5,7 +5,7 @@ logo: /assets/images.png
 show_downloads: true
 markdown: GFM
 #theme: jekyll-theme-minimal
-remote_theme: Phlow/feeling-responsive
+remote_theme: wowthemesnet/mundana-theme-jekyll
 #remote_theme: pages-themes/architect@v0.2.0
 #remote_theme: pages-themes/cayman@v0.2.0
 #remote_theme: pages-themes/dinky@v0.2.0
@@ -22,15 +22,15 @@ remote_theme: Phlow/feeling-responsive
 
 # Plugins
 plugins:
-#- jekyll-paginate
-#- jekyll-sitemap
-#- jekyll-feed
-#- jekyll-seo-tag
+- jekyll-paginate
+- jekyll-sitemap
+- jekyll-feed
+- jekyll-seo-tag
 #- jekyll-archives
 #- jekyll-remote-theme
-- jekyll-asciidoc
-- jekyll-gist
-- jekyll-paginate
+#- jekyll-asciidoc
+#- jekyll-gist
+#- jekyll-paginate
 
 # Archives
 jekyll-archives:
