@@ -2,11 +2,10 @@ title: Afza Azzindani
 logo: /assets/images.png
 #description: text below image
 show_downloads: true
-#processors: GFM
-#markdown: GFM
-baseurl: /mediumish-theme-jekyll
+markdown: GFM
+#baseurl: /mediumish-theme-jekyll
 #theme: jekyll-theme-minimal
-#remote_theme: wowthemesnet/mediumish-theme-jekyll
+remote_theme: wowthemesnet/mediumish-theme-jekyll
 #remote_theme: pages-themes/architect@v0.2.0
 #remote_theme: pages-themes/dinky@v0.2.0
 #remote_theme: pages-themes/hacker@v0.2.0
@@ -39,13 +38,3 @@ jekyll-archives:
 # Pagination 
 paginate: 6
 paginate_path: /page:num/
-    
-# Other
-markdown: kramdown
-
-kramdown:
-  input: GFM
-  syntax_highlighter: rouge
-  syntax_highlighter_opts:
-    block:
-      line_numbers: true
