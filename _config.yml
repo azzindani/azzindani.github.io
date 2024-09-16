@@ -16,3 +16,7 @@ markdown: GFM
 
 # Paginate
 paginate: 10
+
+# Include custom CSS
+sass:
+  style: compressed
