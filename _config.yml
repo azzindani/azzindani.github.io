@@ -1,47 +1,65 @@
-title: Afza Azzindani
-logo: /assets/images.png
+# Site
+name: 'Mundana'
+description: 'Mundana is a free Jekyll theme for awesome people like you, Medium like.'
+logo: 'assets/images/logo.png'
+favicon: 'assets/images/favicon.ico'
+baseurl: '/mundana-theme-jekyll'
+disqus: 'demowebsite'
+email: 'wowthemesnet@gmail.com'
+mailchimp-list: 'https://wowthemes.us11.list-manage.com/subscribe/post?u=8aeb20a530e124561927d3bd8&amp;id=8c3d2d214b'
 
-#description: text below image
-#show_downloads: true
-markdown: GFM
-#theme: jekyll-theme-minimal
-remote_theme: poole/lanyon
-#remote_theme: pages-themes/architect@v0.2.0
-#remote_theme: pages-themes/cayman@v0.2.0
-#remote_theme: pages-themes/dinky@v0.2.0
-#remote_theme: pages-themes/hacker@v0.2.0
-#remote_theme: pages-themes/leap-day@v0.2.0
-#remote_theme: pages-themes/merlot@v0.2.0
-#remote_theme: pages-themes/midnight@v0.2.0
-#remote_theme: pages-themes/minimal@v0.2.0
-#remote_theme: pages-themes/modernist@v0.2.0
-#remote_theme: pages-themes/slate@v0.2.0
-#remote_theme: pages-themes/tactile@v0.2.0
-#remote_theme: pages-themes/time-machine@v0.2.0
-
+include: ["_pages"]
+permalink: /:title/
 
 # Plugins
-plugins:
-- jekyll-paginate
-- jekyll-sitemap
-- jekyll-feed
-- jekyll-seo-tag
-#- jekyll-archives
-#- jekyll-remote-theme
-#- jekyll-asciidoc
-#- jekyll-gist
-#- jekyll-paginate
+plugins: 
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-paginate
+  - jekyll-seo-tag
+  
+authors:
+    sal:
+      name:           Sal
+      site:           https://www.wowthemes.net
+      avatar:         /assets/images/avatar1.jpg
+      bio:            "Hi, I am Sal, the author of Mundana, the theme you're currently previewing. I hope you like it!"
+      email:          wowthemesnet@gmail.com
+      twitter:        https://twitter.com/wowthemesnet
 
-# Archives
-jekyll-archives:
-  enabled:
-    - categories
-  layout: archive
-  permalinks:
-    category: '/category/:name/'
-    
-# Pagination 
-paginate: 6
-paginate_path: /page:num/
+    jane:
+      name:           Jane
+      site:           https://www.wowthemes.net
+      avatar:         /assets/images/avatar2.jpg
+      bio:            "Blogger, fashionista, love to explore new ideas and write on my morning coffee!"
+      email:          fakemail@gmail.com
+      twitter:        https://twitter.com/wowthemesnet
+ 
+# Defaults
+defaults:
 
-gem "github-pages", group: :jekyll_plugins
+  # all posts
+  - scope:
+      path: "_posts"
+    values:
+      layout: post
+      author: sal
+      avatar: /assets/images/avatar1.jpg
+      
+  # all pages
+  - scope:
+      path: "_pages"
+    values:
+      layout: page
+      
+# Syntax
+markdown: kramdown
+highlighter: rouge
+
+# Paginate
+paginate: 10
+
+
+
+# Exclude metadata and development time dependencies (like Grunt plugins)
+exclude: [README.markdown, package.json, grunt.js, Gruntfile.js, Gruntfile.coffee, node_modules]
