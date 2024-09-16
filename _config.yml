@@ -43,3 +43,5 @@ jekyll-archives:
 # Pagination 
 paginate: 6
 paginate_path: /page:num/
+
+gem "github-pages", group: :jekyll_plugins
