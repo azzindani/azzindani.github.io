@@ -6,7 +6,7 @@ show_downloads: true
 #markdown: GFM
 baseurl: /mediumish-theme-jekyll
 #theme: jekyll-theme-minimal
-#remote_theme: zerostaticthemes/jekyll-serif-theme
+#remote_theme: wowthemesnet/mediumish-theme-jekyll
 #remote_theme: pages-themes/architect@v0.2.0
 #remote_theme: pages-themes/dinky@v0.2.0
 #remote_theme: pages-themes/hacker@v0.2.0
