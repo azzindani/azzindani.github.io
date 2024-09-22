@@ -21,10 +21,6 @@
   </ol>
 </details>
 
-# Data Scientist
-
-#### Technical Skills: Python, Data Analysis, Machine Learning, Deep Learning, Artificial Intelligence, Web Scrapping, Automation, Project Management, Administration, Customer Service
-
 
 ## Portofolios
 ### Github Repository Portofolios
@@ -45,16 +41,15 @@ Below are my personal projects that I shared with entire source code
 Below are my personal projects that I expliained the process only
 |No   |Project Name     |Link     |
 |-------|---------------------------|-----------|
-|1     |Lungs Object Detection (Computer Vision) |[Click Here](/docs/page1.md)  |
-|2   |Covid 19 Object Detection (Computer Vision) |[Click Here](/docs/page2.md) |
-|3     |Lung Abnormalities Object Detection (Computer Vision) |[Click Here](/docs/page2.md) |
-|4     |Covid 19 Deep Learning |[Click Here](/docs/page2.md) |
-|5     |Minor Face Recognition Deep Learning |[Click Here](/docs/page2.md) |
-|6     |Major Face Recognition Deep Learning |[Click Here](/docs/page2.md) |
-|7     |IDX Financial Statement Data Mining (All Documents Available) |[Click Here](/docs/page2.md) |
-|8     |IDX Financial Statement Data Mining (Only Excel Files) |[Click Here](/docs/page2.md) |
-|9     |Broker Mining |[Click Here](/docs/page2.md) |
-|10   |Broker Analytic |[Click Here](/docs/page2.md) |
+|1     |Lungs Detection (Computer Vision) |[Click Here](/docs/page1.md)  |
+|2   |Covid 19 Detection (Computer Vision) |[Click Here](/docs/page2.md) |
+|3     |Lung Abnormalities Detection (Computer Vision) |[Click Here](/docs/page3.md) |
+|4     |Small Face Recognition Deep Learning |[Click Here](/docs/page4.md) |
+|5     |Large Face Recognition Deep Learning |[Click Here](/docs/page5.md) |
+|6     |IDX Financial Statement Data Mining (All Documents Available) |[Click Here](/docs/page2.md) |
+|7     |IDX Financial Statement Data Mining (Only Excel Files) |[Click Here](/docs/page2.md) |
+|8     |Broker Mining |[Click Here](/docs/page2.md) |
+|9   |Broker Analytic |[Click Here](/docs/page2.md) |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
