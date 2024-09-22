@@ -11,225 +11,73 @@ headline: false
 <details>
   <summary>Table of Contents</summary>
   <ol>
-    <li>
-      <a href="#about-this-repository">About This Repository</a>
-    </li>
-    <li>
-      <a href="#import-dataset">Import Dataset</a>
-      <ul>
-        <li><a href="#import-by-url">Import by URL</a></li>
-        <li><a href="#download-dataset">Download Dataset</a></li>
-        <li><a href="#download-all-datasets">Download All Datasets</a></li>
-      </ul>
-    </li>
-    <li><a href="#contact">Contact</a></li>
+    <li> <a href="#overview-and-objective">Overview and Objective</a></li>
+    <li><a href="#motivation-and-inspiration">Motivation and Inspiration</a></li>
+    <li><a href="#workflow">Workflow</a></li>
+    <li><a href="#solution-and-technology-stack">Solution and Technology Stack</a></li>
+    <li><a href="#project-details-and-results">Project Details and Results</a></li>
+    <li><a href="#challenges">Challenges</a></li>
+    <li><a href="#insights">Insights</a></li>
+    <li><a href="#future-plans">Future Plans</a></li>
   </ol>
 </details>
 
-## About This Repository
+## Overview and Objective
+This project, initiated in 2021, aims to develop a computer vision system capable of detecting and localizing lungs in medical images such as CXR (Chest X-Ray) or CT scans. By accurately identifying the lung boundaries, the model will lay the foundation for further analysis, including detecting lung diseases like Covid-19. This detection system represents the first step in building a more comprehensive tool for diagnosing and monitoring various conditions affecting internal organs.
 
-This repository contain datasets that can be used for data analytics, machine learning, deep learning, etc. The file format used are csv, zip, json, geojson, etc. These datasets came from different source such as kaggle, github, etc. You may not found large datasets over 25 MB, because of github limitation.
-
-My purpose to collect this datasets is to simplify importing process through URL. No need to create any API key like kaggle does. Also the reason I collected these datasets because these datasets contain thousands row of data, able of being used for analytic, and sometimes if I search in github or kaggle, it is hard to find relevant datasets with medium size.
-
-I will update this repository regurally to add more datasets and remove duplicate / irrelevant dataset.
+The primary goal is to create a reliable computer vision model that can accurately detect lungs in medical images. This system will not only assist in lung health analysis but will also serve as a basis for detecting other internal organs, enabling more comprehensive diagnostic capabilities for a range of medical conditions. However, for now, the project's focus remains solely on lung detection.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Import Dataset
+## Motivation and Inspiration
+The Covid-19 pandemic served as the primary catalyst for this project. Witnessing the global impact of the virus and the urgent need for advanced diagnostic tools inspired me to contribute to the development of a scalable and accurate detection system. This project represents a foundational step toward creating a Covid-19 detection model by focusing on lung detection in X-ray images. Accurate lung detection is crucial for isolating the target area, enabling more precise and efficient model training for disease identification.
 
-You can access the datasets using methods below:
-
-### Import by URL
-
-#### 1. CSV file
-
-This is how to import csv file that I usually used in jupyter notebook.
-
-```sh
-import pandas as pd
-
-filename = 'Adidas_US_Sales.csv' # replace this only
-
-url = 'https://github.com/azzindani/00_Data_Source/raw/main/'+ filename
-df = pd.read_csv(url)
-df.head()
-```
-You can add more arguments such as encoding, seperator, etc to read the dataset.
+Moreover, this project is not only a step toward Covid-19 detection but also a proof of concept demonstrating the potential of deep learning in medical imaging. It shows that specific organs or objects within the human body can be accurately detected through CXR or other X-ray images if the model is trained with appropriate data. This capability has far-reaching implications beyond Covid-19, paving the way for detecting various other conditions and abnormalities in multiple organs. It enhances the effectiveness of diagnostic tools and supports advancements in personalized medicine.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-#### 2. ZIP file
-
-This is how to import zip file that I usually used in jupyter notebook.
-
-* Starting by importing modules or packages
-  ```sh
-  from urllib.request import urlopen
-  from io import BytesIO
-  from zipfile import ZipFile
-  
-  filename = 'Diseases_And_Symptoms.zip' # replace this only
-  
-  url = 'https://github.com/azzindani/00_Data_Source/raw/main/'+ filename
-  http_response = urlopen(url)
-  zipfile = ZipFile(BytesIO(http_response.read()))
-  zipfile.extractall()
-  ```
-
-* then i check file location in the folder
-  ```sh
-  os.listdir()
-  ```
-
-* for the example the file located in the first row of the list
-  ```sh
-  location = 0 # replace this only
-  
-  df = pd.read_csv(os.listdir()[location])
-  df.head()
-  ```
-  
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-#### 3. JSON file
-
-This is how to import json file that I usually used in jupyter notebook.
-
-* regular json
-  ```sh
-  import pandas as pd
-  
-  filename = 'US_States.json' # replace this only
-  
-  url = 'https://github.com/azzindani/00_Data_Source/raw/main/'+ filename
-  df = pd.read_json(url)
-  df.head()
-  ```
-  
-* nested  json
-  ```sh
-  import pandas as pd
-  import json
-  import requests
-  
-  filename = 'US_States.json' # replace this only
-  
-  url = 'https://github.com/azzindani/00_Data_Source/raw/main/'+ filename
-  # Fetch the JSON content
-  response = requests.get(url)
-  data = response.json()
-  # Normalize nested JSON data into a flat table
-  df = pd.json_normalize(data)
-  df.head()
-  ```
-  
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-  
-#### 4. GEOJSON file
-
-Geojson file contain the geographical landscape that defined in geometry coordinates. This is how to import geojson file that I usually used in jupyter notebook.
-
-```sh
-import geopandas as gpd
-
-filename = 'Indonesia_Cities.geojson' # replace this only
-
-url = 'https://github.com/azzindani/00_Data_Source/raw/main/'+ filename
-df = gpd.read_file(url)
-df.head()
-```
+## Workflow
+Below is the workflow on how my project works
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-  
-### Download Dataset
 
-#### 1. Using wget
+## Solution and Technology Stack
+Used tools:
+1. TensorFlow Object Detection API
+2. Pretrained Model
+3. Python library : TensorFlow, Open CV, Scikit-Learn, Numpy, LabelImg
+4. Hardware : Laptop Acer Predator Helios 300, Intel-12700H, 48 GB Ram, Gen4 SSD, RTX3070Ti Laptop GPU, 8 GB Vram
 
-This is the example how to use it in any terminal. The instruction is simple, just type `wget` + space + URL
-```sh
-wget https://github.com/azzindani/00_Data_Source/raw/main/Adidas_US_Sales.csv
-```
-
-#### 2. Using curl
-
-This is the example how to use it in any terminal. The instruction is simple, just type `curl -O` + space + URL
-```sh
-curl -O  https://github.com/azzindani/00_Data_Source/raw/main/Adidas_US_Sales.csv
-```
-
-#### 3. Download using python library
-
-This is the example how to use it in IDE.
-```sh
-import requests
-
-filename = 'Adidas_US_Sales.csv' # replace this only
-
-url = 'https://github.com/azzindani/00_Data_Source/raw/main/'+ filename
-response = requests.get(url)
-with open(filename, 'wb') as f:
-    f.write(response.content)
-```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-#### 4. Manual download
-* Navigate to the file in the GitHub repository (e.g., data.csv)
-* Click on the file name to view it
-  <div align="center">
-    <img src="/assets/001.png" alt="Logo" width="1000">
-  </div>
-  
-* Click the "Raw" button to view the raw file content
-  <div align="center">
-    <img src="/assets/002.png" alt="Logo" width="1000">
-  </div>
-  
-* Right-click on the page and select "Save As..." or press Ctrl + S (Cmd + S on Mac) to save the file to your local machine
-  <div align="center">
-    <img src="/assets/003.png" alt="Logo" width="1000">
-  </div>
-  
-* Or just simply click on "Download raw file"
-  <div align="center">
-    <img src="/assets/004.png" alt="Logo" width="1000">
-  </div>
+## Project Details and Results
+1. Data Collection
+2. Labelling
+3. Generate Training Records
+4. Training Model using TensorFlow OD API
+5. Detection Test
+6. Cropping Test
 
-### Download All Datasets
-
-You also can download all datasets or this entire repository by following the steps below
-* Manual download
-  * Click on the green "Code" button near the top right
-    <div align="center">
-      <img src="/assets/005.png" alt="Logo" width="1000">
-    </div>
-    
-  * In the dropdown menu, select "Download ZIP"
-    <div align="center">
-      <img src="/assets/006.png" alt="Logo" width="1000">
-    </div>
-    
-  * This will download the entire repository as a ZIP file to your local machine. You can then extract the ZIP file and access the dataset from the appropriate folder
-
-* Using git
-  ```sh
-  git clone https://github.com/azzindani/00_Data_Source.git
-  ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- CONTACT -->
-## Contact
+## Challenges
+1. **Data Labeling:** Acquiring accurately labeled medical images, particularly with precise lung boundaries, is challenging due to the specific expertise required.
+2. **Anatomical Variation:** The size, shape, and position of lungs can vary significantly among individuals, making it difficult to generalize across the population.
+3. **Limited Training Data:** The availability of medical images for training may be limited, which can impact the robustness of the model.
 
-<div id="badges">
-  <a href="mailto:your.422indani@gmail.com">
-    <img src="https://img.shields.io/badge/Gmail-white?style=for-the-badge&logo=gmail&logoColor=black" alt="Gmail Badge"/>
-  </a>
-  <a href="https://www.linkedin.com/in/azzindan1/">
-    <img src="https://img.shields.io/badge/LinkedIn-blue?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn Badge"/>
-  </a>
-  <a href="https://azzindani.github.io/">
-    <img src="https://img.shields.io/badge/Github_Profile-navy?style=for-the-badge&logo=github&logoColor=white" alt="Github Badge"/>
-  </a>
-</div>
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Insights
+1. **Adaptability:** The techniques developed for lung detection can be adapted to other internal organs such as the heart, liver, or kidneys, providing a versatile tool for broader medical applications.
+2. **Radiologist Collaboration:** Collaborating with medical experts offers valuable insights into key anatomical markers for accurate lung detection, enhancing the model’s precision.
+3. **Feature Localization:** The model’s ability to highlight specific areas within the lungs can assist doctors in identifying anomalies such as tumors, infections, or structural changes.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Future Plans
+1. **Expand Organ Detection:** Build upon this foundation to detect other internal organs in medical images, such as the liver, kidneys, and heart, enabling a comprehensive diagnostic system for various health conditions.
+2. **Real-Time Diagnostics:** Develop a web-based platform where doctors can upload images for real-time lung detection and analysis, enhancing efficiency in clinical settings.
+3. **Enhanced Lung Disease Detection:** Extend the model to detect diseases like pneumonia, lung cancer, and eventually Covid-19 by training the system to recognize specific pathological features.
+4. **Improved Model Accuracy:** Continuously refine the model by incorporating larger and more diverse datasets, and integrating advanced deep learning techniques like attention mechanisms and U-Net architectures for better segmentation.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
