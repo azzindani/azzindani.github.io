@@ -5,6 +5,8 @@ profile: false
 headline: false
 ---
 
+# Small Facial Recognition
+
 <a id="readme-top"></a>
 
 <!-- TABLE OF CONTENTS -->
