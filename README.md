@@ -46,10 +46,14 @@ Below are my personal projects that I expliained the process only
 |3     |Lung Abnormalities Detection (Computer Vision) |[Click Here](/docs/page3.md) |
 |4     |Small Face Recognition Deep Learning |[Click Here](/docs/page4.md) |
 |5     |Large Face Recognition Deep Learning |[Click Here](/docs/page5.md) |
-|6     |IDX Financial Statement Data Mining (All Documents Available) |[Click Here](/docs/page2.md) |
-|7     |IDX Financial Statement Data Mining (Only Excel Files) |[Click Here](/docs/page2.md) |
-|8     |Broker Mining |[Click Here](/docs/page2.md) |
-|9   |Broker Analytic |[Click Here](/docs/page2.md) |
+|6     |IDX Financial Statement Data Mining (All Documents Available) |[Click Here](/docs/page6.md) |
+|7     |IDX Financial Statement Data Mining (Only Excel Files) |[Click Here](/docs/page7.md) |
+|8   |Broker Transaction Data Scraping |[Click Here](/docs/page2.md) |
+|9   |Broker Transaction Data Analysis |[Click Here](/docs/page2.md) |
+|10   |Broker Transaction Data Automation System |[Click Here](/docs/page2.md) |
+|11   |Image Segmentation |[Click Here](/docs/page2.md) |
+|12   |Image Super Resolution |[Click Here](/docs/page2.md) |
+|13   |Facial Emotion Recognition |[Click Here](/docs/page2.md) |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
