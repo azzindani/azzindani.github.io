@@ -1,26 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Portfolio</title>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-</head>
-<body>
-  <h1>Welcome to My Portfolio</h1>
-  <div id="markdown-content">
-    <!-- README.md content will be rendered here -->
-  </div>
+# Welcome to My Portfolio
 
-  <script>
-    // Fetch README.md from the GitHub repository and render it
-    fetch('README.md')
-      .then(response => response.text())
-      .then(text => {
-        // Convert Markdown to HTML
-        document.getElementById('markdown-content').innerHTML = marked(text);
-      })
-      .catch(error => console.error('Error fetching README.md:', error));
-  </script>
-</body>
-</html>
+## Projects
+
+<div class="card-container">
+
+### Project 1
+<div class="card">
+  <img src="https://via.placeholder.com/150" alt="Project 1" class="card-img">
+  <h3>Project Title 1</h3>
+  <p>Description of the project goes here. This is a brief overview of what the project is about.</p>
+</div>
+
+### Project 2
+<div class="card">
+  <img src="https://via.placeholder.com/150" alt="Project 2" class="card-img">
+  <h3>Project Title 2</h3>
+  <p>Description of the project goes here. This is a brief overview of what the project is about.</p>
+</div>
+
+### Project 3
+<div class="card">
+  <img src="https://via.placeholder.com/150" alt="Project 3" class="card-img">
+  <h3>Project Title 3</h3>
+  <p>Description of the project goes here. This is a brief overview of what the project is about.</p>
+</div>
+
+</div>
