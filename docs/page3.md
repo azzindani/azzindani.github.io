@@ -1,13 +1,13 @@
 ---
 layout: default
-title: page1
+title: Lungs Abnormalities Detection
 profile: false
 headline: false
 ---
 
-# Lungs Abnormalities Detection
-
 <a id="readme-top"></a>
+
+# Lungs Abnormalities Detection
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -57,11 +57,29 @@ Used tools:
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Project Details and Results
+This project is trained to detect lung abnormalities categorized into 14 conditions: 'Atelectasis', 'Consolidation', 'Infiltration', 'Pneumothorax', 'Edema', 'Emphysema', 'Fibrosis', 'Effusion', 'Pneumonia', 'Pleural Thickening', 'Cardiomegaly', 'Nodular Mass', and 'Hernia'.
+
 1. Data Collection
-2. Labelling
-3. Generate Training Records
-4. Training Model using TensorFlow OD API
-5. Detection Test
+The dataset utilizing NIH Chest X-ray can be found at this [link](https://www.kaggle.com/datasets/nih-chest-xrays/data). I have used only 880 images as a sample, limited to the number labeled by radiologists provided within the dataset.
+
+3. Labelling
+Image labeling is done using the bounding box coordinates provided in this Excel file. I am unable to create further annotations and labels, as this needs to be performed by a qualified radiologist.
+
+5. Generate Training Records
+TFRecords generation in Python involves converting datasets, such as images and annotations, into a serialized binary format optimized for TensorFlow, enabling efficient data storage and access during model training and evaluation.
+
+7. Training Model using TensorFlow OD API
+- The TensorFlow object detection API was downloaded from this repository: [TensorFlow Models](https://github.com/tensorflow/models/tree/master/research/object_detection).
+- The pre-trained models were downloaded from this repository: [TF2 Detection Model Zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md).
+
+In this section, the dataset was trained to detect lungs as an object, and the trained model was saved by following these steps:
+
+a. Generate the training command using this code.
+b. Copy and paste the training command into the command prompt, then press enter to start the training process.
+c. Once training is complete, you can check the trained model as shown below. This model can be used to perform various detection tasks.
+
+9. Detection Test
+The actual testing will use images different from those used in training. In this step, the code will attempt to detect 1,000 images, generating bounding boxes, labels, and detection scores on the images. You can review the detection results below.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
