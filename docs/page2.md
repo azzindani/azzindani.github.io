@@ -55,7 +55,7 @@ Used tools:
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Project Details and Results
-This project is designed to detect only two categories: 'Covid-19 positive' and 'Covid-19 negative'.
+This project is designed to detect only two categories: `Covid-19 positive` and `Covid-19 negative`.
 
 1. Data Collection
 The dataset utilizing Covid-19 Radiography can be found at this [link](https://www.kaggle.com/datasets/tawsifurrahman/covid19-radiography-database). I have used only 800 images as a sample, comprising 400 images for each category, which is considered sufficient for detecting two object categories.
