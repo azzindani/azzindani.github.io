@@ -1,13 +1,13 @@
 ---
 layout: default
-title: page1
+title: Financial Statement Excel Web Scraping
 profile: false
 headline: false
 ---
 
-# IDX Financial Statement Excel Only
-
 <a id="readme-top"></a>
+
+# Financial Statement Excel Web Scraping
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -25,7 +25,7 @@ headline: false
 </details>
 
 ## Overview and Objective
-This project aims to develop a web scraping system specifically designed to extract various financial data from stock exchange databases, focusing exclusively on collecting financial report tables in Excel format.
+This project developed in 2021, aims to create a web scraping system specifically designed to extract various financial data from stock exchange databases, focusing exclusively on collecting financial report tables in Excel format.
 
 The primary goal of this project is to build a robust web scraping system capable of automatically gathering and organizing financial data. This serves as a foundational step towards creating a comprehensive quantitative dataset that can be used to build a financial database and support future analysis.
 
