@@ -1,13 +1,13 @@
 ---
 layout: default
-title: page1
+title: Lungs Detection
 profile: false
 headline: false
 ---
 
-# Lungs Detection
-
 <a id="readme-top"></a>
+
+# Lungs Detection
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -54,11 +54,29 @@ Used tools:
 
 ## Project Details and Results
 1. Data Collection
-2. Labelling
-3. Generate Training Records
-4. Training Model using TensorFlow OD API
-5. Detection Test
-6. Cropping Test
+The dataset utilizing NIH Chest X-ray [link](https://www.kaggle.com/datasets/nih-chest-xrays/data) contains over 112,000 Chest X-ray images from more than 30,000 unique patients. I have used only 400 images as a sample, which is considered sufficient for single-object detection.
+
+3. Labelling
+Image labeling using LabelImg in Python involves manually annotating images by drawing bounding boxes around objects of interest and saving the coordinates and class labels in XML.
+
+5. Generate Training Records
+TFRecords generation in Python involves converting datasets, such as images and annotations, into a serialized binary format optimized for TensorFlow, enabling efficient data storage and access during model training and evaluation.
+
+7. Training Model using TensorFlow OD API
+- The TensorFlow object detection API was downloaded from this repository: [TensorFlow Models](https://github.com/tensorflow/models/tree/master/research/object_detection).
+- The pre-trained models were downloaded from this repository: [TF2 Detection Model Zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md).
+
+In this section, the dataset was trained to detect lungs as an object, and the trained model was saved by following these steps:
+
+a. Generate the training command using this code.
+b. Copy and paste the training command into the command prompt, then press enter to start the training process.
+c. Once training is complete, you can check the trained model as shown below. This model can be used to perform various detection tasks.
+
+9. Detection Test
+The actual testing will use images different from those used in training. In this step, the code will attempt to detect 1,000 images, generating bounding boxes, labels, and detection scores on the images. You can review the detection results below.
+
+11. Cropping Test
+This is an image cropping test using the trained model. You can find the results below.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
