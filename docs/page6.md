@@ -1,13 +1,13 @@
 ---
 layout: default
-title: page1
+title: Financial Statement Web Scraping
 profile: false
 headline: false
 ---
 
-# IDX All Financial Statement
-
 <a id="readme-top"></a>
+
+# Financial Statement Web Scraping
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -25,7 +25,7 @@ headline: false
 </details>
 
 ## Overview and Objective
-This project aims to develop a web scraping system designed to extract a diverse range of financial data from the Indonesian stock exchange database. The system will collect financial reports, supporting documents, Excel tables, and XBRL files. By automating the extraction process, this project seeks to provide a comprehensive dataset for financial analysis, research, and reporting, making it easier to access and analyze essential financial information.
+This project developed in 2021, aims to create a web scraping system designed to extract a diverse range of financial data from the Indonesian stock exchange database. The system will collect financial reports, supporting documents, Excel tables, and XBRL files. By automating the extraction process, this project seeks to provide a comprehensive dataset for financial analysis, research, and reporting, making it easier to access and analyze essential financial information.
 
 The primary goal of this project is to build a robust web scraping system capable of automatically gathering and organizing financial data using multi-threading or multiprocessing techniques. While the main focus is on creating a comprehensive dataset, the project’s current scope is limited to data collection only.
 
