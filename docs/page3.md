@@ -57,7 +57,7 @@ Used tools:
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Project Details and Results
-This project is trained to detect lung abnormalities categorized into 14 conditions: 'Atelectasis', 'Consolidation', 'Infiltration', 'Pneumothorax', 'Edema', 'Emphysema', 'Fibrosis', 'Effusion', 'Pneumonia', 'Pleural Thickening', 'Cardiomegaly', 'Nodular Mass', and 'Hernia'.
+This project is trained to detect lung abnormalities categorized into 14 conditions: `Atelectasis`, `Consolidation`, `Infiltration`, `Pneumothorax`, `Edema`, `Emphysema`, `Fibrosis`, `Effusion`, `Pneumonia`, `Pleural Thickening`, `Cardiomegaly`, `Nodular Mass`, and `Hernia`.
 
 1. Data Collection
 The dataset utilizing NIH Chest X-ray can be found at this [link](https://www.kaggle.com/datasets/nih-chest-xrays/data). I have used only 880 images as a sample, limited to the number labeled by radiologists provided within the dataset.
