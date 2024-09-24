@@ -18,16 +18,19 @@ Below are my personal projects that I shared with entire source code
 Below are my personal projects that I expliained the process only
 |No   |Project Name     |Link     |
 |-------|---------------------------|-----------|
-|1     |Lungs Object Detection (Computer Vision) |[Click Here](/docs/page1.md)  |
-|2   |Covid 19 Object Detection (Computer Vision) |[Click Here](/docs/page2.md) |
-|3     |Lung Abnormalities Object Detection (Computer Vision) |[Click Here](/docs/page2.md) |
-|4     |Covid 19 Deep Learning |[Click Here](/docs/page2.md) |
-|5     |Minor Face Recognition Deep Learning |[Click Here](/docs/page2.md) |
-|6     |Major Face Recognition Deep Learning |[Click Here](/docs/page2.md) |
-|7     |IDX Financial Statement Data Mining (All Documents Available) |[Click Here](/docs/page2.md) |
-|8     |IDX Financial Statement Data Mining (Only Excel Files) |[Click Here](/docs/page2.md) |
-|9     |Broker Mining |[Click Here](/docs/page2.md) |
-|10   |Broker Analytic |[Click Here](/docs/page2.md) |
+|1     |Lungs Detection (Computer Vision) |[Click Here](/docs/page1.md)  |
+|2   |Covid-19 Detection (Computer Vision) |[Click Here](/docs/page2.md) |
+|3     |Lung Abnormalities Detection (Computer Vision) |[Click Here](/docs/page3.md) |
+|4     |Facial Recognition - Small Version |[Click Here](/docs/page4.md) |
+|5     |Facial Recognition - Large Version |[Click Here](/docs/page5.md) |
+|6     |Financial Statement Web Scraping |[Click Here](/docs/page6.md) |
+|7     |Financial Statement Excel Web Scraping   |[Click Here](/docs/page7.md) |
+|8     |Broker Transaction Data Scraping |[Click Here](/docs/page8.md) |
+|9   |Broker Transaction Data Analysis |[Click Here](/docs/page9.md) |
+|10   |Broker Transaction Automation System |[Click Here](/docs/page10.md) |
+|11   |Image Segmentation |[Click Here](/docs/page9.md) |
+|12   |Image Super Resolution |[Click Here](/docs/page9.md) |
+|13  |Facial Emotion Recognition |[Click Here](/docs/page9.md) |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
