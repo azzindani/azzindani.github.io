@@ -11,7 +11,7 @@ body {
 h1, h2, h3, h4 {
   font-weight: 600;
   text-align: center;
-  color: #0366d6;
+  color: #2c8a5a;  /* Green color for headings */
 }
 
 h1 {
@@ -22,6 +22,7 @@ p {
   text-align: center;
   max-width: 600px;
   margin: 0 auto;
+  color: #586069; /* Light gray for text */
 }
 
 /* Card layout styling */
@@ -52,6 +53,7 @@ p {
 .card h2 {
   margin: 0 0 10px;
   font-size: 1.5rem;
+  color: #2c8a5a;  /* Green color for card titles */
 }
 
 .card p {
@@ -59,7 +61,7 @@ p {
 }
 
 .card a {
-  color: #0366d6;
+  color: #2c8a5a;  /* Green color for links */
   text-decoration: none;
   font-weight: bold;
 }
@@ -80,7 +82,7 @@ p {
 }
 
 .markdown-body h2 {
-  color: #0366d6;
+  color: #2c8a5a;  /* Green color for headings in markdown content */
   margin-top: 20px;
 }
 
@@ -90,7 +92,7 @@ p {
 }
 
 .markdown-body a {
-  color: #0366d6;
+  color: #2c8a5a;  /* Green color for links in markdown content */
   text-decoration: none;
 }
 
