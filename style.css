@@ -42,12 +42,34 @@ p {
   box-shadow: 0 1px 3px rgba(27, 31, 35, 0.12), 0 8px 24px rgba(27, 31, 35, 0.12);
   padding: 20px;
   width: 280px;
-  transition: box-shadow 0.2s;
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* For the scaling effect */
   text-align: center;
+  position: relative;
 }
 
+.card img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+/* Hover effect for scaling the card */
 .card:hover {
-  box-shadow: 0 4px 12px rgba(27, 31, 35, 0.15);
+  transform: scale(1.05);  /* Makes the card grow slightly */
+  box-shadow: 0 6px 16px rgba(27, 31, 35, 0.15); /* Increase shadow effect on hover */
+}
+
+/* Styling the entire card as a clickable link */
+.card a {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1; /* Ensures the whole card is clickable */
+  display: block;
+  text-decoration: none;
 }
 
 .card h2 {
@@ -60,42 +82,7 @@ p {
   color: #586069;
 }
 
-.card a {
-  color: #2c8a5a;  /* Green color for links */
-  text-decoration: none;
-  font-weight: bold;
-}
-
-.card a:hover {
-  text-decoration: underline;
-}
-
-/* Markdown content styling */
-.markdown-body {
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 20px;
-  background: white;
-  border: 1px solid #e1e4e8;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(27, 31, 35, 0.12), 0 8px 24px rgba(27, 31, 35, 0.12);
-}
-
-.markdown-body h2 {
-  color: #2c8a5a;  /* Green color for headings in markdown content */
-  margin-top: 20px;
-}
-
-.markdown-body p {
-  color: #24292e;
-  line-height: 1.6;
-}
-
-.markdown-body a {
-  color: #2c8a5a;  /* Green color for links in markdown content */
-  text-decoration: none;
-}
-
-.markdown-body a:hover {
-  text-decoration: underline;
+/* Ensure the cursor shows as a pointer when hovering over the card */
+.card:hover {
+  cursor: pointer;
 }
