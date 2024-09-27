@@ -21,6 +21,7 @@ body {
 .portfolio-cards {
     display: flex;
     flex-wrap: wrap;
+    gap: 20px; /* Space between cards */
 }
 
 .card {
@@ -29,4 +30,13 @@ body {
     padding: 15px;
     margin: 10px;
     flex: 1 1 300px; /* Flex item, grow and shrink */
+    transition: transform 0.3s ease; /* Smooth transition */
+    position: relative; /* Necessary for absolute positioning of content */
+    cursor: pointer; /* Change cursor to pointer */
+}
+
+.card:hover {
+    transform: scale(1.05); /* Enlarge card on hover */
+    z-index: 1; /* Ensure hovered card is above others */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Shadow for depth */
 }
