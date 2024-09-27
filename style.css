@@ -92,6 +92,7 @@ body {
     display: grid; /* Use grid layout */
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Create responsive grid */
     gap: 20px; /* Space between cards */
+    list-style-type: none; /* Ensure no list styling */
 }
 
 .project-item {
