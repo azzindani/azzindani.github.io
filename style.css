@@ -1,26 +1,32 @@
-.portfolio-card {
-    background-color: #f9f9f9;
-    width: calc(33.333% - 16px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    overflow: hidden;
-    transition: transform 0.3s ease;
-    cursor: pointer; /* Makes it clear it's clickable */
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    margin: 0;
 }
 
-.portfolio-card:hover {
-    transform: translateY(-5px);
+.sidebar {
+    width: 250px;
+    background-color: #f4f4f4;
+    padding: 15px;
+    position: fixed; /* Keep sidebar fixed */
+    height: 100%; /* Full height */
 }
 
-.portfolio-card img {
-    width: 100%;
-    height: auto;
+.content {
+    margin-left: 260px; /* Adjust according to sidebar width */
+    padding: 20px;
+    flex-grow: 1; /* Allow content to grow */
 }
 
-.card-content {
-    padding: 16px;
+.portfolio-cards {
+    display: flex;
+    flex-wrap: wrap;
 }
 
-.card-content h3 {
-    margin: 0 0 10px;
+.card {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin: 10px;
+    flex: 1 1 300px; /* Flex item, grow and shrink */
 }
