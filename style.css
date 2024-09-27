@@ -1,31 +1,37 @@
-/* General layout */
-body {
+/* Basic reset */
+* {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f0f0f0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
+/* Body styling */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+}
+
+/* Wrapper for sidebar and main content */
 .wrapper {
   display: flex;
 }
 
+/* Sidebar styling */
 .sidebar {
   width: 250px;
-  background-color: #1a7c1d; /* Cayman green color */
+  background-color: #1a7c1d;
   padding: 20px;
-  color: white;
   height: 100vh;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  color: white;
 }
 
 .sidebar h2 {
-  font-size: 24px;
-  margin-bottom: 20px;
+  font-size: 22px;
+  margin-bottom: 15px;
 }
 
 .sidebar ul {
-  list-style-type: none;
-  padding: 0;
+  list-style: none;
 }
 
 .sidebar ul li {
@@ -35,34 +41,34 @@ body {
 .sidebar ul li a {
   color: white;
   text-decoration: none;
-  font-size: 18px;
 }
 
 .sidebar ul li a:hover {
   text-decoration: underline;
 }
 
-/* Main content area */
+/* Main content styling */
 .main-content {
+  padding: 20px;
   flex-grow: 1;
-  padding: 40px;
 }
 
 .main-content h1 {
-  color: #1a7c1d; /* Cayman green color */
-  margin-bottom: 30px;
+  color: #1a7c1d;
+  margin-bottom: 20px;
 }
 
+/* Card container */
 .card-container {
   display: flex;
-  flex-wrap: wrap;
   gap: 20px;
 }
 
+/* Card styling */
 .card {
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s, box-shadow 0.2s;
   text-align: center;
   padding: 20px;
@@ -77,8 +83,8 @@ body {
 }
 
 .card h2 {
-  color: #1a7c1d; /* Cayman green color */
-  font-size: 20px;
+  color: #1a7c1d;
+  font-size: 18px;
   margin-top: 15px;
 }
 
@@ -87,18 +93,12 @@ body {
   color: #555;
 }
 
-/* Hover effect */
+/* Card hover effect */
 .card:hover {
   transform: scale(1.05);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
-/* Ensures that the entire card is clickable */
-.card a {
-  text-decoration: none;
-  color: inherit;
-  display: block;
-  width: 100%;
-  height: 100%;
+.card:active {
+  transform: scale(1);
 }
-
