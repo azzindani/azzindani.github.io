@@ -13,10 +13,19 @@
   <!-- Sidebar with toggle button -->
   {% include sidebar.html %}
 
+  <!-- Add the toggle button outside the sidebar -->
+  <button id="toggle-button">☰</button>
+
   <header>
     <h1>{{ site.title }}</h1>
     <p>{{ site.description }}</p>
   </header>
+
+  <nav>
+    <a href="/">Home</a>
+    <a href="/aboutme.html">About Me</a>
+    <a href="/page2">Page 2</a>
+  </nav>
 
   <div class="content">
     {{ content }}
