@@ -75,6 +75,7 @@
     function toggleSidebar() {
       var sidebar = document.getElementById("sidebar");
       sidebar.classList.toggle("closed");
+      localStorage.setItem("sidebarState", sidebar.classList.contains("closed") ? "closed" : "open");
       adjustLayout();
     }
 
@@ -95,11 +96,16 @@
       }
     }
 
-    // Adjust layout on page load
-    window.onload = adjustLayout;
+    // Load sidebar state from localStorage
+    window.onload = function() {
+      var sidebarState = localStorage.getItem("sidebarState") || "open";
+      var sidebar = document.getElementById("sidebar");
+      if (sidebarState === "closed") {
+        sidebar.classList.add("closed");
+      }
+      adjustLayout();
+    };
   </script>
   
 </body>
 </html>
-
-
