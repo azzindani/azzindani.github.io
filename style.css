@@ -12,13 +12,16 @@ h1 {
 
 .banner {
     width: 100%;
-    height: 200px; /* Adjust height as needed */
-    background-color: #007b5f; /* Cayman green */
-    color: white;
+    height: 300px; /* Adjust height as needed */
+    background-image: url('assets/images.png'); /* Wide banner image */
+    background-size: cover;
+    background-position: center;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 24px;
+    color: white;
+    font-size: 36px;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
 }
 
 .card-container {
@@ -30,7 +33,7 @@ h1 {
 
 .card {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     background: white;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -55,7 +58,9 @@ h1 {
 
 .card h2 {
     margin: 0;
+    margin-bottom: 10px;
     color: #007b5f; /* Cayman green */
+    font-size: 24px;
 }
 
 .card p {
