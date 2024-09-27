@@ -76,12 +76,10 @@ body {
 
 .banner-text {
     position: absolute;
-    top: 50%;
+    top: 30%;
     left: 50%;
     transform: translate(-50%, -50%);
     color: white;
-    background-color: rgba(0, 0, 0, 0.6);
-    padding: 20px;
     text-align: center;
     font-size: 36px;
     font-weight: bold;
@@ -98,17 +96,31 @@ body {
     padding: 0;
 }
 
-.project-list li {
+.project-item {
+    display: flex;
+    align-items: center;
     background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 8px;
     margin-bottom: 15px;
     padding: 15px;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-decoration: none; /* Remove underline */
 }
 
-.project-list li:hover {
-    transform: scale(1.02);
+.project-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.project-image {
+    width: 100px; /* Set image width */
+    height: auto; /* Maintain aspect ratio */
+    margin-right: 15px; /* Space between image and text */
+}
+
+.project-details {
+    flex-grow: 1; /* Allow details to take the remaining space */
 }
 
 .project-list h3 {
