@@ -1,27 +1,38 @@
----
-layout: cayman
----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ page.title | escape }}</title>
 
-{% include sidebar.html %}
+  <!-- Link to custom styles -->
+  <link rel="stylesheet" href="{{ 'custom-style.css' | relative_url }}">
 
-<div class="content">
-  {{ content }}
-</div>
+  <!-- You may also link Cayman theme CSS if needed, but it's typically included automatically -->
+</head>
+<body>
+  {% include sidebar.html %}
+  <div class="content">
+    {{ content }}
+  </div>
 
-<!-- Add JavaScript to handle sidebar toggle -->
-<script>
-  document.addEventListener("DOMContentLoaded", function() {
-    var sidebar = document.getElementById('sidebar');
-    var toggleButton = document.getElementById('toggle-button');
-    
-    toggleButton.addEventListener('click', function() {
-      if (sidebar.classList.contains('sidebar-closed')) {
-        sidebar.classList.remove('sidebar-closed');
-        sidebar.classList.add('sidebar-open');
-      } else {
-        sidebar.classList.remove('sidebar-open');
-        sidebar.classList.add('sidebar-closed');
-      }
+  <!-- Add JavaScript to handle sidebar toggle -->
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      var sidebar = document.getElementById('sidebar');
+      var toggleButton = document.getElementById('toggle-button');
+      
+      toggleButton.addEventListener('click', function() {
+        if (sidebar.classList.contains('sidebar-closed')) {
+          sidebar.classList.remove('sidebar-closed');
+          sidebar.classList.add('sidebar-open');
+        } else {
+          sidebar.classList.remove('sidebar-open');
+          sidebar.classList.add('sidebar-closed');
+        }
+      });
     });
-  });
-</script>
+  </script>
+
+</body>
+</html>
