@@ -1,119 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Portfolio</title>
-  <link rel="stylesheet" href="style.css"> <!-- Link to the external stylesheet -->
-</head>
-<body>
+---
+layout: default
+title: Home
+---
 
-  <!-- Sidebar Toggle Button -->
-  <button id="toggle-sidebar" onclick="toggleSidebar()">☰</button>
-
-  <!-- Sidebar will be loaded here dynamically -->
-  <div id="sidebar-container"></div>
-
-  <!-- Banner with Wide Image -->
-  <div class="banner">
-    <img src="assets/images.png" alt="Banner Image" class="banner-image">
-    <div class="banner-text">
-      <h1>Welcome to My Portfolio</h1>
+<section class="portfolio">
+    <div class="portfolio-card" onclick="location.href='/page1'">
+        <img src="project1.jpg" alt="Project 1">
+        <div class="card-content">
+            <h3>Project 1</h3>
+            <p>A brief description of Project 1.</p>
+        </div>
     </div>
-  </div>
 
-  <!-- List of Projects -->
-  <div class="project-list" id="home">
-    <h2>Projects</h2>
-    <ul>
-      <li>
-        <a href="https://azzindani.github.io/docs/page1.html" class="project-item">
-          <img src="assets/images.png" alt="Lungs Detection" class="project-image">
-          <div class="project-details">
-            <h3>Lungs Detection</h3>
-            <p>This project, initiated in 2021, aims to develop a computer vision system capable of detecting and localizing lungs in medical images such as CXR (Chest X-Ray) or CT scans.</p>
-          </div>
-        </a>
-      </li>
-      <li>
-        <a href="https://azzindani.github.io/docs/page2.html" class="project-item">
-          <img src="assets/images.png" alt="Covid-19 Detection" class="project-image">
-          <div class="project-details">
-            <h3>Covid-19 Detection</h3>
-            <p>This project, developed in 2021, harnesses the power of computer vision and deep learning techniques to detect Covid-19 from chest X-ray (CXR) images.</p>
-          </div>
-        </a>
-      </li>
-    </ul>
-  </div>
+    <div class="portfolio-card" onclick="location.href='/page2'">
+        <img src="project2.jpg" alt="Project 2">
+        <div class="card-content">
+            <h3>Project 2</h3>
+            <p>A brief description of Project 2.</p>
+        </div>
+    </div>
 
-  <!-- About Section -->
-  <div id="about" class="content">
-    <h2>About Me</h2>
-    <p>Here you can write about yourself. This section introduces who you are, your skills, and your experiences.</p>
-  </div>
-
-  <!-- Contact Section -->
-  <div id="contact" class="content">
-    <h2>Contact</h2>
-    <p>You can add your contact information here.</p>
-  </div>
-
-  <!-- Footer -->
-  <div class="footer">
-    &copy; 2024 Your Name. All rights reserved.
-  </div>
-
-  <!-- JavaScript to handle Sidebar Toggle and Load Sidebar HTML -->
-  <script>
-    // Function to toggle the sidebar visibility
-    function toggleSidebar() {
-      var sidebar = document.getElementById("sidebar");
-      sidebar.classList.toggle("closed");
-      adjustLayout();
-    }
-
-    // Function to adjust layout based on sidebar visibility
-    function adjustLayout() {
-      var sidebar = document.getElementById("sidebar");
-      var projectList = document.querySelector('.project-list');
-      var content = document.querySelectorAll('.content');
-      if (sidebar.classList.contains('closed')) {
-        projectList.style.marginLeft = '0';
-        content.forEach(item => {
-          item.style.marginLeft = '0'; // Adjust content margin
-        });
-      } else {
-        projectList.style.marginLeft = '270px'; // Adjust according to the sidebar width
-        content.forEach(item => {
-          item.style.marginLeft = '270px'; // Adjust content margin
-        });
-      }
-    }
-
-    // Function to load the sidebar from sidebar.html
-    function loadSidebar() {
-      var xhr = new XMLHttpRequest();
-      xhr.open('GET', 'sidebar.html', true);
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-          document.getElementById('sidebar-container').innerHTML = xhr.responseText;
-          
-          // After the sidebar is loaded, assign the toggle function to the button
-          document.getElementById('toggle-sidebar').addEventListener('click', toggleSidebar);
-
-          // Adjust layout after loading the sidebar
-          adjustLayout();
-        }
-      };
-      xhr.send();
-    }
-
-    // Load the sidebar when the page is ready
-    window.onload = function() {
-      loadSidebar();
-    };
-  </script>
-  
-</body>
-</html>
+    <!-- Add more portfolio cards here -->
+</section>
