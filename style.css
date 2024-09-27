@@ -1,64 +1,98 @@
-/* Sidebar basic styling */
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Sidebar */
 .sidebar {
     width: 250px;
     height: 100%;
-    background-color: #f8f9fa;
+    background-color: #2c3e50;
     position: fixed;
     top: 0;
     left: 0;
     transition: transform 0.3s ease;
     z-index: 1000;
     padding: 20px;
+    box-shadow: 3px 0 10px rgba(0,0,0,0.1);
+}
+
+.sidebar h2 {
+    color: #ecf0f1;
+    text-align: center;
+    font-weight: 600;
+}
+
+.sidebar a {
+    display: block;
+    padding: 10px;
+    color: #ecf0f1;
+    text-decoration: none;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.sidebar a:hover {
+    background-color: #16a085;
+    color: #fff;
 }
 
 .sidebar.closed {
     transform: translateX(-100%);
 }
 
-/* Styling for the toggle button */
+/* Toggle Button */
 #toggle-sidebar {
     position: fixed;
     top: 15px;
     left: 15px;
-    background-color: #4CAF50;
+    background-color: #16a085;
     color: white;
     border: none;
     padding: 10px;
     cursor: pointer;
     z-index: 1001;
+    font-size: 18px;
 }
 
-/* Main content styling */
-.content {
-    margin-left: 270px;
-    padding: 20px;
-    transition: margin-left 0.3s ease;
-}
-
-/* Footer styling */
-.footer {
-    padding: 10px;
-    text-align: center;
-    background-color: #f1f1f1;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-}
-
-/* Banner styling */
+/* Banner */
 .banner {
-    text-align: center;
-    padding: 50px;
-    background-color: #007BFF;
-    color: white;
+    position: relative;
+    width: 100%;
+    height: 300px;
+    margin-left: 250px; /* Make space for the sidebar */
 }
 
-/* Card styling */
+.banner-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.banner-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 20px;
+    text-align: center;
+    font-size: 36px;
+    font-weight: bold;
+}
+
+/* Cards Section */
 .card-container {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
     padding: 20px;
+    margin-left: 250px; /* Adjust for sidebar */
 }
 
 .card {
@@ -71,6 +105,11 @@
     text-decoration: none;
     color: #333;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: scale(1.05);
 }
 
 .card-image {
@@ -87,4 +126,23 @@
 .card p {
     font-size: 1rem;
     color: #555;
+}
+
+/* Main Content */
+.content {
+    margin-left: 270px;
+    padding: 20px;
+}
+
+/* Footer */
+.footer {
+    padding: 10px;
+    text-align: center;
+    background-color: #2c3e50;
+    color: white;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    margin-left: 250px;
+    box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.1);
 }
