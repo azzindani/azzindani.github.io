@@ -98,7 +98,12 @@
       xhr.onreadystatechange = function () {
         if (xhr.readyState == 4 && xhr.status == 200) {
           document.getElementById('sidebar-container').innerHTML = xhr.responseText;
-          adjustLayout(); // Adjust layout after loading the sidebar
+          
+          // After the sidebar is loaded, assign the toggle function to the button
+          document.getElementById('toggle-sidebar').addEventListener('click', toggleSidebar);
+
+          // Adjust layout after loading the sidebar
+          adjustLayout();
         }
       };
       xhr.send();
@@ -107,7 +112,6 @@
     // Load the sidebar when the page is ready
     window.onload = function() {
       loadSidebar();
-      adjustLayout();
     };
   </script>
   
