@@ -87,8 +87,8 @@ body {
 /* Project List */
 .project-list {
     transition: margin-left 0.3s ease; /* Smooth transition for margin */
-    display: flex; /* Use flexbox for fluid layout */
-    flex-wrap: wrap; /* Allow cards to wrap to the next line */
+    display: grid; /* Use grid for fluid layout */
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); /* Responsive columns */
     justify-content: center; /* Space cards evenly */
     list-style-type: none; /* Ensure no list styling */
     gap: 20px;
