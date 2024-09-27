@@ -1,86 +1,72 @@
-/* Basic layout styling */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  line-height: 1.6;
-  margin: 0;
-  padding: 0;
-  background-color: #f5f5f5; /* Light gray background */
-  color: #333; /* Dark gray text */
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh; /* Full height to support footer */
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f7f7f7;
 }
 
-/* Header and Banner styling */
-header {
-  text-align: center;
+h1 {
+    text-align: center;
+    margin: 20px;
 }
 
 .banner {
-  width: 100%;
-  height: 250px;
-  object-fit: cover; /* Maintain aspect ratio */
+    width: 100%;
+    height: 200px; /* Adjust height as needed */
+    background-color: #007b5f; /* Cayman green */
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
 }
 
-/* Heading styling */
-h1 {
-  margin: 20px 0;
-  font-weight: 600;
-  color: #2c8a5a; /* Green color for main heading */
-}
-
-/* Card layout styling */
 .card-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
-  margin: 40px auto;
-  padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
 }
 
 .card {
-  background: white;
-  border: 1px solid #e1e4e8;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(27, 31, 35, 0.12), 0 8px 24px rgba(27, 31, 35, 0.12);
-  padding: 20px;
-  width: 280px;
-  text-align: center;
-  position: relative;
-  cursor: pointer; /* Show pointer on hover */
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* For the scaling effect */
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin: 10px;
+    padding: 20px;
+    width: 90%; /* Adjust width as needed */
+    transition: transform 0.3s;
+    cursor: pointer;
+    text-decoration: none; /* Remove underline from links */
 }
 
-.card img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 6px;
-  margin-bottom: 15px;
-}
-
-/* Hover effect for scaling the card */
 .card:hover {
-  transform: scale(1.05); /* Makes the card grow slightly */
-  box-shadow: 0 6px 16px rgba(27, 31, 35, 0.15); /* Increase shadow effect on hover */
+    transform: scale(1.05); /* Pop effect on hover */
 }
 
-/* Styling for the clickable link */
-.card a {
-  color: inherit; /* Inherit color from the card */
-  text-decoration: none; /* Remove underline from links */
+.card-image {
+    width: 100px; /* Set image size */
+    height: auto;
+    border-radius: 8px;
+    margin-right: 20px; /* Space between image and text */
 }
 
-/* Footer styling */
-footer {
-  background-color: #1a7c1d; /* Green footer background */
-  color: white; /* White text */
-  text-align: center;
-  padding: 10px;
-  margin-top: 20px;
-  flex-shrink: 0; /* Prevent footer from shrinking */
+.card h2 {
+    margin: 0;
+    color: #007b5f; /* Cayman green */
 }
 
-footer p {
-  margin: 0; /* Remove default margin */
+.card p {
+    margin: 0;
+    color: #333;
+}
+
+.footer {
+    text-align: center;
+    padding: 10px;
+    font-size: 14px;
+    color: #666;
+    margin-top: 20px;
 }
