@@ -1,52 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ page.title | escape }}</title>
-
-  <!-- Link to your custom CSS -->
-  <link rel="stylesheet" href="{{ 'custom-style.css' | relative_url }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page.title }}</title>
+    <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
+    <!-- Include the sidebar -->
+    {% include sidebar.html %}
+    
+    <!-- Main content area -->
+    <div id="main-content" class="content">
+        <header class="banner">
+            <h1>{{ page.title }}</h1>
+        </header>
 
-  <!-- Sidebar with toggle button -->
-  {% include sidebar.html %}
-
-  <header>
-    <h1>{{ site.title }}</h1>
-    <p>{{ site.description }}</p>
-  </header>
-
-  <div class="content">
-    {{ content }}
-  </div>
-
-  <footer>
-    <p>&copy; {{ site.time | date: "%Y" }} {{ site.title }}. All rights reserved.</p>
-  </footer>
-
-  <!-- Add the JavaScript for sidebar toggle -->
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      var sidebar = document.getElementById('sidebar');
-      var toggleButton = document.getElementById('toggle-button');
-      
-      // Ensure sidebar is closed by default
-      sidebar.classList.add('sidebar-closed');
-
-      toggleButton.addEventListener('click', function() {
-        // Toggle sidebar classes
-        if (sidebar.classList.contains('sidebar-closed')) {
-          sidebar.classList.remove('sidebar-closed');
-          sidebar.classList.add('sidebar-open');
-        } else {
-          sidebar.classList.remove('sidebar-open');
-          sidebar.classList.add('sidebar-closed');
-        }
-      });
-    });
-  </script>
-
+        <section class="portfolio">
+            {{ content }}
+        </section>
+    </div>
+    
+    <footer class="footer">
+        <p>&copy; 2024 My Portfolio. All rights reserved.</p>
+    </footer>
 </body>
 </html>
