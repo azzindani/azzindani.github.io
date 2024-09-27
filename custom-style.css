@@ -91,8 +91,15 @@ footer {
   transition: transform 0.3s ease;
 }
 
-#sidebar.sidebar-open {
-  transform: translateX(0);
+.sidebar-open {
+  transform: translateX(0); /* Move sidebar into view */
+  visibility: visible; /* Ensure it's visible when open */
+}
+
+.sidebar-closed {
+  transform: translateX(-100%); /* Move sidebar out of view */
+  /* Optional: add visibility styles */
+  visibility: hidden; /* Hide visually when closed */
 }
 
 #toggle-button {
