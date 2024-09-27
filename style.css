@@ -88,6 +88,7 @@ body {
 .project-list {
     margin-left: 270px; /* Adjust for sidebar */
     padding: 20px;
+    transition: margin-left 0.3s ease; /* Smooth transition for margin */
 }
 
 .project-list ul {
@@ -135,8 +136,9 @@ body {
 
 /* Main Content */
 .content {
-    margin-left: 270px;
+    margin-left: 270px; /* Adjust for sidebar */
     padding: 20px;
+    transition: margin-left 0.3s ease; /* Smooth transition for margin */
 }
 
 /* Footer */
@@ -147,7 +149,7 @@ body {
     color: white;
     position: fixed;
     bottom: 0;
-    width: 100%;
-    margin-left: 250px;
+    width: calc(100% - 250px); /* Adjust for sidebar */
+    margin-left: 250px; /* Adjust for sidebar */
     box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.1);
 }
