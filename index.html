@@ -11,8 +11,8 @@
   <!-- Sidebar Toggle Button -->
   <button id="toggle-sidebar" onclick="toggleSidebar()">☰</button>
 
-  <!-- Import the Sidebar from default.html -->
-  {% include sidebar.html %}
+  <!-- Sidebar will be loaded here dynamically -->
+  <div id="sidebar-container"></div>
 
   <!-- Banner with Wide Image -->
   <div class="banner">
@@ -44,7 +44,6 @@
           </div>
         </a>
       </li>
-      <!-- Add more projects as needed -->
     </ul>
   </div>
 
@@ -65,14 +64,16 @@
     &copy; 2024 Your Name. All rights reserved.
   </div>
 
-  <!-- JavaScript to handle Sidebar Toggle -->
+  <!-- JavaScript to handle Sidebar Toggle and Load Sidebar HTML -->
   <script>
+    // Function to toggle the sidebar visibility
     function toggleSidebar() {
       var sidebar = document.getElementById("sidebar");
       sidebar.classList.toggle("closed");
       adjustLayout();
     }
 
+    // Function to adjust layout based on sidebar visibility
     function adjustLayout() {
       var sidebar = document.getElementById("sidebar");
       var projectList = document.querySelector('.project-list');
@@ -90,8 +91,24 @@
       }
     }
 
-    // Adjust layout on page load
-    window.onload = adjustLayout;
+    // Function to load the sidebar from sidebar.html
+    function loadSidebar() {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', 'sidebar.html', true);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState == 4 && xhr.status == 200) {
+          document.getElementById('sidebar-container').innerHTML = xhr.responseText;
+          adjustLayout(); // Adjust layout after loading the sidebar
+        }
+      };
+      xhr.send();
+    }
+
+    // Load the sidebar when the page is ready
+    window.onload = function() {
+      loadSidebar();
+      adjustLayout();
+    };
   </script>
   
 </body>
