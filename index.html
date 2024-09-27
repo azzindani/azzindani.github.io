@@ -14,7 +14,7 @@
   <!-- Sidebar Structure -->
   <div id="sidebar" class="sidebar closed">
     <h2>Navigation</h2>
-    <a href="index.html">Home</a>
+    <a href="#home">Home</a>
     <a href="#about">About Me</a>
     <a href="#contact">Contact</a>
   </div>
@@ -74,11 +74,7 @@
   <script>
     function toggleSidebar() {
       var sidebar = document.getElementById("sidebar");
-      if (sidebar.style.display === "none" || sidebar.style.display === "") {
-        sidebar.style.display = "block"; // Show sidebar
-      } else {
-        sidebar.style.display = "none"; // Hide sidebar
-      }
+      sidebar.classList.toggle("closed");
       adjustLayout();
     }
 
@@ -86,7 +82,7 @@
       var sidebar = document.getElementById("sidebar");
       var projectList = document.querySelector('.project-list');
       var content = document.querySelectorAll('.content');
-      if (sidebar.style.display === "none") {
+      if (sidebar.classList.contains('closed')) {
         projectList.style.marginLeft = '0';
         content.forEach(item => {
           item.style.marginLeft = '0'; // Adjust content margin
@@ -99,18 +95,11 @@
       }
     }
 
-    // Load sidebar state from localStorage
-    window.onload = function() {
-      var sidebarState = localStorage.getItem("sidebarState") || "open";
-      var sidebar = document.getElementById("sidebar");
-      if (sidebarState === "closed") {
-        sidebar.style.display = "none"; // Hide sidebar on load
-      } else {
-        sidebar.style.display = "block"; // Show sidebar on load
-      }
-      adjustLayout();
-    };
+    // Adjust layout on page load
+    window.onload = adjustLayout;
   </script>
-
+  
 </body>
 </html>
+
+
