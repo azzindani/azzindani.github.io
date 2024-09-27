@@ -5,8 +5,6 @@ profile: false
 headline: false
 ---
 
-{% include sidebar.html %}
-
 <a id="readme-top"></a>
 
 # Lungs Detection
