@@ -3,6 +3,8 @@ body {
     margin: 0;
     padding: 0;
     background-color: #f7f7f7;
+    display: flex;
+    flex-direction: row;
 }
 
 h1 {
@@ -11,7 +13,7 @@ h1 {
 }
 
 .banner {
-    width: 100%;
+    width: calc(100% - 200px); /* Adjust for sidebar */
     height: 300px; /* Adjust height as needed */
     background-image: url('assets/images.png'); /* Wide banner image */
     background-size: cover;
@@ -22,6 +24,30 @@ h1 {
     color: white;
     font-size: 36px;
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+    margin-left: 200px; /* Account for the sidebar */
+}
+
+.sidebar {
+    width: 200px;
+    background-color: #007b5f; /* Cayman green */
+    height: 100vh; /* Full height of the viewport */
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 20px;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar a {
+    color: white;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 15px;
+    font-size: 18px;
+}
+
+.sidebar a:hover {
+    text-decoration: underline;
 }
 
 .card-container {
@@ -29,6 +55,7 @@ h1 {
     flex-direction: column;
     align-items: center;
     margin: 20px;
+    margin-left: 220px; /* Adjust for sidebar */
 }
 
 .card {
@@ -40,6 +67,7 @@ h1 {
     margin: 10px;
     padding: 20px;
     width: 90%; /* Adjust width as needed */
+    height: 250px; /* Increase card height */
     transition: transform 0.3s;
     cursor: pointer;
     text-decoration: none; /* Remove underline from links */
@@ -50,7 +78,7 @@ h1 {
 }
 
 .card-image {
-    width: 100px; /* Set image size */
+    width: 150px; /* Increase image width */
     height: auto;
     border-radius: 8px;
     margin-right: 20px; /* Space between image and text */
