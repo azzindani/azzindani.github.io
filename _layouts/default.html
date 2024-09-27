@@ -5,18 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ page.title | escape }}</title>
 
-  <!-- Link to custom styles -->
+  <!-- Load Cayman theme's styles -->
+  {{ content_for_head }}
+
+  <!-- Load custom CSS for the sidebar -->
   <link rel="stylesheet" href="{{ 'custom-style.css' | relative_url }}">
 
-  <!-- You may also link Cayman theme CSS if needed, but it's typically included automatically -->
 </head>
 <body>
+  <!-- Include custom sidebar (ensure sidebar.html exists) -->
   {% include sidebar.html %}
+
+  <!-- Cayman theme's content -->
   <div class="content">
     {{ content }}
   </div>
 
-  <!-- Add JavaScript to handle sidebar toggle -->
+  <!-- Add JavaScript for the sidebar toggle -->
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       var sidebar = document.getElementById('sidebar');
