@@ -7,18 +7,6 @@ headline: false
 
 {% include sidebar.html %}
 
-<script>
-  // Include the same toggle functionality here
-  document.getElementById("toggleSidebar").onclick = function() {
-    var sidebar = document.getElementById("sidebar");
-    if (sidebar.style.display === "none" || sidebar.style.display === "") {
-      sidebar.style.display = "block"; // Show sidebar
-    } else {
-      sidebar.style.display = "none"; // Hide sidebar
-    }
-  };
-</script>
-
 <a id="readme-top"></a>
 
 # Lungs Detection
