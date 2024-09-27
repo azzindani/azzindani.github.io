@@ -5,23 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ page.title | escape }}</title>
 
-  <!-- Load Cayman theme's styles -->
-  {{ content_for_head }}
-
-  <!-- Load custom CSS for the sidebar -->
-  <link rel="stylesheet" href="{{ 'custom-style.css' | relative_url }}">
+  <!-- Link to your custom CSS -->
+  <link rel="stylesheet" href="{{ '/assets/css/custom-style.css' | relative_url }}">
 
 </head>
 <body>
-  <!-- Include custom sidebar (ensure sidebar.html exists) -->
+
+  <!-- Sidebar with toggle button -->
   {% include sidebar.html %}
 
-  <!-- Cayman theme's content -->
+  <!-- Add the toggle button outside the sidebar -->
+  <button id="toggle-button">☰</button>
+
+  <header>
+    <h1>{{ site.title }}</h1>
+    <p>{{ site.description }}</p>
+  </header>
+
+  <nav>
+    <a href="/">Home</a>
+    <a href="/aboutme.html">About Me</a>
+    <a href="/page2">Contact</a>
+  </nav>
+
   <div class="content">
     {{ content }}
   </div>
 
-  <!-- Add JavaScript for the sidebar toggle -->
+  <footer>
+    <p>&copy; {{ site.time | date: "%Y" }} {{ site.title }}. All rights reserved.</p>
+  </footer>
+
+  <!-- Add the JavaScript for sidebar toggle -->
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       var sidebar = document.getElementById('sidebar');
