@@ -5,6 +5,23 @@ profile: false
 headline: false
 ---
 
+{% include sidebar.html %}
+
+<div class="content">
+  <h1>Project 1 Title</h1>
+  <p>Details about project 1...</p>
+</div>
+
+<div id="about" style="padding: 20px;">
+  <h2>About Me</h2>
+  <p>Information about yourself.</p>
+</div>
+
+<div id="contact" style="padding: 20px;">
+  <h2>Contact</h2>
+  <p>Your contact information.</p>
+</div>
+
 <a id="readme-top"></a>
 
 # Lungs Detection
