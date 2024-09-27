@@ -9,10 +9,10 @@
 <body>
 
   <!-- Sidebar Toggle Button -->
-  <button id="toggle-sidebar" onclick="toggleSidebar()">☰ Toggle Sidebar</button>
+  <button id="toggle-sidebar" onclick="toggleSidebar()">☰</button>
 
   <!-- Sidebar Structure -->
-  <div id="sidebar" class="sidebar">
+  <div id="sidebar" class="sidebar closed">
     <h2>Navigation</h2>
     <a href="#home">Home</a>
     <a href="#about">About Me</a>
@@ -27,24 +27,24 @@
     </div>
   </div>
 
-  <!-- Cards Section -->
-  <div class="card-container" id="home">
-    <a href="https://azzindani.github.io/docs/page1.html" class="card">
-      <img src="assets/images.png" alt="Project 1" class="card-image">
-      <div>
-        <h2>Lungs Detection</h2>
-        <p>This project, initiated in 2021, aims to develop a computer vision system capable of detecting and localizing lungs in medical images such as CXR (Chest X-Ray) or CT scans.</p>
-      </div>
-    </a>
-    
-    <a href="https://azzindani.github.io/docs/page2.html" class="card">
-      <img src="assets/images.png" alt="Project 2" class="card-image">
-      <div>
-        <h2>Covid-19 Detection</h2>
-        <p>This project, developed in 2021, harnesses the power of computer vision and deep learning techniques to detect Covid-19 from chest X-ray (CXR) images.</p>
-      </div>
-    </a>
-    <!-- Add more cards as needed -->
+  <!-- List of Projects -->
+  <div class="project-list" id="home">
+    <h2>Projects</h2>
+    <ul>
+      <li>
+        <a href="https://azzindani.github.io/docs/page1.html">
+          <h3>Lungs Detection</h3>
+          <p>This project, initiated in 2021, aims to develop a computer vision system capable of detecting and localizing lungs in medical images such as CXR (Chest X-Ray) or CT scans.</p>
+        </a>
+      </li>
+      <li>
+        <a href="https://azzindani.github.io/docs/page2.html">
+          <h3>Covid-19 Detection</h3>
+          <p>This project, developed in 2021, harnesses the power of computer vision and deep learning techniques to detect Covid-19 from chest X-ray (CXR) images.</p>
+        </a>
+      </li>
+      <!-- Add more projects as needed -->
+    </ul>
   </div>
 
   <!-- About Section -->
@@ -74,3 +74,4 @@
   
 </body>
 </html>
+
