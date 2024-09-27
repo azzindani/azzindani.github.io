@@ -1,202 +1,26 @@
-/* General Styles */
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+.portfolio-card {
+    background-color: #f9f9f9;
+    width: calc(33.333% - 16px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    cursor: pointer; /* Makes it clear it's clickable */
 }
 
-h1, h2, h3 {
-  color: #333;
+.portfolio-card:hover {
+    transform: translateY(-5px);
 }
 
-a {
-  text-decoration: none;
-  color: #0066cc;
-}
-
-ul {
-  list-style: none;
-  padding: 0;
-}
-
-/* Sidebar Styles */
-.sidebar {
-  width: 250px;
-  height: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  background-color: #333;
-  padding-top: 20px;
-  transition: 0.3s;
-  z-index: 1000;
-  overflow-x: hidden;
-}
-
-.sidebar a {
-  padding: 10px 20px;
-  text-align: left;
-  display: block;
-  color: #fff;
-  transition: 0.3s;
-}
-
-.sidebar a:hover {
-  background-color: #575757;
-}
-
-.sidebar.closed {
-  width: 0;
-  padding: 0;
-  overflow: hidden;
-}
-
-/* Toggle Button */
-#toggle-sidebar {
-  position: fixed;
-  top: 15px;
-  left: 15px;
-  background-color: #0066cc;
-  color: white;
-  padding: 10px;
-  border: none;
-  cursor: pointer;
-  z-index: 1001;
-}
-
-#toggle-sidebar:hover {
-  background-color: #004080;
-}
-
-/* Banner Styles */
-.banner {
-  margin-left: 250px; /* Adjust according to sidebar width */
-  background-color: #f5f5f5;
-  position: relative;
-  text-align: center;
-  padding: 40px 0;
-}
-
-.banner-image {
-  width: 100%;
-  max-height: 300px;
-  object-fit: cover;
-}
-
-.banner-text h1 {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: white;
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 10px 20px;
-  border-radius: 5px;
-}
-
-/* Card View for Projects */
-.project-list {
-  margin: 40px auto;
-  padding: 20px;
-  width: 80%;
-}
-
-.project-list h2 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.project-list ul {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-}
-
-.project-item {
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  width: 45%;
-  margin: 15px 0;
-  padding: 20px;
-  display: flex;
-  align-items: center;
-  transition: transform 0.3s;
-}
-
-.project-item:hover {
-  transform: translateY(-5px);
-}
-
-.project-image {
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  border-radius: 50%;
-  margin-right: 20px;
-}
-
-.project-details h3 {
-  margin: 0 0 10px 0;
-}
-
-.project-details p {
-  margin: 0;
-  color: #555;
-}
-
-/* About & Contact Section */
-.content {
-  margin-left: 250px; /* Adjust according to sidebar width */
-  padding: 20px;
-}
-
-.content h2 {
-  margin-top: 0;
-}
-
-.content p {
-  font-size: 1.1em;
-  line-height: 1.6;
-}
-
-/* Footer Styles */
-.footer {
-  text-align: center;
-  background-color: #333;
-  color: #fff;
-  padding: 20px;
-  position: fixed;
-  width: 100%;
-  bottom: 0;
-}
-
-/* Responsive Styles */
-@media (max-width: 768px) {
-  #toggle-sidebar {
-    left: 0;
-  }
-
-  .sidebar {
+.portfolio-card img {
     width: 100%;
     height: auto;
-    position: relative;
-  }
+}
 
-  .sidebar.closed {
-    width: 0;
-  }
+.card-content {
+    padding: 16px;
+}
 
-  .banner {
-    margin-left: 0;
-  }
-
-  .content {
-    margin-left: 0;
-  }
-
-  .project-item {
-    width: 100%;
-  }
+.card-content h3 {
+    margin: 0 0 10px;
 }
