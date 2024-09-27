@@ -91,16 +91,16 @@ body {
     transition: margin-left 0.3s ease; /* Smooth transition for margin */
     display: flex;
     flex-wrap: wrap; /* Allow cards to wrap */
-    justify-content: space-between; /* Space between cards */
+    justify-content: flex-start; /* Align cards to the start */
 }
 
 .project-item {
     background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 12px; /* More rounded corners for a card look */
-    margin-bottom: 20px;
+    margin: 10px; /* Space around cards */
     padding: 20px;
-    flex: 0 1 calc(30% - 20px); /* Adjust width for three cards per row */
+    width: calc(30% - 20px); /* Width for medium card, adjust as needed */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     text-decoration: none; /* Remove underline */
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Add shadow for card effect */
