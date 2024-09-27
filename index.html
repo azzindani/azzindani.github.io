@@ -9,7 +9,15 @@
 <body>
 
   <!-- Sidebar Toggle Button -->
-  {% include sidebar.html %}
+  <button id="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+
+  <!-- Sidebar Structure -->
+  <div id="sidebar" class="sidebar closed">
+    <h2>Navigation</h2>
+    <a href="/">Home</a>
+    <a href="aboutme.html">About Me</a>
+    <a href="#contact">Contact</a>
+  </div>
 
   <!-- Banner with Wide Image -->
   <div class="banner">
