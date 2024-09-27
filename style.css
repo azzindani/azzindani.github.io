@@ -18,7 +18,7 @@ body {
     transition: transform 0.3s ease;
     z-index: 1000;
     padding: 20px;
-    box-shadow: 3px 0 10px rgba(0,0,0,0.1);
+    box-shadow: 3px 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar h2 {
@@ -89,9 +89,9 @@ body {
     margin-left: 270px; /* Adjust for sidebar */
     padding: 20px;
     transition: margin-left 0.3s ease; /* Smooth transition for margin */
-    display: grid; /* Use grid layout */
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Create responsive grid */
-    gap: 20px; /* Space between cards */
+    display: flex; /* Use flexbox for fluid layout */
+    flex-wrap: wrap; /* Allow cards to wrap to the next line */
+    justify-content: space-between; /* Space cards evenly */
     list-style-type: none; /* Ensure no list styling */
 }
 
@@ -105,6 +105,8 @@ body {
     text-decoration: none; /* Remove underline */
     display: flex;
     flex-direction: column; /* Stack contents vertically */
+    width: calc(30% - 20px); /* Set width with spacing */
+    margin-bottom: 20px; /* Space between rows */
 }
 
 .project-item:hover {
@@ -123,7 +125,7 @@ body {
 }
 
 .project-list h3 {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     margin: 10px 0 5px; /* Adjust margin for spacing */
     color: #16a085; /* Green Cayman color for project titles */
 }
