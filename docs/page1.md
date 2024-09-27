@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: cayman
 title: Lungs Detection
 profile: false
 headline: false
