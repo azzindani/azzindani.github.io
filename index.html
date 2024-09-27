@@ -7,17 +7,24 @@
   <link rel="stylesheet" href="style.css"> <!-- Link to the external stylesheet -->
 </head>
 <body>
-  <div class="sidebar">
+
+  <!-- Sidebar Toggle Button -->
+  <button id="toggle-sidebar" onclick="toggleSidebar()">☰ Toggle Sidebar</button>
+
+  <!-- Sidebar Structure -->
+  <div id="sidebar" class="sidebar">
     <h2>Navigation</h2>
     <a href="#home">Home</a>
     <a href="#about">About Me</a>
     <a href="#contact">Contact</a>
   </div>
 
+  <!-- Banner -->
   <div class="banner">
     <h1>My Portfolio</h1>
   </div>
-  
+
+  <!-- Cards Section -->
   <div class="card-container" id="home">
     <a href="https://azzindani.github.io/docs/page1.html" class="card">
       <img src="assets/images.png" alt="Project 1" class="card-image">
@@ -37,21 +44,34 @@
     <!-- Add more cards as needed -->
   </div>
 
-  <div id="about" style="padding: 20px; margin-left: 220px;">
+  <!-- About Section -->
+  <div id="about" class="content">
     <h2>About Me</h2>
     <p>Here you can write about yourself. This section introduces who you are, your skills, and your experiences.</p>
   </div>
 
-  <div id="contact" style="padding: 20px; margin-left: 220px;">
+  <!-- Contact Section -->
+  <div id="contact" class="content">
     <h2>Contact</h2>
     <p>You can add your contact information here.</p>
   </div>
-  
+
+  <!-- Footer -->
   <div class="footer">
     &copy; 2024 Your Name. All rights reserved.
   </div>
+
+  <!-- JavaScript to handle Sidebar Toggle -->
+  <script>
+    function toggleSidebar() {
+      var sidebar = document.getElementById("sidebar");
+      sidebar.classList.toggle("closed");
+    }
+  </script>
+  
 </body>
 </html>
+
 
 
 
