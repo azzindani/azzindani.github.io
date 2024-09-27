@@ -1,15 +1,17 @@
 # Site
 title: My GitHub Pages Site
-description: A site using a custom theme
+#description: A site using a custom theme
 
-remote_theme: pages-themes/cayman@v0.2.0
+theme: jekyll-theme-cayman
+
+#remote_theme: pages-themes/cayman@v0.2.0
 #baseurl: "/docs"
 # Plugins
-plugins: 
-  - jekyll-feed
-  - jekyll-sitemap
-  - jekyll-paginate
-  - jekyll-seo-tag
+#plugins: 
+#  - jekyll-feed
+#  - jekyll-sitemap
+#  - jekyll-paginate
+#  - jekyll-seo-tag
       
 # Syntax
 markdown: GFM
