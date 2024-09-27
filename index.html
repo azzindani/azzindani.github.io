@@ -1,44 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <title>Your Portfolio</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Portfolio</title>
+  <link rel="stylesheet" href="style.css"> <!-- Link to the external stylesheet -->
 </head>
 <body>
-    <div id="sidebar" class="sidebar">
-        <h2>Portfolio</h2>
-        <a href="/">Home</a>
-        <a href="portfolio/page1.md">Page 1</a>
-        <a href="portfolio/page2.md">Page 2</a>
-    </div>
 
-    <div id="content" class="content">
-        <header>
-            <h1>Your Name</h1>
-            <p>Your tagline or description.</p>
-        </header>
-        
-        <main>
-            <div class="portfolio-cards">
-                <div class="card">
-                    <h3>Project Title 1</h3>
-                    <p>Short description of the project.</p>
-                    <a href="portfolio/page1.md">View Project</a>
-                </div>
-                <div class="card">
-                    <h3>Project Title 2</h3>
-                    <p>Short description of the project.</p>
-                    <a href="portfolio/page2.md">View Project</a>
-                </div>
-                <!-- Repeat for more projects -->
-            </div>
-        </main>
-        
-        <footer>
-            <p>&copy; 2024 Your Name. All rights reserved.</p>
-        </footer>
+  <!-- Sidebar Toggle Button -->
+  <button id="toggle-sidebar" onclick="toggleSidebar()">☰</button>
+
+  <!-- Sidebar Structure -->
+  <div id="sidebar" class="sidebar closed">
+    <h2>Navigation</h2>
+    <a href="#home">Home</a>
+    <a href="#about">About Me</a>
+    <a href="#contact">Contact</a>
+  </div>
+
+  <!-- Banner with Wide Image -->
+  <div class="banner">
+    <img src="assets/images.png" alt="Banner Image" class="banner-image">
+    <div class="banner-text">
+      <h1>Welcome to My Portfolio</h1>
     </div>
+  </div>
+
+  <!-- List of Projects -->
+  <div class="project-list" id="home">
+    <h2>Projects</h2>
+    <ul>
+      <li>
+        <a href="https://azzindani.github.io/docs/page1.html" class="project-item">
+          <img src="assets/images.png" alt="Lungs Detection" class="project-image">
+          <div class="project-details">
+            <h3>Lungs Detection</h3>
+            <p>This project, initiated in 2021, aims to develop a computer vision system capable of detecting and localizing lungs in medical images such as CXR (Chest X-Ray) or CT scans.</p>
+          </div>
+        </a>
+      </li>
+      <li>
+        <a href="https://azzindani.github.io/docs/page2.html" class="project-item">
+          <img src="assets/images.png" alt="Covid-19 Detection" class="project-image">
+          <div class="project-details">
+            <h3>Covid-19 Detection</h3>
+            <p>This project, developed in 2021, harnesses the power of computer vision and deep learning techniques to detect Covid-19 from chest X-ray (CXR) images.</p>
+          </div>
+        </a>
+      </li>
+      <!-- Add more projects as needed -->
+    </ul>
+  </div>
+
+  <!-- About Section -->
+  <div id="about" class="content">
+    <h2>About Me</h2>
+    <p>Here you can write about yourself. This section introduces who you are, your skills, and your experiences.</p>
+  </div>
+
+  <!-- Contact Section -->
+  <div id="contact" class="content">
+    <h2>Contact</h2>
+    <p>You can add your contact information here.</p>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    &copy; 2024 Your Name. All rights reserved.
+  </div>
+
+  <!-- JavaScript to handle Sidebar Toggle -->
+  <script>
+    function toggleSidebar() {
+      var sidebar = document.getElementById("sidebar");
+      sidebar.classList.toggle("closed");
+      adjustLayout();
+    }
+
+    function adjustLayout() {
+      var sidebar = document.getElementById("sidebar");
+      var projectList = document.querySelector('.project-list');
+      var content = document.querySelectorAll('.content');
+      if (sidebar.classList.contains('closed')) {
+        projectList.style.marginLeft = '0';
+        content.forEach(item => {
+          item.style.marginLeft = '0'; // Adjust content margin
+        });
+      } else {
+        projectList.style.marginLeft = '270px'; // Adjust according to the sidebar width
+        content.forEach(item => {
+          item.style.marginLeft = '270px'; // Adjust content margin
+        });
+      }
+    }
+
+    // Adjust layout on page load
+    window.onload = adjustLayout;
+  </script>
+  
 </body>
 </html>
+
+
