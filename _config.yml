@@ -1,5 +1,5 @@
 # Site
-title: My GitHub Pages Site
+#title: My GitHub Pages Site
 #description: A site using a custom theme
 
 #remote_theme: pages-themes/cayman@v0.2.0
@@ -15,8 +15,8 @@ title: My GitHub Pages Site
 markdown: GFM
 
 # Paginate
-paginate: 10
+#paginate: 10
 
 # Include custom CSS
-sass:
-  style: compressed
+#sass:
+#  style: compressed
