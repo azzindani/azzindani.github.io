@@ -7,7 +7,6 @@
 
   <!-- Link to your custom CSS -->
   <link rel="stylesheet" href="{{ 'custom-style.css' | relative_url }}">
-
 </head>
 <body>
 
@@ -42,6 +41,9 @@
       var sidebar = document.getElementById('sidebar');
       var toggleButton = document.getElementById('toggle-button');
       
+      // Ensure sidebar is closed by default
+      sidebar.classList.add('sidebar-closed');
+
       toggleButton.addEventListener('click', function() {
         if (sidebar.classList.contains('sidebar-closed')) {
           sidebar.classList.remove('sidebar-closed');
