@@ -18,7 +18,7 @@ body {
     transition: transform 0.3s ease;
     z-index: 1000;
     padding: 20px;
-    box-shadow: 3px 0 10px rgba(0,0,0,0.1);
+    box-shadow: 3px 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar h2 {
@@ -84,39 +84,38 @@ body {
     font-weight: bold;
 }
 
-/* Project List */
+/* Project Cards */
 .project-list {
     margin-left: 270px; /* Adjust for sidebar */
     padding: 20px;
     transition: margin-left 0.3s ease; /* Smooth transition for margin */
-}
-
-.project-list ul {
-    list-style-type: none; /* Remove default list styling */
-    padding: 0;
+    display: flex;
+    flex-wrap: wrap; /* Allow cards to wrap */
+    justify-content: space-between; /* Space between cards */
 }
 
 .project-item {
-    display: flex;
-    align-items: center;
     background-color: #fff;
     border: 1px solid #ddd;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    padding: 15px;
+    border-radius: 12px; /* More rounded corners for a card look */
+    margin-bottom: 20px;
+    padding: 20px;
+    flex: 0 1 calc(30% - 20px); /* Adjust width for three cards per row */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     text-decoration: none; /* Remove underline */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Add shadow for card effect */
 }
 
 .project-item:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Enhance shadow on hover */
 }
 
 .project-image {
-    width: 100px; /* Set image width */
+    width: 100%; /* Full width for the image */
     height: auto; /* Maintain aspect ratio */
-    margin-right: 15px; /* Space between image and text */
+    border-radius: 8px; /* Round image corners */
+    margin-bottom: 15px; /* Space between image and text */
 }
 
 .project-details {
