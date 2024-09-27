@@ -1,24 +1,43 @@
----
-layout: default
-title: Home
----
-
-<section class="portfolio">
-    <div class="portfolio-card" onclick="location.href='/page1'">
-        <img src="project1.jpg" alt="Project 1">
-        <div class="card-content">
-            <h3>Project 1</h3>
-            <p>A brief description of Project 1.</p>
-        </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Your Portfolio</title>
+</head>
+<body>
+    <div id="sidebar" class="sidebar">
+        <h2>Portfolio</h2>
+        <!-- Include your sidebar links here -->
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+        <!-- Add other links as needed -->
     </div>
 
-    <div class="portfolio-card" onclick="location.href='/page2'">
-        <img src="project2.jpg" alt="Project 2">
-        <div class="card-content">
-            <h3>Project 2</h3>
-            <p>A brief description of Project 2.</p>
-        </div>
+    <div id="content" class="content">
+        <header>
+            <h1>Your Name</h1>
+            <p>Your tagline or description.</p>
+        </header>
+        
+        <main>
+            <div class="portfolio-cards">
+                <!-- Example of a portfolio card -->
+                <div class="card">
+                    <h3>Project Title</h3>
+                    <p>Short description of the project.</p>
+                    <a href="portfolio/page1.md">View Project</a>
+                </div>
+                <!-- Repeat for more projects -->
+            </div>
+        </main>
+        
+        <footer>
+            <p>&copy; 2024 Your Name. All rights reserved.</p>
+        </footer>
     </div>
 
-    <!-- Add more portfolio cards here -->
-</section>
+    <script src="script.js"></script>
+</body>
+</html>
