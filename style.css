@@ -4,25 +4,55 @@ body {
     margin: 0;
     padding: 0;
     display: flex;
-    background-color: #f8f9fa; /* Light gray background */
-    color: #333; /* Dark gray text */
+    background-color: #f8f9fa;
+    color: #333;
+    flex-direction: column;
 }
 
 /* Sidebar */
 .sidebar {
-    width: 250px;
-    background-color: #2a8f53; /* Green background */
-    color: white;
     position: fixed;
-    height: 100%;
-    padding-top: 20px;
+    top: 20px;
+    left: 0;
+    width: 50px; /* Width of button only */
+    height: auto; /* Height adjusts to content */
+    background-color: transparent; /* No background color when collapsed */
     transition: width 0.3s ease;
-    overflow: hidden;
+}
+
+.sidebar button {
+    background-color: #2a8f53; /* Green color for button */
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.sidebar button:hover {
+    background-color: #237546; /* Darker green on hover */
+}
+
+/* Sidebar content hidden by default */
+.sidebar-content {
+    display: none;
+    background-color: #2a8f53;
+    padding-top: 10px;
+}
+
+/* Expanded sidebar with links visible */
+.sidebar:not(.collapsed) {
+    width: 250px;
+}
+
+.sidebar:not(.collapsed) .sidebar-content {
+    display: block; /* Show links when expanded */
 }
 
 .sidebar ul {
     list-style-type: none;
     padding: 0;
+    margin: 0;
 }
 
 .sidebar ul li {
@@ -39,49 +69,25 @@ body {
     color: #a1e6c2; /* Light green on hover */
 }
 
-.sidebar button {
+/* Full-width Banner */
+.full-width {
+    width: 100vw;
     background-color: #2a8f53;
     color: white;
-    border: none;
-    width: 100%;
-    padding: 10px;
-    cursor: pointer;
-}
-
-.sidebar button:hover {
-    background-color: #237546; /* Darker green */
-}
-
-/* Collapsed Sidebar (default state) */
-.sidebar.collapsed {
-    width: 50px;
-}
-
-.sidebar.collapsed ul {
-    display: none;
+    text-align: center;
+    padding: 30px 0;
 }
 
 /* Main content */
 .content {
-    margin-left: 50px;  /* Default margin for collapsed sidebar */
+    margin-left: 50px; /* Adjust margin for button-only sidebar */
     padding: 20px;
     flex-grow: 1;
     transition: margin-left 0.3s ease;
-    background-color: #fff; /* White background for content */
 }
 
-/* Expanded content when sidebar is open */
 .sidebar:not(.collapsed) ~ .content {
-    margin-left: 250px;
-}
-
-/* Banner */
-.banner {
-    background-color: #2a8f53; /* Green background for banner */
-    color: white;
-    padding: 20px;
-    text-align: center;
-    font-size: 2em;
+    margin-left: 250px; /* Adjust when sidebar expands */
 }
 
 /* Portfolio Cards */
@@ -102,7 +108,7 @@ body {
     overflow: hidden;
     transition: transform 0.3s;
     text-align: center;
-    color: #333; /* Dark text */
+    color: #333;
 }
 
 .card:hover {
@@ -116,11 +122,11 @@ body {
 
 .card a {
     text-decoration: none;
-    color: #2a8f53; /* Green for links */
+    color: #2a8f53;
 }
 
 .card a:hover {
-    color: #1f6f40; /* Darker green on hover */
+    color: #1f6f40;
 }
 
 /* Footer */
