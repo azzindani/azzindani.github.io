@@ -3,7 +3,7 @@ title: My GitHub Pages Site
 description: A site using a custom theme
 
 
-theme: minima
+theme: cayman
 plugins:
   - jekyll-paginate
 paginate: 10
