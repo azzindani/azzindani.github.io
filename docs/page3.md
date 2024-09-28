@@ -57,7 +57,7 @@ Used tools:
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Project Details and Results
-This project is trained to detect lung abnormalities categorized into 14 conditions: `Atelectasis`, `Infiltration`, `Pneumothorax`, `Effusion`, `Pneumonia`, `Cardiomegaly`, `Nodule`, and `Mass`.
+This project is trained to detect lung abnormalities categorized into 8 conditions: `Atelectasis`, `Infiltration`, `Pneumothorax`, `Effusion`, `Pneumonia`, `Cardiomegaly`, `Nodule`, and `Mass`.
 
 1. Data Collection
 
@@ -160,6 +160,11 @@ This project is trained to detect lung abnormalities categorized into 14 conditi
    
    <div align="center">
      <img src="/assets/page3/006.png" alt="Logo" width="1000">
+     <img src="/assets/page3/007.png" alt="Logo" width="1000">
+     <img src="/assets/page3/008.png" alt="Logo" width="1000">
+     <img src="/assets/page3/009.png" alt="Logo" width="1000">
+     <img src="/assets/page3/010.png" alt="Logo" width="1000">
+     <img src="/assets/page3/011.png" alt="Logo" width="1000">
    </div>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
