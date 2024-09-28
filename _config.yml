@@ -2,16 +2,16 @@
 title: My GitHub Pages Site
 description: A site using a custom theme
 
-theme: jekyll-theme-cayman
+#theme: jekyll-theme-cayman
 #include: [sidebar.html]
 #remote_theme: pages-themes/cayman@v0.2.0
 #baseurl: "/docs"
 # Plugins
-plugins: 
-  - jekyll-feed
-  - jekyll-sitemap
-  - jekyll-paginate
-  - jekyll-seo-tag
+#plugins: 
+#  - jekyll-feed
+#  - jekyll-sitemap
+#  - jekyll-paginate
+#  - jekyll-seo-tag
       
 # Syntax
 markdown: GFM
