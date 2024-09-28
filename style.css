@@ -10,12 +10,12 @@ body {
 
 /* Sidebar */
 .sidebar {
-    width: 250px;
+    width: 15.625rem; /* 250px */
     background-color: #2a8f53; /* Green background */
     color: white;
     position: fixed;
     height: 100%;
-    padding-top: 20px;
+    padding-top: 1.25rem; /* 20px */
     transition: width 0.3s ease;
     overflow: hidden;
 }
@@ -26,7 +26,7 @@ body {
 }
 
 .sidebar ul li {
-    padding: 10px;
+    padding: 0.625rem; /* 10px */
     text-align: center;
 }
 
@@ -44,7 +44,7 @@ body {
     color: white;
     border: none;
     width: 100%;
-    padding: 10px;
+    padding: 0.625rem; /* 10px */
     cursor: pointer;
 }
 
@@ -54,7 +54,7 @@ body {
 
 /* Collapsed Sidebar (default state) */
 .sidebar.collapsed {
-    width: 50px;
+    width: 3.125rem; /* 50px */
 }
 
 .sidebar.collapsed ul {
@@ -63,8 +63,8 @@ body {
 
 /* Main content */
 .content {
-    margin-left: 50px;  /* Default margin for collapsed sidebar */
-    padding: 20px;
+    margin-left: 3.125rem;  /* 50px, Default margin for collapsed sidebar */
+    padding: 1.25rem; /* 20px */
     flex-grow: 1;
     transition: margin-left 0.3s ease;
     background-color: #fff; /* White background for content */
@@ -72,13 +72,13 @@ body {
 
 /* Expanded content when sidebar is open */
 .sidebar:not(.collapsed) ~ .content {
-    margin-left: 250px;
+    margin-left: 15.625rem; /* 250px */
 }
 
 /* Full-width Banner */
 .banner {
     width: 100%;
-    height: 400px; /* Height of the banner */
+    height: 25rem; /* 400px */
     position: relative; /* Position relative for text overlay */
 }
 
@@ -91,22 +91,16 @@ body {
     justify-content: center; /* Center horizontally */
     align-items: center; /* Center vertically */
     color: white; /* Text color */
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Text shadow for better visibility */
+    text-shadow: 0.125rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); /* 2px 2px 4px shadow for better visibility */
 }
 
 .banner h1 {
-    font-size: 3em; /* Adjust font size as needed */
+    font-size: 3rem; /* 48px */
     margin: 0; /* Remove default margin */
 }
 
-/* Main content */
-.content {
-    margin-left: 50px; /* Default margin when sidebar is collapsed */
-    padding: 20px;
-}
-
 /* Responsive Styles */
-@media (max-width: 768px) {
+@media (max-width: 48rem) { /* 768px */
     .sidebar {
         width: 0; /* Collapsed state on mobile */
     }
@@ -125,11 +119,11 @@ body {
 
 .card {
     background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 300px;
-    margin: 20px;
+    border: 0.0625rem solid #ddd; /* 1px */
+    border-radius: 0.625rem; /* 10px */
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1); /* 0 4px 8px */
+    width: 18.75rem; /* 300px */
+    margin: 1.25rem; /* 20px */
     overflow: hidden;
     transition: transform 0.3s;
     text-align: center;
@@ -157,7 +151,7 @@ body {
 /* Footer */
 footer {
     text-align: center;
-    padding: 10px;
+    padding: 0.625rem; /* 10px */
     background-color: #2a8f53;
     color: white;
 }
