@@ -45,7 +45,7 @@ body {
     background-color: #555;
 }
 
-/* Collapsed Sidebar */
+/* Collapsed Sidebar (default state) */
 .sidebar.collapsed {
     width: 50px;
 }
@@ -56,15 +56,15 @@ body {
 
 /* Main content */
 .content {
-    margin-left: 250px;
+    margin-left: 50px;  /* Default margin for collapsed sidebar */
     padding: 20px;
     flex-grow: 1;
     transition: margin-left 0.3s ease;
 }
 
-/* Adjust content when sidebar is collapsed */
-.sidebar.collapsed ~ .content {
-    margin-left: 50px;
+/* Expanded content when sidebar is open */
+.sidebar:not(.collapsed) ~ .content {
+    margin-left: 250px;
 }
 
 /* Banner */
