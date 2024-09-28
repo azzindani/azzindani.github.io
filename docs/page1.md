@@ -7,7 +7,7 @@ headline: false
 
 <a id="readme-top"></a>
 
-# Lungs Detection
+[HOME](https://azzindani.github.io/)
 
 <!-- TABLE OF CONTENTS -->
 <details>
