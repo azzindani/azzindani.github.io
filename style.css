@@ -13,6 +13,8 @@ body {
     position: fixed;
     height: 100%;
     padding-top: 20px;
+    transition: width 0.3s ease;
+    overflow: hidden;
 }
 
 .sidebar ul {
@@ -30,11 +32,39 @@ body {
     text-decoration: none;
 }
 
+.sidebar button {
+    background-color: #333;
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.sidebar button:hover {
+    background-color: #555;
+}
+
+/* Collapsed Sidebar */
+.sidebar.collapsed {
+    width: 50px;
+}
+
+.sidebar.collapsed ul {
+    display: none;
+}
+
 /* Main content */
 .content {
     margin-left: 250px;
     padding: 20px;
     flex-grow: 1;
+    transition: margin-left 0.3s ease;
+}
+
+/* Adjust content when sidebar is collapsed */
+.sidebar.collapsed ~ .content {
+    margin-left: 50px;
 }
 
 /* Banner */
