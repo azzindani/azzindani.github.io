@@ -1,77 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Portfolio</title>
-  <link rel="stylesheet" href="style.css"> <!-- Link to the external stylesheet -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- Sidebar starts as collapsed -->
+    <nav id="sidebar" class="sidebar collapsed">
+        <button id="toggleSidebar">☰</button>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <!-- You can add other permanent links here -->
+        </ul>
+    </nav>
 
-  <!-- Sidebar Toggle Button -->
-  <div id="sidebar" class="sidebar closed">
-    <button id="toggle-sidebar" onclick="toggleSidebar()">☰</button>
-    <div class="sidebar-content">
-      <h2>Navigation</h2>
-      <a href="#home">Home</a>
-      <a href="#about">About Me</a>
-      <a href="#contact">Contact</a>
+    <!-- Full-width Banner -->
+    <header class="banner full-width">
+        <h1>Welcome to My Portfolio</h1>
+        <img src="path-to-image1">
+    </header>
+
+    <!-- Main Content -->
+    <div id="main-content" class="content">
+        <!-- Portfolio Cards -->
+        <section class="portfolio">
+            <div class="card">
+                <a href="https://azzindani.github.io/docs/page1.html">
+                    <img src="path-to-image1" alt="Project 1 Image">
+                    <h3>Project 1</h3>
+                    <p>Details about Project 1.</p>
+                </a>
+            </div>
+            <div class="card">
+                <a href="page2.md">
+                    <img src="path-to-image2" alt="Project 2 Image">
+                    <h3>Project 2</h3>
+                    <p>Details about Project 2.</p>
+                </a>
+            </div>
+            <div class="card">
+                <a href="page10.md">
+                    <img src="path-to-image10" alt="Project 10 Image">
+                    <h3>Project 10</h3>
+                    <p>Details about Project 10.</p>
+                </a>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2024 Your Name. All rights reserved.</p>
+        </footer>
     </div>
-  </div>
 
-  <!-- Banner with Wide Image -->
-  <div class="banner">
-    <img src="assets/images.png" alt="Banner Image" class="banner-image">
-    <div class="banner-text">
-      <h1>Welcome to My Portfolio</h1>
-    </div>
-  </div>
-
-  <!-- List of Projects -->
-  <div class="project-list" id="home">
-    <h2>Projects</h2>
-    <ul>
-      <li>
-        <a href="https://azzindani.github.io/docs/page1.html" class="project-item">
-          <img src="assets/images.png" alt="Lungs Detection" class="project-image">
-          <div class="project-details">
-            <h3>Lungs Detection</h3>
-            <p>This project, initiated in 2021, aims to develop a computer vision system capable of detecting and localizing lungs in medical images such as CXR (Chest X-Ray) or CT scans.</p>
-          </div>
-        </a>
-      </li>
-      <li>
-        <a href="https://azzindani.github.io/docs/page2.html" class="project-item">
-          <img src="assets/images.png" alt="Covid-19 Detection" class="project-image">
-          <div class="project-details">
-            <h3>Covid-19 Detection</h3>
-            <p>This project, developed in 2021, harnesses the power of computer vision and deep learning techniques to detect Covid-19 from chest X-ray (CXR) images.</p>
-          </div>
-        </a>
-      </li>
-      <!-- Add more projects as needed -->
-    </ul>
-  </div>
-
-  <!-- About Section -->
-  <div id="about" class="content">
-    <h2>About Me</h2>
-    <p>Here you can write about yourself. This section introduces who you are, your skills, and your experiences.</p>
-  </div>
-
-  <!-- Contact Section -->
-  <div id="contact" class="content">
-    <h2>Contact</h2>
-    <p>You can add your contact information here.</p>
-  </div>
-
-  <!-- Footer -->
-  <div class="footer">
-    &copy; 2024 Your Name. All rights reserved.
-  </div>
-
-  <!-- JavaScript to handle Sidebar Toggle -->
-  <script src="script.js"></script> <!-- Link to the external JavaScript file -->
-  
+    <script src="script.js"></script>
 </body>
 </html>
