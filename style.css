@@ -1,138 +1,25 @@
-/* General styles */
-body {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    background-color: #f8f9fa;
-    color: #333;
-    flex-direction: column;
+function toggleSidebar() {
+    var sidebar = document.getElementById("sidebar");
+    sidebar.classList.toggle("closed");
+    adjustLayout();
 }
 
-/* Sidebar */
-.sidebar {
-    position: fixed;
-    top: 20px;
-    left: 0;
-    width: 50px; /* Width of button only */
-    height: auto; /* Height adjusts to content */
-    background-color: transparent; /* No background color when collapsed */
-    transition: width 0.3s ease;
+function adjustLayout() {
+    var sidebar = document.getElementById("sidebar");
+    var projectList = document.querySelector('.project-list');
+    var content = document.querySelectorAll('.content');
+    if (sidebar.classList.contains('closed')) {
+        projectList.style.marginLeft = '0';
+        content.forEach(item => {
+            item.style.marginLeft = '0'; // Adjust content margin
+        });
+    } else {
+        projectList.style.marginLeft = '270px'; // Adjust according to the sidebar width
+        content.forEach(item => {
+            item.style.marginLeft = '270px'; // Adjust content margin
+        });
+    }
 }
 
-.sidebar button {
-    background-color: #2a8f53; /* Green color for button */
-    color: white;
-    border: none;
-    padding: 10px;
-    cursor: pointer;
-    width: 100%;
-}
-
-.sidebar button:hover {
-    background-color: #237546; /* Darker green on hover */
-}
-
-/* Sidebar content hidden by default */
-.sidebar-content {
-    display: none;
-    background-color: #2a8f53;
-    padding-top: 10px;
-}
-
-/* Expanded sidebar with links visible */
-.sidebar:not(.collapsed) {
-    width: 250px;
-}
-
-.sidebar:not(.collapsed) .sidebar-content {
-    display: block; /* Show links when expanded */
-}
-
-.sidebar ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-
-.sidebar ul li {
-    padding: 10px;
-    text-align: center;
-}
-
-.sidebar ul li a {
-    color: white;
-    text-decoration: none;
-}
-
-.sidebar ul li a:hover {
-    color: #a1e6c2; /* Light green on hover */
-}
-
-/* Full-width Banner */
-.full-width {
-    width: 100vw;
-    background-color: #2a8f53;
-    color: white;
-    text-align: center;
-    padding: 30px 0;
-}
-
-/* Main content */
-.content {
-    margin-left: 50px; /* Adjust margin for button-only sidebar */
-    padding: 20px;
-    flex-grow: 1;
-    transition: margin-left 0.3s ease;
-}
-
-.sidebar:not(.collapsed) ~ .content {
-    margin-left: 250px; /* Adjust when sidebar expands */
-}
-
-/* Portfolio Cards */
-.portfolio {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    background-color: #f8f9fa;
-}
-
-.card {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 300px;
-    margin: 20px;
-    overflow: hidden;
-    transition: transform 0.3s;
-    text-align: center;
-    color: #333;
-}
-
-.card:hover {
-    transform: scale(1.05);
-}
-
-.card img {
-    width: 100%;
-    height: auto;
-}
-
-.card a {
-    text-decoration: none;
-    color: #2a8f53;
-}
-
-.card a:hover {
-    color: #1f6f40;
-}
-
-/* Footer */
-footer {
-    text-align: center;
-    padding: 10px;
-    background-color: #2a8f53;
-    color: white;
-}
+// Adjust layout on page load
+window.onload = adjustLayout;
