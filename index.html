@@ -7,12 +7,11 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Sidebar -->
+    <!-- Sidebar (No Toggle) -->
     <nav id="sidebar" class="sidebar">
-        <button id="toggleSidebar">Toggle</button>
         <ul>
             <li><a href="index.html">Home</a></li>
-            <!-- Sidebar links (Permanent) -->
+            <!-- You can add other permanent links here if necessary -->
         </ul>
     </nav>
 
@@ -25,12 +24,29 @@
 
         <!-- Portfolio Cards -->
         <section class="portfolio">
+            <!-- Portfolio card examples linked to .md pages -->
             <div class="card">
-                <img src="path-to-image" alt="Project Image">
-                <h3>Project Title</h3>
-                <p>Description of the project.</p>
+                <a href="page1.md">
+                    <img src="path-to-image1" alt="Project 1 Image">
+                    <h3>Project 1</h3>
+                    <p>Details about Project 1.</p>
+                </a>
             </div>
-            <!-- More cards as needed -->
+            <div class="card">
+                <a href="page2.md">
+                    <img src="path-to-image2" alt="Project 2 Image">
+                    <h3>Project 2</h3>
+                    <p>Details about Project 2.</p>
+                </a>
+            </div>
+            <!-- Add more cards up to page10.md -->
+            <div class="card">
+                <a href="page10.md">
+                    <img src="path-to-image10" alt="Project 10 Image">
+                    <h3>Project 10</h3>
+                    <p>Details about Project 10.</p>
+                </a>
+            </div>
         </section>
 
         <!-- Footer -->
@@ -39,6 +55,6 @@
         </footer>
     </div>
 
-    <script src="script.js"></script>
+    <!-- No JavaScript needed for toggle functionality since the sidebar is permanent -->
 </body>
 </html>
