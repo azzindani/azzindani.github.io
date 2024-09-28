@@ -3,26 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="custome-styles.css">
     <title>{{ page.title }}</title>
-    <link rel="stylesheet" href="custom-style.css">
 </head>
 <body>
-    <!-- Include the sidebar -->
-    {% include sidebar.html %}
-    
-    <!-- Main content area -->
-    <div id="main-content" class="content">
-        <header class="banner">
-            <h1>{{ page.title }}</h1>
-        </header>
-
-        <section class="portfolio">
-            {{ content }}
-        </section>
+    <div id="sidebar" class="sidebar">
+        <h2>Portfolio</h2>
+        <a href="/">Home</a>
+        <a href="/portfolio/page1.html">Page 1</a>
+        <a href="/portfolio/page2.html">Page 2</a>
+        <!-- Add other links as needed -->
     </div>
-    
-    <footer class="footer">
-        <p>&copy; 2024 My Portfolio. All rights reserved.</p>
-    </footer>
+
+    <div id="content" class="content">
+        <header>
+            <h1>Your Name</h1>
+            <p>Your tagline or description.</p>
+        </header>
+        
+        <main>
+            {{ content }}  <!-- This renders the Markdown content -->
+        </main>
+        
+        <footer>
+            <p>&copy; 2024 Your Name. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="/script.js"></script>
 </body>
 </html>
