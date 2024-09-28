@@ -3,36 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <title>Your Portfolio</title>
+    <title>My Portfolio</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="sidebar" class="sidebar">
-        <h2>Portfolio</h2>
-        <!-- Include your sidebar links here -->
-        <a href="#about">About</a>
-        <a href="#contact">Contact</a>
-        <!-- Add other links as needed -->
-    </div>
+    <!-- Sidebar -->
+    <nav id="sidebar" class="sidebar">
+        <button id="toggleSidebar">Toggle</button>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <!-- Sidebar links (Permanent) -->
+        </ul>
+    </nav>
 
-    <div id="content" class="content">
-        <header>
-            <h1>Your Name</h1>
-            <p>Your tagline or description.</p>
+    <!-- Main Content -->
+    <div id="main-content" class="content">
+        <!-- Banner -->
+        <header class="banner">
+            <h1>Welcome to My Portfolio</h1>
         </header>
-        
-        <main>
-            <div class="portfolio-cards">
-                <!-- Example of a portfolio card -->
-                <div class="card">
-                    <h3>Project Title</h3>
-                    <p>Short description of the project.</p>
-                    <a href="portfolio/page1.md">View Project</a>
-                </div>
-                <!-- Repeat for more projects -->
+
+        <!-- Portfolio Cards -->
+        <section class="portfolio">
+            <div class="card">
+                <img src="path-to-image" alt="Project Image">
+                <h3>Project Title</h3>
+                <p>Description of the project.</p>
             </div>
-        </main>
-        
+            <!-- More cards as needed -->
+        </section>
+
+        <!-- Footer -->
         <footer>
             <p>&copy; 2024 Your Name. All rights reserved.</p>
         </footer>
