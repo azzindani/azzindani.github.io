@@ -7,7 +7,7 @@ headline: false
 
 <a id="readme-top"></a>
 
-# Covid-19 Detection
+[HOME](https://azzindani.github.io/)
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -58,26 +58,98 @@ Used tools:
 This project is designed to detect only two categories: `Covid-19 positive` and `Covid-19 negative`.
 
 1. Data Collection
-The dataset utilizing Covid-19 Radiography can be found at this [link](https://www.kaggle.com/datasets/tawsifurrahman/covid19-radiography-database). I have used only 800 images as a sample, comprising 400 images for each category, which is considered sufficient for detecting two object categories.
+   
+   The dataset utilizing Covid-19 Radiography. I have used only 800 images as a sample, comprising 400 images for each category, which is considered sufficient for detecting two object categories.
 
-3. Labelling
-Image labeling using LabelImg in Python involves manually annotating images by drawing bounding boxes around objects of interest and saving the coordinates and class labels in XML.
+2. Labelling
 
-5. Generate Training Records
-TFRecords generation in Python involves converting datasets, such as images and annotations, into a serialized binary format optimized for TensorFlow, enabling efficient data storage and access during model training and evaluation.
+   Image labeling using LabelImg in Python involves manually annotating images by drawing bounding boxes around objects of interest and saving the coordinates and class labels in XML.
 
-7. Training Model using TensorFlow OD API
-- The TensorFlow object detection API was downloaded from this repository: [TensorFlow Models](https://github.com/tensorflow/models/tree/master/research/object_detection).
-- The pre-trained models were downloaded from this repository: [TF2 Detection Model Zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md).
+   <div align="center">
+     <img src="/assets/page2/001.png" alt="Logo" width="1000">
+   </div>
 
-In this section, the dataset was trained to detect 2 categories as an object, and the trained model was saved by following these steps:
+3. Generate Training Records
 
-a. Generate the training command using this code.
-b. Copy and paste the training command into the command prompt, then press enter to start the training process.
-c. Once training is complete, you can check the trained model as shown below. This model can be used to perform various detection tasks.
+   TFRecords generation in Python involves converting datasets, such as images and annotations, into a serialized binary format optimized for TensorFlow, enabling efficient data storage and access during model training and evaluation.
+   ```sh
+   import pathlib
 
-9. Detection Test
-The actual testing will use images different from those used in training. In this step, the code will attempt to detect 1,000 images, generating bounding boxes, labels, and detection scores on the images. You can review the detection results below.
+   MAIN_PATH = str(pathlib.Path().resolve())
+   WORKSPACE_PATH = MAIN_PATH + "\\workspace"
+   SCRIPTS_PATH = MAIN_PATH + "\\scripts"
+   ANNOTATION_PATH = WORKSPACE_PATH + "\\annotations"
+   IMAGE_PATH = WORKSPACE_PATH + "\\images"
+   ```
+
+   ```sh
+   labels = [
+     {'name' : 'covid_19_negative', 'id' : 1},
+     {'name' : 'covid_19_positive', 'id' : 2}
+   ]
+
+   with open(ANNOTATION_PATH + "\label_map.pbtxt", "w") as f:
+       for label in labels:
+           f.write("item { \n")
+           f.write("\tname:\"{}\"\n".format(label["name"]))
+           f.write("\tid:{}\n".format(label["id"]))
+           f.write("}\n")
+   ```
+
+   
+   ```sh
+   !python {SCRIPTS_PATH + "\\generate_tfrecord.py"} -x {IMAGE_PATH + "\\train"} -l {ANNOTATION_PATH + "\\label_map.pbtxt"} -o {ANNOTATION_PATH + "\\train.record"}
+   !python {SCRIPTS_PATH + "\\generate_tfrecord.py"} -x {IMAGE_PATH + "\\test"} -l {ANNOTATION_PATH + "\\label_map.pbtxt"} -o {ANNOTATION_PATH + "\\test.record"}
+   ```
+   
+   <div align="center">
+     <img src="/assets/page2/002.png" alt="Logo" width="1000">
+   </div>
+
+4. Training Model using TensorFlow OD API
+   - The TensorFlow object detection API was downloaded from this repository: [TensorFlow Models](https://github.com/tensorflow/models/tree/master/research/object_detection).
+   - The pre-trained models were downloaded from this repository: [TF2 Detection Model Zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md).
+   
+   In this section, the dataset was trained to detect 2 categories as an object, and the trained model was saved by following these steps:
+   - Generate the training command using this code.
+
+     ```sh
+      APIMODEL_PATH = "\\TensorFlow\\models" # set up your own path
+      WORKSPACE_PATH = MAIN_PATH + "\\workspace"
+      MODEL_PATH =  WORKSPACE_PATH + "\\models"
+      CUSTOM_MODEL_NAME = "my_ssd_mobnet" # used pre-trained model
+      n = 5000
+      ```
+      
+      ```sh
+      print("""python {}\\research\\object_detection\\model_main_tf2.py --model_dir={}\\{} --pipeline_config_path={}\\{}\\pipeline.config --num_train_steps={}""".format(APIMODEL_PATH, MODEL_PATH, CUSTOM_MODEL_NAME, MODEL_PATH, CUSTOM_MODEL_NAME, n))
+      ```
+
+   - Copy and paste the training command into the command prompt, then press enter to start the training process.
+
+     <div align="center">
+       <img src="/assets/page2/003.png" alt="Logo" width="1000">
+     </div>
+      
+   - Training process
+
+     <div align="center">
+       <img src="/assets/page2/004.png" alt="Logo" width="1000">
+     </div>
+     
+   - Once training is complete, you can check the trained model as shown below. This model can be used to perform various detection tasks.
+
+     <div align="center">
+       <img src="/assets/page2/005.png" alt="Logo" width="1000">
+     </div>
+
+5. Detection Test
+
+   The actual testing will use images different from those used in training. In this step, the code will attempt to detect 1,000 images, generating bounding boxes, labels, and detection scores on the images. You can review the detection results below.
+
+   <div align="center">
+     <img src="/assets/page2/006.png" alt="Logo" width="1000">
+   </div>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
