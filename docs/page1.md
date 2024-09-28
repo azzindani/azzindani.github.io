@@ -65,6 +65,7 @@ Used tools:
      <img src="/assets/page1/001.png" alt="Logo" width="1000">
    </div>
 
+
 3. Generate Training Records
 
    TFRecords generation in Python involves converting datasets, such as images and annotations, into a serialized binary format optimized for TensorFlow, enabling efficient data storage and access during model training and evaluation.
@@ -101,6 +102,7 @@ Used tools:
      <img src="/assets/page1/002.png" alt="Logo" width="1000">
    </div>
 
+
 4. Training Model using TensorFlow OD API
 
    - The TensorFlow object detection API was downloaded from this repository: [TensorFlow Models](https://github.com/tensorflow/models/tree/master/research/object_detection).
@@ -127,18 +129,21 @@ Used tools:
       <div align="center">
         <img src="/assets/page1/003.png" alt="Logo" width="1000">
       </div>
+
       
     - Training process
 
       <div align="center">
         <img src="/assets/page1/004.png" alt="Logo" width="1000">
       </div>
+
    
     - Once training is complete, you can check the trained model as shown below. This model can be used to perform various detection tasks.
   
       <div align="center">
         <img src="/assets/page1/005.png" alt="Logo" width="1000">
       </div>
+
 
 5. Detection Test
    
@@ -148,12 +153,14 @@ Used tools:
      <img src="/assets/page1/006.png" alt="Logo" width="1000">
    </div>
 
+
 7. Cropping Test
    This is an image cropping test using the trained model. You can find the results below.
 
    <div align="center">
      <img src="/assets/page1/007.png" alt="Logo" width="1000">
    </div>
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
