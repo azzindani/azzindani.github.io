@@ -6,6 +6,8 @@ description: A site using a custom theme
 theme: minima
 plugins:
   - jekyll-paginate
+paginate: 10
+
 
 #theme: jekyll-theme-cayman
 #include: [sidebar.html]
