@@ -1,4 +1,4 @@
-// Example JavaScript to toggle sidebar visibility (if needed)
-document.getElementById('sidebar').addEventListener('click', function() {
-    // Toggle logic here
+document.getElementById('toggleSidebar').addEventListener('click', function () {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('collapsed');
 });
