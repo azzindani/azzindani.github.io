@@ -7,7 +7,7 @@ headline: false
 
 <a id="readme-top"></a>
 
-# Lungs Abnormalities Detection
+[HOME](https://azzindani.github.io/)
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -57,29 +57,110 @@ Used tools:
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Project Details and Results
-This project is trained to detect lung abnormalities categorized into 14 conditions: `Atelectasis`, `Consolidation`, `Infiltration`, `Pneumothorax`, `Edema`, `Emphysema`, `Fibrosis`, `Effusion`, `Pneumonia`, `Pleural Thickening`, `Cardiomegaly`, `Nodular Mass`, and `Hernia`.
+This project is trained to detect lung abnormalities categorized into 14 conditions: `Atelectasis`, `Infiltration`, `Pneumothorax`, `Effusion`, `Pneumonia`, `Cardiomegaly`, `Nodule`, and `Mass`.
 
 1. Data Collection
-The dataset utilizing NIH Chest X-ray can be found at this [link](https://www.kaggle.com/datasets/nih-chest-xrays/data). I have used only 880 images as a sample, limited to the number labeled by radiologists provided within the dataset.
 
-3. Labelling
-Image labeling is done using the bounding box coordinates provided in this Excel file. I am unable to create further annotations and labels, as this needs to be performed by a qualified radiologist.
+   The dataset utilizing NIH Chest X-ray can be found at this [link](https://www.kaggle.com/datasets/nih-chest-xrays/data). I have used only 880 images as a sample, limited to the number labeled by radiologists provided within the dataset.
 
-5. Generate Training Records
-TFRecords generation in Python involves converting datasets, such as images and annotations, into a serialized binary format optimized for TensorFlow, enabling efficient data storage and access during model training and evaluation.
+2. Labelling
 
-7. Training Model using TensorFlow OD API
-- The TensorFlow object detection API was downloaded from this repository: [TensorFlow Models](https://github.com/tensorflow/models/tree/master/research/object_detection).
-- The pre-trained models were downloaded from this repository: [TF2 Detection Model Zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md).
+   Image labeling is done using the bounding box coordinates provided in this Excel file. I am unable to create further annotations and labels, as this needs to be performed by a qualified radiologist.
 
-In this section, the dataset was trained to detect lungs as an object, and the trained model was saved by following these steps:
+   <div align="center">
+     <img src="/assets/page3/001.png" alt="Logo" width="1000">
+   </div>
 
-a. Generate the training command using this code.
-b. Copy and paste the training command into the command prompt, then press enter to start the training process.
-c. Once training is complete, you can check the trained model as shown below. This model can be used to perform various detection tasks.
+3. Generate Training Records
 
-9. Detection Test
-The actual testing will use images different from those used in training. In this step, the code will attempt to detect 1,000 images, generating bounding boxes, labels, and detection scores on the images. You can review the detection results below.
+   TFRecords generation in Python involves converting datasets, such as images and annotations, into a serialized binary format optimized for TensorFlow, enabling efficient data storage and access during model training and evaluation.
+
+   ```sh
+   import pathlib
+
+   MAIN_PATH = str(pathlib.Path().resolve())
+   WORKSPACE_PATH = MAIN_PATH + "\\workspace"
+   SCRIPTS_PATH = MAIN_PATH + "\\scripts"
+   ANNOTATION_PATH = WORKSPACE_PATH + "\\annotations"
+   IMAGE_PATH = WORKSPACE_PATH + "\\images"
+   TEST_PATH = IMAGE_PATH + "\\test"
+   TRAIN_PATH = IMAGE_PATH + "\\train'"
+   ```
+
+   ```sh
+   labels = [
+       {"name" : "Atelectasis", "id" : 1},
+       {"name" : "Cardiomegaly", "id" : 2},
+       {"name" : "Effusion", "id" : 3},
+       {"name" : "Infiltrate", "id" : 4},
+       {"name" : "Mass", "id" : 5},
+       {"name" : "Nodule", "id" : 6},
+       {"name" : "Pneumonia", "id" : 7},
+       {"name" : "Pneumothorax", "id" : 8}
+   ]
+
+   with open(ANNOTATION_PATH + "\label_map.pbtxt", "w") as f:
+       for label in labels:
+           f.write("item { \n")
+           f.write("\tname:\"{}\"\n".format(label["name"]))
+           f.write("\tid:{}\n".format(label["id"]))
+           f.write("}\n")
+   ```
+
+   
+   ```sh
+   !python {MAIN_PATH + "\\00_Gen_Tfrecord.py"} --csv_input={ANNOTATION_PATH + "\\train_list.csv"} --image_dir={TRAIN_PATH} --output_path={ANNOTATION_PATH + "\\train.record"}
+   !python {MAIN_PATH + "\\00_Gen_Tfrecord.py"} --csv_input={ANNOTATION_PATH + "\\test_list.csv"} --image_dir={TEST_PATH} --output_path={ANNOTATION_PATH + "\\test.record"}
+   ```
+   
+   <div align="center">
+     <img src="/assets/page3/002.png" alt="Logo" width="1000">
+   </div>
+
+4. Training Model using TensorFlow OD API
+   - The TensorFlow object detection API was downloaded from this repository: [TensorFlow Models](https://github.com/tensorflow/models/tree/master/research/object_detection).
+   - The pre-trained models were downloaded from this repository: [TF2 Detection Model Zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md).
+   
+   In this section, the dataset was trained to detect lungs as an object, and the trained model was saved by following these steps:
+   - Generate the training command using this code.
+     
+     ```sh
+      APIMODEL_PATH = "\\TensorFlow\\models" # set up your own path
+      WORKSPACE_PATH = MAIN_PATH + "\\workspace"
+      MODEL_PATH =  WORKSPACE_PATH + "\\models"
+      CUSTOM_MODEL_NAME = "my_ssd_mobnet" # used pre-trained model
+      n = 5000
+      ```
+      
+      ```sh
+      print("""python {}\\research\\object_detection\\model_main_tf2.py --model_dir={}\\{} --pipeline_config_path={}\\{}\\pipeline.config --num_train_steps={}""".format(APIMODEL_PATH, MODEL_PATH, CUSTOM_MODEL_NAME, MODEL_PATH, CUSTOM_MODEL_NAME, n))
+      ```
+   
+    - Copy and paste the training command into the command prompt, then press enter to start the training process.
+      
+      <div align="center">
+        <img src="/assets/page3/003.png" alt="Logo" width="1000">
+      </div>
+     
+   - Training process
+
+     <div align="center">
+       <img src="/assets/page3/004.png" alt="Logo" width="1000">
+     </div>
+     
+   - Once training is complete, you can check the trained model as shown below. This model can be used to perform various detection tasks.
+
+     <div align="center">
+       <img src="/assets/page3/005.png" alt="Logo" width="1000">
+     </div>
+
+5. Detection Test
+
+   The actual testing will use images different from those used in training. In this step, the code will attempt to detect 1,000 images, generating bounding boxes, labels, and detection scores on the images. You can review the detection results below.
+   
+   <div align="center">
+     <img src="/assets/page3/006.png" alt="Logo" width="1000">
+   </div>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
