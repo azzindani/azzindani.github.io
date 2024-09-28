@@ -53,44 +53,139 @@ Used tools:
 
 ## Project Details and Results
 1. Data Collection
-I encountered difficulties in collecting data through Kaggle.com, so I developed a solution by creating an automation bot. This bot, built using the Selenium module, was designed to gather facial images by using celebrity names as keywords. It browses Google Images and downloads the desired number of images (100 per keyword). To speed up the data collection process, I implemented multi-threading, running 10 bots simultaneously, each with different keywords.
 
-For the initial data collection, I used 1,898 celebrity names as keywords, collecting approximately 178,934 image files organized into folders based on the keywords, developed in 2022.
+   I encountered difficulties in collecting data through Kaggle.com, so I developed a solution by creating an automation bot. This bot, built using the Selenium module, was designed to gather facial images by using celebrity names as keywords. It browses Google Images and downloads the desired number of images (100 per keyword). To speed up the data collection process, I implemented multi-threading, running 10 bots simultaneously, each with different keywords.
 
-The latest data collection update was prepared for 10,000 keywords, gathering over 1 million images.
+   For the initial data collection, I used 1,898 celebrity names as keywords, collecting approximately 178,934 image files organized into folders based on the keywords, developed in 2022.
 
-3. Cropping Images
-I cropped all the images using OpenCV with the Haar Cascade method.
+   <div align="center">
+     <img src="/assets/page5/001.png" alt="Logo" width="1000">
+   </div>
+   
+   **The latest data collection update has been prepared for 10,000 keywords, gathering over 1 million images. Currently, more than 500,000 images and over 9,000 keyword folders remain to be processed.**
 
-5. Data Cleaning
-a. At this stage, I had to manually verify whether the collected facial images were correct, as sometimes they included pictures of other people. I needed to remove any faces that did not match the criteria.
-b. In this step, I counted the cropped images to ensure that the samples were filled with heterogeneous images. Each folder of cropped images needed to contain 30 images; once a folder met this requirement, my code would copy the images to another directory.
-c. At this point, I automatically selected folders to be used as samples.
-d. For this step, each folder of images needed to contain 50 sample images. I created code to populate new folders with 50 images. If the source already contained more than 50 images, only 50 images would be copied to the new folder; if the source had fewer than 50 images, images would be duplicated until the new folder contained 50 images.
+   <div align="center">
+     <img src="/assets/page5/002.png" alt="Logo" width="1000">
+   </div>
 
-Currently, I have collected over 1,000 celebrity faces that are ready for model training. I still have more than 4,000 celebrity faces that need to be cleaned and processed.
+2. Cropping Images
 
-7. Data Augmentation
-To increase the quantity of images and obtain more samples, I needed data augmentation to expand the dataset. Here's an example of data augmentation techniques to multiply 50 images in each folder into 500 images per folder.
+   I cropped all the images using OpenCV with the Haar Cascade method.
 
-9. Training Model
-I have rigorously trained multiple times to ensure the capabilities of this deep learning algorithm with varying samples of faces and images.
+   <div align="center">
+     <img src="/assets/page5/003.png" alt="Logo" width="1000">
+     <img src="/assets/page5/004.png" alt="Logo" width="1000">
+   </div>
 
-For instance, I will demonstrate using a dataset of 650 unique faces, each with 240 images, as follows:
+3. Data Cleaning
+   - At this stage, I had to manually verify whether the collected facial images were correct, as sometimes they included pictures of other people. I needed to remove any faces that did not match the criteria.
+  
+     <div align="center">
+       <img src="/assets/page5/005.png" alt="Logo" width="1000">
+     </div>
+     
+   - In this step, I counted the cropped images to ensure that the samples were filled with heterogeneous images. Each folder of cropped images needed to contain 30 images; once a folder met this requirement, my code would copy the images to another directory.
+  
+     <div align="center">
+       <img src="/assets/page5/006.png" alt="Logo" width="1000">
+     </div>
 
-a. I loaded these samples into an array with 96 x 96 pixel dimensions as my input tensor, encompassing 156,000 samples. In this scenario, the input tensor consists of celebrity face images, while the output tensor represents 650 celebrity names.
-b. I utilized 156,000 images as my dataset, partitioning it into 109,200 images for training (70%), 31,200 images for testing (20%), and 15,600 images for validation (10%). The deep learning CNN models will use 26 million trainable parameters.
-c. I set an accuracy threshold of 0.97 or 97% to halt the training process, achieving 52 epochs in the process.
-d. Upon testing with the validation samples, the model achieved an accuracy of 0.97 or 97% .
+   - For this step, each folder of images needed to contain 50 sample images. I created code to populate new folders with 50 images. If the source already contained more than 50 images, only 50 images would be copied to the new folder; if the source had fewer than 50 images, images would be duplicated until the new folder contained 50 images.
+     
+     <div align="center">
+       <img src="/assets/page5/007.png" alt="Logo" width="1000">
+     </div>
+   
+   Currently, I have collected over 1,000 celebrity faces that are ready for model training. I still have more than 4,000 celebrity faces that need to be cleaned and processed.
+   - Samples to be used for training
 
-11. Filter & Feature Map Check
-a. Here are the filters generated by this deep learning model.
-b. Here are the feature maps produced by this deep learning model.
+     <div align="center">
+       <img src="/assets/page5/008.png" alt="Logo" width="1000">
+     </div>
+     
+   - **Remaining dataset for future development**
 
-13. Testing Trained Model
-I created test demonstration images as a benchmark for evaluating the true accuracy of my model.
+     <div align="center">
+       <img src="/assets/page5/009.png" alt="Logo" width="1000">
+     </div>
 
-The results indicate that I achieved authentic face recognition, though not perfectly, as illustrated in the screenshot below. You can observe that the face images serve as the input tensor, while the filenames represent the output tensor from the detection.
+4. Data Augmentation
+
+   To increase the quantity of images and obtain more samples, I needed data augmentation to expand the dataset. Here's an example of data augmentation techniques to multiply 50 images in each folder into 500 images per folder.
+
+   <div align="center">
+     <img src="/assets/page5/010.png" alt="Logo" width="1000">
+   </div>
+
+   The result
+
+   <div align="center">
+     <img src="/assets/page5/011.png" alt="Logo" width="1000">
+     <img src="/assets/page5/012.png" alt="Logo" width="1000">
+   </div>
+
+5. Training Model
+
+   I have rigorously trained multiple times to ensure the capabilities of this deep learning algorithm with varying samples of faces and images.
+
+   <div align="center">
+     <img src="/assets/page5/013.png" alt="Logo" width="1000">
+   </div>
+   
+   For instance, I will demonstrate using a dataset of 1000 unique faces, each with 100 images, as follows:
+   - I loaded these samples into an array with 96 x 96 pixel dimensions as my input tensor, encompassing 100,000 samples. In this scenario, the input tensor consists of celebrity face images, while the output tensor represents 650 celebrity names.
+
+     <div align="center">
+       <img src="/assets/page5/014.png" alt="Logo" width="1000">
+       <img src="/assets/page5/015.png" alt="Logo" width="1000">
+     </div>
+     
+   - I utilized 100,000 images as my dataset, partitioning it into 70,000 images for training (70%), 20,000 images for testing (20%), and 10,000 images for validation (10%). The deep learning CNN models will use 28 million trainable parameters.
+
+     <div align="center">
+       <img src="/assets/page5/016.png" alt="Logo" width="1000">
+     </div>
+     
+   - I set an accuracy threshold of 0.97 or 97% to halt the training process, achieving 231 epochs in the process.
+
+     <div align="center">
+       <img src="/assets/page5/017.png" alt="Logo" width="1000">
+       <img src="/assets/page5/018.png" alt="Logo" width="1000">
+     </div>
+     
+   - Upon testing with the validation samples, the model achieved an accuracy of 0.97 or 97%.
+
+     <div align="center">
+       <img src="/assets/page5/019.png" alt="Logo" width="1000">
+     </div>
+
+6. Filter & Feature Map Check
+   - Here are the filters generated by this deep learning model.
+
+     <div align="center">
+       <img src="/assets/page5/020.png" alt="Logo" width="1000">
+     </div>
+     
+   - Here are the feature maps produced by this deep learning model.
+
+     <div align="center">
+       <img src="/assets/page5/021.png" alt="Logo" width="1000">
+     </div>
+
+7. Testing Trained Model
+
+   I created test demonstration images as a benchmark for evaluating the true accuracy of my model.
+
+   <div align="center">
+     <img src="/assets/page5/022.png" alt="Logo" width="1000">
+   </div>
+
+   The results indicate that I achieved authentic face recognition, though not perfectly, as illustrated in the screenshot below. You can observe that the face images serve as the input tensor, while the filenames represent the output tensor from the detection.
+
+   <div align="center">
+     <img src="/assets/page5/023.png" alt="Logo" width="1000">
+     <img src="/assets/page5/024.png" alt="Logo" width="1000">
+   </div>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
