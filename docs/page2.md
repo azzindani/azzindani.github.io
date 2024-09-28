@@ -151,6 +151,10 @@ This project is designed to detect only two categories: `Covid-19 positive` and 
      <img src="/assets/page2/006.png" alt="Logo" width="1000">
    </div>
 
+   <div align="center">
+     <img src="/assets/page2/007.png" alt="Logo" width="1000">
+   </div>
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Challenges
