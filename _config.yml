@@ -2,6 +2,11 @@
 title: My GitHub Pages Site
 description: A site using a custom theme
 
+
+theme: minima
+plugins:
+  - jekyll-paginate
+
 #theme: jekyll-theme-cayman
 #include: [sidebar.html]
 #remote_theme: pages-themes/cayman@v0.2.0
