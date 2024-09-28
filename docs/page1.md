@@ -60,10 +60,46 @@ Used tools:
 2. Labelling
 
    Image labeling using LabelImg in Python involves manually annotating images by drawing bounding boxes around objects of interest and saving the coordinates and class labels in XML.
+   
+   <div align="center">
+     <img src="/assets/page1/001.png" alt="Logo" width="1000">
+   </div>
 
 3. Generate Training Records
 
    TFRecords generation in Python involves converting datasets, such as images and annotations, into a serialized binary format optimized for TensorFlow, enabling efficient data storage and access during model training and evaluation.
+   ```sh
+   import pathlib
+
+   MAIN_PATH = str(pathlib.Path().resolve())
+   WORKSPACE_PATH = MAIN_PATH + "\\workspace"
+   SCRIPTS_PATH = MAIN_PATH + "\\scripts"
+   ANNOTATION_PATH = WORKSPACE_PATH + "\\annotations"
+   IMAGE_PATH = WORKSPACE_PATH + "\\images"
+   ```
+
+   ```sh
+   labels = [
+       {"name" : "lung", "id" : 1}
+   ]
+
+   with open(ANNOTATION_PATH + "\label_map.pbtxt", "w") as f:
+       for label in labels:
+           f.write("item { \n")
+           f.write("\tname:\"{}\"\n".format(label["name"]))
+           f.write("\tid:{}\n".format(label["id"]))
+           f.write("}\n")
+   ```
+
+   
+   ```sh
+   !python {SCRIPTS_PATH + "\\generate_tfrecord.py"} -x {IMAGE_PATH + "\\train"} -l {ANNOTATION_PATH + "\\label_map.pbtxt"} -o {ANNOTATION_PATH + "\\train.record"}
+   !python {SCRIPTS_PATH + "\\generate_tfrecord.py"} -x {IMAGE_PATH + "\\test"} -l {ANNOTATION_PATH + "\\label_map.pbtxt"} -o {ANNOTATION_PATH + "\\test.record"}
+   ```
+   
+   <div align="center">
+     <img src="/assets/page1/002.png" alt="Logo" width="1000">
+   </div>
 
 4. Training Model using TensorFlow OD API
 
@@ -72,17 +108,100 @@ Used tools:
 
    In this section, the dataset was trained to detect lungs as an object, and the trained model was saved by following these steps:
 
-    a. Generate the training command using this code.
+    - Generate the training command using this code.
+      
+      ```sh
+      APIMODEL_PATH = "\\TensorFlow\\models" # set up your own path
+      WORKSPACE_PATH = MAIN_PATH + "\\workspace"
+      MODEL_PATH =  WORKSPACE_PATH + "\\models"
+      CUSTOM_MODEL_NAME = "my_ssd_mobnet" # used pre-trained model
+      n = 5000
+      ```
+      
+      ```sh
+      print("""python {}\\research\\object_detection\\model_main_tf2.py --model_dir={}\\{} --pipeline_config_path={}\\{}\\pipeline.config --num_train_steps={}""".format(APIMODEL_PATH, MODEL_PATH, CUSTOM_MODEL_NAME, MODEL_PATH, CUSTOM_MODEL_NAME, n))
+      ```
    
-    b. Copy and paste the training command into the command prompt, then press enter to start the training process.
+    - Copy and paste the training command into the command prompt, then press enter to start the training process.
+      
+      <div align="center">
+        <img src="/assets/page1/003.png" alt="Logo" width="1000">
+      </div>
+      
+    - Training process
+
+      <div align="center">
+        <img src="/assets/page1/004.png" alt="Logo" width="1000">
+      </div>
    
-    c. Once training is complete, you can check the trained model as shown below. This model can be used to perform various detection tasks.
+    - Once training is complete, you can check the trained model as shown below. This model can be used to perform various detection tasks.
+  
+      <div align="center">
+        <img src="/assets/page1/005.png" alt="Logo" width="1000">
+      </div>
 
-9. Detection Test
-The actual testing will use images different from those used in training. In this step, the code will attempt to detect 1,000 images, generating bounding boxes, labels, and detection scores on the images. You can review the detection results below.
+5. Detection Test
+   
+   The actual testing will use images different from those used in training. In this step, the code will attempt to detect 1,000 images, generating bounding boxes, labels, and detection scores on the images. You can review the detection results below.
+   
+   <div align="center">
+     <img src="/assets/page1/006.png" alt="Logo" width="1000">
+   </div>
 
-11. Cropping Test
-This is an image cropping test using the trained model. You can find the results below.
+   <div class="slider">
+     <div class="slides">
+       <div class="slide"><img src="https://via.placeholder.com/600x300?text=Slide+1" alt="Slide 1"></div>
+       <div class="slide"><img src="https://via.placeholder.com/600x300?text=Slide+2" alt="Slide 2"></div>
+       <div class="slide"><img src="https://via.placeholder.com/600x300?text=Slide+3" alt="Slide 3"></div>
+     </div>
+   </div>
+   
+   <style>
+     .slider {
+       width: 100%;
+       max-width: 600px;
+       position: relative;
+       margin: auto;
+     }
+     
+     .slides {
+       display: flex;
+       overflow: hidden;
+       width: 300%;
+       animation: slide 10s infinite;
+     }
+     
+     .slide {
+       width: 100%;
+       transition: transform 0.5s ease-in-out;
+     }
+     
+     .slide img {
+       width: 100%;
+     }
+     
+     @keyframes slide {
+       0% {
+         transform: translateX(0%);
+       }
+       33% {
+         transform: translateX(-100%);
+       }
+       66% {
+         transform: translateX(-200%);
+       }
+       100% {
+         transform: translateX(0%);
+       }
+     }
+   </style>
+
+7. Cropping Test
+   This is an image cropping test using the trained model. You can find the results below.
+
+   <div align="center">
+     <img src="/assets/page1/007.png" alt="Logo" width="1000">
+   </div>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
