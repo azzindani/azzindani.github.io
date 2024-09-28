@@ -148,54 +148,6 @@ Used tools:
      <img src="/assets/page1/006.png" alt="Logo" width="1000">
    </div>
 
-   <div class="slider">
-     <div class="slides">
-       <div class="slide"><img src="https://via.placeholder.com/600x300?text=Slide+1" alt="Slide 1"></div>
-       <div class="slide"><img src="https://via.placeholder.com/600x300?text=Slide+2" alt="Slide 2"></div>
-       <div class="slide"><img src="https://via.placeholder.com/600x300?text=Slide+3" alt="Slide 3"></div>
-     </div>
-   </div>
-   
-   <style>
-     .slider {
-       width: 100%;
-       max-width: 600px;
-       position: relative;
-       margin: auto;
-     }
-     
-     .slides {
-       display: flex;
-       overflow: hidden;
-       width: 300%;
-       animation: slide 10s infinite;
-     }
-     
-     .slide {
-       width: 100%;
-       transition: transform 0.5s ease-in-out;
-     }
-     
-     .slide img {
-       width: 100%;
-     }
-     
-     @keyframes slide {
-       0% {
-         transform: translateX(0%);
-       }
-       33% {
-         transform: translateX(-100%);
-       }
-       66% {
-         transform: translateX(-200%);
-       }
-       100% {
-         transform: translateX(0%);
-       }
-     }
-   </style>
-
 7. Cropping Test
    This is an image cropping test using the trained model. You can find the results below.
 
