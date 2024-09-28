@@ -84,8 +84,8 @@ This project is designed to detect only two categories: `Covid-19 positive` and 
 
    ```sh
    labels = [
-     {'name' : 'covid_19_negative', 'id' : 1},
-     {'name' : 'covid_19_positive', 'id' : 2}
+     {"name" : "covid_19_negative", "id" : 1},
+     {"name" : "covid_19_positive", "id" : 2}
    ]
 
    with open(ANNOTATION_PATH + "\label_map.pbtxt", "w") as f:
