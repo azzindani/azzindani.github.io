@@ -41,6 +41,10 @@ Accessing financial data from stock exchange databases can be time-consuming and
 ## Workflow
 Below is the workflow on how my project works
 
+<div align="center">
+  <img src="/assets/page6/000.png" alt="Logo" width="1000">
+</div>
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Solution and Technology Stack
