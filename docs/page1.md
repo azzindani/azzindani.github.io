@@ -41,6 +41,10 @@ Moreover, this project is not only a step toward Covid-19 detection but also a p
 ## Workflow
 Below is the workflow on how my project works
 
+<div align="center">
+  <img src="/assets/page1/000.png" alt="Logo" width="1000">
+</div>
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Solution and Technology Stack
