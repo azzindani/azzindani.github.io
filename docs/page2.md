@@ -43,6 +43,10 @@ Such advancements can not only alleviate the burden on healthcare systems but al
 ## Workflow
 Below is the workflow on how my project works
 
+<div align="center">
+  <img src="/assets/page2/000.png" alt="Logo" width="1000">
+</div>
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Solution and Technology Stack
