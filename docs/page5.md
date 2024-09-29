@@ -7,7 +7,7 @@ headline: false
 
 <a id="readme-top"></a>
 
-# Facial Recognition - Large Version
+[HOME](https://azzindani.github.io/)
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -36,6 +36,9 @@ The project's objective is to develop a robust facial recognition model that can
 This facial recognition project is inspired by the remarkable capabilities of the human eye and brain, which can effortlessly detect and recognize multiple objects and faces simultaneously. Research indicates that the human brain can recognize an average of 5,000 faces and remember up to 10,000 faces. Leveraging this understanding, the project aims to harness the transformative potential of facial recognition technology to revolutionize various industries.
 
 Traditional facial recognition methods often face challenges with scalability and accuracy when dealing with large datasets. By integrating rapid advancements in deep learning, this project seeks to develop a robust system capable of accurately handling and identifying thousands of faces.
+
+**Project Reference**
+- [Facial Recognition - Small Version](https://azzindani.github.io/docs/page4.html)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
