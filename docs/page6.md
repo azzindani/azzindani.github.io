@@ -7,7 +7,7 @@ headline: false
 
 <a id="readme-top"></a>
 
-# Financial Statement Web Scraping
+[HOME](https://azzindani.github.io/)
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -52,12 +52,52 @@ Used tools:
 
 ## Project Details and Results
 1. Data Collection Automation
-a. When I first developed this bot, I started with a single instance, facing the challenge of slow data mining. The bot performed a series of tasks, including launching Chromedriver, navigating to the website (https://www.idx.co.id/id/perusahaan-tercatat/laporan-keuangan-dan-tahunan), entering keywords into the search tab, selecting the year and quarter, clicking “search”/“apply,” downloading files, and saving them in a temporary directory. The final step involved renaming the file from the temporary path and moving it to a new location with an organized folder structure.
-b. In the second approach, I created a multi-threaded bot capable of generating 10 bots simultaneously, each handling a different task. This setup allowed me to gather over 10,000 files annually, significantly enhancing efficiency and productivity.
-c. As you may know, the website only provides data from the last 5 years. However, I was fortunate to extract financial reports dating back to 2015 by employing an HTML injection script. Unfortunately, this method is no longer feasible.
+   
+   - When I first developed this bot, I started with a single instance, facing the challenge of slow data mining. The bot performed a series of tasks, including launching Chromedriver, navigating to the website (https://www.idx.co.id/id/perusahaan-tercatat/laporan-keuangan-dan-tahunan), entering keywords into the search tab, selecting the year and quarter, clicking “search”/“apply,” downloading files, and saving them in a temporary directory. The final step involved renaming the file from the temporary path and moving it to a new location with an organized folder structure.
+     - Below is the website preview
+       
+       <div align="center">
+         <img src="/assets/page6/001.png" alt="Logo" width="1000">
+       </div>
+       
+     - Single bot
+       
+       <div align="center">
+         <img src="/assets/page6/002.png" alt="Logo" width="1000">
+       </div>
+       
+     - Results
+       
+       <div align="center">
+         <img src="/assets/page6/003.png" alt="Logo" width="1000">
+         <img src="/assets/page6/004.png" alt="Logo" width="1000">
+       </div>
+       
+   - In the second approach, I created a multi-threaded bot capable of generating 10 bots simultaneously, each handling a different task. This setup allowed me to gather over 10,000 files annually, significantly enhancing efficiency and productivity.
+     - Multi-threaded bot
+       
+       <div align="center">
+         <img src="/assets/page6/005.png" alt="Logo" width="1000">
+       </div>
+       
+     - Results
+       
+       <div align="center">
+         <img src="/assets/page6/006.png" alt="Logo" width="1000">
+       </div>
+     
+   - As you may know, the website only provides data from the last 5 years. However, I was fortunate to extract financial reports dating back to 2015 by employing an HTML injection script. Unfortunately, this method is no longer feasible.
 
-3. Files Check
-After downloading all the financial report documents, I need to verify the bot's performance to ensure completeness and accuracy.
+     <div align="center">
+       <img src="/assets/page6/007.png" alt="Logo" width="1000">
+     </div>
+
+2. Files Check
+   After downloading all the financial report documents, I need to verify the bot's performance to ensure completeness and accuracy.
+   
+   <div align="center">
+     <img src="/assets/page6/008.png" alt="Logo" width="1000">
+   </div>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
