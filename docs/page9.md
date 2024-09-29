@@ -49,26 +49,53 @@ Used tools:
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Project Details and Results
-1. Data Preparation
-In this section, I focus on transforming raw data into numerical data, enabling effective calculations and analysis.
+1. Data Transformation
+   In this section, I focus on transforming raw data into numerical data, enabling effective calculations and analysis.
+   - Transform data to new format, by leveraging 
+   
+     <div align="center">
+       <img src="/assets/page9/002.png" alt="Logo" width="1000">
+     </div>
+     
+   - Result example
+     
+     <div align="center">
+       <img src="/assets/page9/002.png" alt="Logo" width="1000">
+     </div>
 
-3. Broker Data Transformation
-In this section, I perform data transformation based on broker transaction activities, allowing me to identify which stocks capture each broker's interest.
-a. The first step involves extracting each transaction's data and saving it as a CSV file. The data will be divided into two main categories: buy transactions and sell transactions.
-b. The second step is to combine all this data into time series data for each ticker, categorized by broker.
-c. The final step is to merge all these ticker data into a comprehensive time series of broker transactions.
+   - Merging all dataset, from daily dataset to ticker dataset
+     
+     <div align="center">
+       <img src="/assets/page9/003.png" alt="Logo" width="1000">
+     </div>
 
-5. Ticker Data Transformation
-In this section, I perform data transformation based on ticker codes/stocks, allowing me to see which brokers show interest in each stock.
-a. The first step involves extracting each transaction's data and saving it as a CSV file. The data will be divided into two main categories: buy transactions and sell transactions.
-b. The second step is to combine all this data into time series data for each ticker, categorized by broker.
-c. The final step is to merge all these ticker data frames into a comprehensive time series data frame of broker transactions.
+2. Setup SQL Server
+   In this section, I perform setup to create and upload all dataset to SQL server
+   - Creating SQL server
+     
+     <div align="center">
+       <img src="/assets/page9/004.png" alt="Logo" width="1000">
+     </div
+       
+   - Uploading dataset to SQL server
+     
+     <div align="center">
+       <img src="/assets/page9/005.png" alt="Logo" width="1000">
+     </div>
+     
+   - Result and preview
+     
+     <div align="center">
+       <img src="/assets/page9/006.png" alt="Logo" width="1000">
+       <img src="/assets/page9/007.png" alt="Logo" width="1000">
+     </div>
 
-7. Data Analyzer
-This section will perform selection and quick calculations for broker transaction data and ticker transaction data.
-
-9. Data Visualization
-Untuk saat ini saya hanya menggunakan excel untuk melakukan visualisasi data dengan memasukkan grafik.
+3. Data Visualization
+   For now, I am only using Plotly and Streamlit to create simple data visualizations.\
+   
+   <div align="center">
+     <img src="/assets/page9/008.png" alt="Logo" width="1000">
+   </div>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
