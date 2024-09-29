@@ -37,6 +37,14 @@ The need of continuous updates and improvements.
 ## Workflow
 Below is the workflow on how my project works
 
+**Project Reference**
+- [Broker Transaction Data Scraping](https://azzindani.github.io/docs/page8.html)
+- [Broker Transaction Data Analysis](https://azzindani.github.io/docs/page9.html)
+
+<div align="center">
+  <img src="/assets/page10/000.png" alt="Logo" width="1000">
+</div>
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Solution and Technology Stack
