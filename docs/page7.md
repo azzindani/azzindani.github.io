@@ -7,7 +7,7 @@ headline: false
 
 <a id="readme-top"></a>
 
-# Financial Statement Excel Web Scraping
+[HOME](https://azzindani.github.io/)
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -52,20 +52,67 @@ Used tools:
 
 ## Project Details and Results
 1. Data Collection Automation
-At this stage, I am utilizing a multi-threaded bot directly, with tasks differing from the previous bot, which involves a more complex download script. This approach allows me to save time while collecting over 2,500 Excel files from all publicly listed companies in Indonesia.
+   
+   This project is a simplification of a previous one, where I only download Excel files from websites. The reason I focus on collecting Excel files is that I need raw data for conducting data analysis. While several websites like Yahoo Finance, Investing.com, and others already provide financial data for companies, their offerings are limited and the data is pre-cleaned.
 
-The bot performs the following tasks: it opens Chromedriver, navigates to the website (https://www.idx.co.id/id/perusahaan-tercatat/laporan-keuangan-dan-tahunan), enters keywords into the search tab, selects the year and quarter, clicks “search”/“apply,” downloads the Excel files, and saves them in a temporary directory. The final step involves renaming the files from the temporary path and moving them to a new location with an organized folder structure.
+   <div align="center">
+     <img src="/assets/page7/001.png" alt="Logo" width="1000">
+   </div>
 
-3. Files Check
-After downloading all the Excel financial reports, I need to verify the completeness of the bot's work. Fortunately, I was able to collect financial reports dating back to 2015 using an HTML injection script. However, this method is no longer applicable at this time.
+   At this stage, I am utilizing a multi-threaded bot directly, with tasks differing from the previous bot, which involves a more complex download script. This approach allows me to save time while collecting over 2,500 Excel files from all publicly listed companies in Indonesia.
+   
+   <div align="center">
+     <img src="/assets/page7/002.png" alt="Logo" width="1000">
+   </div>
 
-5. Data Transformation
-a. The first data transformation involves extracting tabular data into multiple files.
-b. The second step is to convert these files into numerical data, enabling analysis when the files are merged.
-c. The final step is to combine the data, and here is an example of the results.
+   The bot performs the following tasks: it opens Chromedriver, navigates to the website (https://www.idx.co.id/id/perusahaan-tercatat/laporan-keuangan-dan-tahunan), enters keywords into the search tab, selects the year and quarter, clicks “search”/“apply,” downloads the Excel files, and saves them in a temporary directory. The final step involves renaming the files from the temporary path and moving them to a new location with an organized folder structure.
+   
+   <div align="center">
+     <img src="/assets/page7/003.png" alt="Logo" width="1000">
+   </div>
 
-7. Analytic & Visualization
-Currently, data analysis requires accounting methodologies, which will be available once I complete my studies in accounting. As for data visualization, it is still in development; for now, we can use Microsoft Excel to create charts and other visual representations.
+2. Files Check
+
+   After downloading all the Excel financial reports, I need to verify the completeness of the bot's work. Fortunately, I was able to collect financial reports dating back to 2015 using an HTML injection script. However, this method is no longer applicable at this time.
+   
+   <div align="center">
+     <img src="/assets/page7/004.png" alt="Logo" width="1000">
+   </div>
+
+3. Data Transformation
+   - The first data transformation involves extracting tabular data into multiple files.
+     - Process
+       
+       <div align="center">
+         <img src="/assets/page7/005.png" alt="Logo" width="1000">
+       </div>
+       
+     - Results
+
+       <div align="center">
+         <img src="/assets/page7/006.png" alt="Logo" width="1000">
+       </div>
+     
+   - The second step is to convert these files into numerical data, enabling analysis when the files are merged.
+
+     <div align="center">
+       <img src="/assets/page7/007.png" alt="Logo" width="1000">
+     </div>
+     
+   - The final step is to combine the data, and here is an example of the results.
+     
+     <div align="center">
+       <img src="/assets/page7/008.png" alt="Logo" width="1000">
+     </div>
+
+4. Analytic & Visualization
+
+   Currently, data analysis requires accounting methodologies, which will be available once I complete my studies in accounting. As for data visualization, it is still in development; for now, we can use Microsoft Excel to create charts and other visual representations.
+   
+   <div align="center">
+     <img src="/assets/page7/009.png" alt="Logo" width="1000">
+     <img src="/assets/page7/010.png" alt="Logo" width="1000">
+   </div>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
