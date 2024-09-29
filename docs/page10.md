@@ -7,7 +7,7 @@ headline: false
 
 <a id="readme-top"></a>
 
-# Broker Transaction Automation System
+[HOME](https://azzindani.github.io/)
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -48,16 +48,66 @@ Used tools:
 
 ## Project Details and Results
 1. Data Collection
-The data collection program, developed with 10 integrated bots, automatically updates ticker data, checks for data completeness, and re-collects incomplete data. The program can be scheduled to run on specific dates, weekly updates, or daily updates. Currently, I am using only 5 bots to reduce the workload on my computer. These bots are capable of collecting data for over 900 companies in just 50 minutes each day.
+   The data collection program, developed with 10 integrated bots, automatically updates ticker data, checks for data completeness, and re-collects incomplete data. The program can be scheduled to run on specific dates, weekly updates, or daily updates. Currently, I am using only 5 bots to reduce the workload on my computer. These bots are capable of collecting data for over 900 companies in just 50 minutes each day.
+   - Collection process
+     
+     <div align="center">
+       <img src="/assets/page10/001.png" alt="Logo" width="1000">
+       <img src="/assets/page10/002.png" alt="Logo" width="1000">
+       <img src="/assets/page10/003.png" alt="Logo" width="1000">
+     </div>
+     
+   - Completion check
+     
+     <div align="center">
+       <img src="/assets/page10/004.png" alt="Logo" width="1000">
+     </div>
+     
+   - Recollection process
+     
+     <div align="center">
+       <img src="/assets/page10/005.png" alt="Logo" width="1000">
+     </div>
 
-3. Data Process
-In this step, the program will execute the ETL process (Extract, Transform, Load), including backing up raw data. The process involves extracting information from raw data, transforming it into numerical data, reformatting the data frame, merging all data, then uploading it to my SQL server, and followed by backing up the raw data.
+2. Data Process
+   In this step, the program will execute the ETL process (Extract, Transform, Load), including backing up raw data. The process involves extracting information from raw data, transforming it into numerical data, reformatting the data frame, merging all data, then uploading it to my SQL server, and followed by backing up the raw data.
+   - Data conversion by leveraging multiprocessing
+     
+     <div align="center">
+       <img src="/assets/page10/006.png" alt="Logo" width="1000">
+     </div>
+     
+   - Uploading dataset to SQL server
+     
+     <div align="center">
+       <img src="/assets/page10/007.png" alt="Logo" width="1000">
+     </div>
+     
+   - Result & preview
+     
+     <div align="center">
+       <img src="/assets/page10/008.png" alt="Logo" width="1000">
+     </div>
+     
+   - Back up dataset as raw files
+     
+     <div align="center">
+       <img src="/assets/page10/009.png" alt="Logo" width="1000">
+     </div>
 
-2. Data Visualization
-Data visualization is created using Plotly and Streamlit for interactive dashboards, capable of querying datasets from the SQL server, processing calculations based on predefined functions, and then visualizing the data.
+3. Data Visualization
+   Data visualization is created using Plotly and Streamlit for interactive dashboards, capable of querying datasets from the SQL server, processing calculations based on predefined functions, and then visualizing the data.
+   
+   <div align="center">
+     <img src="/assets/page10/010.png" alt="Logo" width="1000">
+     <img src="/assets/page10/011.png" alt="Logo" width="1000">
+     <img src="/assets/page10/012.png" alt="Logo" width="1000">
+     <img src="/assets/page10/013.png" alt="Logo" width="1000">
+   </div>
 
-Notes:
-This project has the potential to be developed into a fully automated system by deploying the program to a hosting server that operates 24/7. However, at the moment, I don't have the necessary equipment to build a server for running the bots and hosting the interactive dashboard as a web application.
+**Notes:**
+
+**This project has the potential to be developed into a fully automated system by deploying the program to a hosting server that operates 24/7. However, at the moment, I don't have the necessary equipment to build a server for running the bots and hosting the interactive dashboard as a web application.**
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
