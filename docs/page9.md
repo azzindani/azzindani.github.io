@@ -39,6 +39,10 @@ With the successfully collected broker transaction data from various exchanges, 
 ## Workflow
 Below is the workflow on how my project works
 
+<div align="center">
+  <img src="/assets/page9/000.png" alt="Logo" width="1000">
+</div>
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Solution and Technology Stack
