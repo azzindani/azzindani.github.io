@@ -7,7 +7,7 @@ headline: false
 
 <a id="readme-top"></a>
 
-# Broker Transaction Data Scraping
+[HOME](https://azzindani.github.io/)
 
 <!-- TABLE OF CONTENTS -->
 <details>
@@ -34,6 +34,10 @@ The goal of this project is to build a scalable web scraping system capable of a
 ## Motivation and Inspiration
 I have experience investing in the Indonesian stock market. One of the main challenges in trading and investing in this market is that predicting stock prices cannot be solely based on technical or fundamental analysis. To address this issue, I sought out alternative methods and came across a book titled Bandarmology by Ryan Filbert. This book introduced me to a unique investment approach known as bandarmology—which translates to brokermology in English. This method involves observing broker transactions (buy/sell) for specific stocks, offering a different perspective on the stock market. Brokers can represent any segment of investors, such as local or foreign, retail investors or hedge funds.
 
+<div align="center">
+  <img src="/assets/page8/001.png" alt="Logo" width="1000">
+</div>
+
 Simultaneously, I realized the importance of learning how to gather large datasets from the internet. Broker transaction data is one of the few datasets shared publicly for transparency. However, collecting this data manually from the stock exchange can be inefficient, time-consuming, and exhausting, as it is presented in HTML tables instead of exportable files. The inspiration behind this project stemmed from the need to automate the process of collecting broker transaction data, providing a comprehensive and efficient way to track and analyze broker activities. By making this data more accessible, the project aims to support more informed investment decisions and market analysis.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -52,27 +56,76 @@ Used tools:
 
 ## Project Details and Results
 1. Data Collection Automation
-There is a platform that provides daily broker transaction data, which I use for data mining. Previously, I employed a multi-threaded bot setup with 20 bots running simultaneously to gather data. However, due to platform limitations and website designe changes, I currently use a 10 bots for data extraction. While I won't be sharing screenshots of my code for various reasons, I am happy to showcase the results. The primary goal of this bot is to collect and extract tabular transaction data from HTML and save it as CSV files.
+   There is a platform that provides daily broker transaction data, which I use for data mining. Previously, I employed a multi-threaded bot setup with 20 bots running simultaneously to gather data. However, due to platform limitations and website designe changes, I currently use a 10 bots for data extraction. While I won't be sharing screenshots of my code for various reasons, I am happy to showcase the results. The primary goal of this bot is to collect and extract tabular transaction data from HTML and save it as CSV files.
 
-To date, I have gathered approximately 1 million plus of CSV files using my bot, which has been mining transaction data since 2017.
+   <div align="center">
+     <img src="/assets/page8/002.png" alt="Logo" width="1000">
+   </div>
 
-3. Collected Data Check
-a. Identifying Missing Files: Locating any files that were not downloaded successfully.
-b. Verifying File Content: Checking whether the CSV files contain transaction data, as there are instances where my bot fails to write data correctly (possibly due to an error).
-c. Detecting Empty Files: Identifying empty CSV files by inspecting their file sizes.
+   To date, I have gathered approximately 1 million plus of CSV files using my bot, which has been mining transaction data since 2017.
+   
+   <div align="center">
+     <img src="/assets/page8/003.png" alt="Logo" width="1000">
+   </div>
 
-5. Data Validation
-a. Collect Original Summary Data: Retrieve the original summary data from my broker platform for comparison.
-b. Summarize Daily Transaction Data: Aggregate all daily transaction data through an extensive calculation process.
-c. Identify Data Discrepancies: Compare the summary data to identify and correct any data errors.
+2. Completion Data Check
+   - Identifying Missing Files: Locating any files that were not downloaded successfully.
+     
+     <div align="center">
+       <img src="/assets/page8/004.png" alt="Logo" width="1000">
+     </div>
+     
+   - Verifying File Content: Checking whether the CSV files contain transaction data, as there are instances where my bot fails to write data correctly (possibly due to an error).
+     
+     <div align="center">
+       <img src="/assets/page8/005.png" alt="Logo" width="1000">
+     </div>
+     
+   - Detecting Empty Files: Identifying empty CSV files by inspecting their file sizes.
+     
+     <div align="center">
+       <img src="/assets/page8/006.png" alt="Logo" width="1000">
+     </div>
 
-7. Recollecting Data to be Revised
-a. Manual Data Analysis: Manually analyze the compared transaction summary data in Excel, using it as a reference for refining the bot.
-b. Re-running the Bot: Run the bot to re-collect data, where it will scan for files smaller than 40 bytes and automate the re-download process.
-c. Iterative Refinement: Repeat this process, comparing results each time to minimize data discrepancies and achieve the lowest margin of error.
+3. Data Validation
+   - Collect Original Summary Data: Retrieve the original summary data from my broker platform for comparison.
+     
+     <div align="center">
+       <img src="/assets/page8/007.png" alt="Logo" width="1000">
+     </div>
+     
+   - Summarize Daily Transaction Data: Aggregate all daily transaction data through an extensive calculation process.
+     
+     <div align="center">
+       <img src="/assets/page8/008.png" alt="Logo" width="1000">
+     </div>
+     
+   - Identify Data Discrepancies: Compare the summary data to identify and correct any data errors.
+     
+     <div align="center">
+       <img src="/assets/page8/009.png" alt="Logo" width="1000">
+       <img src="/assets/page8/010.png" alt="Logo" width="1000">
+     </div>
 
-9. Updating Data
-Daily Data Updates: Update data daily using the bot. Currently, the estimated time required for the daily update process is around 400 minutes.
+4. Recollecting Data to be Revised
+   - Manual Data Analysis: Manually analyze the compared transaction summary data in Excel, using it as a reference for refining the bot.
+     
+     <div align="center">
+       <img src="/assets/page8/011.png" alt="Logo" width="1000">
+     </div>
+     
+   - Re-running the Bot: Run the bot to re-collect data, where it will scan for files smaller than 40 bytes and automate the re-download process.
+     
+     <div align="center">
+       <img src="/assets/page8/012.png" alt="Logo" width="1000">
+       <img src="/assets/page8/013.png" alt="Logo" width="1000">
+     </div>
+     
+   - Iterative Refinement: Repeat this process, comparing results each time to minimize data discrepancies and achieve the lowest margin of error.
+
+     <div align="center">
+       <img src="/assets/page8/014.png" alt="Logo" width="1000">
+     </div>
 
 ## Challenges
 1. **Data Volume and Frequency:** Broker transactions are vast and frequent, posing challenges in efficiently collecting, processing, and storing large volumes of data.
