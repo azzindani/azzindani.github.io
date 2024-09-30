@@ -47,19 +47,19 @@ Below is the workflow on how my project works
 <br>
 
 1. Problem Definition
-   - Clearly define the problem that needs to be solved.<br>
+   - Clearly define the problem that needs to be solved.<br><br>
 
 2. Finding Solution
    - List all potential solutions and select one for implementation.
-   - Develop a plan that outlines the expected outcomes.<br>
+   - Develop a plan that outlines the expected outcomes.<br><br>
      
 3. Data Collection
    - Gather and prepare relevant datasets aligned with the problem.  
    - If batch datasets are unavailable, develop a data collection process like web scraping.  
-   - Ensure data quality and resolve any data issues.<br>
+   - Ensure data quality and resolve any data issues.<br><br>
 
 4. Continuous Updates
-   - Regularly update the dataset or as needed.<br>
+   - Regularly update the dataset or as needed.<br><br>
 
 5. Evaluation & Improvement
    - Evaluate inputs, processes, outputs, and outcomes.  
