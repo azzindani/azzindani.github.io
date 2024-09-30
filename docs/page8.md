@@ -60,6 +60,7 @@ Used tools:
 
 ## Project Details and Results
 1. Data Collection Automation
+
    There is a platform that provides daily broker transaction data, which I use for data mining. Previously, I employed a multi-threaded bot setup with 20 bots running simultaneously to gather data. However, due to platform limitations and website designe changes, I currently use a 10 bots for data extraction. While I won't be sharing screenshots of my code for various reasons, I am happy to showcase the results. The primary goal of this bot is to collect and extract tabular transaction data from HTML and save it as CSV files.
 
    <div align="center">
@@ -72,7 +73,7 @@ Used tools:
      <img src="/assets/page8/003.png" alt="Logo" width="1000">
    </div>
 
-2. Completion Data Check
+3. Completion Data Check
    - Identifying Missing Files: Locating any files that were not downloaded successfully.
      
      <div align="center">
@@ -91,7 +92,7 @@ Used tools:
        <img src="/assets/page8/006.png" alt="Logo" width="1000">
      </div>
 
-3. Data Validation
+4. Data Validation
    - Collect Original Summary Data: Retrieve the original summary data from my broker platform for comparison.
      
      <div align="center">
@@ -111,7 +112,7 @@ Used tools:
        <img src="/assets/page8/010.png" alt="Logo" width="1000">
      </div>
 
-4. Recollecting Data to be Revised
+5. Recollecting Data to be Revised
    - Manual Data Analysis: Manually analyze the compared transaction summary data in Excel, using it as a reference for refining the bot.
      
      <div align="center">
