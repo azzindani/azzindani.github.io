@@ -44,6 +44,7 @@ Below is the workflow on how my project works
 <div align="center">
   <img src="/assets/page1/000.png" alt="Logo" width="1000">
 </div>
+<br><br>
 
 1. Problem Definition
    - Clearly define the problem that needs to be solved.<br><br>
@@ -79,7 +80,7 @@ Below is the workflow on how my project works
 Used tools:
 1. TensorFlow Object Detection API
 2. Pretrained Model
-3. Python library : TensorFlow, Open CV, Scikit-Learn, Numpy, LabelImg
+3. Python library : ![TensorFlow](https://img.shields.io/badge/TensorFlow-%23FF6F00.svg?style=for-the-badge&logo=TensorFlow&logoColor=white) ![OpenCV](https://img.shields.io/badge/OpenCV-5C3EE8.svg?style=for-the-badge&logo=opencv&logoColor=white) ![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white) ![NumPy](https://img.shields.io/badge/numpy-%23013243.svg?style=for-the-badge&logo=numpy&logoColor=white) ![labelImg](https://img.shields.io/badge/labelImg-FF8800.svg?style=for-the-badge&logo=labelimg&logoColor=white)
 4. Hardware : Laptop Acer Predator Helios 300, Intel-12700H, 48 GB Ram, Gen4 SSD, RTX3070Ti Laptop GPU, 8 GB Vram
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -96,7 +97,7 @@ Used tools:
    <div align="center">
      <img src="/assets/page1/001.png" alt="Logo" width="1000">
    </div>
-
+   <br><br>
 
 3. Generate Training Records
 
@@ -129,11 +130,13 @@ Used tools:
    !python {SCRIPTS_PATH + "\\generate_tfrecord.py"} -x {IMAGE_PATH + "\\train"} -l {ANNOTATION_PATH + "\\label_map.pbtxt"} -o {ANNOTATION_PATH + "\\train.record"}
    !python {SCRIPTS_PATH + "\\generate_tfrecord.py"} -x {IMAGE_PATH + "\\test"} -l {ANNOTATION_PATH + "\\label_map.pbtxt"} -o {ANNOTATION_PATH + "\\test.record"}
    ```
+
+   <br><br>
    
    <div align="center">
      <img src="/assets/page1/002.png" alt="Logo" width="1000">
    </div>
-
+   <br><br>
 
 4. Training Model using TensorFlow OD API
 
@@ -155,27 +158,28 @@ Used tools:
       ```sh
       print("""python {}\\research\\object_detection\\model_main_tf2.py --model_dir={}\\{} --pipeline_config_path={}\\{}\\pipeline.config --num_train_steps={}""".format(APIMODEL_PATH, MODEL_PATH, CUSTOM_MODEL_NAME, MODEL_PATH, CUSTOM_MODEL_NAME, n))
       ```
+      <br><br>
    
     - Copy and paste the training command into the command prompt, then press enter to start the training process.
       
       <div align="center">
         <img src="/assets/page1/003.png" alt="Logo" width="1000">
       </div>
-
+      <br><br>
       
     - Training process
 
       <div align="center">
         <img src="/assets/page1/004.png" alt="Logo" width="1000">
       </div>
-
+      <br><br>
    
     - Once training is complete, you can check the trained model as shown below. This model can be used to perform various detection tasks.
   
       <div align="center">
         <img src="/assets/page1/005.png" alt="Logo" width="1000">
       </div>
-
+      <br><br>
 
 5. Detection Test
    
@@ -184,7 +188,7 @@ Used tools:
    <div align="center">
      <img src="/assets/page1/006.png" alt="Logo" width="1000">
    </div>
-
+   <br><br>
 
 6. Cropping Test
 
