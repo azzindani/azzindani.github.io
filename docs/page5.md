@@ -48,41 +48,42 @@ Below is the workflow on how my project works
 <div align="center">
   <img src="/assets/page5/000.png" alt="Logo" width="1000">
 </div>
+<br>
 
 1. Problem Definition
-   - Clearly define the problem that needs to be solved.
+   - Clearly define the problem that needs to be solved.<br>
 
 2. Finding Solutions
    - List all potential solutions and select one for implementation.  
    - Set objectives (e.g., classification accuracy, minimizing prediction errors) and constraints (e.g., time, hardware limitations).  
-   - Develop a plan that outlines the expected outcomes.
+   - Develop a plan that outlines the expected outcomes.<br>
 
 3. Data Collection
    - Gather and prepare relevant datasets aligned with the problem.  
-   - If batch datasets are unavailable, develop a data collection process like web scraping.
+   - If batch datasets are unavailable, develop a data collection process like web scraping.<br>
 
 4. Data Preprocessing
    - Clean and sort relevant datasets.  
    - Handle missing data or outliers.  
    - Perform data augmentation.  
-   - Split the data into training, validation, and test sets.
+   - Split the data into training, validation, and test sets.<br>
 
 5. Model Building
    - Select a deep learning model architecture based on the problem (e.g., CNN for images, RNN/LSTM for sequential data, Transformer for NLP).  
    - Configure layers (convolutional, dense, recurrent, etc.), activations, and connectivity.  
    - Choose an optimizer (e.g., Adam, SGD, RMSProp).  
-   - Set hyperparameters such as learning rate, batch size, and number of epochs.
+   - Set hyperparameters such as learning rate, batch size, and number of epochs.<br>
 
 6. Train & Test Model
    - Train the model, setting targets for accuracy, loss, and other performance metrics.  
    - Test the model using the test dataset to evaluate its performance.  
    - Inspect feature maps and filters.  
-   - Conduct real-world testing with external datasets to ensure the model's accuracy and applicability.
+   - Conduct real-world testing with external datasets to ensure the model's accuracy and applicability.<br>
 
 7. Fine-Tuning
    - Hyperparameter Tuning: Adjust learning rate, batch size, number of layers, etc., to enhance performance.  
    - Regularization: Apply techniques like dropout, weight decay, or L2 regularization to avoid overfitting.  
-   - Transfer Learning: Fine-tune pre-trained models on new datasets if the original task is similar.
+   - Transfer Learning: Fine-tune pre-trained models on new datasets if the original task is similar.<br>
 
 8. Evaluation & Improvement
    - Evaluate inputs, processes, outputs, and outcomes.  
@@ -95,7 +96,7 @@ Below is the workflow on how my project works
 
 ## Solution and Technology Stack
 Used tools:
-1. Python library : TensorFlow, Open CV, Scikit-Learn, Numpy, Matplotlib, Selenium
+1. Python library : ![TensorFlow](https://img.shields.io/badge/TensorFlow-%23FF6F00.svg?style=for-the-badge&logo=TensorFlow&logoColor=white) ![Keras](https://img.shields.io/badge/Keras-%23D00000.svg?style=for-the-badge&logo=Keras&logoColor=white) ![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white) ![NumPy](https://img.shields.io/badge/numpy-%23013243.svg?style=for-the-badge&logo=numpy&logoColor=white) ![Matplotlib](https://img.shields.io/badge/Matplotlib-%23ffffff.svg?style=for-the-badge&logo=Matplotlib&logoColor=black) ![Selenium](https://img.shields.io/badge/selenium-43B02A.svg?style=for-the-badge&logo=selenium&logoColor=white)
 2. Hardware : Laptop Acer Predator Helios 300, Intel-12700H, 48 GB Ram, Gen4 SSD, RTX3070Ti Laptop GPU, 8 GB Vram
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -110,12 +111,14 @@ Used tools:
    <div align="center">
      <img src="/assets/page5/001.png" alt="Logo" width="1000">
    </div>
+   <br>
    
    **The latest data collection update has been prepared for 10,000 keywords, gathering over 1 million images. Currently, more than 500,000 images and over 9,000 keyword folders remain to be processed.**
 
    <div align="center">
      <img src="/assets/page5/002.png" alt="Logo" width="1000">
    </div>
+   <br>
 
 2. Cropping Images
 
@@ -125,6 +128,7 @@ Used tools:
      <img src="/assets/page5/003.png" alt="Logo" width="1000">
      <img src="/assets/page5/004.png" alt="Logo" width="1000">
    </div>
+   <br>
 
 3. Data Cleaning
    - At this stage, I had to manually verify whether the collected facial images were correct, as sometimes they included pictures of other people. I needed to remove any faces that did not match the criteria.
@@ -132,18 +136,21 @@ Used tools:
      <div align="center">
        <img src="/assets/page5/005.png" alt="Logo" width="1000">
      </div>
+     <br>
      
    - In this step, I counted the cropped images to ensure that the samples were filled with heterogeneous images. Each folder of cropped images needed to contain 30 images; once a folder met this requirement, my code would copy the images to another directory.
   
      <div align="center">
        <img src="/assets/page5/006.png" alt="Logo" width="1000">
      </div>
+     <br>
 
    - For this step, each folder of images needed to contain 50 sample images. I created code to populate new folders with 50 images. If the source already contained more than 50 images, only 50 images would be copied to the new folder; if the source had fewer than 50 images, images would be duplicated until the new folder contained 50 images.
      
      <div align="center">
        <img src="/assets/page5/007.png" alt="Logo" width="1000">
      </div>
+     <br>
    
    Currently, I have collected over 1,000 celebrity faces that are ready for model training. I still have more than 4,000 celebrity faces that need to be cleaned and processed.
    - Samples to be used for training
@@ -151,12 +158,14 @@ Used tools:
      <div align="center">
        <img src="/assets/page5/008.png" alt="Logo" width="1000">
      </div>
+     <br>
      
    - **Remaining dataset for future development**
 
      <div align="center">
        <img src="/assets/page5/009.png" alt="Logo" width="1000">
      </div>
+     <br>
 
 4. Data Augmentation
 
@@ -165,6 +174,7 @@ Used tools:
    <div align="center">
      <img src="/assets/page5/010.png" alt="Logo" width="1000">
    </div>
+   <br>
 
    The result
 
@@ -172,6 +182,7 @@ Used tools:
      <img src="/assets/page5/011.png" alt="Logo" width="1000">
      <img src="/assets/page5/012.png" alt="Logo" width="1000">
    </div>
+   <br>
 
 5. Training Model
 
@@ -180,6 +191,7 @@ Used tools:
    <div align="center">
      <img src="/assets/page5/013.png" alt="Logo" width="1000">
    </div>
+   <br>
    
    For instance, I will demonstrate using a dataset of 1000 unique faces, each with 100 images, as follows:
    - I loaded these samples into an array with 96 x 96 pixel dimensions as my input tensor, encompassing 100,000 samples. In this scenario, the input tensor consists of celebrity face images, while the output tensor represents 650 celebrity names.
@@ -188,12 +200,14 @@ Used tools:
        <img src="/assets/page5/014.png" alt="Logo" width="1000">
        <img src="/assets/page5/015.png" alt="Logo" width="1000">
      </div>
+     <br>
      
    - I utilized 100,000 images as my dataset, partitioning it into 70,000 images for training (70%), 20,000 images for testing (20%), and 10,000 images for validation (10%). The deep learning CNN models will use 28 million trainable parameters.
 
      <div align="center">
        <img src="/assets/page5/016.png" alt="Logo" width="1000">
      </div>
+     <br>
      
    - I set an accuracy threshold of 0.97 or 97% to halt the training process, achieving 231 epochs in the process.
 
@@ -201,12 +215,14 @@ Used tools:
        <img src="/assets/page5/017.png" alt="Logo" width="1000">
        <img src="/assets/page5/018.png" alt="Logo" width="1000">
      </div>
+     <br>
      
    - Upon testing with the validation samples, the model achieved an accuracy of 0.97 or 97%.
 
      <div align="center">
        <img src="/assets/page5/019.png" alt="Logo" width="1000">
      </div>
+     <br>
 
 6. Filter & Feature Map Check
    - Here are the filters generated by this deep learning model.
@@ -214,12 +230,14 @@ Used tools:
      <div align="center">
        <img src="/assets/page5/020.png" alt="Logo" width="1000">
      </div>
+     <br>
      
    - Here are the feature maps produced by this deep learning model.
 
      <div align="center">
        <img src="/assets/page5/021.png" alt="Logo" width="1000">
      </div>
+     <br>
 
 7. Testing Trained Model
 
@@ -228,6 +246,7 @@ Used tools:
    <div align="center">
      <img src="/assets/page5/022.png" alt="Logo" width="1000">
    </div>
+   <br>
 
    The results indicate that I achieved authentic face recognition, though not perfectly, as illustrated in the screenshot below. You can observe that the face images serve as the input tensor, while the filenames represent the output tensor from the detection.
 
