@@ -45,33 +45,33 @@ Below is the workflow on how my project works
   <img src="/assets/page1/000.png" alt="Logo" width="1000">
 </div>
 
-**1. Problem Definition**  
-- Clearly define the problem that needs to be solved.
+1. Problem Definition
+   - Clearly define the problem that needs to be solved.
 
-**2. Finding Solutions**  
-- List all potential solutions and choose one to implement.  
-- Set objectives (e.g., classification accuracy, minimizing prediction errors) and constraints (e.g., time, hardware limitations).  
-- Create a plan outlining the expected outcomes.
+2. Finding Solution
+   - List all potential solutions and choose one to implement.
+   - Set objectives (e.g., classification accuracy, minimizing prediction errors) and constraints (e.g., time, hardware limitations).
+   - Create a plan outlining the expected outcomes.
 
-**3. Data Collection**  
-- Gather and prepare a relevant dataset aligned with the problem.
+3. Data Collection
+   - Gather and prepare a relevant dataset aligned with the problem.
 
-**4. Data Preprocessing**  
-- Split the data into training, validation, and test sets.  
-- Perform labeling or annotation where necessary.
+4. Data Preprocessing
+   - Split the data into training, validation, and test sets.
+   - Perform labeling or annotation where necessary.
 
-**5. Train & Test Model**  
-- Choose a deep learning model architecture based on the problem (e.g., CNN for images, RNN/LSTM for sequential data, Transformer for NLP).    
-- Train the model, setting targets for accuracy, loss, and other performance metrics.  
-- Test the model using the test dataset to evaluate its performance.  
-- Conduct real-world testing with external datasets to ensure the model's accuracy and applicability.
+5. Train & Test Model
+   - Choose a deep learning model architecture based on the problem (e.g., CNN for images, RNN/LSTM for sequential data, Transformer for NLP).
+   - Train the model, setting targets for accuracy, loss, and other performance metrics.
+   - Test the model using the test dataset to evaluate its performance.
+   - Conduct real-world testing with external datasets to ensure the model's accuracy and applicability.
 
-**6. Evaluation & Improvement**  
-- Evaluate inputs, processes, outputs, and outcomes.  
-- Identify challenges.  
-- Discover insights.  
-- Make necessary improvements by addressing challenges, adding new features, or refining results based on evaluation feedback.  
-- Set a plan for future developments.
+6. Evaluation & Improvement
+   - Evaluate inputs, processes, outputs, and outcomes.
+   - Identify challenges.
+   - Discover insights.
+   - Make necessary improvements by addressing challenges, adding new features, or refining results based on evaluation feedback.
+   - Set a plan for future developments.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -85,11 +85,11 @@ Used tools:
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Project Details and Results
-**1. Data Collection**
+1. Data Collection
    
    The dataset utilizing NIH Chest X-ray [link](https://www.kaggle.com/datasets/nih-chest-xrays/data) contains over 112,000 Chest X-ray images from more than 30,000 unique patients. I have used only 400 images as a sample, which is considered sufficient for single-object detection.
 
-**2. Labelling**
+2. Labelling
 
    Image labeling using LabelImg in Python involves manually annotating images by drawing bounding boxes around objects of interest and saving the coordinates and class labels in XML.
    
@@ -98,7 +98,7 @@ Used tools:
    </div>
 
 
-**3. Generate Training Records**
+3. Generate Training Records
 
    TFRecords generation in Python involves converting datasets, such as images and annotations, into a serialized binary format optimized for TensorFlow, enabling efficient data storage and access during model training and evaluation.
    ```sh
@@ -135,7 +135,7 @@ Used tools:
    </div>
 
 
-**4. Training Model using TensorFlow OD API**
+4. Training Model using TensorFlow OD API
 
    - The TensorFlow object detection API was downloaded from this repository: [TensorFlow Models](https://github.com/tensorflow/models/tree/master/research/object_detection).
    - The pre-trained models were downloaded from this repository: [TF2 Detection Model Zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md).
@@ -177,7 +177,7 @@ Used tools:
       </div>
 
 
-**5. Detection Test**
+5. Detection Test
    
    The actual testing will use images different from those used in training. In this step, the code will attempt to detect 1,000 images, generating bounding boxes, labels, and detection scores on the images. You can review the detection results below.
    
@@ -186,7 +186,7 @@ Used tools:
    </div>
 
 
-**6. Cropping Test**
+6. Cropping Test
    This is an image cropping test using the trained model. You can find the results below.
 
    <div align="center">
