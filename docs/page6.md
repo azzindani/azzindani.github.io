@@ -45,6 +45,28 @@ Below is the workflow on how my project works
   <img src="/assets/page6/000.png" alt="Logo" width="1000">
 </div>
 
+1. Problem Definition
+   - Clearly define the problem that needs to be solved.
+
+2. Identifying Solutions 
+   - List all potential solutions and select one for implementation.  
+   - Develop a plan that outlines the expected outcomes.
+
+3. Data Collection
+   - Gather and prepare relevant datasets aligned with the problem.  
+   - If batch datasets are unavailable, develop a data collection process like web scraping.  
+   - Ensure data quality and resolve any data issues.
+
+4. Continuous Updates
+   - Regularly update the dataset or as needed.
+
+5. Evaluation & Improvement
+   - Evaluate inputs, processes, outputs, and outcomes.  
+   - Identify challenges.  
+   - Gain insights.  
+   - Implement necessary improvements by addressing challenges, adding new features, or refining results based on evaluation feedback.  
+   - Develop a plan for future enhancements.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Solution and Technology Stack
