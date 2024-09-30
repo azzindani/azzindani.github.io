@@ -47,19 +47,19 @@ Below is the workflow on how my project works
 <br>
 
 1. Problem Definition
-   - Clearly define the problem that needs to be solved.
+   - Clearly define the problem that needs to be solved.<br>
 
 2. Finding Solution
    - List all potential solutions and select one for implementation.
-   - Develop a plan that outlines the expected outcomes.
+   - Develop a plan that outlines the expected outcomes.<br>
      
 3. Data Collection
    - Gather and prepare relevant datasets aligned with the problem.  
    - If batch datasets are unavailable, develop a data collection process like web scraping.  
-   - Ensure data quality and resolve any data issues.
+   - Ensure data quality and resolve any data issues.<br>
 
 4. Continuous Updates
-   - Regularly update the dataset or as needed.
+   - Regularly update the dataset or as needed.<br>
 
 5. Evaluation & Improvement
    - Evaluate inputs, processes, outputs, and outcomes.  
@@ -86,12 +86,14 @@ Used tools:
        <div align="center">
          <img src="/assets/page6/001.png" alt="Logo" width="1000">
        </div>
+       <br>
        
      - Single bot
        
        <div align="center">
          <img src="/assets/page6/002.png" alt="Logo" width="1000">
        </div>
+       <br>
        
      - Results
        
@@ -99,6 +101,7 @@ Used tools:
          <img src="/assets/page6/003.png" alt="Logo" width="1000">
          <img src="/assets/page6/004.png" alt="Logo" width="1000">
        </div>
+       <br>
        
    - In the second approach, I created a multi-threaded bot capable of generating 10 bots simultaneously, each handling a different task. This setup allowed me to gather over 10,000 files annually, significantly enhancing efficiency and productivity.
      - Multi-threaded bot
@@ -106,18 +109,21 @@ Used tools:
        <div align="center">
          <img src="/assets/page6/005.png" alt="Logo" width="1000">
        </div>
+       <br>
        
      - Results
        
        <div align="center">
          <img src="/assets/page6/006.png" alt="Logo" width="1000">
        </div>
+       <br>
      
    - As you may know, the website only provides data from the last 5 years. However, I was fortunate to extract financial reports dating back to 2015 by employing an HTML injection script. Unfortunately, this method is no longer feasible.
 
      <div align="center">
        <img src="/assets/page6/007.png" alt="Logo" width="1000">
      </div>
+     <br>
 
 2. Files Check
    After downloading all the financial report documents, I need to verify the bot's performance to ensure completeness and accuracy.
