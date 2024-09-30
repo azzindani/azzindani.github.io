@@ -48,23 +48,28 @@ Below is the workflow on how my project works
 1. Problem Definition
    - Clearly define the problem that needs to be solved.
 
+
 2. Finding Solution
    - List all potential solutions and choose one to implement.
    - Set objectives (e.g., classification accuracy, minimizing prediction errors) and constraints (e.g., time, hardware limitations).
    - Create a plan outlining the expected outcomes.
 
+
 3. Data Collection
    - Gather and prepare a relevant dataset aligned with the problem.
+
 
 4. Data Preprocessing
    - Split the data into training, validation, and test sets.
    - Perform labeling or annotation where necessary.
+
 
 5. Train & Test Model
    - Choose a deep learning model architecture based on the problem (e.g., CNN for images, RNN/LSTM for sequential data, Transformer for NLP).
    - Train the model, setting targets for accuracy, loss, and other performance metrics.
    - Test the model using the test dataset to evaluate its performance.
    - Conduct real-world testing with external datasets to ensure the model's accuracy and applicability.
+
 
 6. Evaluation & Improvement
    - Evaluate inputs, processes, outputs, and outcomes.
