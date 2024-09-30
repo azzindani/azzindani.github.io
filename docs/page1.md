@@ -44,28 +44,28 @@ Below is the workflow on how my project works
 <div align="center">
   <img src="/assets/page1/000.png" alt="Logo" width="1000">
 </div>
-<br><br>
+<br>
 
 1. Problem Definition
-   - Clearly define the problem that needs to be solved.<br><br>
+   - Clearly define the problem that needs to be solved.<br>
 
 2. Finding Solution
    - List all potential solutions and choose one to implement.
    - Set objectives (e.g., classification accuracy, minimizing prediction errors) and constraints (e.g., time, hardware limitations).
-   - Create a plan outlining the expected outcomes.<br><br>
+   - Create a plan outlining the expected outcomes.<br>
 
 3. Data Collection
-   - Gather and prepare a relevant dataset aligned with the problem.<br><br>
+   - Gather and prepare a relevant dataset aligned with the problem.<br>
 
 4. Data Preprocessing
    - Split the data into training, validation, and test sets.
-   - Perform labeling or annotation where necessary.<br><br>
+   - Perform labeling or annotation where necessary.<br>
 
 5. Train & Test Model
    - Choose a deep learning model architecture based on the problem (e.g., CNN for images, RNN/LSTM for sequential data, Transformer for NLP).
    - Train the model, setting targets for accuracy, loss, and other performance metrics.
    - Test the model using the test dataset to evaluate its performance.
-   - Conduct real-world testing with external datasets to ensure the model's accuracy and applicability.<br><br>
+   - Conduct real-world testing with external datasets to ensure the model's accuracy and applicability.<br>
 
 6. Evaluation & Improvement
    - Evaluate inputs, processes, outputs, and outcomes.
@@ -97,7 +97,7 @@ Used tools:
    <div align="center">
      <img src="/assets/page1/001.png" alt="Logo" width="1000">
    </div>
-   <br><br>
+   <br>
 
 3. Generate Training Records
 
@@ -131,12 +131,12 @@ Used tools:
    !python {SCRIPTS_PATH + "\\generate_tfrecord.py"} -x {IMAGE_PATH + "\\test"} -l {ANNOTATION_PATH + "\\label_map.pbtxt"} -o {ANNOTATION_PATH + "\\test.record"}
    ```
 
-   <br><br>
+   <br>
    
    <div align="center">
      <img src="/assets/page1/002.png" alt="Logo" width="1000">
    </div>
-   <br><br>
+   <br>
 
 4. Training Model using TensorFlow OD API
 
@@ -158,28 +158,28 @@ Used tools:
       ```sh
       print("""python {}\\research\\object_detection\\model_main_tf2.py --model_dir={}\\{} --pipeline_config_path={}\\{}\\pipeline.config --num_train_steps={}""".format(APIMODEL_PATH, MODEL_PATH, CUSTOM_MODEL_NAME, MODEL_PATH, CUSTOM_MODEL_NAME, n))
       ```
-      <br><br>
+      <br>
    
     - Copy and paste the training command into the command prompt, then press enter to start the training process.
       
       <div align="center">
         <img src="/assets/page1/003.png" alt="Logo" width="1000">
       </div>
-      <br><br>
+      <br>
       
     - Training process
 
       <div align="center">
         <img src="/assets/page1/004.png" alt="Logo" width="1000">
       </div>
-      <br><br>
+      <br>
    
     - Once training is complete, you can check the trained model as shown below. This model can be used to perform various detection tasks.
   
       <div align="center">
         <img src="/assets/page1/005.png" alt="Logo" width="1000">
       </div>
-      <br><br>
+      <br>
 
 5. Detection Test
    
@@ -188,7 +188,7 @@ Used tools:
    <div align="center">
      <img src="/assets/page1/006.png" alt="Logo" width="1000">
    </div>
-   <br><br>
+   <br>
 
 6. Cropping Test
 
