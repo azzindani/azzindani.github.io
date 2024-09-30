@@ -44,14 +44,15 @@ Below is the workflow on how my project works
 <div align="center">
   <img src="/assets/page6/000.png" alt="Logo" width="1000">
 </div>
+<br>
 
 1. Problem Definition
    - Clearly define the problem that needs to be solved.
 
 2. Finding Solution
-   - List all potential solutions and select one for implementation.  
+   - List all potential solutions and select one for implementation.
    - Develop a plan that outlines the expected outcomes.
-
+     
 3. Data Collection
    - Gather and prepare relevant datasets aligned with the problem.  
    - If batch datasets are unavailable, develop a data collection process like web scraping.  
@@ -71,7 +72,7 @@ Below is the workflow on how my project works
 
 ## Solution and Technology Stack
 Used tools:
-1. Python library : Selenium
+1. Python library : ![Selenium](https://img.shields.io/badge/selenium-43B02A.svg?style=for-the-badge&logo=selenium&logoColor=white)
 2. Hardware : Laptop Acer Predator Helios 300, Intel-12700H, 48 GB Ram, Gen4 SSD, RTX3070Ti Laptop GPU, 8 GB Vram
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
