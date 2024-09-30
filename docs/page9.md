@@ -54,6 +54,7 @@ Used tools:
 
 ## Project Details and Results
 1. Data Transformation
+
    In this section, I focus on transforming raw data into numerical data, enabling effective calculations and analysis.
    - Transform data to new format, by leveraging 
    
@@ -74,6 +75,7 @@ Used tools:
      </div>
 
 2. Setup SQL Server
+
    In this section, I perform setup to create and upload all dataset to SQL server
    - Creating SQL server
      
@@ -95,6 +97,7 @@ Used tools:
      </div>
 
 3. Data Visualization
+
    For now, I am only using Plotly and Streamlit to create simple data visualizations.\
    
    <div align="center">
