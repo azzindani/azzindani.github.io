@@ -43,6 +43,48 @@ Below is the workflow on how my project works
   <img src="/assets/page4/000.png" alt="Logo" width="1000">
 </div>
 
+**1. Problem Definition**  
+- Clearly define the problem that needs to be solved.
+
+**2. Finding Solutions**  
+- List all potential solutions and select one for implementation.  
+- Set objectives (e.g., classification accuracy, minimizing prediction errors) and constraints (e.g., time, hardware limitations).  
+- Develop a plan that outlines the expected outcomes.
+
+**3. Data Collection**  
+- Gather and prepare relevant datasets aligned with the problem.  
+- If batch datasets are unavailable, develop a data collection process like web scraping.
+
+**4. Data Preprocessing**  
+- Clean and sort relevant datasets.  
+- Handle missing data or outliers.  
+- Perform data augmentation.  
+- Split the data into training, validation, and test sets.
+
+**5. Model Building**  
+- Select a deep learning model architecture based on the problem (e.g., CNN for images, RNN/LSTM for sequential data, Transformer for NLP).  
+- Configure layers (convolutional, dense, recurrent, etc.), activations, and connectivity.  
+- Choose an optimizer (e.g., Adam, SGD, RMSProp).  
+- Set hyperparameters such as learning rate, batch size, and number of epochs.
+
+**6. Train & Test Model**  
+- Train the model, setting targets for accuracy, loss, and other performance metrics.  
+- Test the model using the test dataset to evaluate its performance.  
+- Inspect feature maps and filters.  
+- Conduct real-world testing with external datasets to ensure the model's accuracy and applicability.
+
+**7. Fine-Tuning**  
+- Hyperparameter Tuning: Adjust learning rate, batch size, number of layers, etc., to enhance performance.  
+- Regularization: Apply techniques like dropout, weight decay, or L2 regularization to avoid overfitting.  
+- Transfer Learning: Fine-tune pre-trained models on new datasets if the original task is similar.
+
+**8. Evaluation & Improvement**  
+- Evaluate inputs, processes, outputs, and outcomes.  
+- Identify challenges.  
+- Gain insights.  
+- Implement necessary improvements by addressing challenges, adding new features, or refining results based on evaluation feedback.  
+- Develop a plan for future enhancements.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Solution and Technology Stack
