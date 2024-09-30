@@ -187,6 +187,7 @@ Used tools:
 
 
 6. Cropping Test
+
    This is an image cropping test using the trained model. You can find the results below.
 
    <div align="center">
