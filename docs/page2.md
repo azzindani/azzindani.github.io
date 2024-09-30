@@ -89,11 +89,11 @@ Used tools:
 ## Project Details and Results
 This project is designed to detect only two categories: `Covid-19 positive` and `Covid-19 negative`.
 
-**1. Data Collection**
+1. Data Collection
    
    The dataset utilizing Covid-19 Radiography. I have used only 800 images as a sample, comprising 400 images for each category, which is considered sufficient for detecting two object categories.
 
-**2. Labelling**
+2. Labelling
 
    Image labeling using LabelImg in Python involves manually annotating images by drawing bounding boxes around objects of interest and saving the coordinates and class labels in XML.
 
@@ -101,7 +101,7 @@ This project is designed to detect only two categories: `Covid-19 positive` and 
      <img src="/assets/page2/001.png" alt="Logo" width="1000">
    </div>
 
-**3. Generate Training Records**
+3. Generate Training Records
 
    TFRecords generation in Python involves converting datasets, such as images and annotations, into a serialized binary format optimized for TensorFlow, enabling efficient data storage and access during model training and evaluation.
    ```sh
@@ -138,7 +138,7 @@ This project is designed to detect only two categories: `Covid-19 positive` and 
      <img src="/assets/page2/002.png" alt="Logo" width="1000">
    </div>
 
-**4. Training Model using TensorFlow OD API**
+4. Training Model using TensorFlow OD API
    - The TensorFlow object detection API was downloaded from this repository: [TensorFlow Models](https://github.com/tensorflow/models/tree/master/research/object_detection).
    - The pre-trained models were downloaded from this repository: [TF2 Detection Model Zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2_detection_zoo.md).
    
@@ -175,7 +175,7 @@ This project is designed to detect only two categories: `Covid-19 positive` and 
        <img src="/assets/page2/005.png" alt="Logo" width="1000">
      </div>
 
-**5. Detection Test**
+5. Detection Test
 
    The actual testing will use images different from those used in training. In this step, the code will attempt to detect 1,000 images, generating bounding boxes, labels, and detection scores on the images. You can review the detection results below.
 
