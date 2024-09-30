@@ -82,7 +82,7 @@ Below is the workflow on how my project works
 Used tools:
 1. TensorFlow Object Detection API
 2. Pretrained Model
-3. Python library : TensorFlow, Open CV, Scikit-Learn, Numpy, LabelImg
+3. Python library : ![TensorFlow](https://img.shields.io/badge/TensorFlow-%23FF6F00.svg?style=for-the-badge&logo=TensorFlow&logoColor=white) ![OpenCV](https://img.shields.io/badge/OpenCV-5C3EE8.svg?style=for-the-badge&logo=opencv&logoColor=white) ![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white) ![NumPy](https://img.shields.io/badge/numpy-%23013243.svg?style=for-the-badge&logo=numpy&logoColor=white) ![labelImg](https://img.shields.io/badge/labelImg-FF8800.svg?style=for-the-badge&logo=labelimg&logoColor=white)
 4. Hardware : Laptop Acer Predator Helios 300, Intel-12700H, 48 GB Ram, Gen4 SSD, RTX3070Ti Laptop GPU, 8 GB Vram
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
