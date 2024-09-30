@@ -44,34 +44,35 @@ Below is the workflow on how my project works
 <div align="center">
   <img src="/assets/page7/000.png" alt="Logo" width="1000">
 </div>
+<br>
 
 1. Problem Definition
-   - Clearly define the problem that needs to be solved.<br><br>
+   - Clearly define the problem that needs to be solved.<br>
 
 2. Finding Solution
    - List all potential solutions and choose one for implementation.  
-   - Develop a plan outlining the expected outcomes.<br><br>
+   - Develop a plan outlining the expected outcomes.<br>
 
 3. Data Collection
    - Gather and prepare relevant datasets aligned with the problem.  
    - If batch datasets are unavailable, develop a data collection process such as web scraping.  
-   - Ensure data quality and resolve any data issues.<br><br>
+   - Ensure data quality and resolve any data issues.<br>
 
 4. Data Preprocessing
    - Handle missing data or outliers.  
    - Clean and structure the data.  
    - Perform data transformation.  
    - Store data appropriately.  
-   - Backup the data.<br><br>
+   - Backup the data.<br>
 
 5. Continuous Update
-   - Regularly update the dataset or as needed.<br><br>
+   - Regularly update the dataset or as needed.<br>
 
 6. Data Visualization & Analysis
    - Univariate analysis - (numerical data): Use histograms, box plots, and density plots to understand distributions.  
    - Univariate analysis - (categorical data): Use bar charts or pie charts to observe category frequencies.  
    - Bivariate analysis: Analyze relationships between two variables.  
-   - Multivariate analysis: Examine interactions between three or more variables, often visualized with pair plots or heatmaps.<br><br>
+   - Multivariate analysis: Examine interactions between three or more variables, often visualized with pair plots or heatmaps.<br>
 
 7. Evaluation & Improvement
    - Evaluate inputs, processes, outputs, and outcomes.  
@@ -84,7 +85,7 @@ Below is the workflow on how my project works
 
 ## Solution and Technology Stack
 Used tools:
-1. Python library : Selenium
+1. Python library : ![Selenium](https://img.shields.io/badge/selenium-43B02A.svg?style=for-the-badge&logo=selenium&logoColor=white)
 2. Hardware : Laptop Acer Predator Helios 300, Intel-12700H, 48 GB Ram, Gen4 SSD, RTX3070Ti Laptop GPU, 8 GB Vram
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -97,18 +98,21 @@ Used tools:
    <div align="center">
      <img src="/assets/page7/001.png" alt="Logo" width="1000">
    </div>
+   <br>
 
    At this stage, I am utilizing a multi-threaded bot directly, with tasks differing from the previous bot, which involves a more complex download script. This approach allows me to save time while collecting over 2,500 Excel files from all publicly listed companies in Indonesia.
    
    <div align="center">
      <img src="/assets/page7/002.png" alt="Logo" width="1000">
    </div>
+   <br>
 
    The bot performs the following tasks: it opens Chromedriver, navigates to the website (https://www.idx.co.id/id/perusahaan-tercatat/laporan-keuangan-dan-tahunan), enters keywords into the search tab, selects the year and quarter, clicks “search”/“apply,” downloads the Excel files, and saves them in a temporary directory. The final step involves renaming the files from the temporary path and moving them to a new location with an organized folder structure.
    
    <div align="center">
      <img src="/assets/page7/003.png" alt="Logo" width="1000">
    </div>
+   <br>
 
 2. Files Check
 
@@ -117,6 +121,7 @@ Used tools:
    <div align="center">
      <img src="/assets/page7/004.png" alt="Logo" width="1000">
    </div>
+   <br>
 
 3. Data Transformation
    - The first data transformation involves extracting tabular data into multiple files.
@@ -125,24 +130,28 @@ Used tools:
        <div align="center">
          <img src="/assets/page7/005.png" alt="Logo" width="1000">
        </div>
+       <br>
        
      - Results
 
        <div align="center">
          <img src="/assets/page7/006.png" alt="Logo" width="1000">
        </div>
+       <br>
      
    - The second step is to convert these files into numerical data, enabling analysis when the files are merged.
 
      <div align="center">
        <img src="/assets/page7/007.png" alt="Logo" width="1000">
      </div>
+     <br>
      
    - The final step is to combine the data, and here is an example of the results.
      
      <div align="center">
        <img src="/assets/page7/008.png" alt="Logo" width="1000">
      </div>
+     <br>
 
 4. Analytic & Visualization
 
