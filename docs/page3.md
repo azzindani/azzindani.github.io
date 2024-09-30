@@ -48,27 +48,28 @@ Below is the workflow on how my project works
 <div align="center">
   <img src="/assets/page3/000.png" alt="Logo" width="1000">
 </div>
+<br>
 
 1. Problem Definition
-   - Clearly define the problem that needs to be solved.
+   - Clearly define the problem that needs to be solved.<br>
 
 2. Finding Solutions
    - List all potential solutions and choose one to implement.  
    - Set objectives (e.g., classification accuracy, minimizing prediction errors) and constraints (e.g., time, hardware limitations).  
-   - Create a plan outlining the expected outcomes.
+   - Create a plan outlining the expected outcomes.<br>
 
 3. Data Collection
-   - Gather and prepare a relevant dataset aligned with the problem.
+   - Gather and prepare a relevant dataset aligned with the problem.<br>
 
 4. Data Preprocessing
    - Split the data into training, validation, and test sets.  
-   - Perform labeling or annotation where necessary.
+   - Perform labeling or annotation where necessary.<br>
 
 5. Train & Test Model
-   - Choose a deep learning model architecture based on the problem (e.g., CNN for images, RNN/LSTM for sequential data, Transformer for NLP).    
+   - Choose a deep learning model architecture based on the problem (e.g., CNN for images, RNN/LSTM for sequential data, Transformer for NLP).
    - Train the model, setting targets for accuracy, loss, and other performance metrics.  
    - Test the model using the test dataset to evaluate its performance.  
-   - Conduct real-world testing with external datasets to ensure the model's accuracy and applicability.
+   - Conduct real-world testing with external datasets to ensure the model's accuracy and applicability.<br>
 
 6. Evaluation & Improvement
    - Evaluate inputs, processes, outputs, and outcomes.  
@@ -83,7 +84,7 @@ Below is the workflow on how my project works
 Used tools:
 1. TensorFlow Object Detection API
 2. Pretrained Model
-3. Python library : TensorFlow, Open CV, Scikit-Learn, Numpy, LabelImg
+3. Python library : ![TensorFlow](https://img.shields.io/badge/TensorFlow-%23FF6F00.svg?style=for-the-badge&logo=TensorFlow&logoColor=white) ![OpenCV](https://img.shields.io/badge/OpenCV-5C3EE8.svg?style=for-the-badge&logo=opencv&logoColor=white) ![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white) ![NumPy](https://img.shields.io/badge/numpy-%23013243.svg?style=for-the-badge&logo=numpy&logoColor=white) ![labelImg](https://img.shields.io/badge/labelImg-FF8800.svg?style=for-the-badge&logo=labelimg&logoColor=white)
 4. Hardware : Laptop Acer Predator Helios 300, Intel-12700H, 48 GB Ram, Gen4 SSD, RTX3070Ti Laptop GPU, 8 GB Vram
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -102,6 +103,7 @@ This project is trained to detect lung abnormalities categorized into 8 conditio
    <div align="center">
      <img src="/assets/page3/001.png" alt="Logo" width="1000">
    </div>
+   <br>
 
 3. Generate Training Records
 
@@ -138,16 +140,17 @@ This project is trained to detect lung abnormalities categorized into 8 conditio
            f.write("\tid:{}\n".format(label["id"]))
            f.write("}\n")
    ```
-
    
    ```sh
    !python {MAIN_PATH + "\\00_Gen_Tfrecord.py"} --csv_input={ANNOTATION_PATH + "\\train_list.csv"} --image_dir={TRAIN_PATH} --output_path={ANNOTATION_PATH + "\\train.record"}
    !python {MAIN_PATH + "\\00_Gen_Tfrecord.py"} --csv_input={ANNOTATION_PATH + "\\test_list.csv"} --image_dir={TEST_PATH} --output_path={ANNOTATION_PATH + "\\test.record"}
    ```
+   <br>
    
    <div align="center">
      <img src="/assets/page3/002.png" alt="Logo" width="1000">
    </div>
+   <br>
 
 4. Training Model using TensorFlow OD API
    - The TensorFlow object detection API was downloaded from this repository: [TensorFlow Models](https://github.com/tensorflow/models/tree/master/research/object_detection).
@@ -173,18 +176,21 @@ This project is trained to detect lung abnormalities categorized into 8 conditio
       <div align="center">
         <img src="/assets/page3/003.png" alt="Logo" width="1000">
       </div>
+      <br>
      
    - Training process
 
      <div align="center">
        <img src="/assets/page3/004.png" alt="Logo" width="1000">
      </div>
+     <br>
      
    - Once training is complete, you can check the trained model as shown below. This model can be used to perform various detection tasks.
 
      <div align="center">
        <img src="/assets/page3/005.png" alt="Logo" width="1000">
      </div>
+     <br>
 
 5. Detection Test
 
