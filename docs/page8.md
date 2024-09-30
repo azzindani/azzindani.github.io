@@ -37,6 +37,7 @@ I have experience investing in the Indonesian stock market. One of the main chal
 <div align="center">
   <img src="/assets/page8/001.png" alt="Logo" width="1000">
 </div>
+<br>
 
 Simultaneously, I realized the importance of learning how to gather large datasets from the internet. Broker transaction data is one of the few datasets shared publicly for transparency. However, collecting this data manually from the stock exchange can be inefficient, time-consuming, and exhausting, as it is presented in HTML tables instead of exportable files. The inspiration behind this project stemmed from the need to automate the process of collecting broker transaction data, providing a comprehensive and efficient way to track and analyze broker activities. By making this data more accessible, the project aims to support more informed investment decisions and market analysis.
 
