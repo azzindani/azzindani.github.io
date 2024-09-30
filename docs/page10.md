@@ -44,34 +44,35 @@ Below is the workflow on how my project works
 <div align="center">
   <img src="/assets/page10/000.png" alt="Logo" width="1000">
 </div>
+<br>
 
 1. Problem Definition
-   - Clearly define the problem that needs to be solved.<br><br>
+   - Clearly define the problem that needs to be solved.<br>
 
 2. Finding Solution
    - List all potential solutions and choose one for implementation.  
-   - Develop a plan outlining the expected outcomes.<br><br>
+   - Develop a plan outlining the expected outcomes.<br>
 
 3. Data Collection
    - Gather and prepare relevant datasets aligned with the problem.  
    - If batch datasets are unavailable, develop a data collection process such as web scraping.  
-   - Ensure data quality and resolve any data issues.<br><br>
+   - Ensure data quality and resolve any data issues.<br>
 
 4. Data Preprocessing
    - Handle missing data or outliers.  
    - Clean and structure the data.  
    - Perform data transformation.  
    - Store data appropriately.  
-   - Backup the data.<br><br>
+   - Backup the data.<br>
 
 5. Continuous Update
-   - Regularly update the dataset or as needed.<br><br>
+   - Regularly update the dataset or as needed.<br>
 
 6. Data Visualization & Analysis
    - Univariate analysis - (numerical data): Use histograms, box plots, and density plots to understand distributions.  
    - Univariate analysis - (categorical data): Use bar charts or pie charts to observe category frequencies.  
    - Bivariate analysis: Analyze relationships between two variables.  
-   - Multivariate analysis: Examine interactions between three or more variables, often visualized with pair plots or heatmaps.<br><br>
+   - Multivariate analysis: Examine interactions between three or more variables, often visualized with pair plots or heatmaps.<br>
 
 7. Evaluation & Improvement
    - Evaluate inputs, processes, outputs, and outcomes.  
@@ -84,7 +85,7 @@ Below is the workflow on how my project works
 
 ## Solution and Technology Stack
 Used tools:
-1. Python library : Pandas, PostgreSQL, Psycopg, Plotly, Streamlit
+1. Python library : ![Pandas](https://img.shields.io/badge/pandas-%23150458.svg?style=for-the-badge&logo=pandas&logoColor=white) ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white) ![Psycopg](https://img.shields.io/badge/psycopg-2F6792.svg?style=for-the-badge&logo=postgresql&logoColor=white) ![Plotly](https://img.shields.io/badge/Plotly-%233F4F75.svg?style=for-the-badge&logo=plotly&logoColor=white) ![Streamlit](https://img.shields.io/badge/streamlit-FF4B4B.svg?style=for-the-badge&logo=streamlit&logoColor=white)
 2. Hardware : Laptop Acer Predator Helios 300, Intel-12700H, 48 GB Ram, Gen4 SSD, RTX3070Ti Laptop GPU, 8 GB Vram
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -100,18 +101,21 @@ Used tools:
        <img src="/assets/page10/002.png" alt="Logo" width="1000">
        <img src="/assets/page10/003.png" alt="Logo" width="1000">
      </div>
+     <br>
      
    - Completion check
      
      <div align="center">
        <img src="/assets/page10/004.png" alt="Logo" width="1000">
      </div>
+     <br>
      
    - Recollection process
      
      <div align="center">
        <img src="/assets/page10/005.png" alt="Logo" width="1000">
      </div>
+     <br>
 
 2. Data Process
 
@@ -121,12 +125,14 @@ Used tools:
      <div align="center">
        <img src="/assets/page10/006.png" alt="Logo" width="1000">
      </div>
+     <br>
      
    - Uploading dataset to SQL server
      
      <div align="center">
        <img src="/assets/page10/007.png" alt="Logo" width="1000">
      </div>
+     <br>
      
    - Result & preview
      
@@ -139,6 +145,7 @@ Used tools:
      <div align="center">
        <img src="/assets/page10/009.png" alt="Logo" width="1000">
      </div>
+     <br>
 
 3. Data Visualization
 
@@ -150,6 +157,7 @@ Used tools:
      <img src="/assets/page10/012.png" alt="Logo" width="1000">
      <img src="/assets/page10/013.png" alt="Logo" width="1000">
    </div>
+   <br>
 
 **Notes:**
 
