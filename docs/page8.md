@@ -48,24 +48,25 @@ Below is the workflow on how my project works
 <div align="center">
   <img src="/assets/page8/000.png" alt="Logo" width="1000">
 </div>
+<br>
 
 1. Problem Definition
-   - Clearly define the problem that needs to be solved.
+   - Clearly define the problem that needs to be solved.<br>
 
 
 2. Finding Solution
    - List all potential solutions and select one for implementation.  
-   - Develop a plan that outlines the expected outcomes.
+   - Develop a plan that outlines the expected outcomes.<br>
 
 
 3. Data Collection
    - Gather and prepare relevant datasets aligned with the problem.  
    - If batch datasets are unavailable, develop a data collection process like web scraping.  
-   - Ensure data quality and resolve any data issues.
+   - Ensure data quality and resolve any data issues.<br>
 
 
 4. Continuous Updates
-   - Regularly update the dataset or as needed.
+   - Regularly update the dataset or as needed.<br>
 
 
 5. Evaluation & Improvement
@@ -79,7 +80,7 @@ Below is the workflow on how my project works
 
 ## Solution and Technology Stack
 Used tools:
-1. Python library : Selenium, Pandas
+1. Python library : ![Selenium](https://img.shields.io/badge/selenium-43B02A.svg?style=for-the-badge&logo=selenium&logoColor=white) ![Pandas](https://img.shields.io/badge/pandas-%23150458.svg?style=for-the-badge&logo=pandas&logoColor=white)
 2. Hardware : Laptop Acer Predator Helios 300, Intel-12700H, 48 GB Ram, Gen4 SSD, RTX3070Ti Laptop GPU, 8 GB Vram
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -92,12 +93,14 @@ Used tools:
    <div align="center">
      <img src="/assets/page8/002.png" alt="Logo" width="1000">
    </div>
+   <br>
 
    To date, I have gathered approximately 1 million plus of CSV files using my bot, which has been mining transaction data since 2017.
    
    <div align="center">
      <img src="/assets/page8/003.png" alt="Logo" width="1000">
    </div>
+   <br>
 
 3. Completion Data Check
    - Identifying Missing Files: Locating any files that were not downloaded successfully.
@@ -105,18 +108,21 @@ Used tools:
      <div align="center">
        <img src="/assets/page8/004.png" alt="Logo" width="1000">
      </div>
+     <br>
      
    - Verifying File Content: Checking whether the CSV files contain transaction data, as there are instances where my bot fails to write data correctly (possibly due to an error).
      
      <div align="center">
        <img src="/assets/page8/005.png" alt="Logo" width="1000">
      </div>
+     <br>
      
    - Detecting Empty Files: Identifying empty CSV files by inspecting their file sizes.
      
      <div align="center">
        <img src="/assets/page8/006.png" alt="Logo" width="1000">
      </div>
+     <br>
 
 4. Data Validation
    - Collect Original Summary Data: Retrieve the original summary data from my broker platform for comparison.
@@ -124,12 +130,14 @@ Used tools:
      <div align="center">
        <img src="/assets/page8/007.png" alt="Logo" width="1000">
      </div>
+     <br>
      
    - Summarize Daily Transaction Data: Aggregate all daily transaction data through an extensive calculation process.
      
      <div align="center">
        <img src="/assets/page8/008.png" alt="Logo" width="1000">
      </div>
+     <br>
      
    - Identify Data Discrepancies: Compare the summary data to identify and correct any data errors.
      
@@ -137,6 +145,7 @@ Used tools:
        <img src="/assets/page8/009.png" alt="Logo" width="1000">
        <img src="/assets/page8/010.png" alt="Logo" width="1000">
      </div>
+     <br>
 
 5. Recollecting Data to be Revised
    - Manual Data Analysis: Manually analyze the compared transaction summary data in Excel, using it as a reference for refining the bot.
@@ -144,6 +153,7 @@ Used tools:
      <div align="center">
        <img src="/assets/page8/011.png" alt="Logo" width="1000">
      </div>
+     <br>
      
    - Re-running the Bot: Run the bot to re-collect data, where it will scan for files smaller than 40 bytes and automate the re-download process.
      
@@ -151,6 +161,7 @@ Used tools:
        <img src="/assets/page8/012.png" alt="Logo" width="1000">
        <img src="/assets/page8/013.png" alt="Logo" width="1000">
      </div>
+     <br>
      
    - Iterative Refinement: Repeat this process, comparing results each time to minimize data discrepancies and achieve the lowest margin of error.
 
