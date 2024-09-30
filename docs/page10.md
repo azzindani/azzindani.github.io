@@ -56,6 +56,7 @@ Used tools:
 
 ## Project Details and Results
 1. Data Collection
+   
    The data collection program, developed with 10 integrated bots, automatically updates ticker data, checks for data completeness, and re-collects incomplete data. The program can be scheduled to run on specific dates, weekly updates, or daily updates. Currently, I am using only 5 bots to reduce the workload on my computer. These bots are capable of collecting data for over 900 companies in just 50 minutes each day.
    - Collection process
      
@@ -78,6 +79,7 @@ Used tools:
      </div>
 
 2. Data Process
+
    In this step, the program will execute the ETL process (Extract, Transform, Load), including backing up raw data. The process involves extracting information from raw data, transforming it into numerical data, reformatting the data frame, merging all data, then uploading it to my SQL server, and followed by backing up the raw data.
    - Data conversion by leveraging multiprocessing
      
@@ -104,6 +106,7 @@ Used tools:
      </div>
 
 3. Data Visualization
+
    Data visualization is created using Plotly and Streamlit for interactive dashboards, capable of querying datasets from the SQL server, processing calculations based on predefined functions, and then visualizing the data.
    
    <div align="center">
