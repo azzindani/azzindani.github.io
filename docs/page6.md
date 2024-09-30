@@ -48,7 +48,7 @@ Below is the workflow on how my project works
 1. Problem Definition
    - Clearly define the problem that needs to be solved.
 
-2. Identifying Solutions 
+2. Finding Solution
    - List all potential solutions and select one for implementation.  
    - Develop a plan that outlines the expected outcomes.
 
