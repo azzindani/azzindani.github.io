@@ -43,6 +43,41 @@ Below is the workflow on how my project works
   <img src="/assets/page9/000.png" alt="Logo" width="1000">
 </div>
 
+1. Problem Definition
+   - Clearly define the problem that needs to be solved.<br><br>
+
+2. Finding Solution
+   - List all potential solutions and choose one for implementation.  
+   - Develop a plan outlining the expected outcomes.<br><br>
+
+3. Data Collection
+   - Gather and prepare relevant datasets aligned with the problem.  
+   - If batch datasets are unavailable, develop a data collection process such as web scraping.  
+   - Ensure data quality and resolve any data issues.<br><br>
+
+4. Data Preprocessing
+   - Handle missing data or outliers.  
+   - Clean and structure the data.  
+   - Perform data transformation.  
+   - Store data appropriately.  
+   - Backup the data.<br><br>
+
+5. Continuous Update
+   - Regularly update the dataset or as needed.<br><br>
+
+6. Data Visualization & Analysis
+   - Univariate analysis - (numerical data): Use histograms, box plots, and density plots to understand distributions.  
+   - Univariate analysis - (categorical data): Use bar charts or pie charts to observe category frequencies.  
+   - Bivariate analysis: Analyze relationships between two variables.  
+   - Multivariate analysis: Examine interactions between three or more variables, often visualized with pair plots or heatmaps.<br><br>
+
+7. Evaluation & Improvement
+   - Evaluate inputs, processes, outputs, and outcomes.  
+   - Identify challenges.  
+   - Gain insights.  
+   - Implement necessary improvements by addressing challenges, adding new features, or refining results based on evaluation feedback.  
+   - Develop a plan for future enhancements.
+     
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Solution and Technology Stack
