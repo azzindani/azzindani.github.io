@@ -8,25 +8,24 @@
     {{ content_for_head }}
 </head>
 <body>
-    <div class="layout-container">
-        <!-- Top Navigation Bar -->
-        <div class="navbar">
-            <div class="logo">
-                <img src="/assets/images.png" alt="Logo">
-            </div>
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="aboutme.html">About Me</a></li>
-                <!-- Add other navigation items here -->
-            </ul>
+    <!-- Navigation bar -->
+    <div class="navbar">
+        <div class="logo">
+            <img src="assets/logo.png" alt="Logo">
         </div>
-
-        <!-- Main content container -->
-        <div class="content">
-            {{ content }}
-        </div>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="aboutme.html">About Me</a></li>
+            <!-- Other links here -->
+        </ul>
     </div>
 
+    <!-- Main content area for all pages -->
+    <div class="content">
+        {{ content }}
+    </div>
+
+    <!-- Footer -->
     <footer>
         <p>&copy; 2024 Your Name. All rights reserved.</p>
     </footer>
