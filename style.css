@@ -1,146 +1,91 @@
-/* General styles */
+/* General Styles */
 body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background-color: #f9f9f9; /* Light background */
+    color: #333; /* Dark text */
     margin: 0;
     padding: 0;
-    background-color: #f8f9fa; /* Light gray background */
-    color: #333; /* Dark gray text */
 }
 
-/* Style for the layout container */
-.layout-container {
-    display: flex;
-    flex-direction: column; /* Stacking navigation and content vertically */
-}
-
-/* Left Image Styling */
-.left-image {
-    width: 200px; /* Adjust width of the image container */
-    padding: 20px; /* Add some padding around the image */
-}
-
-.left-image img {
-    width: 100%; /* Make the image fill the container */
-    height: auto;
-    border-radius: 10px; /* Optional: Make the image corners rounded */
-}
-
-/* Style for the top navigation bar */
+/* Navbar */
 .navbar {
-    background-color: #333;
-    overflow: hidden;
+    background-color: #2a8f53; /* Green navbar */
     display: flex;
     justify-content: flex-start;
-    align-items: center; /* Vertically align items */
-    padding: 0.625rem; /* 10px padding */
-    position: fixed; /* Fix the navbar at the top */
-    top: 0;
-    width: 100%;
-    z-index: 1000; /* Ensure the navbar stays above other content */
-    height: 60px; /* Set the height of the navbar */
-}
-
-/* Logo in the navbar */
-.navbar .logo {
-    display: flex;
     align-items: center;
-    margin-right: 20px; /* Space between the logo and the navigation links */
+    padding: 10px 20px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    height: 60px;
 }
 
 .navbar .logo img {
-    height: 100%; /* Make the image height match the navbar height */
-    max-height: 100%; /* Ensure it doesn't exceed the navbar height */
-    width: auto; /* Maintain the image's aspect ratio */
+    height: 100%;
 }
 
-/* Navbar links styling */
 .navbar ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
     display: flex;
+    list-style: none;
+    margin-left: 20px;
+    padding: 0;
 }
 
 .navbar ul li {
-    padding: 14px 20px;
+    margin-right: 20px;
 }
 
 .navbar ul li a {
     color: white;
     text-decoration: none;
-    display: block;
+    font-size: 16px;
+    padding: 8px 15px;
 }
 
 .navbar ul li a:hover {
-    background-color: #575757;
+    background-color: #218142; /* Darker green on hover */
+    border-radius: 5px;
 }
 
-
-/* Push the content down to avoid overlapping the navbar */
+/* Content Area */
 .content {
-    padding-top: 70px; /* Adjust based on the height of your navbar */
+    padding-top: 80px; /* Space for fixed navbar */
+    padding-left: 20px;
+    padding-right: 20px;
+    max-width: 1200px;
+    margin: auto;
 }
 
-/* Main content */
-.content {
-    padding: 1.25rem; /* 20px padding for main content */
-    flex-grow: 1;
-    background-color: #fff; /* White background for content */
-}
-
-/* Full-width Banner */
-.banner {
+/* Footer */
+footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #2a8f53;
+    color: white;
+    position: relative;
+    bottom: 0;
     width: 100%;
-    height: 25rem; /* 400px */
-    position: relative; /* Position relative for text overlay */
 }
 
-.banner-background {
-    background-image: url('assets/images.png'); /* Background image */
-    background-size: cover; /* Cover the entire banner */
-    background-position: center; /* Center the image */
-    height: 100%;
-    display: flex; /* Use flexbox for center alignment */
-    justify-content: center; /* Center horizontally */
-    align-items: center; /* Center vertically */
-    color: white; /* Text color */
-    text-shadow: 0.125rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); /* Shadow for better visibility */
-}
-
-.banner h1 {
-    font-size: 3rem; /* 48px */
-    margin: 0; /* Remove default margin */
-}
-
-/* Responsive Styles */
-@media (max-width: 48rem) { /* 768px */
-    .navbar {
-        flex-direction: column; /* Stack the navbar links vertically on smaller screens */
-    }
-    .content {
-        padding-top: 100px; /* Adjust to avoid overlap on small screens */
-    }
-}
-
-/* Portfolio Cards */
+/* Card style (main page) */
 .portfolio {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
-    background-color: #f8f9fa;
+    margin-top: 20px;
 }
 
 .card {
     background-color: #fff;
-    border: 0.0625rem solid #ddd; /* 1px */
-    border-radius: 0.625rem; /* 10px */
-    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1); /* 0 4px 8px */
-    width: 18.75rem; /* 300px */
-    margin: 1.25rem; /* 20px */
-    overflow: hidden;
-    transition: transform 0.3s;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    margin: 20px;
     text-align: center;
-    color: #333; /* Dark text */
+    transition: transform 0.3s;
 }
 
 .card:hover {
@@ -154,17 +99,27 @@ body {
 
 .card a {
     text-decoration: none;
-    color: #2a8f53; /* Green for links */
+    color: #2a8f53; /* Green link color */
 }
 
 .card a:hover {
     color: #1f6f40; /* Darker green on hover */
 }
 
-/* Footer */
-footer {
-    text-align: center;
-    padding: 0.625rem; /* 10px */
-    background-color: #2a8f53;
-    color: white;
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .navbar ul {
+        flex-direction: column;
+        margin-top: 10px;
+    }
+
+    .portfolio {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .card {
+        width: 100%;
+        max-width: 350px;
+    }
 }
