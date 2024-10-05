@@ -31,14 +31,29 @@ body {
     overflow: hidden;
     display: flex;
     justify-content: flex-start;
-    align-items: center;
+    align-items: center; /* Vertically align items */
     padding: 0.625rem; /* 10px padding */
     position: fixed; /* Fix the navbar at the top */
     top: 0;
     width: 100%;
     z-index: 1000; /* Ensure the navbar stays above other content */
+    height: 60px; /* Set the height of the navbar */
 }
 
+/* Logo in the navbar */
+.navbar .logo {
+    display: flex;
+    align-items: center;
+    margin-right: 20px; /* Space between the logo and the navigation links */
+}
+
+.navbar .logo img {
+    height: 100%; /* Make the image height match the navbar height */
+    max-height: 100%; /* Ensure it doesn't exceed the navbar height */
+    width: auto; /* Maintain the image's aspect ratio */
+}
+
+/* Navbar links styling */
 .navbar ul {
     list-style-type: none;
     margin: 0;
@@ -59,6 +74,7 @@ body {
 .navbar ul li a:hover {
     background-color: #575757;
 }
+
 
 /* Push the content down to avoid overlapping the navbar */
 .content {
