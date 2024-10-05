@@ -3,7 +3,6 @@ body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     margin: 0;
     padding: 0;
-    display: flex;
     background-color: #f8f9fa; /* Light gray background */
     color: #333; /* Dark gray text */
 }
@@ -11,7 +10,7 @@ body {
 /* Style for the layout container */
 .layout-container {
     display: flex;
-    align-items: flex-start; /* Align items to the top */
+    flex-direction: column; /* Stacking navigation and content vertically */
 }
 
 /* Left Image Styling */
@@ -30,8 +29,14 @@ body {
 .navbar {
     background-color: #333;
     overflow: hidden;
-    flex-grow: 1; /* Navbar takes up remaining space */
-    margin-left: 20px; /* Add space between the image and navbar */
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 0.625rem; /* 10px padding */
+    position: fixed; /* Fix the navbar at the top */
+    top: 0;
+    width: 100%;
+    z-index: 1000; /* Ensure the navbar stays above other content */
 }
 
 .navbar ul {
@@ -39,7 +44,6 @@ body {
     margin: 0;
     padding: 0;
     display: flex;
-    justify-content: flex-start;
 }
 
 .navbar ul li {
@@ -58,74 +62,14 @@ body {
 
 /* Push the content down to avoid overlapping the navbar */
 .content {
-    padding-top: 50px; /* Adjust based on the height of your navbar */
-}
-
-/* Sidebar */
-.sidebar {
-    width: 15.625rem; /* 250px */
-    background-color: #2a8f53; /* Green background */
-    color: white;
-    position: fixed;
-    height: 100%;
-    padding-top: 1.25rem; /* 20px */
-    transition: width 0.3s ease;
-    overflow: hidden;
-}
-
-.sidebar ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-.sidebar ul li {
-    padding: 0.625rem; /* 10px */
-    text-align: center;
-}
-
-.sidebar ul li a {
-    color: white;
-    text-decoration: none;
-}
-
-.sidebar ul li a:hover {
-    color: #a1e6c2; /* Light green on hover */
-}
-
-.sidebar button {
-    background-color: #2a8f53;
-    color: white;
-    border: none;
-    width: 100%;
-    padding: 0.625rem; /* 10px */
-    cursor: pointer;
-}
-
-.sidebar button:hover {
-    background-color: #237546; /* Darker green */
-}
-
-/* Collapsed Sidebar (default state) */
-.sidebar.collapsed {
-    width: 3.125rem; /* 50px */
-}
-
-.sidebar.collapsed ul {
-    display: none;
+    padding-top: 70px; /* Adjust based on the height of your navbar */
 }
 
 /* Main content */
 .content {
-    margin-left: 3.125rem;  /* 50px, Default margin for collapsed sidebar */
-    padding: 1.25rem; /* 20px */
+    padding: 1.25rem; /* 20px padding for main content */
     flex-grow: 1;
-    transition: margin-left 0.3s ease;
     background-color: #fff; /* White background for content */
-}
-
-/* Expanded content when sidebar is open */
-.sidebar:not(.collapsed) ~ .content {
-    margin-left: 15.625rem; /* 250px */
 }
 
 /* Full-width Banner */
@@ -144,7 +88,7 @@ body {
     justify-content: center; /* Center horizontally */
     align-items: center; /* Center vertically */
     color: white; /* Text color */
-    text-shadow: 0.125rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); /* 2px 2px 4px shadow for better visibility */
+    text-shadow: 0.125rem 0.125rem 0.25rem rgba(0, 0, 0, 0.5); /* Shadow for better visibility */
 }
 
 .banner h1 {
@@ -154,11 +98,11 @@ body {
 
 /* Responsive Styles */
 @media (max-width: 48rem) { /* 768px */
-    .sidebar {
-        width: 0; /* Collapsed state on mobile */
+    .navbar {
+        flex-direction: column; /* Stack the navbar links vertically on smaller screens */
     }
     .content {
-        margin-left: 0; /* No margin on mobile */
+        padding-top: 100px; /* Adjust to avoid overlap on small screens */
     }
 }
 
