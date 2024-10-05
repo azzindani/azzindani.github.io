@@ -123,3 +123,55 @@ footer {
         max-width: 350px;
     }
 }
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #2a8f53; /* Green header background */
+    color: white;
+}
+
+/* Headers */
+h1, h2, h3, h4, h5, h6 {
+    color: #2a8f53; /* Green color for headers */
+}
+
+/* Links */
+a {
+    color: #2a8f53;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Lists */
+ul, ol {
+    margin-left: 20px;
+}
+
+/* Blockquotes */
+blockquote {
+    border-left: 4px solid #2a8f53;
+    padding-left: 16px;
+    margin-left: 0;
+    color: #555;
+}
+
+/* Code */
+code {
+    background-color: #f4f4f4;
+    padding: 2px 4px;
+    border-radius: 3px;
+    color: #333;
+}
