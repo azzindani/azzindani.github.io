@@ -8,6 +8,59 @@ body {
     color: #333; /* Dark gray text */
 }
 
+/* Style for the layout container */
+.layout-container {
+    display: flex;
+    align-items: flex-start; /* Align items to the top */
+}
+
+/* Left Image Styling */
+.left-image {
+    width: 200px; /* Adjust width of the image container */
+    padding: 20px; /* Add some padding around the image */
+}
+
+.left-image img {
+    width: 100%; /* Make the image fill the container */
+    height: auto;
+    border-radius: 10px; /* Optional: Make the image corners rounded */
+}
+
+/* Style for the top navigation bar */
+.navbar {
+    background-color: #333;
+    overflow: hidden;
+    flex-grow: 1; /* Navbar takes up remaining space */
+    margin-left: 20px; /* Add space between the image and navbar */
+}
+
+.navbar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.navbar ul li {
+    padding: 14px 20px;
+}
+
+.navbar ul li a {
+    color: white;
+    text-decoration: none;
+    display: block;
+}
+
+.navbar ul li a:hover {
+    background-color: #575757;
+}
+
+/* Push the content down to avoid overlapping the navbar */
+.content {
+    padding-top: 50px; /* Adjust based on the height of your navbar */
+}
+
 /* Sidebar */
 .sidebar {
     width: 15.625rem; /* 250px */
