@@ -1,8 +1,8 @@
 # Site
 title: My GitHub Pages Site
-description: A site using a custom theme
+#description: A site using a custom theme
 
-#: jekyll-theme-cayman
+: jekyll-theme-cayman
 
 #theme: minima
 plugins:
