@@ -1,21 +1,56 @@
----
-layout: default
-title: Home
----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portfolio - Home</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation bar -->
+    <div class="navbar">
+        <div class="logo">
+            <img src="assets/images.png" alt="Logo">
+        </div>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="aboutme.html">About Me</a></li>
+            <!-- Other links here -->
+        </ul>
+    </div>
 
-<section class="portfolio">
-    <div class="card">
-        <a href="https://azzindani.github.io/docs/page1.html">
-            <img src="assets/page1.jpg" alt="Lungs Detection">
-            <h3>Lungs Detection</h3>
-            <p>This project, initiated in 2021, aims to develop a computer vision system capable of detecting and localizing lungs in medical images such as CXR (Chest X-Ray) or CT scans.</p>
-        </a>
+    <!-- Main Content Section with Prolog -->
+    <div class="layout-container">
+        <!-- Prolog Section on the Left -->
+        <div class="prolog">
+            <h2>Welcome to My Portfolio</h2>
+            <p>This is an introduction or prolog to provide context about the portfolio and the projects featured here.</p>
+        </div>
+
+        <!-- Section Content on the Right -->
+        <div class="content">
+            <section class="portfolio">
+                <div class="card">
+                    <a href="https://azzindani.github.io/docs/page1.html">
+                        <img src="assets/page1.jpg" alt="Lungs Detection">
+                        <h3>Lungs Detection</h3>
+                        <p>This project, initiated in 2021, aims to develop a computer vision system capable of detecting and localizing lungs in medical images such as CXR (Chest X-Ray) or CT scans.</p>
+                    </a>
+                </div>
+                <div class="card">
+                    <a href="https://azzindani.github.io/docs/page2.html">
+                        <img src="assets/page2.png" alt="Covid-19 Detection">
+                        <h3>Covid-19 Detection</h3>
+                        <p>This project, developed in 2021, harnesses the power of computer vision and deep learning techniques to detect Covid-19 from chest X-ray (CXR) images.</p>
+                    </a>
+                </div>
+            </section>
+        </div>
     </div>
-    <div class="card">
-        <a href="https://azzindani.github.io/docs/page2.html">
-            <img src="assets/page2.png" alt="Covid-19 Detection">
-            <h3>Covid-19 Detection</h3>
-            <p>This project, developed in 2021, harnesses the power of computer vision and deep learning techniques to detect Covid-19 from chest X-ray (CXR) images.</p>
-        </a>
-    </div>
-</section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Your Name. All rights reserved.</p>
+    </footer>
+</body>
+</html>
