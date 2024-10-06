@@ -68,6 +68,40 @@ body {
     transition: all 0.3s ease; /* Smooth transition */
 }
 
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column; /* Stack elements vertically */
+        padding: 0.5rem 1rem; /* Adjust padding */
+        height: auto; /* Allow height to adjust based on content */
+    }
+
+    .navbar .logo img {
+        margin-bottom: 0.5rem; /* Space below logo */
+    }
+
+    .navbar h2 {
+        font-size: 2rem; /* Smaller title size for mobile */
+        margin-right: 0; /* Remove right margin */
+    }
+
+    .navbar ul {
+        flex-direction: column; /* Stack menu items vertically */
+        align-items: center; /* Center items */
+        width: 100%; /* Full width */
+    }
+
+    .navbar ul li {
+        margin-right: 0; /* Remove right margin */
+        margin-bottom: 0.5rem; /* Space between items */
+    }
+
+    .navbar ul li a {
+        font-size: 0.9rem; /* Smaller link size for mobile */
+        padding: 0.5rem; /* Adjust padding */
+    }
+}
+
 /* Layout container under navbar */
 .layout-container {
     /*: flex; */
@@ -85,7 +119,7 @@ body {
 .divider {
     border: none; /* Remove default border */
     height: 2px; /* Height of the line */
-    background-color: #b9f8d3; /* Color of the line */
+    background-color: #dae9e0; /* Color of the line */
     margin: 1rem 0; /* Spacing above and below the line */
 }
 
@@ -96,7 +130,7 @@ body {
 }
 
 .prolog h2 {
-    color: #dae9e0;
+    color: #19a553;
     margin-bottom: 0.625rem; /* 10px */
 }
 
