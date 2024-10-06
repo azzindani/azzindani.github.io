@@ -1,72 +1,140 @@
 /* General Styles */
 body {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    background-color: #f9f9f9;
+    font-family: "Calibri Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    background-color: #ffffff;
     color: #333;
     margin: 0;
     padding: 0;
+    text-align: left; /* Aligns body text to the left */
 }
 
 /* Navbar */
 .navbar {
-    background-color: #2a8f53; /* Green navbar */
+    /*background-color: #2a8f53; /* Fallback color */
+    background: linear-gradient(135deg, #09a5b9, #19a553); /* Green gradient */
+    /*background-color: linear-gradient(135deg, #2a8f53, #1f6f40); /* Green navbar */
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
-    padding: 10px 20px;
-    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    padding: 0.625rem 1.25rem; /* 10px 20px */
+    box-shadow: 0rem 0.25rem 0.5rem rgba(0, 0, 0, 0.1); /* 0px 2px 5px */
     position: fixed;
-    width: 100%;
+    width: calc(100% - 2.5rem);
     top: 0;
     z-index: 1000;
-    height: 60px; /* Fixed height for navbar */
+    height: 3.75rem; /* 60px */
 }
 
 .navbar .logo img {
-    height: 100%; /* Set logo height to match navbar */
+    height: 3.75rem; /* Set logo height to match navbar */
+    margin-left: 0; /* 20px */
+    margin-right: 5rem; /* 20px */
 }
 
 .navbar ul {
     display: flex;
     list-style: none;
-    margin-left: 20px;
+    margin-left: 0; /* 20px */
     padding: 0;
 }
 
 .navbar ul li {
-    margin-right: 20px;
+    margin-right: 1.25rem; /* 20px */
+}
+
+.navbar h2 {
+    color: white;
+    text-decoration: none;
+    font-size: 2.5rem; /* 16px */
+    padding: 0.5rem 1rem; /* 8px 15px */
+    transition: background-color 0.3s; /* Smooth transition for hover */
+    margin-right: 5rem; /* 20px */
+    font-family: "Calibri";
+    font-weight: medium;
 }
 
 .navbar ul li a {
     color: white;
     text-decoration: none;
-    font-size: 16px;
-    padding: 8px 15px;
+    font-size: 1rem; /* 16px */
+    padding: 0.5rem 1rem; /* 8px 15px */
+    transition: background-color 0.3s; /* Smooth transition for hover */
 }
 
 .navbar ul li a:hover {
-    background-color: #218142; /* Darker green on hover */
-    border-radius: 5px;
+    background-color: #81b496; /* Darker green on hover */
+    border-radius: 0.3125rem; /* 5px */
+    padding: 1.5rem 1.5rem; /* Increase padding for more height (10px and 15px in rem) */
+    transition: all 0.3s ease; /* Smooth transition */
+}
+
+/* Layout container under navbar */
+.layout-container {
+    /*: flex; */
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-top: 5rem; /* 64px (to make it appear under the navbar) */
+    padding-left: 2.5rem; /* Match the content padding */
+    padding-right: 2.5rem; /* Match the content padding */
+    max-width: 75rem; /* Match the content width */
+    margin: 1rem auto -5rem;
+    box-sizing: border-box;
+}
+
+.divider {
+    border: none; /* Remove default border */
+    height: 2px; /* Height of the line */
+    background-color: #b9f8d3; /* Color of the line */
+    margin: 1rem 0; /* Spacing above and below the line */
+}
+
+/* Prolog section */
+.prolog {
+    width: 100%; /* Full width of the container */
+    margin-bottom: 1.25rem; /* Add some space after prolog */
+}
+
+.prolog h2 {
+    color: #19a553;
+    margin-bottom: 0.625rem; /* 10px */
+}
+
+.prolog p, li, ul, blockquote {
+    color: #5f5f5f;
+    text-align: left; /* Ensure text is aligned to the left */
+}
+
+.image-section img {
+    width: 23rem; /* Adjust the image size */
+    height: auto;     /* Maintain aspect ratio */
+    border-radius: 0rem;
+    /*box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Optional: add a shadow */
+    padding-top: 1rem; /* 64px (to make it appear under the navbar) */
+    padding-left: 5rem; /* 20px */
+}
+
+/* Layout container under navbar */
+.layout-container2 {
+    /*: flex; */
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-top: 0rem; /* 64px (to make it appear under the navbar) */
+    padding-left: 2.5rem; /* Match the content padding */
+    padding-right: 2.5rem; /* Match the content padding */
+    max-width: 75rem; /* Match the content width */
+    margin: auto;
+    box-sizing: border-box;
 }
 
 /* Content Area */
 .content {
-    padding-top: 80px; /* Add padding to prevent content from being cut off */
-    padding-left: 20px;
-    padding-right: 20px;
-    max-width: 1200px;
+    padding-top: 5rem; /* 80px */
+    padding-left: 1.25rem; /* 20px */
+    padding-right: 1.25rem; /* 20px */
+    max-width: 75rem; /* 1200px */
     margin: auto;
-}
-
-/* Footer */
-footer {
-    text-align: center;
-    padding: 20px;
-    background-color: #2a8f53;
-    color: white;
-    position: relative;
-    bottom: 0;
-    width: 100%;
 }
 
 /* Card style (main page) */
@@ -74,16 +142,16 @@ footer {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
-    margin-top: 20px;
+    margin-top: 1.25rem; /* 20px */
 }
 
 .card {
     background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 300px;
-    margin: 20px;
+    border: 0.0625rem solid #ddd; /* 1px */
+    border-radius: 0.625rem; /* 10px */
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1); /* 0 4px 8px */
+    width: 19rem; /* 300px */
+    margin: 1.25rem; /* 20px */
     text-align: center;
     transition: transform 0.3s;
 }
@@ -95,22 +163,53 @@ footer {
 .card img {
     width: 100%;
     height: auto;
+    border-radius: 0.625rem;
 }
 
 .card a {
     text-decoration: none;
-    color: #2a8f53; /* Green link color */
+    color: #5f5f5f; /* Green link color */
 }
 
 .card a:hover {
-    color: #1f6f40; /* Darker green on hover */
+    color: #81b496; /* Darker green on hover */
+}
+
+.card2 {
+    background-color: #fff;
+    border: 0.0625rem solid #ddd; /* 1px */
+    border-radius: 0.625rem; /* 10px */
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1); /* 0 4px 8px */
+    width: 15rem; /* 300px */
+    margin: 0.75rem; /* 20px */
+    text-align: center;
+    transition: transform 0.3s;
+}
+
+.card2:hover {
+    transform: scale(1.05);
+}
+
+.card2 img {
+    width: 100%;
+    height: auto;
+    border-radius: 0.625rem;
+}
+
+.card2 a {
+    text-decoration: none;
+    color: #5f5f5f; /* Green link color */
+}
+
+.card2 a:hover {
+    color: #81b496; /* Darker green on hover */
 }
 
 /* Responsive Styles */
 @media (max-width: 768px) {
     .navbar ul {
         flex-direction: column;
-        margin-top: 10px;
+        margin-top: 0.625rem; /* 10px */
     }
 
     .portfolio {
@@ -120,7 +219,7 @@ footer {
 
     .card {
         width: 100%;
-        max-width: 350px;
+        max-width: 21.875rem; /* 350px */
     }
 }
 
@@ -131,8 +230,8 @@ table {
 }
 
 th, td {
-    padding: 12px;
-    border-bottom: 1px solid #ddd;
+    padding: 0.75rem; /* 12px */
+    border-bottom: 0.0625rem solid #ddd; /* 1px */
 }
 
 th {
@@ -142,36 +241,61 @@ th {
 
 /* Headers */
 h1, h2, h3, h4, h5, h6 {
-    color: #2a8f53; /* Green color for headers */
+    color: #19a553; /* Green color for headers */
+    font-family: "Arial";
+    font-weight: medium;
+    /*text-align: left; /* Aligns headings to the left */
+}
+
+/* Font for Body Text */
+p, li {
+    font-family: "Arial";
+    line-height: 1.5;
+    text-align: left; /* Aligns paragraph, list items, and blockquotes to the left */
+    margin-left: 0.5rem; /* 20px */
+    margin-right: 0.5rem; /* 20px */
+    font-weight: normal;
 }
 
 /* Links */
 a {
-    color: #2a8f53;
+    color: #19a553;
     text-decoration: none;
 }
 
 a:hover {
-    text-decoration: underline;
+    text-decoration: none;
 }
 
 /* Lists */
 ul, ol {
-    margin-left: 20px;
+    margin-left: 1.25rem; /* 20px */
 }
 
 /* Blockquotes */
 blockquote {
-    border-left: 4px solid #2a8f53;
-    padding-left: 16px;
+    border-left: 0.25rem solid #2a8f53; /* 4px */
+    padding-left: 1rem; /* 16px */
     margin-left: 0;
+    text-align: left; /* Aligns paragraph, list items, and blockquotes to the left */
     color: #555;
 }
 
 /* Code */
 code {
     background-color: #f4f4f4;
-    padding: 2px 4px;
-    border-radius: 3px;
+    padding: 0.125rem 0.25rem; /* 2px 4px */
+    border-radius: 0.1875rem; /* 3px */
     color: #333;
+}
+
+/* Footer */
+footer p {
+    text-align: center;
+    padding: 1.25rem; /* 20px */
+    background-color: #ffffff;
+    color: #5f5f5f;
+    position: relative;
+    bottom: 0; /* 20px */
+    width: 100%;
 }
