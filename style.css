@@ -206,22 +206,6 @@ body {
 }
 
 
-/* Tables */
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th, td {
-    padding: 0.75rem; /* 12px */
-    border-bottom: 0.0625rem solid #ddd; /* 1px */
-}
-
-th {
-    background-color: #2a8f53; /* Green header background */
-    color: white;
-}
-
 /* Headers */
 h1, h2, h3, h4, h5, h6 {
     color: #19a553; /* Green color for headers */
@@ -292,13 +276,22 @@ footer p {
     }
 
     .navbar ul {
-        flex-direction: column; /* Stack menu items vertically */
+        /*flex-direction: column; /* Stack menu items vertically */
         align-items: center; /* Center align menu items */
+    }
+
+    .navbar ul li a:hover {
+        border-radius: 0.125rem; /* 5px */
+        padding: 0.25rem 0.52rem; /* Increase padding for more height (10px and 15px in rem) */
     }
 
     .navbar h2 {
         margin-right: 0; /* Remove right margin */
         font-size: 2rem; /* 16px */
+    }
+
+    .navbar ul li a {
+        font-size: 0.875rem; /* Reduce font size for navbar links */
     }
 
     .image-section img {
@@ -317,17 +310,21 @@ footer p {
         justify-content: center; /* Center portfolio items */
     }
 
-    .card,
-    .card2 {
+    .card {
         width: 70%; /* Full width on small screens */
         margin: 0.5rem; /* Reduce margin */
     }
 
+    .card2 {
+        width: 50%; /* Full width on small screens */
+        margin: 0.5rem; /* Reduce margin */
+    }
+
     .prolog h2 {
-        font-size: 1.5rem; /* Adjust font size for headings */
+        font-size: 1.25rem; /* Adjust font size for headings */
     }
 
     .prolog p, li {
-        font-size: 0.9rem; /* Smaller font size for body text */
+        font-size: 0.8rem; /* Smaller font size for body text */
     }
 }
