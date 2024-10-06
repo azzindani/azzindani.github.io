@@ -284,7 +284,7 @@ footer p {
 }
 
 /* Media Queries for Responsiveness */
-@media (max-width: 768px) {
+@media only screen and (max-width: 768px) {
     .navbar {
         flex-direction: column; /* Stack navbar items vertically */
         height: auto; /* Adjust height */
@@ -321,9 +321,17 @@ footer p {
         width: 90%; /* Full width on small screens */
         margin: 0.5rem; /* Reduce margin */
     }
+
+    .prolog h2 {
+        font-size: 1.5rem; /* Adjust font size for headings */
+    }
+
+    .prolog p, li {
+        font-size: 0.9rem; /* Smaller font size for body text */
+    }
 }
 
-@media (max-width: 480px) {
+@media only screen and (max-width: 480px) {
     .navbar h2 {
         font-size: 2rem; /* Smaller font size for title */
     }
@@ -337,10 +345,14 @@ footer p {
     }
 
     .prolog h2 {
-        font-size: 1.5rem; /* Adjust font size for headings */
+        font-size: 1.25rem; /* Further adjust font size for headings */
     }
 
     .prolog p, li {
-        font-size: 0.9rem; /* Smaller font size for body text */
+        font-size: 0.8rem; /* Smaller font size for body text */
+    }
+
+    .content {
+        padding: 0 0.5rem; /* Reduce content padding */
     }
 }
