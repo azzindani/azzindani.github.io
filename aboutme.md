@@ -114,8 +114,7 @@ Below are my personal projects that I expliained the process only
 |1   |Broker Transaction Automation System |[Click Here](/docs/page10.md) |
 |2     |Facial Recognition - Large Version |[Click Here](/docs/page5.md) |
 |3     |Lung Abnormalities Detection (Computer Vision) |[Click Here](/docs/page3.md) |
-|4     |Financial Statement Excel Web Scraping
- |[Click Here](/docs/page7.md) |
+|4     |Financial Statement Excel Web Scraping|[Click Here](/docs/page7.md) |
 |5     |Broker Transaction Data Scraping |[Click Here](/docs/page8.md) |
 |6     |Broker Transaction Data Analysis |[Click Here](/docs/page9.md) |
 |7     |Facial Recognition - Small Version |[Click Here](/docs/page4.md) |
