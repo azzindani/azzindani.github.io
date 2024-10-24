@@ -1,3 +1,9 @@
+---
+layout: default
+title: About Me
+profile: false
+headline: false
+---
 <a id="readme-top"></a>
 
 <!-- TABLE OF CONTENTS -->
