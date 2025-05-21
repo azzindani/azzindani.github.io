@@ -7,6 +7,13 @@ headline: false
 
 <a id="readme-top"></a>
 
+[![Gmail](https://img.shields.io/badge/Gmail-D14836?logo=gmail&logoColor=white)](mailto:422indani@gmail.com)
+[![LinkedIn](https://custom-icon-badges.demolab.com/badge/LinkedIn-0A66C2?logo=linkedin-white&logoColor=fff)](https://www.linkedin.com/in/azzindan1/)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-121013?logo=github&logoColor=white)](https://azzindani.github.io/)
+[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-FFD21E?logo=huggingface&logoColor=000)](https://huggingface.co/Azzindani)
+[![GitHub](https://img.shields.io/badge/GitHub-%23121011.svg?logo=github&logoColor=white)](https://github.com/azzindani)
+---
+
 [HOME](https://azzindani.github.io/)
 
 <!-- TABLE OF CONTENTS -->
@@ -21,9 +28,11 @@ headline: false
     <li><a href="#challenges">Challenges</a></li>
     <li><a href="#insights">Insights</a></li>
     <li><a href="#future-plans">Future Plans</a></li>
+    <li><a href="#real-world-use-cases">Real World Use Cases</a></li>
   </ol>
 </details>
 
+---
 ## Overview and Objective
 This project, initiated in 2021, aims to develop a computer vision system capable of detecting and localizing lungs in medical images such as CXR (Chest X-Ray) or CT scans. By accurately identifying the lung boundaries, the model will lay the foundation for further analysis, including detecting lung diseases like Covid-19. This detection system represents the first step in building a more comprehensive tool for diagnosing and monitoring various conditions affecting internal organs.
 
@@ -31,6 +40,7 @@ The primary goal is to create a reliable computer vision model that can accurate
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Motivation and Inspiration
 The Covid-19 pandemic served as the primary catalyst for this project. Witnessing the global impact of the virus and the urgent need for advanced diagnostic tools inspired me to contribute to the development of a scalable and accurate detection system. This project represents a foundational step toward creating a Covid-19 detection model by focusing on lung detection in X-ray images. Accurate lung detection is crucial for isolating the target area, enabling more precise and efficient model training for disease identification.
 
@@ -38,6 +48,7 @@ Moreover, this project is not only a step toward Covid-19 detection but also a p
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Workflow
 Below is the workflow on how my project works
 
@@ -76,6 +87,7 @@ Below is the workflow on how my project works
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Solution and Technology Stack
 Used tools:
 1. TensorFlow Object Detection API
@@ -85,6 +97,7 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Project Details and Results
 1. Data Collection
    
@@ -201,6 +214,7 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Challenges
 1. **Data Labeling:** Acquiring accurately labeled medical images, particularly with precise lung boundaries, is challenging due to the specific expertise required.
 2. **Anatomical Variation:** The size, shape, and position of lungs can vary significantly among individuals, making it difficult to generalize across the population.
@@ -208,6 +222,7 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Insights
 1. **Adaptability:** The techniques developed for lung detection can be adapted to other internal organs such as the heart, liver, or kidneys, providing a versatile tool for broader medical applications.
 2. **Radiologist Collaboration:** Collaborating with medical experts offers valuable insights into key anatomical markers for accurate lung detection, enhancing the model’s precision.
@@ -215,10 +230,22 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Future Plans
 1. **Expand Organ Detection:** Build upon this foundation to detect other internal organs in medical images, such as the liver, kidneys, and heart, enabling a comprehensive diagnostic system for various health conditions.
 2. **Real-Time Diagnostics:** Develop a web-based platform where doctors can upload images for real-time lung detection and analysis, enhancing efficiency in clinical settings.
 3. **Enhanced Lung Disease Detection:** Extend the model to detect diseases like pneumonia, lung cancer, and eventually Covid-19 by training the system to recognize specific pathological features.
 4. **Improved Model Accuracy:** Continuously refine the model by incorporating larger and more diverse datasets, and integrating advanced deep learning techniques like attention mechanisms and U-Net architectures for better segmentation.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
+## Real World Use Cases
+
+1. **Supporting Radiologists in Hospital Triage:** Acting as a complementary tool, this model helps radiologists focus their expertise where it matters most by highlighting lung regions in chest X-rays, accelerating diagnosis during critical times without replacing human judgment.
+2. **Enhancing Diagnostic Pre-Screening:** As an assistive technology, it empowers clinicians to better prioritize cases by flagging potential abnormalities early, fostering a collaborative partnership between AI insights and medical experience.
+3. **Extending Healthcare Reach to Underserved Areas:** By integrating into portable or telemedicine devices, this tool amplifies the capabilities of healthcare providers in remote regions, enabling earlier detection and care without substituting the vital human touch.
+4. **Augmenting Medical Imaging Systems:** Embedded within larger platforms, it serves as a foundational step in refining diagnostic workflows—preparing images for deeper analysis—while recognizing that true understanding requires human interpretation.
+5. **A Foundation for Holistic Organ Detection:** Beyond lungs, this approach lays groundwork for future AI tools that assist in identifying various organ-specific conditions, reflecting the ongoing partnership between human wisdom and machine precision to advance personalized healthcare.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
