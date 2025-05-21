@@ -34,17 +34,17 @@ headline: false
 
 ---
 ## Overview and Objective
-This project, initiated in 2021, aims to develop a computer vision system capable of detecting and localizing lungs in medical images such as CXR (Chest X-Ray) or CT scans. By accurately identifying the lung boundaries, the model will lay the foundation for further analysis, including detecting lung diseases like Covid-19. This detection system represents the first step in building a more comprehensive tool for diagnosing and monitoring various conditions affecting internal organs.
+This project, initiated in **2021**, aims to develop a **computer vision system capable of detecting and localizing lungs** in medical images such as **CXR (Chest X-Ray)** or **CT scans**. By **accurately identifying the lung boundaries**, the model will lay the foundation for further analysis, including **detecting lung diseases like Covid-19**. This detection system represents the **first step in building a more comprehensive tool** for diagnosing and monitoring various conditions affecting **internal organs**.
 
-The primary goal is to create a reliable computer vision model that can accurately detect lungs in medical images. This system will not only assist in lung health analysis but will also serve as a basis for detecting other internal organs, enabling more comprehensive diagnostic capabilities for a range of medical conditions. However, for now, the project's focus remains solely on lung detection.
+The **primary goal** is to create a **reliable computer vision model** that can **accurately detect lungs** in medical images. This system will not only assist in **lung health analysis** but will also serve as a **basis for detecting other internal organs**, enabling more **comprehensive diagnostic capabilities** for a range of medical conditions. However, for now, the project's focus remains solely on **lung detection**.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ---
 ## Motivation and Inspiration
-The Covid-19 pandemic served as the primary catalyst for this project. Witnessing the global impact of the virus and the urgent need for advanced diagnostic tools inspired me to contribute to the development of a scalable and accurate detection system. This project represents a foundational step toward creating a Covid-19 detection model by focusing on lung detection in X-ray images. Accurate lung detection is crucial for isolating the target area, enabling more precise and efficient model training for disease identification.
+The **Covid-19 pandemic** served as the **primary catalyst** for this project. Witnessing the **global impact** of the virus and the **urgent need for advanced diagnostic tools** inspired me to contribute to the development of a **scalable and accurate detection system**. This project represents a **foundational step toward creating a Covid-19 detection model** by focusing on **lung detection in X-ray images**. **Accurate lung detection** is crucial for **isolating the target area**, enabling more **precise and efficient model training** for disease identification.
 
-Moreover, this project is not only a step toward Covid-19 detection but also a proof of concept demonstrating the potential of deep learning in medical imaging. It shows that specific organs or objects within the human body can be accurately detected through CXR or other X-ray images if the model is trained with appropriate data. This capability has far-reaching implications beyond Covid-19, paving the way for detecting various other conditions and abnormalities in multiple organs. It enhances the effectiveness of diagnostic tools and supports advancements in personalized medicine.
+Moreover, this project is not only a step toward Covid-19 detection but also a **proof of concept** demonstrating the **potential of deep learning in medical imaging**. It shows that **specific organs or objects within the human body can be accurately detected** through **CXR or other X-ray images** if the model is trained with appropriate data. This capability has **far-reaching implications beyond Covid-19**, paving the way for **detecting various other conditions and abnormalities** in **multiple organs**. It enhances the **effectiveness of diagnostic tools** and supports advancements in **personalized medicine**.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
