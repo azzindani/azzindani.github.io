@@ -101,7 +101,7 @@ Used tools:
 ## Project Details and Results
 1. Data Collection
    
-   The dataset utilizing NIH Chest X-ray [link](https://www.kaggle.com/datasets/nih-chest-xrays/data) contains over 112,000 Chest X-ray images from more than 30,000 unique patients. I have used only 400 images as a sample, which is considered sufficient for single-object detection.
+   The dataset utilizing NIH Chest X-ray [link](https://www.kaggle.com/datasets/nih-chest-xrays/data) contains over 112,000 Chest X-ray images from more than 30,000 unique patients. I have used only **400 images** as a sample, which is considered sufficient for single-object detection.
 
 2. Labelling
 
