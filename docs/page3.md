@@ -7,6 +7,13 @@ headline: false
 
 <a id="readme-top"></a>
 
+[![Gmail](https://img.shields.io/badge/Gmail-D14836?logo=gmail&logoColor=white)](mailto:422indani@gmail.com)
+[![LinkedIn](https://custom-icon-badges.demolab.com/badge/LinkedIn-0A66C2?logo=linkedin-white&logoColor=fff)](https://www.linkedin.com/in/azzindan1/)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-121013?logo=github&logoColor=white)](https://azzindani.github.io/)
+[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-FFD21E?logo=huggingface&logoColor=000)](https://huggingface.co/Azzindani)
+[![GitHub](https://img.shields.io/badge/GitHub-%23121011.svg?logo=github&logoColor=white)](https://github.com/azzindani)
+---
+
 [HOME](https://azzindani.github.io/)
 
 <!-- TABLE OF CONTENTS -->
@@ -21,27 +28,31 @@ headline: false
     <li><a href="#challenges">Challenges</a></li>
     <li><a href="#insights">Insights</a></li>
     <li><a href="#future-plans">Future Plans</a></li>
+    <li><a href="#real-world-use-cases">Real World Use Cases</a></li>
   </ol>
 </details>
 
+---
 ## Overview and Objective
-This project, developed in 2021, aims to utilize computer vision and deep learning systems to identify and analyze abnormalities in lung images, such as chest X-rays (CXR) or CT scans. By applying deep learning techniques to medical imaging data, the system seeks to assist healthcare professionals in diagnosing conditions such as nodules, infiltrates, and other pulmonary abnormalities. This tool serves as a foundation for more advanced diagnostic applications, including the potential for detecting specific diseases.
+This project, developed in **2021**, aims to utilize **computer vision and deep learning systems** to identify and analyze **abnormalities in lung images**, such as **chest X-rays (CXR) or CT scans**. By applying deep learning techniques to medical imaging data, the system seeks to assist **healthcare professionals in diagnosing conditions** such as **nodules, infiltrates, and other pulmonary abnormalities**. This tool serves as a foundation for more advanced diagnostic applications, including the potential for detecting **specific diseases**.
 
-The objective of this project is to develop an accurate and reliable computer vision model capable of detecting and classifying abnormalities in lung images. This system will aid radiologists in identifying various lung conditions, providing an early diagnostic tool that can be expanded to encompass the detection of more specialized diseases in the future.
+The objective of this project is to develop an **accurate and reliable computer vision model** capable of **detecting and classifying abnormalities in lung images**. This system will aid **radiologists in identifying various lung conditions**, providing an **early diagnostic tool** that can be expanded to encompass the detection of more specialized diseases in the future.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Motivation and Inspiration
-Early detection of lung abnormalities is crucial for the effective treatment and management of various pulmonary diseases, such as pneumonia, tuberculosis, and lung cancer. Timely diagnosis can significantly improve treatment outcomes and enhance the chances of successful interventions. However, manual examination of medical images is often time-consuming and prone to human error, leading to delays in diagnosis and misinterpretations.
+**Early detection of lung abnormalities** is crucial for the effective treatment and management of various pulmonary diseases, such as **pneumonia, tuberculosis, and lung cancer**. **Timely diagnosis** can significantly improve treatment outcomes and enhance the chances of successful interventions. However, **manual examination of medical images** is often **time-consuming and prone to human error**, leading to delays in diagnosis and misinterpretations.
 
-Inspired by the transformative potential of AI to enhance diagnostic accuracy and efficiency, this project harnesses advanced computer vision techniques to automate and streamline the detection process. By creating a sophisticated tool capable of rapidly identifying abnormalities in chest X-rays and CT scans, that aims to alleviate some of the burdens faced by radiologists.
+Inspired by the transformative potential of **AI to enhance diagnostic accuracy and efficiency**, this project harnesses **advanced computer vision techniques** to automate and streamline the detection process. By creating a sophisticated tool capable of **rapidly identifying abnormalities in chest X-rays and CT scans**, it aims to **alleviate some of the burdens faced by radiologists**.
 
-This automated system is designed to serve as a supportive assistant, providing initial assessments that can expedite the review process and allow healthcare professionals to focus on more complex cases. By improving diagnostic efficiency, we hope to enhance the overall workflow in radiology departments, ultimately contributing to better patient outcomes. Additionally, this project has the potential to reduce the burden on healthcare systems by enabling quicker identification and management of lung conditions, particularly in settings with high patient volumes or limited access to specialized medical expertise.
+This automated system is designed to serve as a **supportive assistant**, providing **initial assessments** that can expedite the review process and allow healthcare professionals to focus on more complex cases. By improving diagnostic efficiency, we hope to **enhance the overall workflow in radiology departments**, ultimately contributing to **better patient outcomes**. Additionally, this project has the potential to **reduce the burden on healthcare systems** by enabling **quicker identification and management of lung conditions**, particularly in settings with **high patient volumes or limited access to specialized medical expertise**.
 
-Through this initiative, we aspire not only to improve individual patient care but also to advance the broader field of medical imaging, paving the way for further innovations in AI-based healthcare solutions.
+Through this initiative, we aspire not only to improve **individual patient care** but also to advance the broader field of **medical imaging**, paving the way for further innovations in **AI-based healthcare solutions**.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Workflow
 Below is the workflow on how my project works
 
@@ -80,6 +91,7 @@ Below is the workflow on how my project works
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Solution and Technology Stack
 Used tools:
 1. TensorFlow Object Detection API
@@ -89,12 +101,13 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Project Details and Results
-This project is trained to detect lung abnormalities categorized into 8 conditions: `Atelectasis`, `Infiltration`, `Pneumothorax`, `Effusion`, `Pneumonia`, `Cardiomegaly`, `Nodule`, and `Mass`.
+This project is trained to **detect lung abnormalities categorized into 8 conditions**: `Atelectasis`, `Infiltration`, `Pneumothorax`, `Effusion`, `Pneumonia`, `Cardiomegaly`, `Nodule`, and `Mass`.
 
 1. Data Collection
 
-   The dataset utilizing NIH Chest X-ray can be found at this [link](https://www.kaggle.com/datasets/nih-chest-xrays/data). I have used only 880 images as a sample, limited to the number labeled by radiologists provided within the dataset.
+   The dataset utilizing NIH Chest X-ray can be found at this [link](https://www.kaggle.com/datasets/nih-chest-xrays/data). I have used only **880 images** as a sample, limited to the number labeled by radiologists provided within the dataset.
 
 2. Labelling
 
@@ -207,6 +220,7 @@ This project is trained to detect lung abnormalities categorized into 8 conditio
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Challenges
 1. **Data Quality and Annotation**: Obtaining a diverse dataset of labeled lung images with clear annotations of abnormalities poses a challenge due to the need for medical input from experts. High-quality annotations from radiologists are essential for effectively training deep learning models. The scarcity of annotated datasets can limit the model's ability to generalize across various populations and conditions. Furthermore, ensuring that the data represents diverse demographics, disease stages, and imaging modalities complicates the data collection process.
 2. **Inconsistency in Annotations**: Variability in interpretation among different experts can lead to inconsistencies in labeling, impacting model training.
@@ -218,6 +232,7 @@ This project is trained to detect lung abnormalities categorized into 8 conditio
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Insights
 1. **Model Adaptability**: The techniques used to detect lung abnormalities can be adapted for other medical imaging tasks, such as identifying abnormalities in various organs.
 2. **Cross-Domain Applications**: Techniques developed for detecting lung abnormalities can also be applied to other imaging modalities, such as MRI or ultrasound, thereby broadening the technology's scope.
@@ -233,6 +248,7 @@ This project is trained to detect lung abnormalities categorized into 8 conditio
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Future Plans
 1. **Expand Disease Detection**: Broaden the model's capabilities to identify and classify additional lung conditions and abnormalities, such as specific infections or cancers.
 2. **Multi-Organ Abnormality Detection**: Enhance the model's ability to detect abnormalities in other organs, creating a comprehensive diagnostic tool for various medical conditions.
@@ -247,5 +263,15 @@ This project is trained to detect lung abnormalities categorized into 8 conditio
 11. **Continuous Improvement**: Regularly update and refine the model based on new data and feedback from clinical use to maintain high performance and relevance.
 12. **Feedback Mechanism**: Establish structured channels for healthcare professionals to provide feedback on the model's performance, which can inform ongoing improvements.
 13. **Adaptive Learning**: Implement adaptive learning techniques that enable the model to automatically learn from new cases and anomalies, ensuring it remains up to date with evolving medical knowledge.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
+## Real World Use Cases
+1. **Assisting Radiologists in Early Detection:** This AI-driven tool acts as a supportive assistant by rapidly highlighting potential lung abnormalities in chest X-rays and CT scans, allowing radiologists to prioritize cases that require urgent attention and improve diagnostic accuracy.
+2. **Enhancing Diagnostic Efficiency in High-Volume Settings:** By automating the initial screening of lung images, the system reduces workload and turnaround times in busy radiology departments, enabling faster patient triage and more timely interventions.
+3. **Expanding Access in Resource-Limited Areas:** Integrated into portable or telemedicine platforms, this technology empowers healthcare providers in regions with limited specialist availability to identify lung conditions early, bridging gaps in healthcare accessibility.
+4. **Complementing, Not Replacing, Human Expertise:** Serving as an augmentative technology, the system provides preliminary assessments that support, rather than substitute, the critical judgment and experience of medical professionals.
+5. **Foundation for Broader AI-Driven Medical Imaging Solutions:** This project lays the groundwork for future development of AI tools capable of detecting a wide range of pulmonary diseases and abnormalities, helping to advance personalized and scalable healthcare worldwide.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
