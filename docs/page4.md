@@ -7,6 +7,13 @@ headline: false
 
 <a id="readme-top"></a>
 
+[![Gmail](https://img.shields.io/badge/Gmail-D14836?logo=gmail&logoColor=white)](mailto:422indani@gmail.com)
+[![LinkedIn](https://custom-icon-badges.demolab.com/badge/LinkedIn-0A66C2?logo=linkedin-white&logoColor=fff)](https://www.linkedin.com/in/azzindan1/)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-121013?logo=github&logoColor=white)](https://azzindani.github.io/)
+[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-FFD21E?logo=huggingface&logoColor=000)](https://huggingface.co/Azzindani)
+[![GitHub](https://img.shields.io/badge/GitHub-%23121011.svg?logo=github&logoColor=white)](https://github.com/azzindani)
+---
+
 [HOME](https://azzindani.github.io/)
 
 <!-- TABLE OF CONTENTS -->
@@ -21,21 +28,25 @@ headline: false
     <li><a href="#challenges">Challenges</a></li>
     <li><a href="#insights">Insights</a></li>
     <li><a href="#future-plans">Future Plans</a></li>
+    <li><a href="#real-world-use-cases">Real World Use Cases</a></li>
   </ol>
 </details>
 
+---
 ## Overview and Objective
-This project is a pilot initiative developed in 2022, designed to establish a foundational model for facial recognition that can accurately identify and verify faces. By harnessing the power of deep learning techniques, the model aspires to deliver highly accurate and efficient facial recognition capabilities. The ultimate goal is to create a scalable solution and a fully functional deep learning workflow that can be utilized to advance CNN (Convolutional Neural Network) projects and any computer vision application.
+This project is a **pilot initiative developed in 2022**, designed to establish a **foundational model for facial recognition** that can **accurately identify and verify faces**. By harnessing the power of **deep learning techniques**, the model aspires to deliver **highly accurate and efficient facial recognition capabilities**. The **ultimate goal** is to create a **scalable solution** and a **fully functional deep learning workflow** that can be utilized to **advance CNN (Convolutional Neural Network) projects** and any **computer vision application**.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Motivation and Inspiration
-This facial recognition project is inspired by the remarkable capabilities of the human eye and brain, which can effortlessly detect and recognize multiple objects and faces simultaneously. In everyday situations, humans can quickly identify individuals across various environments, regardless of lighting, angles, or distractions, thanks to the brain's ability to process complex visual data into recognizable patterns. This natural ability forms the foundation of my project, which aims to replicate and enhance human facial recognition using advanced technology.
+This **facial recognition project** is inspired by the **remarkable capabilities of the human eye and brain**, which can effortlessly **detect and recognize multiple objects and faces simultaneously**. In everyday situations, humans can **quickly identify individuals across various environments**, regardless of **lighting, angles, or distractions**, thanks to the brain's ability to **process complex visual data into recognizable patterns**. This **natural ability** forms the foundation of my project, which aims to **replicate and enhance human facial recognition** using **advanced technology**.
 
-By mimicking the human visual system, my goal is to create a highly accurate and efficient facial recognition system that excels in dynamic real-world scenarios, bridging the gap between human perception and artificial intelligence. On the other hand, faces are among the most challenging objects to recognize due to the vast similarities among human faces. Even small facial features can resemble those of other individuals. If this deep learning model can achieve high accuracy despite the many variations in human facial features. I believe that this algorithm and deep learning model can be applied to a wide range of objects beyond just facial recognition.
+By **mimicking the human visual system**, my goal is to create a **highly accurate and efficient facial recognition system** that excels in **dynamic real-world scenarios**, **bridging the gap between human perception and artificial intelligence**. On the other hand, **faces are among the most challenging objects to recognize** due to the **vast similarities among human faces**. Even **small facial features can resemble those of other individuals**. If this **deep learning model** can achieve **high accuracy** despite the many **variations in human facial features**, I believe that this **algorithm and deep learning model can be applied to a wide range of objects** beyond just facial recognition.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Workflow
 Below is the workflow on how my project works
 
@@ -88,6 +99,7 @@ Below is the workflow on how my project works
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Solution and Technology Stack
 Used tools:
 1. Python library : ![TensorFlow](https://img.shields.io/badge/TensorFlow-%23FF6F00.svg?style=for-the-badge&logo=TensorFlow&logoColor=white) ![Keras](https://img.shields.io/badge/Keras-%23D00000.svg?style=for-the-badge&logo=Keras&logoColor=white) ![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white) ![NumPy](https://img.shields.io/badge/numpy-%23013243.svg?style=for-the-badge&logo=numpy&logoColor=white) ![Matplotlib](https://img.shields.io/badge/Matplotlib-%23ffffff.svg?style=for-the-badge&logo=Matplotlib&logoColor=black) ![Selenium](https://img.shields.io/badge/selenium-43B02A.svg?style=for-the-badge&logo=selenium&logoColor=white)
@@ -95,17 +107,18 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Project Details and Results
 1. Data Collection
 
-   I encountered difficulties in gathering data through Kaggle.com, so the solution was to create a bot. I developed an automation bot using the Selenium module to collect facial images. The bot's task is to gather images by using celebrity names as keywords, searching through Google Images, and downloading as many images as I need (in this case, I collected 100 images per keyword). To speed up the data collection process, I implemented multi-threading, running 10 bots simultaneously, each with different keyword tasks. For the initial data collection, I used 300 celebrity names as keywords.
+   I encountered **difficulties in gathering data through Kaggle.com**, so the solution was to **create a bot**. I developed an **automation bot using the Selenium module** to **collect facial images**. The bot's task is to **gather images by using celebrity names as keywords**, **searching through Google Images**, and **downloading as many images as needed** (**100 images per keyword** in this case). To **speed up the data collection process**, I implemented **multi-threading**, running **10 bots simultaneously**, each with **different keyword tasks**. For the **initial data collection**, I used **300 celebrity names as keywords**.
 
    <div align="center">
      <img src="/assets/page4/001.png" alt="Logo" width="1000">
    </div>
    <br>
 
-   In total, I collected around 28,926 image files, organized into folders based on the respective keywords.
+   In total, I **collected around 28,926 image files**, organized into folders based on the respective keywords.
 
    <div align="center">
      <img src="/assets/page4/002.png" alt="Logo" width="1000">
@@ -114,7 +127,7 @@ Used tools:
 
 2. Cropping Images
 
-   I encountered an issue where the downloaded images were random, so I needed to ensure that I was specifically getting facial images. The solution was to create an automation process that could crop only the faces using OpenCV, leveraging the Haar Cascade method.
+   I encountered an issue where the downloaded images were random, so I needed to ensure that I was specifically getting facial images. The solution was to create an **automation process that could crop only the faces using OpenCV**, leveraging the **Haar Cascade method**.
 
    <div align="center">
      <img src="/assets/page4/003.png" alt="Logo" width="1000">
@@ -154,14 +167,14 @@ Used tools:
      <br>
      
 4. Training Model
-   - I loaded the samples into an array with 96 x 96 pixels as my input tensor, consisting of 10,000 samples. In this case, the input tensor represents celebrity face images, and the output tensor corresponds to 100 celebrity names.
+   - I loaded the samples into an array with **96 x 96 pixels** as my input tensor, **consisting of 10,000 samples**. In this case, the input tensor represents celebrity face images, and the output tensor corresponds to 100 celebrity names.
 
      <div align="center">
        <img src="/assets/page4/010.png" alt="Logo" width="1000">
      </div>
      <br>
      
-   - I used 10,000 images as my sample set, with 7,000 images allocated for training (70%), 2,000 images for testing (20%), and 1,000 images for validation (10%). The deep learning CNN models will use 26 million trainable parameters.
+   - I used **10,000 images as my sample set**, with **7,000 images allocated for training (70%)**, **2,000 images for testing (20%)**, and **1,000 images for validation (10%)**. The deep learning CNN models will use **26 million trainable parameters**.
 
      <div align="center">
        <img src="/assets/page4/011.png" alt="Logo" width="1000">
@@ -169,14 +182,14 @@ Used tools:
      </div>
      <br>
      
-   - The model was tested over 50 epochs and achieved an accuracy of over 0.80 OR 80%.
+   - The model was tested over **50 epochs** and **achieved an accuracy of over 0.80 OR 80%**.
 
      <div align="center">
        <img src="/assets/page4/013.png" alt="Logo" width="1000">
      </div>
      <br>
      
-   - I evaluated the model using the test samples, and the results confirmed an accuracy of over 0.80 or 80%.
+   - I evaluated the model using the test samples, and the results confirmed an **accuracy of over 0.80 or 80%**.
      
      <div align="center">
        <img src="/assets/page4/014.png" alt="Logo" width="1000">
@@ -206,7 +219,7 @@ Used tools:
      <img src="/assets/page4/017.png" alt="Logo" width="1000">
    </div>
 
-    The results reveal that the facial recognition is not perfect, as illustrated by the screenshots below which trained for 80 % accuracy only. You can see that the facial images serve as the input tensor, while the filenames represent the output tensor of the detection.
+    The results reveal that the facial recognition is not perfect, as illustrated by the screenshots below which trained for **80 % accuracy** only. You can see that the facial images serve as the input tensor, while the filenames represent the output tensor of the detection.
 
     <div align="center">
       <img src="/assets/page4/018.png" alt="Logo" width="1000">
@@ -214,6 +227,7 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Challenges
 1. **Data Collection Speed:** The data collection was very slow due to the use of a single bot. Therefore, I developed a multi-threaded bot that can run simultaneously.
 2. **Network Constraints:** Network limitations can affect image data quality and potentially cause crashes. Hence, I need to limit the number of bots running the process.
@@ -223,6 +237,7 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Insights
 1. **Parallel Processing:** Techniques like parallel computing can enhance performance by executing multiple operations simultaneously.
 2. **Convolutional Neural Networks (CNN):** CNNs are vital for extracting complex features from facial images. They can automatically learn hierarchical features, such as edges, textures, and patterns, from raw pixel data. In facial recognition, deeper CNN layers capture high-level features like facial shapes, eyes, and noses.
@@ -232,11 +247,23 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Future Plans
 1. **Diverse Data Collection:** Gather data from a variety of sources to capture different facial expressions, ages, ethnicities, and lighting conditions. This helps in building a more comprehensive and unbiased model.
 2. **Data Augmentation:** Apply techniques such as image rotation, scaling, and color adjustment to artificially expand the training dataset and enhance the model's generalization.
 3. **Improve Accuracy:** Continuously refine the model by incorporating advanced deep learning techniques and expanding the dataset to enhance recognition accuracy and robustness.
 4. **Integration with Applications:** Develop integration solutions for various applications, such as security systems, personalized services, and enhanced customer experiences.
 5. **Scalable AI Solutions:** Leverage AI platforms that offer scalable and flexible solutions, allowing you to adjust resources on demand.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
+## Real-World Use Cases
+1. **Secure Identity Verification Systems:** This model can serve as the core engine for secure access control systems in workplaces, airports, and financial institutions, helping to verify identities quickly and reliably while enhancing user convenience and system security.
+2. **Supportive Technology in Healthcare:** Facial recognition can be integrated into patient monitoring systems in hospitals or elderly care centers to identify patients and track their movements for safety, especially for those with memory loss or cognitive impairments.
+3. **Assisting in Finding Missing Persons:** Leveraging the model in public surveillance systems or mobile apps can aid in identifying missing individuals or victims of trafficking in a responsible and ethical framework, in collaboration with law enforcement.
+4. **Augmenting Personalized User Experiences:** This model can support adaptive systems such as smart home devices, retail analytics, or public services, providing personalized experiences while preserving individual privacy through secure processing pipelines.
+5. **Research and Education in AI & Computer Vision:** As a pilot project, this model is an accessible and scalable foundation for academic institutions or research groups to explore convolutional neural networks, object detection, and other computer vision applications.
+6. **Expanding Beyond Facial Recognition:** The algorithmic foundation and architecture can be repurposed or extended to recognize other object categories—opening doors for industrial, environmental, or agricultural use cases, where visual classification and recognition are essential.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
