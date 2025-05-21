@@ -7,6 +7,13 @@ headline: false
 
 <a id="readme-top"></a>
 
+[![Gmail](https://img.shields.io/badge/Gmail-D14836?logo=gmail&logoColor=white)](mailto:422indani@gmail.com)
+[![LinkedIn](https://custom-icon-badges.demolab.com/badge/LinkedIn-0A66C2?logo=linkedin-white&logoColor=fff)](https://www.linkedin.com/in/azzindan1/)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-121013?logo=github&logoColor=white)](https://azzindani.github.io/)
+[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-FFD21E?logo=huggingface&logoColor=000)](https://huggingface.co/Azzindani)
+[![GitHub](https://img.shields.io/badge/GitHub-%23121011.svg?logo=github&logoColor=white)](https://github.com/azzindani)
+---
+
 [HOME](https://azzindani.github.io/)
 
 <!-- TABLE OF CONTENTS -->
@@ -24,6 +31,7 @@ headline: false
   </ol>
 </details>
 
+---
 ## Overview and Objective
 This project, developed in 2021, harnesses the power of computer vision and deep learning techniques to detect Covid-19 from chest X-ray (CXR) images. By training a model on a carefully curated dataset of labeled medical images, the objective is to classify these images as either positive or negative for Covid-19. This initiative aspires to provide a faster and more automated diagnostic tool, empowering medical professionals to identify Covid-19 cases with remarkable accuracy, complementing traditional testing methods.
 
@@ -31,6 +39,7 @@ The primary aim of this project is to create an AI-powered system capable of swi
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Motivation and Inspiration
 The global Covid-19 pandemic has highlighted the urgent need for rapid and accurate diagnostic tools, exposing the limitations of traditional testing methods like PCR tests, which, while effective, often require significant time and resources. Delays in testing and slow result turnaround emphasize the necessity for alternative approaches that can provide timely insights.
 
@@ -40,6 +49,7 @@ Such advancements can not only alleviate the burden on healthcare systems but al
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Workflow
 Below is the workflow on how my project works
 
@@ -78,6 +88,7 @@ Below is the workflow on how my project works
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Solution and Technology Stack
 Used tools:
 1. TensorFlow Object Detection API
@@ -87,12 +98,13 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Project Details and Results
 This project is designed to detect only two categories: `Covid-19 positive` and `Covid-19 negative`.
 
 1. Data Collection
    
-   The dataset utilizing Covid-19 Radiography. I have used only 800 images as a sample, comprising 400 images for each category, which is considered sufficient for detecting two object categories.
+   The dataset utilizing Covid-19 Radiography. I have used only **800 images** as a sample, comprising **400 images** for each category, which is considered sufficient for detecting two object categories.
 
 2. Labelling
 
@@ -195,6 +207,7 @@ This project is designed to detect only two categories: `Covid-19 positive` and 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Challenges
 1. **Data Availability**: Accessing large and high-quality datasets of Covid-19 medical images can be challenging due to privacy and ethical concerns.
 2. **Image Quality and Variability**: Medical images often differ significantly in quality, resolution, and positioning, making it difficult for models to generalize effectively.
@@ -202,6 +215,7 @@ This project is designed to detect only two categories: `Covid-19 positive` and 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Insights
 1. **Transfer Learning**: Leveraging pre-trained models significantly enhances performance when working with limited medical image data.
 2. **Importance of Features**: By analyzing the areas of the images that the model focuses on, insights can be gained regarding which regions of the lungs are most indicative of COVID-19 infection.
@@ -209,9 +223,20 @@ This project is designed to detect only two categories: `Covid-19 positive` and 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Future Plans
 1. **Expand the Dataset**: Plan to collaborate with healthcare institutions to gather a more diverse and comprehensive dataset, including images from various stages of infection.
 2. **Implement as a Web Application**: Develop a web-based tool (using frameworks like Streamlit) to make the detection model accessible to healthcare professionals in real time.
 3. **Multimodal Diagnosis**: Integrate additional diagnostic data (such as patient symptoms and demographic information) to enhance the overall accuracy and robustness of the model.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
+## Real-World Use Cases
+1. **Accelerating Covid-19 Screening in Clinical Settings:** This AI-powered tool serves as a supportive assistant to healthcare professionals by rapidly analyzing chest X-rays to flag potential Covid-19 cases. It helps prioritize urgent cases and streamline workflows, enabling medical staff to focus their expertise where it matters most.
+2. **Enhancing Diagnostic Capacity in Resource-Limited Areas:** By providing an automated, accessible method for preliminary Covid-19 detection, this system extends diagnostic capabilities to regions with limited access to PCR testing or specialized radiologists, fostering greater equity in healthcare delivery.
+3. **Complementing Traditional Testing Methods:** Rather than replacing existing diagnostic standards, this model acts as a complementary technology, offering faster insights that can guide timely decision-making while waiting for confirmatory lab results, thus bridging technology and medicine.
+4. **Supporting Pandemic Preparedness and Response:** The framework developed here can be adapted for rapid deployment in future public health crises, enabling early detection of respiratory illnesses through imaging, and helping healthcare systems respond more resiliently and proactively.
+5. **A Step Toward Democratizing Healthcare Through AI:** By empowering clinicians with advanced tools that enhance accuracy and speed, this project reflects a vision where technology amplifies human judgment and compassion—working hand in hand to deliver better outcomes and broaden access to quality care.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
