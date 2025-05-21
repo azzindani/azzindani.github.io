@@ -28,6 +28,7 @@ headline: false
     <li><a href="#challenges">Challenges</a></li>
     <li><a href="#insights">Insights</a></li>
     <li><a href="#future-plans">Future Plans</a></li>
+    <li><a href="#real-world-use-cases">Real World Use Cases</a></li>
   </ol>
 </details>
 
@@ -232,7 +233,7 @@ This project is designed to detect only two categories: `Covid-19 positive` and 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ---
-## Real-World Use Cases
+## Real World Use Cases
 1. **Accelerating Covid-19 Screening in Clinical Settings:** This AI-powered tool serves as a supportive assistant to healthcare professionals by rapidly analyzing chest X-rays to flag potential Covid-19 cases. It helps prioritize urgent cases and streamline workflows, enabling medical staff to focus their expertise where it matters most.
 2. **Enhancing Diagnostic Capacity in Resource-Limited Areas:** By providing an automated, accessible method for preliminary Covid-19 detection, this system extends diagnostic capabilities to regions with limited access to PCR testing or specialized radiologists, fostering greater equity in healthcare delivery.
 3. **Complementing Traditional Testing Methods:** Rather than replacing existing diagnostic standards, this model acts as a complementary technology, offering faster insights that can guide timely decision-making while waiting for confirmatory lab results, thus bridging technology and medicine.
