@@ -215,7 +215,7 @@ Used tools:
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ---
-## Real-World Use Cases
+## Real World Use Cases
 1. **Retail Investor Decision Support:** Retail traders can use the dashboard to observe which brokers are driving volume or initiating large buy/sell orders, helping them **identify institutional accumulation or distribution**. This insight enables retail investors to align their strategies with dominant market players or avoid unfavorable positions.
 2. **Early Detection of Market Manipulation:** By identifying anomalies in broker activity—such as abrupt shifts in net buying/selling patterns or repeated suspicious volume spikes—the platform can help detect **pump-and-dump schemes or coordinated trading**, assisting both independent traders and regulatory bodies.
 3. **Backtesting and Strategy Optimization:** Investors and quant traders can use historical broker behavior data to **backtest Bandarmology-based trading strategies**, adjusting filters based on broker type, trading patterns, or behavioral indicators to optimize returns.
