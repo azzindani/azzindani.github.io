@@ -307,18 +307,12 @@ Used tools:
 ---
 ## Real-World Use Cases
 
-1. **Nation-Scale Identity Authentication Systems:**
-   This model can support the development of secure and efficient national identification systems, enabling governments to streamline services such as digital ID verification, passport control, and e-voting, while enhancing accessibility and reducing identity fraud.
-2. **Large-Scale Attendance and Access Management:**
-   Educational institutions, corporate campuses, or public events with thousands of participants can benefit from automated attendance systems that identify individuals in real-time, reducing bottlenecks and administrative overhead while ensuring security.
-3. **Smart City Infrastructure:**
-   As cities adopt AI technologies, this model could help enable intelligent surveillance systems that support public safety, monitor crowd density, or assist in emergency responses—while adhering to ethical guidelines for privacy and fairness.
-4. **Humanitarian Aid and Disaster Response:**
-   In large-scale disaster situations, refugee registration camps, or crisis zones, this model can aid in verifying identities to ensure equitable distribution of aid, support family reunification efforts, and track population movements responsibly.
-5. **Enhancing Financial and E-Commerce Security:**
-   High-volume financial platforms or digital wallets can integrate facial recognition for secure customer verification, providing an additional layer of protection for transactions while improving user convenience.
-6. **Scalable Research and Innovation Platform:**
-   This project also serves as a valuable base for academic and industrial research on large-scale image classification, bias mitigation, and neural architecture optimization, providing a template for broader computer vision solutions beyond facial recognition.
+1. **Nation-Scale Identity Authentication Systems:** This model can support the development of secure and efficient national identification systems, enabling governments to streamline services such as digital ID verification, passport control, and e-voting, while enhancing accessibility and reducing identity fraud.
+2. **Large-Scale Attendance and Access Management:** Educational institutions, corporate campuses, or public events with thousands of participants can benefit from automated attendance systems that identify individuals in real-time, reducing bottlenecks and administrative overhead while ensuring security.
+3. **Smart City Infrastructure:** As cities adopt AI technologies, this model could help enable intelligent surveillance systems that support public safety, monitor crowd density, or assist in emergency responses—while adhering to ethical guidelines for privacy and fairness.
+4. **Humanitarian Aid and Disaster Response:** In large-scale disaster situations, refugee registration camps, or crisis zones, this model can aid in verifying identities to ensure equitable distribution of aid, support family reunification efforts, and track population movements responsibly.
+5. **Enhancing Financial and E-Commerce Security:** High-volume financial platforms or digital wallets can integrate facial recognition for secure customer verification, providing an additional layer of protection for transactions while improving user convenience.
+6. **Scalable Research and Innovation Platform:** This project also serves as a valuable base for academic and industrial research on large-scale image classification, bias mitigation, and neural architecture optimization, providing a template for broader computer vision solutions beyond facial recognition.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
