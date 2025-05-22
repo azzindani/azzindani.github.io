@@ -7,6 +7,13 @@ headline: false
 
 <a id="readme-top"></a>
 
+[![Gmail](https://img.shields.io/badge/Gmail-D14836?logo=gmail&logoColor=white)](mailto:422indani@gmail.com)
+[![LinkedIn](https://custom-icon-badges.demolab.com/badge/LinkedIn-0A66C2?logo=linkedin-white&logoColor=fff)](https://www.linkedin.com/in/azzindan1/)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-121013?logo=github&logoColor=white)](https://azzindani.github.io/)
+[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-FFD21E?logo=huggingface&logoColor=000)](https://huggingface.co/Azzindani)
+[![GitHub](https://img.shields.io/badge/GitHub-%23121011.svg?logo=github&logoColor=white)](https://github.com/azzindani)
+---
+
 [HOME](https://azzindani.github.io/)
 
 <!-- TABLE OF CONTENTS -->
@@ -21,23 +28,29 @@ headline: false
     <li><a href="#challenges">Challenges</a></li>
     <li><a href="#insights">Insights</a></li>
     <li><a href="#future-plans">Future Plans</a></li>
+    <li><a href="#real-world-use-cases">Real World Use Cases</a></li>
   </ol>
 </details>
 
+---
 ## Overview and Objective
-This project developed in 2021, aims to create a web scraping system specifically designed to extract various financial data from stock exchange databases, focusing exclusively on collecting financial report tables in Excel format.
+This project, **initiated in 2021**, focuses on developing a **web scraping system** tailored to extract **financial report tables in Excel format** from stock exchange databases. The system is designed to automate the retrieval of structured financial data, with a particular emphasis on **accuracy, scalability, and efficiency**.
 
-The primary goal of this project is to build a robust web scraping system capable of automatically gathering and organizing financial data. This serves as a foundational step towards creating a comprehensive quantitative dataset that can be used to build a financial database and support future analysis.
+The **primary goal** is to create a **robust and automated data extraction pipeline** that can **systematically collect and organize financial reports**. This project lays the **foundation for building a comprehensive quantitative financial database**, enabling deeper data analysis and supporting future financial research.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Motivation and Inspiration
-I am passionate about financial markets and want to start my journey by exploring the stock exchange, as it offers transparency and easily accessible documentation. I’ve noticed that while some media sources provide summarized information, access to more extensive historical datasets is often limited and requires a subscription for deeper insights. Since I am unable to afford such subscriptions, I need to develop a bot to collect financial data.
+My interest in **financial markets** and **data analysis** sparked the motivation for this project. The **stock exchange environment**, known for its transparency and rich documentation, offers an ideal entry point for collecting financial data.
 
-Accessing financial data from stock exchange databases can be time-consuming and labor-intensive if done manually. Inspired by the need for efficient data retrieval, this project focuses on automating the web scraping process to swiftly gather detailed financial information. The goal is to streamline financial research, enhance data accessibility, and support informed decision-making.
+While mainstream media and platforms offer summarized financial insights, access to **detailed historical datasets** often comes at a high subscription cost—something that can be a barrier for independent researchers and learners. To overcome this limitation, I developed a **custom bot** to collect financial report tables directly from public sources.
+
+Manual data retrieval from stock exchange websites is often **tedious and time-consuming**. This project aims to **automate** that process, making **financial data collection faster, more reliable, and easily repeatable**. By doing so, it supports **efficient financial research**, boosts **data accessibility**, and helps foster **informed investment and analytical decisions** without relying on expensive tools or services.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Workflow
 Below is the workflow on how my project works
 
@@ -83,6 +96,7 @@ Below is the workflow on how my project works
    
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Solution and Technology Stack
 Used tools:
 1. Python library : ![Selenium](https://img.shields.io/badge/selenium-43B02A.svg?style=for-the-badge&logo=selenium&logoColor=white)
@@ -90,6 +104,7 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Project Details and Results
 1. Data Collection Automation
    
@@ -100,7 +115,7 @@ Used tools:
    </div>
    <br>
 
-   At this stage, I am utilizing a multi-threaded bot directly, with tasks differing from the previous bot, which involves a more complex download script. This approach allows me to save time while collecting over 2,500 Excel files from all publicly listed companies in Indonesia.
+   At this stage, I am utilizing a multi-threaded bot directly, with tasks differing from the previous bot, which involves a more complex download script. This approach allows me to save time while **collecting over 2,500 Excel reports** from all publicly listed companies in Indonesia.
    
    <div align="center">
      <img src="/assets/page7/002.png" alt="Logo" width="1000">
@@ -116,7 +131,7 @@ Used tools:
 
 2. Files Check
 
-   After downloading all the Excel financial reports, I need to verify the completeness of the bot's work. Fortunately, I was able to collect financial reports dating back to 2015 using an HTML injection script. However, this method is no longer applicable at this time.
+   After downloading all the Excel financial reports, I need to verify the completeness of the bot's work. Fortunately, I was able to collect financial reports dating back to 2015 using an **HTML injection script**. However, this method is no longer applicable at this time.
    
    <div align="center">
      <img src="/assets/page7/004.png" alt="Logo" width="1000">
@@ -164,6 +179,7 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Challenges
 1. **Data Collection Speed:** Data collection was initially slow due to using only a single bot. Therefore, I developed a multi-threading bot capable of running simultaneously to increase efficiency.
 2. **Network Constraints:** Network limitations can affect data quality and potentially cause system crashes. To mitigate this, I need to limit the number of bots running concurrently.
@@ -173,6 +189,7 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Insights
 1. **Parallel Browsing:** Multiprocessing allows you to launch multiple browser instances simultaneously, each performing independent scraping tasks. This parallelism can significantly reduce overall execution time, especially when tasks involve loading multiple web pages or downloading large amounts of data.
 2. **Limiting Browser Instances:** Controlling the number of concurrent browser instances to match the available CPU cores prevents overloading and ensures optimal performance.
@@ -186,6 +203,7 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Future Plans
 1. **Expanding Data Sources:** Enhance the system to capture financial data from additional exchanges and financial databases, thereby broadening the scope and depth of available information.
 2. **Improving Data Processing:** Develop tools to process and clean the collected data, ensuring it is ready for analysis and integration into financial models or reports.
@@ -195,3 +213,15 @@ Used tools:
 6. **Building a Comprehensive Analytical Workflow:** Design a complete analytical workflow to assess company performance by evaluating both quantitative and qualitative data.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
+## Real-World Use Cases
+1. **Foundation for Building a Financial Time-Series Database:** The extracted Excel-based financial tables provide clean, structured data ideal for constructing a time-series database. This database can then support long-term trend analysis, performance comparison across companies, and industry benchmarking.
+2. **Fuel for Quantitative and Fundamental Analysis:** Individual investors, portfolio managers, and financial analysts can use the scraped Excel data to run ratio analyses, earnings comparisons, and valuation modeling—empowering data-driven investment decisions without relying on costly platforms.
+3. **Educational Tool for Financial Modeling Practice:** Students, educators, and self-learners in finance or economics can use the dataset to practice real-world financial modeling, forecast building, and company analysis using spreadsheet software, just as professionals do.
+4. **Input Source for Machine Learning Models in Fintech Projects:** The consistently structured Excel tables provide a practical dataset to feed into machine learning pipelines for projects like financial health prediction, fraud detection, or bankruptcy forecasting.
+5. **Supporting Small Investment Advisory Firms or Local Financial Planners:** Smaller firms often lack access to enterprise financial databases. This tool allows them to stay informed with up-to-date financial disclosures in an organized Excel format, enabling better client servicing and faster reporting.
+6. **Preprocessing Layer for NLP and Document Parsing Projects:** Since Excel files are inherently tabular and machine-readable, they serve as a clean data source for natural language processing (NLP) tasks, such as extracting entity-level financial metrics or building keyword-based classifiers.
+7. **Historical Record Keeping for Longitudinal Studies:** Researchers conducting historical studies on company performance, sectoral growth, or economic resilience can use the scraped Excel datasets to create archives that support empirical economic research.
+
+`<p align="right">(<a href="#readme-top">back to top</a>)</p>
