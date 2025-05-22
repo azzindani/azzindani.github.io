@@ -260,10 +260,8 @@ Used tools:
 ---
 ## Real-World Use Cases
 1. **Secure Identity Verification Systems:** This model can serve as the core engine for secure access control systems in workplaces, airports, and financial institutions, helping to verify identities quickly and reliably while enhancing user convenience and system security.
-2. **Supportive Technology in Healthcare:** Facial recognition can be integrated into patient monitoring systems in hospitals or elderly care centers to identify patients and track their movements for safety, especially for those with memory loss or cognitive impairments.
-3. **Assisting in Finding Missing Persons:** Leveraging the model in public surveillance systems or mobile apps can aid in identifying missing individuals or victims of trafficking in a responsible and ethical framework, in collaboration with law enforcement.
-4. **Augmenting Personalized User Experiences:** This model can support adaptive systems such as smart home devices, retail analytics, or public services, providing personalized experiences while preserving individual privacy through secure processing pipelines.
-5. **Research and Education in AI & Computer Vision:** As a pilot project, this model is an accessible and scalable foundation for academic institutions or research groups to explore convolutional neural networks, object detection, and other computer vision applications.
-6. **Expanding Beyond Facial Recognition:** The algorithmic foundation and architecture can be repurposed or extended to recognize other object categories—opening doors for industrial, environmental, or agricultural use cases, where visual classification and recognition are essential.
+2. **Assisting in Finding Missing Persons:** Leveraging the model in public surveillance systems or mobile apps can aid in identifying missing individuals or victims of trafficking in a responsible and ethical framework, in collaboration with law enforcement.
+3. **Research and Education in AI & Computer Vision:** As a pilot project, this model is an accessible and scalable foundation for academic institutions or research groups to explore convolutional neural networks, object detection, and other computer vision applications.
+4. **Expanding Beyond Facial Recognition:** The algorithmic foundation and architecture can be repurposed or extended to recognize other object categories—opening doors for industrial, environmental, or agricultural use cases, where visual classification and recognition are essential.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
