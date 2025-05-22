@@ -7,6 +7,13 @@ headline: false
 
 <a id="readme-top"></a>
 
+[![Gmail](https://img.shields.io/badge/Gmail-D14836?logo=gmail&logoColor=white)](mailto:422indani@gmail.com)
+[![LinkedIn](https://custom-icon-badges.demolab.com/badge/LinkedIn-0A66C2?logo=linkedin-white&logoColor=fff)](https://www.linkedin.com/in/azzindan1/)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-121013?logo=github&logoColor=white)](https://azzindani.github.io/)
+[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-FFD21E?logo=huggingface&logoColor=000)](https://huggingface.co/Azzindani)
+[![GitHub](https://img.shields.io/badge/GitHub-%23121011.svg?logo=github&logoColor=white)](https://github.com/azzindani)
+---
+
 [HOME](https://azzindani.github.io/)
 
 <!-- TABLE OF CONTENTS -->
@@ -22,26 +29,30 @@ headline: false
     <li><a href="#insights">Insights</a></li>
     <li><a href="#future-plans">Future Plans</a></li>
     <li><a href="#reference">Reference</a></li>
+    <li><a href="#real-world-use-cases">Real World Use Cases</a></li>
   </ol>
 </details>
 
+---
 ## Overview and Objective
-This project, developed from 2022 to the present, aims to advance facial recognition on a larger scale by creating a sophisticated model capable of identifying and verifying thousands of faces. By leveraging deep learning techniques, the model seeks to deliver accurate and efficient facial recognition across various environments. The primary goal is to create a scalable solution and a fully functional deep learning workflow that can enhance CNN (Convolutional Neural Network) projects and any computer vision applications.
+This project, **developed from 2022 to the present**, aims to **advance facial recognition on a larger scale** by creating a **sophisticated model capable of identifying and verifying thousands of faces**. By leveraging **deep learning techniques**, the model seeks to deliver **accurate and efficient facial recognition** across various environments. The **primary goal** is to create a **scalable solution** and a **fully functional deep learning workflow** that can enhance **CNN (Convolutional Neural Network) projects** and any **computer vision applications**.
 
-The project's objective is to develop a robust facial recognition model that can accurately recognize and verify thousands of faces, designed to manage a large-scale facial database while ensuring high accuracy.
+The project's objective is to develop a **robust facial recognition model** that can **accurately recognize and verify thousands of faces**, designed to **manage a large-scale facial database** while ensuring **high accuracy**.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Motivation and Inspiration
-This facial recognition project is inspired by the remarkable capabilities of the human eye and brain, which can effortlessly detect and recognize multiple objects and faces simultaneously. Research indicates that the human brain can recognize an average of 5,000 faces and remember up to 10,000 faces. Leveraging this understanding, the project aims to harness the transformative potential of facial recognition technology to revolutionize various industries.
+This facial recognition project is inspired by the **remarkable capabilities of the human eye and brain**, which can effortlessly **detect and recognize multiple objects and faces simultaneously**. Research indicates that the **human brain can recognize an average of 5,000 faces and remember up to 10,000**. Leveraging this understanding, the project aims to **harness the transformative potential of facial recognition technology** to **revolutionize various industries**.
 
-Traditional facial recognition methods often face challenges with scalability and accuracy when dealing with large datasets. By integrating rapid advancements in deep learning, this project seeks to develop a robust system capable of accurately handling and identifying thousands of faces.
+**Traditional facial recognition methods** often face **challenges with scalability and accuracy** when dealing with **large datasets**. By integrating **rapid advancements in deep learning**, this project seeks to develop a **robust system capable of accurately handling and identifying thousands of faces**.
 
 **Project Reference**
 - [Facial Recognition - Small Version](https://azzindani.github.io/docs/page4.html)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Workflow
 Below is the workflow on how my project works
 
@@ -94,6 +105,7 @@ Below is the workflow on how my project works
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Solution and Technology Stack
 Used tools:
 1. Python library : ![TensorFlow](https://img.shields.io/badge/TensorFlow-%23FF6F00.svg?style=for-the-badge&logo=TensorFlow&logoColor=white) ![Keras](https://img.shields.io/badge/Keras-%23D00000.svg?style=for-the-badge&logo=Keras&logoColor=white) ![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white) ![NumPy](https://img.shields.io/badge/numpy-%23013243.svg?style=for-the-badge&logo=numpy&logoColor=white) ![Matplotlib](https://img.shields.io/badge/Matplotlib-%23ffffff.svg?style=for-the-badge&logo=Matplotlib&logoColor=black) ![Selenium](https://img.shields.io/badge/selenium-43B02A.svg?style=for-the-badge&logo=selenium&logoColor=white)
@@ -101,12 +113,13 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Project Details and Results
 1. Data Collection
 
-   I encountered difficulties in collecting data through Kaggle.com, so I developed a solution by creating an automation bot. This bot, built using the Selenium module, was designed to gather facial images by using celebrity names as keywords. It browses Google Images and downloads the desired number of images (100 per keyword). To speed up the data collection process, I implemented multi-threading, running 10 bots simultaneously, each with different keywords.
+   I encountered difficulties in collecting data through Kaggle.com, so I developed a solution by **creating an automation bot**. This bot, built using the Selenium module, was designed to gather facial images by using celebrity names as keywords. It browses Google Images and downloads the desired **number of images (100 per keyword)**. To speed up the data collection process, I implemented multi-threading, **running 10 bots simultaneously**, each with different keywords.
 
-   For the initial data collection, I used 1,898 celebrity names as keywords, collecting approximately 178,934 image files organized into folders based on the keywords, developed in 2022.
+   For the initial data collection, **I used 1,898 celebrity names as keywords**, **collecting approximately 178,934 image** files organized into folders based on the keywords, developed in 2022.
 
    <div align="center">
      <img src="/assets/page5/001.png" alt="Logo" width="1000">
@@ -152,7 +165,7 @@ Used tools:
      </div>
      <br>
    
-   Currently, I have collected over 1,000 celebrity faces that are ready for model training. I still have more than 4,000 celebrity faces that need to be cleaned and processed.
+   Currently, **I have collected over 1,000 celebrity faces** that are ready for model training. I still have **more than 4,000 celebrity faces** that need to be cleaned and processed.
    - Samples to be used for training
 
      <div align="center">
@@ -169,7 +182,7 @@ Used tools:
 
 4. Data Augmentation
 
-   To increase the quantity of images and obtain more samples, I needed data augmentation to expand the dataset. Here's an example of data augmentation techniques to multiply 50 images in each folder into 500 images per folder.
+   To increase the quantity of images and obtain more samples, I needed data augmentation to expand the dataset. Here's an example of data augmentation techniques to **multiply 50 images in each folder into 500 images** per folder.
 
    <div align="center">
      <img src="/assets/page5/010.png" alt="Logo" width="1000">
@@ -193,8 +206,8 @@ Used tools:
    </div>
    <br>
    
-   For instance, I will demonstrate using a dataset of 1000 unique faces, each with 100 images, as follows:
-   - I loaded these samples into an array with 96 x 96 pixel dimensions as my input tensor, encompassing 100,000 samples. In this scenario, the input tensor consists of celebrity face images, while the output tensor represents 650 celebrity names.
+   For instance, I will demonstrate using a dataset of **1000 unique faces, each with 100 images**, as follows:
+   - I loaded these samples into an **array with 96 x 96 pixel dimensions** as my input tensor, encompassing 100,000 samples. In this scenario, the input tensor consists of celebrity face images, while the **output tensor represents 650 celebrity names**.
 
      <div align="center">
        <img src="/assets/page5/014.png" alt="Logo" width="1000">
@@ -202,14 +215,14 @@ Used tools:
      </div>
      <br>
      
-   - I utilized 100,000 images as my dataset, partitioning it into 70,000 images for training (70%), 20,000 images for testing (20%), and 10,000 images for validation (10%). The deep learning CNN models will use 28 million trainable parameters.
+   - I **utilized 100,000 images as my dataset**, partitioning it into **70,000 images for training (70%)**, **20,000 images for testing (20%)**, and **10,000 images for validation (10%)**. The deep learning **CNN models will use 28 million trainable parameters**.
 
      <div align="center">
        <img src="/assets/page5/016.png" alt="Logo" width="1000">
      </div>
      <br>
      
-   - I set an accuracy threshold of 0.97 or 97% to halt the training process, achieving 231 epochs in the process.
+   - I set an **accuracy threshold of 0.97 or 97%** to halt the training process, **achieving 231 epochs** in the process.
 
      <div align="center">
        <img src="/assets/page5/017.png" alt="Logo" width="1000">
@@ -217,7 +230,7 @@ Used tools:
      </div>
      <br>
      
-   - Upon testing with the validation samples, the model achieved an accuracy of 0.97 or 97%.
+   - Upon **testing with the validation** samples, the model **achieved an accuracy of 0.97 or 97%**.
 
      <div align="center">
        <img src="/assets/page5/019.png" alt="Logo" width="1000">
@@ -257,6 +270,7 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Challenges
 1. **Web Scraping Duration:** Increasing the number of faces significantly extends the data collection time.
 2. **Network Challenges:** Network limitations can impact image data quality and potentially cause system crashes. Therefore, I need to limit the number of bots running the process.
@@ -268,6 +282,7 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Insights
 1. **Parallel Processing:** Techniques like parallel computing can enhance performance by executing multiple operations simultaneously.
 2. **Convolutional Neural Networks (CNN):** CNNs are vital for extracting complex features from facial images. They can automatically learn hierarchical features, such as edges, textures, and patterns, from raw pixel data. In facial recognition, deeper CNN layers capture high-level features like facial shapes, eyes, and noses.
@@ -279,6 +294,7 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Future Plans
 1. **Enhance Accuracy:** Continuously refine the model by incorporating advanced deep learning techniques and expanding the dataset to improve recognition accuracy and robustness.
 2. **Integration with Applications:** Develop integration solutions for various applications, such as security systems, personalized services, and enhanced customer experiences.
@@ -288,6 +304,25 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
+## Real-World Use Cases
+
+1. **Nation-Scale Identity Authentication Systems:**
+   This model can support the development of secure and efficient national identification systems, enabling governments to streamline services such as digital ID verification, passport control, and e-voting, while enhancing accessibility and reducing identity fraud.
+2. **Large-Scale Attendance and Access Management:**
+   Educational institutions, corporate campuses, or public events with thousands of participants can benefit from automated attendance systems that identify individuals in real-time, reducing bottlenecks and administrative overhead while ensuring security.
+3. **Smart City Infrastructure:**
+   As cities adopt AI technologies, this model could help enable intelligent surveillance systems that support public safety, monitor crowd density, or assist in emergency responses—while adhering to ethical guidelines for privacy and fairness.
+4. **Humanitarian Aid and Disaster Response:**
+   In large-scale disaster situations, refugee registration camps, or crisis zones, this model can aid in verifying identities to ensure equitable distribution of aid, support family reunification efforts, and track population movements responsibly.
+5. **Enhancing Financial and E-Commerce Security:**
+   High-volume financial platforms or digital wallets can integrate facial recognition for secure customer verification, providing an additional layer of protection for transactions while improving user convenience.
+6. **Scalable Research and Innovation Platform:**
+   This project also serves as a valuable base for academic and industrial research on large-scale image classification, bias mitigation, and neural architecture optimization, providing a template for broader computer vision solutions beyond facial recognition.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
 ## Reference
 1. https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6191703/
 
