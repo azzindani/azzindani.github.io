@@ -7,6 +7,13 @@ headline: false
 
 <a id="readme-top"></a>
 
+[![Gmail](https://img.shields.io/badge/Gmail-D14836?logo=gmail&logoColor=white)](mailto:422indani@gmail.com)
+[![LinkedIn](https://custom-icon-badges.demolab.com/badge/LinkedIn-0A66C2?logo=linkedin-white&logoColor=fff)](https://www.linkedin.com/in/azzindan1/)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-121013?logo=github&logoColor=white)](https://azzindani.github.io/)
+[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-FFD21E?logo=huggingface&logoColor=000)](https://huggingface.co/Azzindani)
+[![GitHub](https://img.shields.io/badge/GitHub-%23121011.svg?logo=github&logoColor=white)](https://github.com/azzindani)
+---
+
 [HOME](https://azzindani.github.io/)
 
 <!-- TABLE OF CONTENTS -->
@@ -21,23 +28,27 @@ headline: false
     <li><a href="#challenges">Challenges</a></li>
     <li><a href="#insights">Insights</a></li>
     <li><a href="#future-plans">Future Plans</a></li>
+    <li><a href="#real-world-use-cases">Real World Use Cases</a></li>
   </ol>
 </details>
 
+---
 ## Overview and Objective
-This project developed in 2021, aims to create a web scraping system designed to extract a diverse range of financial data from the Indonesian stock exchange database. The system will collect financial reports, supporting documents, Excel tables, and XBRL files. By automating the extraction process, this project seeks to provide a comprehensive dataset for financial analysis, research, and reporting, making it easier to access and analyze essential financial information.
+This project, **developed in 2021**, aims to build an **automated web scraping system** to extract a diverse range of **financial data from the Indonesian Stock Exchange**. The system is designed to collect **financial reports, supporting documents, Excel tables, and XBRL files**. By automating this extraction process, the project intends to provide a **comprehensive and organized dataset** that facilitates **financial analysis, research, and reporting**, improving accessibility to essential financial information.
 
-The primary goal of this project is to build a robust web scraping system capable of automatically gathering and organizing financial data using multi-threading or multiprocessing techniques. While the main focus is on creating a comprehensive dataset, the project’s current scope is limited to data collection only.
+The **primary goal** is to develop a **robust scraping system** capable of **automatically gathering and organizing financial data** using **multi-threading or multiprocessing techniques** for enhanced efficiency. While the long-term vision includes deeper analytics, the **current scope is limited to data collection only**.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Motivation and Inspiration
-I am passionate about financial markets and want to start my journey by exploring the stock exchange, as it offers transparency and easily accessible documentation. I’ve noticed that while some media sources provide summarized information, access to more extensive historical datasets is often limited and requires a subscription for deeper insights. Since I am unable to afford such subscriptions, I need to develop a bot to collect financial data.
+My **passion for financial markets** and data-driven research led me to explore the Indonesian stock exchange as a starting point, due to its **transparent operations and accessible documentation**. While media outlets often provide **summarized data**, access to **comprehensive historical datasets** is frequently locked behind **expensive subscriptions**—a barrier I sought to overcome.
 
-Accessing financial data from stock exchange databases can be time-consuming and labor-intensive if done manually. Inspired by the need for efficient data retrieval, this project focuses on automating the web scraping process to swiftly gather detailed financial information. The goal is to streamline financial research, enhance data accessibility, and support informed decision-making.
+Manually accessing financial records is **time-consuming and inefficient**. Motivated by the need for a scalable and cost-effective solution, I decided to **develop an automation bot** to collect extensive financial data. This project not only **streamlines the data collection process**, but also supports **informed decision-making and deeper market analysis**, especially for individuals or researchers who lack access to premium data services.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Workflow
 Below is the workflow on how my project works
 
@@ -70,6 +81,7 @@ Below is the workflow on how my project works
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Solution and Technology Stack
 Used tools:
 1. Python library : ![Selenium](https://img.shields.io/badge/selenium-43B02A.svg?style=for-the-badge&logo=selenium&logoColor=white)
@@ -77,6 +89,7 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Project Details and Results
 1. Data Collection Automation
    
@@ -103,7 +116,7 @@ Used tools:
        </div>
        <br>
        
-   - In the second approach, I created a multi-threaded bot capable of generating 10 bots simultaneously, each handling a different task. This setup allowed me to gather over 10,000 files annually, significantly enhancing efficiency and productivity.
+   - In the second approach, I created a **multi-threaded bot capable of activating 10 bots simultaneously**, each handling a different task. This setup allowed me to **gather over 10,000 files annually**, significantly enhancing efficiency and productivity.
      - Multi-threaded bot
        
        <div align="center">
@@ -118,7 +131,7 @@ Used tools:
        </div>
        <br>
      
-   - As you may know, the website only provides data from the last 5 years. However, I was fortunate to extract financial reports dating back to 2015 by employing an HTML injection script. Unfortunately, this method is no longer feasible.
+   - As you may know, the website only provides data from the last 5 years. However, I was fortunate to extract financial reports dating back to 2015 by employing an **HTML injection script**. Unfortunately, this method is no longer feasible.
 
      <div align="center">
        <img src="/assets/page6/007.png" alt="Logo" width="1000">
@@ -134,6 +147,7 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Challenges
 1. **Data Collection Speed:** Data collection was initially slow due to using only a single bot. Therefore, I developed a multi-threading bot capable of running simultaneously to increase efficiency.
 2. **Network Constraints:** Network limitations can affect data quality and potentially cause system crashes. To mitigate this, I need to limit the number of bots running concurrently.
@@ -143,6 +157,7 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Insights
 1. **Parallel Exploration:** Multiprocessing enables the launch of multiple browser instances simultaneously, each performing independent scraping tasks. This parallelism can significantly reduce overall execution time, especially when tasks involve loading multiple web pages or downloading large volumes of data.
 2. **Browser Instance Management:** Controlling the number of concurrent browser instances to match the available CPU cores prevents overloading and ensures optimal performance.
@@ -157,6 +172,7 @@ Used tools:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+---
 ## Future Plans
 1. **Expanding Data Sources:** Enhancing the system to capture financial data from additional exchanges and financial databases, thereby broadening the scope and depth of available information.
 2. **Improving Data Processing:** Developing advanced tools to process and clean the collected data, ensuring it is fully prepared for analysis and integration into financial models or reports.
@@ -164,5 +180,16 @@ Used tools:
 4. **Automating Updates:** Establishing an automated schedule for routine data retrieval and updates, ensuring financial information remains current and relevant.
 5. **Developing Table Extraction:** Building robust table extraction capabilities to capture all valuable information from PDF documents related to each company, utilizing AI and OCR technologies.
 6. **Building a Comprehensive Analytical Workflow:** Designing a complete analytical workflow to assess company performance by evaluating both quantitative and qualitative data.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+---
+## Real World Use Cases
+1. **Democratizing Financial Research for Independent Analysts and Students:** This project enables individuals—especially students, researchers, and independent investors—to access rich, historical financial data without the barrier of expensive data subscriptions. By automating data collection from official stock exchange sources, it opens doors to meaningful research and learning opportunities, fostering financial literacy and data-driven thinking.
+2. **Building Localized Financial Analytics Tools and Dashboards:** Developers and startups can use the extracted data as a foundation to create localized tools for Indonesian market analysis—such as stock screeners, financial dashboards, or risk-assessment apps—tailored to the unique structure and trends of the local market.
+3. **Supporting Economic Journalism and Investigative Reporting:** Journalists and watchdog organizations can leverage this system to monitor changes in financial statements, detect anomalies, and hold companies accountable. The system simplifies the process of accessing raw filings and structured data like XBRL, allowing for deeper, evidence-based reporting.
+4. **Enhancing Algorithmic Trading Models with Historical Insights:** Quantitative researchers and algorithmic traders can use the compiled dataset to backtest strategies based on real financial disclosures, gaining a deeper understanding of market behavior over time without relying on expensive commercial data providers.
+5. **Automated Compliance and Due Diligence for SMEs and Financial Advisors:** Financial professionals and small advisory firms can use this tool to monitor clients’ investment portfolios or perform quick due diligence by automatically gathering the latest financial disclosures from public companies, streamlining reporting and compliance workflows.
+6. **Foundation for AI-Driven Financial Forecasting or NLP Projects:** The scraped textual and tabular data, including PDFs and XBRL filings, can be fed into machine learning models for tasks such as sentiment analysis, anomaly detection, or financial forecasting—fueling AI research and fintech innovation specific to Southeast Asian markets.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
