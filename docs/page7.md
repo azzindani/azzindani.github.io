@@ -215,7 +215,7 @@ Used tools:
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ---
-## Real-World Use Cases
+## Real World Use Cases
 1. **Foundation for Building a Financial Time-Series Database:** The extracted Excel-based financial tables provide clean, structured data ideal for constructing a time-series database. This database can then support long-term trend analysis, performance comparison across companies, and industry benchmarking.
 2. **Fuel for Quantitative and Fundamental Analysis:** Individual investors, portfolio managers, and financial analysts can use the scraped Excel data to run ratio analyses, earnings comparisons, and valuation modeling—empowering data-driven investment decisions without relying on costly platforms.
 3. **Educational Tool for Financial Modeling Practice:** Students, educators, and self-learners in finance or economics can use the dataset to practice real-world financial modeling, forecast building, and company analysis using spreadsheet software, just as professionals do.
