@@ -1,4 +1,11 @@
 ---
+title: "Financial Statement Web Scraping"
+description: "<strong>Web scraping system</strong> designed to extract a <strong>diverse range of financial data</strong> from <strong>the stock exchange database</strong>."
+date: "2024-01-15"
+image: "assets/page6.png"
+tags: ["web-scraping", "finance", "data-extraction"]
+featured: true
+category: "data-engineering"
 layout: default
 title: Financial Statement Web Scraping
 profile: false
