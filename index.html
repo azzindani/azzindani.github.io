@@ -76,8 +76,9 @@
     <script>
         // Configuration
         const CONFIG = {
-            username: 'azzindani', // Your GitHub username
-            repoName: 'azzindani.github.io', // Your repository name (usually username.github.io for GitHub Pages)
+            username: 'azzindani', // Replace with your GitHub username
+            repoName: 'azzindani.github.io', // Replace with your repository name
+            docsFolder: 'docs', // Folder containing your .md files
             isLocal: window.location.protocol === 'file:' || 
                     window.location.hostname === 'localhost' || 
                     window.location.hostname === '127.0.0.1' ||
@@ -145,16 +146,6 @@
             }
         ];
 
-
-        // Generate page list (page1.md to page50.md)
-        function generatePageList() {
-            const pageList = [];
-            for (let i = 1; i <= 50; i++) {
-                pageList.push(`page${i}.md`);
-            }
-            console.log('📄 Generated page list:', pageList);
-            return pageList;
-        }
 
         // Utility Functions
         const Utils = {
@@ -235,8 +226,55 @@
             }
         };
 
-        // Check if file exists by trying to fetch it
-        async function checkFileExists(filename) {
+        // GitHub API Functions
+        async function fetchGitHubRepoContents(username, repoName, path = '') {
+            const apiUrl = `https://api.github.com/repos/${username}/${repoName}/contents/${path}`;
+            
+            try {
+                console.log(`🔍 Fetching GitHub repo contents from: ${apiUrl}`);
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log(`✅ Successfully fetched ${data.length} items from GitHub`);
+                return data;
+            } catch (error) {
+                console.error('❌ Error fetching GitHub repo contents:', error);
+                return [];
+            }
+        }
+
+        async function fetchFileContent(username, repoName, filePath) {
+            const apiUrl = `https://api.github.com/repos/${username}/${repoName}/contents/${filePath}`;
+            
+            try {
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    console.warn(`⚠️ Could not fetch ${filePath}: ${response.status}`);
+                    return null;
+                }
+                
+                const data = await response.json();
+                
+                // Decode base64 content
+                if (data.content && data.encoding === 'base64') {
+                    const decodedContent = atob(data.content);
+                    return decodedContent;
+                }
+                
+                return null;
+            } catch (error) {
+                console.warn(`❌ Error fetching file content for ${filePath}:`, error);
+                return null;
+            }
+        }
+
+        // Local file checking (for local development)
+        async function checkLocalFile(filename) {
             try {
                 const response = await fetch(`docs/${filename}`, { method: 'HEAD' });
                 return response.ok;
@@ -245,8 +283,7 @@
             }
         }
 
-        // Load content from existing file
-        async function loadFileContent(filename) {
+        async function loadLocalFileContent(filename) {
             try {
                 const response = await fetch(`docs/${filename}`);
                 if (response.ok) {
@@ -254,71 +291,90 @@
                 }
                 return null;
             } catch (error) {
-                console.warn(`❌ Error loading ${filename}:`, error);
+                console.warn(`❌ Error loading local file ${filename}:`, error);
                 return null;
             }
         }
 
-        // Portfolio Loader
+        // Main Portfolio Loader
         async function loadPortfolioProjects() {
             const portfolioContainer = document.getElementById('portfolio-cards');
             const loadingDiv = document.getElementById('loading');
             const projects = [];
             
-            console.log('🔍 Starting to load projects...');
+            console.log('🚀 Starting to load projects...');
             console.log('🌐 Environment:', CONFIG.isLocal ? 'Local' : 'GitHub Pages');
-            
-            // Generate list of pages to check
-            const pageList = generatePageList();
-            let foundFiles = 0;
-            let checkedFiles = 0;
+            console.log('⚙️ Configuration:', CONFIG);
             
             try {
-                // Check each page file
-                for (const filename of pageList) {
-                    checkedFiles++;
-                    console.log(`📄 Checking file ${checkedFiles}/50: ${filename}`);
+                let mdFiles = [];
+                
+                if (CONFIG.isLocal) {
+                    // Local development - check for files manually
+                    console.log('🏠 Local mode: Checking for files manually...');
                     
-                    // Check if file exists
-                    const exists = await checkFileExists(filename);
-                    
-                    if (exists) {
-                        foundFiles++;
-                        console.log(`✅ Found file: ${filename}`);
-                        
-                        // Load file content
-                        const content = await loadFileContent(filename);
-                        
-                        if (content) {
-                            const metadata = Utils.parseMarkdownMetadata(content);
-                            const project = Utils.createProjectObject(filename, content, metadata);
-                            projects.push(project);
-                            console.log(`✨ Added project: ${project.title}`);
-                        }
-                    } else {
-                        console.log(`⏭️ File not found: ${filename}`);
+                    // Generate list of pages to check (page1.md to page50.md)
+                    const pageList = [];
+                    for (let i = 1; i <= 50; i++) {
+                        pageList.push(`page${i}.md`);
                     }
-                }
-                
-                console.log(`📊 Summary: Found ${foundFiles} files out of ${checkedFiles} checked`);
-                
-                // If no files found, try fallback
-                if (projects.length === 0) {
-                    console.warn('🔄 No files found, trying fallback files...');
                     
-                    for (const filename of CONFIG.fallbackMdFiles) {
-                        const exists = await checkFileExists(filename);
+                    for (const filename of pageList) {
+                        const exists = await checkLocalFile(filename);
                         if (exists) {
-                            const content = await loadFileContent(filename);
-                            if (content) {
-                                const metadata = Utils.parseMarkdownMetadata(content);
-                                const project = Utils.createProjectObject(filename, content, metadata);
-                                projects.push(project);
-                                console.log(`📋 Added fallback project: ${project.title}`);
+                            mdFiles.push({ name: filename, type: 'file' });
+                            console.log(`✅ Found local file: ${filename}`);
+                        }
+                    }
+                    
+                    // Try fallback files if none found
+                    if (mdFiles.length === 0) {
+                        for (const filename of CONFIG.fallbackMdFiles) {
+                            const exists = await checkLocalFile(filename);
+                            if (exists) {
+                                mdFiles.push({ name: filename, type: 'file' });
+                                console.log(`📋 Found fallback file: ${filename}`);
                             }
                         }
                     }
+                } else {
+                    // GitHub Pages - use GitHub API
+                    console.log('🐙 GitHub mode: Fetching files from repository...');
+                    
+                    const repoContents = await fetchGitHubRepoContents(CONFIG.username, CONFIG.repoName, CONFIG.docsFolder);
+                    
+                    // Filter for .md files
+                    mdFiles = repoContents.filter(file => 
+                        file.type === 'file' && 
+                        file.name.endsWith('.md')
+                    );
+                    
+                    console.log(`📄 Found ${mdFiles.length} .md files in GitHub repository`);
                 }
+                
+                // Process each .md file
+                for (const file of mdFiles) {
+                    console.log(`📖 Processing file: ${file.name}`);
+                    
+                    let content = null;
+                    
+                    if (CONFIG.isLocal) {
+                        content = await loadLocalFileContent(file.name);
+                    } else {
+                        content = await fetchFileContent(CONFIG.username, CONFIG.repoName, `${CONFIG.docsFolder}/${file.name}`);
+                    }
+                    
+                    if (content) {
+                        const metadata = Utils.parseMarkdownMetadata(content);
+                        const project = Utils.createProjectObject(file.name, content, metadata);
+                        projects.push(project);
+                        console.log(`✨ Added project: ${project.title}`);
+                    } else {
+                        console.warn(`⚠️ Could not load content for: ${file.name}`);
+                    }
+                }
+                
+                console.log(`📊 Summary: Successfully processed ${projects.length} projects`);
                 
                 // Sort projects (featured first, then by date)
                 projects.sort((a, b) => {
@@ -332,14 +388,15 @@
                 
                 // Render projects
                 if (projects.length > 0) {
-                    projects.forEach((project, index) => {
+                    projects.forEach((project) => {
                         const card = document.createElement('div');
                         card.className = 'card';
                         if (project.featured) card.classList.add('featured');
                         
+                        // Generate the correct link
                         const linkUrl = CONFIG.isLocal ? 
                             `docs/${project.filename}` : 
-                            `https://${CONFIG.username}.github.io/${CONFIG.repoName}/docs/${project.filename}`;
+                            `https://${CONFIG.username}.github.io/${CONFIG.docsFolder}/${project.filename}`;
                         
                         card.innerHTML = `
                             <a href="${linkUrl}">
@@ -363,17 +420,40 @@
                     
                     console.log(`✅ Successfully rendered ${projects.length} project cards`);
                 } else {
-                    loadingDiv.innerHTML = 'No projects found in the docs folder.';
+                    loadingDiv.innerHTML = `
+                        <div style="text-align: center; padding: 20px;">
+                            <h3>No projects found</h3>
+                            <p>Make sure you have .md files in your <code>${CONFIG.docsFolder}/</code> folder.</p>
+                            <p>Expected structure:</p>
+                            <ul style="text-align: left; display: inline-block;">
+                                <li>📁 ${CONFIG.docsFolder}/</li>
+                                <li>&nbsp;&nbsp;📄 page1.md</li>
+                                <li>&nbsp;&nbsp;📄 page2.md</li>
+                                <li>&nbsp;&nbsp;📄 ...</li>
+                            </ul>
+                        </div>
+                    `;
                     console.warn('⚠️ No projects to display');
                 }
                 
             } catch (error) {
                 console.error('💥 Error loading portfolio projects:', error);
-                loadingDiv.innerHTML = 'Error loading projects. Please check the console for details.';
+                loadingDiv.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: red;">
+                        <h3>Error loading projects</h3>
+                        <p>There was an error loading your projects. Please check:</p>
+                        <ul style="text-align: left; display: inline-block;">
+                            <li>Your GitHub username and repository name in CONFIG</li>
+                            <li>That your repository is public</li>
+                            <li>That you have .md files in the docs/ folder</li>
+                        </ul>
+                        <p><small>Check the browser console for more details.</small></p>
+                    </div>
+                `;
             }
         }
 
-        // Repository Loader
+        // Repository Loader (unchanged)
         async function loadRepositoryProjects() {
             const repoContainer = document.getElementById('repo-cards');
             const repoLoadingDiv = document.getElementById('repo-loading');
