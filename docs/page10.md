@@ -1,4 +1,11 @@
 ---
+title: "Broker Transaction Automation System"
+description: "Integration of <strong>robust multi-threaded web scraping process</strong>, <strong>data management</strong> and <strong>interactive visualization</strong> of broker transaction data analysis from stock exchanges into an <strong>semi-automated end-to-end system</strong>"
+date: "2024-01-15"
+image: "assets/page10.png"
+tags: ["automation", "data-analysis", "web-scraping"]
+featured: true
+category: "data-science"
 layout: default
 title: Broker Transaction Automation System
 profile: false
