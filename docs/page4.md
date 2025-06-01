@@ -1,4 +1,11 @@
 ---
+title: "Facial Recognition - Small Version"
+description: "<strong>A pilot project of facial recognition</strong> developed to establish a <strong>foundational model for facial recognition</strong> that can accurately identify and verify faces."
+date: "2024-01-15"
+image: "assets/page4.png"
+tags: ["facial-recognition", "computer-vision", "ai-model"]
+featured: true
+category: "machine-learning"
 layout: default
 title: Facial Recognition - Small Version
 profile: false
