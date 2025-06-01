@@ -6,23 +6,29 @@ body {
     margin: 0;
     padding: 0;
     text-align: left; /* Aligns body text to the left */
+    overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
-/* Navbar */
+html {
+    overflow-x: hidden; /* Prevent horizontal scroll on html as well */
+}
+
+
+/* Navbar - Fixed version */
 .navbar {
-    /*background-color: #2a8f53; /* Fallback color */
     background: linear-gradient(135deg, #09a5b9, #19a553); /* Green gradient */
-    /*background-color: linear-gradient(135deg, #2a8f53, #1f6f40); /* Green navbar */
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 0.625rem 1.25rem; /* 10px 20px */
     box-shadow: 0rem 0.25rem 0.5rem rgba(0, 0, 0, 0.1); /* 0px 2px 5px */
     position: fixed;
-    width: calc(100% - 2.5rem);
+    width: 100%; /* Full width instead of calc */
+    left: 0; /* Ensure it starts from the very left */
     top: 0;
     z-index: 1000;
     height: 3.75rem; /* 60px */
+    box-sizing: border-box; /* Include padding in width calculation */
 }
 
 .navbar .logo img {
@@ -84,7 +90,7 @@ body {
 
 .divider {
     border: none; /* Remove default border */
-    height: 2px; /* Height of the line */
+    height: 0.125rem; /* Height of the line */
     background-color: #dae9e0; /* Color of the line */
     margin: 1rem 0; /* Spacing above and below the line */
 }
@@ -109,7 +115,7 @@ body {
     width: 23rem; /* Adjust the image size */
     height: auto;     /* Maintain aspect ratio */
     border-radius: 0rem;
-    /*box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Optional: add a shadow */
+    /*box-shadow: 0rem 0.25rem 0.625rem rgba(0, 0, 0, 0.1); /* Optional: add a shadow */
     padding-top: 1rem; /* 64px (to make it appear under the navbar) */
     padding-left: 5rem; /* 20px */
 }
@@ -137,42 +143,190 @@ body {
     margin: auto;
 }
 
-/* Card style (main page) */
-.portfolio {
+/* Additional styles for the new layout */
+.main-content-wrapper {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
+    gap: 2rem;
+    max-width: 87.5rem; /* 1400px */
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.portfolio-main {
+    flex: 1;
+    min-width: 0; /* Allow flex item to shrink */
+}
+
+.sidebar {
+    flex: 0 0 28.125rem; /* Wider fixed width sidebar - 450px */
+    min-width: 28.125rem;
+    margin-top: 4rem; /* Move sidebar down by 4rem (64px) */
+    text-align: center; /* Center align sidebar content */
+}
+
+/* Fixed 3-column layout for portfolio cards */
+.portfolio {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    padding: 0;
     margin-top: 1.25rem; /* 20px */
 }
 
+.portfolio .card {
+    width: 100%;
+    max-width: none;
+}
+
+/* Card style (main page) */
 .card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     background-color: #fff;
     border: 0.0625rem solid #ddd; /* 1px */
     border-radius: 0.625rem; /* 10px */
     box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1); /* 0 4px 8px */
-    width: 19rem; /* 300px */
     margin: 1.25rem; /* 20px */
     text-align: center;
-    transition: transform 0.3s;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
 }
 
 .card:hover {
-    transform: scale(1.05);
-}
-
-.card img {
-    width: 100%;
-    height: auto;
-    border-radius: 0.625rem;
+    transform: translateY(-0.3125rem); /* -5px */
+    box-shadow: 0 0.625rem 1.875rem rgba(0, 0, 0, 0.3); /* 0 10px 30px */
 }
 
 .card a {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     text-decoration: none;
     color: #5f5f5f; /* Green link color */
 }
 
 .card a:hover {
     color: #81b496; /* Darker green on hover */
+}
+
+.card img {
+    width: 100%;
+    height: 12.5rem; /* 200px */
+    object-fit: cover;
+    border-radius: 0.625rem 0.625rem 0 0;
+}
+
+.card h3 {
+    flex-grow: 0;
+    margin: 1rem 1rem 0.5rem 1rem;
+    color: #19a553;
+}
+
+.card p {
+    flex-grow: 1;
+    margin: 0 1rem 1rem 1rem;
+    color: #5f5f5f;
+    line-height: 1.5;
+    text-align: left;
+}
+
+.card .project-meta {
+    margin: 0 1rem 1rem 1rem;
+    margin-top: auto; /* Push to bottom */
+}
+
+/* Sidebar cards - horizontal layout with image on left, text on right */
+.sidebar-card {
+    background-color: transparent; /* Remove background color */
+    border: none; /* Remove border */
+    border-radius: 0.625rem;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    box-shadow: none; /* Remove default shadow */
+}
+
+.sidebar-card:hover {
+    transform: translateY(-0.3125rem); /* -5px */
+    box-shadow: 0 0.625rem 1.875rem rgba(0, 0, 0, 0.15); /* Show shadow on hover */
+    background-color: #fff; /* Add background on hover */
+}
+
+.sidebar-card a {
+    display: flex;
+    align-items: flex-start;
+    text-decoration: none;
+    color: #5f5f5f;
+    padding: 1.5rem;
+    height: 100%;
+}
+
+.sidebar-card img {
+    width: 7.5rem; /* 120px */
+    height: 6.25rem; /* 100px */
+    object-fit: cover;
+    border-radius: 0.5rem; /* 8px */
+    margin-right: 1.5rem;
+    flex-shrink: 0;
+}
+
+.card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-content h4 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.3rem;
+    color: #19a553;
+}
+
+.card-content p {
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #5f5f5f;
+    flex-grow: 1;
+    text-align: left;
+}
+
+/* Sidebar project meta styling - same as main cards */
+.sidebar-card .project-meta {
+    margin: 0;
+    padding-top: 0.75rem;
+    border-top: 0.0625rem solid transparent; /* Make border transparent by default */
+    margin-top: auto;
+    transition: border-color 0.3s ease;
+}
+
+/* Show border on hover */
+.sidebar-card:hover .project-meta {
+    border-top-color: #ddd; /* Show border on hover */
+}
+
+.sidebar-card .project-date {
+    font-size: 0.9rem;
+    color: #888;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.sidebar-card .project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.sidebar-card .tag {
+    background: #f0f8f4;
+    border: 0.0625rem solid #19a553; /* 1px */
+    color: #19a553;
+    padding: 0.25rem 0.6rem;
+    border-radius: 0.75rem; /* 12px */
+    font-size: 0.75rem;
+    font-weight: 500;
 }
 
 .card2 {
@@ -205,6 +359,84 @@ body {
     color: #81b496; /* Darker green on hover */
 }
 
+/* Align titles at same level */
+.portfolio-main h2,
+.sidebar h2 {
+    font-size: 1.8rem;
+    margin: 0 0 1rem 0;
+    color: #19a553;
+}
+
+.sidebar-section {
+    background-color: transparent; /* Remove background color */
+    border: none; /* Remove border */
+    border-radius: 0.625rem; /* 10px */
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.sidebar h3 {
+    margin: 0 0 1rem 0;
+    color: #19a553;
+    text-align: center;
+}
+
+.repo-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* Main portfolio card metadata styling */
+.project-meta {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 0.0625rem solid #ddd; /* 1px */
+}
+
+.project-date {
+    font-size: 0.9rem;
+    color: #888;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.tag {
+    background: #f0f8f4;
+    border: 0.0625rem solid #19a553; /* 1px */
+    color: #19a553;
+    padding: 0.25rem 0.6rem;
+    border-radius: 0.75rem; /* 12px */
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 2rem;
+    border: 0.0625rem solid #ddd; /* 1px */
+    background: #fff;
+    border-radius: 0.5rem; /* 8px */
+    color: #333;
+    font-size: 1rem;
+}
+
+.search-input::placeholder {
+    color: #888;
+}
+
+#loading {
+    text-align: center;
+    color: #888;
+    padding: 2rem;
+}
 
 /* Headers */
 h1, h2, h3, h4, h5, h6 {
@@ -267,12 +499,40 @@ footer p {
     width: 100%;
 }
 
-/* Media Queries for Responsiveness */
-@media only screen and (max-width: 768px) {
+/* Responsive design */
+@media (max-width: 75rem) { /* 1200px */
+    .main-content-wrapper {
+        flex-direction: column;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    
+    .sidebar {
+        flex: none;
+        min-width: unset;
+        order: 1; /* Move sidebar to bottom on smaller screens */
+        margin-top: 2rem; /* Reduce margin on smaller screens */
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .portfolio-main {
+        order: 0; /* Keep main content on top */
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .portfolio {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
+    }
+}
+
+@media (max-width: 48rem) { /* 768px */
     .navbar {
         height: auto; /* Adjust height */
-        width: calc(100%);
+        width: 100%; /* Full width on mobile */
         height: 3rem; /* 60px */
+        padding: 0.625rem 0.5rem; /* Reduce horizontal padding */
     }
 
     .navbar ul {
@@ -288,13 +548,13 @@ footer p {
     .navbar h2 {
         font-size: 1.75rem; /* 16px */
         padding: 0.125rem 0.125rem; /* 8px 15px */
-        margin-right: 2rem; /* 20px */
+        margin-right: 1rem; /* Reduce margin */
     }
 
     .navbar ul li a {
-        font-size: 1rem; /* Reduce font size for navbar links */
+        font-size: 0.9rem; /* Reduce font size for navbar links */
         margin-right: 0.25rem; /* 20px */
-        padding: 0.125rem 0.125rem; /* 8px 15px */
+        padding: 0.125rem 0.25rem; /* Reduce padding */
     }
 
     .layout-container {
@@ -302,9 +562,10 @@ footer p {
         padding: 0 0.5rem; /* Reduce padding on smaller screens */
         max-width: 100%; /* Full width */
         padding-top: 3rem; /* 64px (to make it appear under the navbar) */
-        padding-left: 1rem; /* Match the content padding */
-        padding-right: 0; /* Match the content padding */
+        padding-left: 0.5rem; /* Consistent padding */
+        padding-right: 0.5rem; /* Consistent padding */
         margin: 1rem auto -5rem;
+        box-sizing: border-box;
     }
 
     .layout-container2 {
@@ -312,8 +573,9 @@ footer p {
         max-width: 100%; /* Full width */
         margin: auto;
         padding-top: 2rem; /* 64px (to make it appear under the navbar) */
-        padding-left: 1rem; /* Match the content padding */
-        padding-right: 0; /* Match the content padding */
+        padding-left: 0.5rem; /* Consistent padding */
+        padding-right: 0.5rem; /* Consistent padding */
+        box-sizing: border-box;
     }
 
     .content {
@@ -321,13 +583,24 @@ footer p {
         max-width: 100%; /* Full width */
         margin: auto;
         padding-top: 2rem; /* 64px (to make it appear under the navbar) */
-        padding-left: 1rem; /* Match the content padding */
-        padding-right: 0; /* Match the content padding */
+        padding-left: 0.5rem; /* Consistent padding */
+        padding-right: 0.5rem; /* Consistent padding */
+        box-sizing: border-box;
+    }
+
+    .main-content-wrapper {
+        padding: 0 0.5rem; /* Add padding to main wrapper */
+        box-sizing: border-box;
+        max-width: 100%;
+        overflow-x: hidden;
     }
 
     .portfolio {
+        grid-template-columns: 1fr; /* Single column on mobile */
+        gap: 1.5rem;
         justify-content: space-around; /* Center portfolio items */
         margin-top: 0; /* 20px */
+        width: 100%;
     }
 
     .card {
@@ -335,15 +608,41 @@ footer p {
         flex-direction: row; /* Make the card layout horizontal in mobile */
         width: 100%; /* Full width */
         align-items: flex-start;
+        margin: 0.625rem 0; /* 10px 0 */
+        box-sizing: border-box;
     }
 
     .card img {
         width: 100%; /* Image takes 40% of the width in mobile view */
         height: auto; /* Maintain aspect ratio */
     }
+    
     .card2 {
         width: 45%; /* Full width on small screens */
         margin: 0.5rem; /* Reduce margin */
+        box-sizing: border-box;
+    }
+
+    .sidebar {
+        margin-top: 1rem; /* Reduce margin on mobile */
+        min-width: unset; /* Remove min-width constraint */
+        width: 100%;
+        flex: none;
+        box-sizing: border-box;
+    }
+
+    .sidebar-card a {
+        flex-direction: column;
+        text-align: left;
+        padding: 1.5rem 0.5rem; /* Reduce horizontal padding */
+        align-items: center;
+        box-sizing: border-box;
+    }
+    
+    .sidebar-card img {
+        margin: 0 0 1rem 0;
+        width: 7.5rem; /* 120px */
+        height: 7.5rem; /* 120px */
     }
 
     .prolog h2 {
@@ -352,5 +651,17 @@ footer p {
 
     .prolog p, li {
         font-size: 1rem; /* Smaller font size for body text */
+    }
+
+    /* Fix any potential overflow issues */
+    * {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+@media (min-width: 48.0625rem) and (max-width: 75rem) { /* 769px - 1200px */
+    .portfolio {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
