@@ -1,4 +1,11 @@
 ---
+title: "Broker Transaction Data Analysis"
+description: "<strong>Data process, data management and analysis of broker transaction data</strong> developed to focus on analyzing the scraped data to generate actionable insights from <strong>interactive visualization</strong>."
+date: "2024-01-15"
+image: "assets/page9.png"
+tags: ["data-analysis", "visualization", "broker-data"]
+featured: true
+category: "data-science"
 layout: default
 title: Broker Transaction Data Analysis
 profile: false
