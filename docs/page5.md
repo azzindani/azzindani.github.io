@@ -1,4 +1,11 @@
 ---
+title: "Facial Recognition - Large Version"
+description: "<strong>Over 500 thousands of facial images</strong> collected using <strong>multi-threaded process</strong>. <strong>Over 1000 faces</strong> able to be recognize with <strong>97% of training and testing accuracy</strong>"
+date: "2024-01-15"
+image: "assets/page5.png"
+tags: ['machine-learning', 'computer-vision', 'ai']
+featured: true
+category: "data-science"
 layout: default
 title: Facial Recognition - Large Version
 profile: false
