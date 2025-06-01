@@ -1,4 +1,11 @@
 ---
+title: "Broker Transaction Data Scraping"
+description: "<strong>Robust multi-threaded web scraping process</strong> developed to <strong>automate the extraction of broker transaction data</strong> from <strong>the stock exchange</strong>."
+date: "2024-01-15"
+image: "assets/page8.png"
+tags: ["web-scraping", "automation", "stock-market"]
+featured: true
+category: "data-engineering"
 layout: default
 title: Broker Transaction Data Scraping
 profile: false
