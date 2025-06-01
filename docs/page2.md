@@ -1,4 +1,11 @@
 ---
+title: "Covid-19 Detection"
+description: "<strong>Computer vision and deep learning techniques</strong> developed to detect <strong>Covid-19</strong> from <strong>chest X-ray (CXR)</strong> images."
+date: "2024-01-15"
+image: "assets/page2.png"
+tags: ["deep-learning", "computer-vision", "covid-19", "medical-imaging"]
+featured: true
+category: "healthcare-ai"
 layout: default
 title: Covid-19 Detection
 profile: false
