@@ -76,16 +76,19 @@
     <script>
         // Configuration
         const CONFIG = {
+            username: 'azzindani', // Your GitHub username
+            repoName: 'azzindani.github.io', // Your repository name (usually username.github.io for GitHub Pages)
             isLocal: window.location.protocol === 'file:' || 
                     window.location.hostname === 'localhost' || 
-                    window.location.hostname === '192.168.8.101',
+                    window.location.hostname === '127.0.0.1' ||
+                    window.location.hostname.includes('192.168.'),
             fallbackMdFiles: ['page5.md', 'page8.md', 'page9.md', 'page10.md']
         };
 
         // Repository metadata (manually maintained list)
         const REPOSITORY_PROJECTS = [
             {
-                url: 'https://github.com/x/01_Data_Analytic',
+                url: 'https://github.com/azzindani/01_Data_Analytic',
                 title: 'Data Analysis',
                 description: 'Providing my data analytic projects that I created in single notebook and can be run directly via google colab.',
                 image: 'assets/page11.gif',
@@ -283,8 +286,7 @@
 
             static async _tryGitHubAPI(detectedFiles) {
                 try {
-                    const repoUrl = window.location.hostname.replace('.github.io', '');
-                    const apiUrl = `https://api.github.com/repos/${repoUrl}/${repoUrl}.github.io/contents/docs`;
+                    const apiUrl = `https://api.github.com/repos/${CONFIG.username}/${CONFIG.repoName}/contents/docs`;
                     
                     const apiResponse = await fetch(apiUrl);
                     if (apiResponse.ok) {
@@ -391,7 +393,7 @@
                     
                     const linkUrl = CONFIG.isLocal ? 
                         `docs/${project.filename}` : 
-                        `https://azzindani.github.io/docs/${project.filename}`;
+                        `https://${CONFIG.username}.github.io/${CONFIG.repoName}/docs/${project.filename}`;
                     
                     card.innerHTML = `
                         <a href="${linkUrl}">
