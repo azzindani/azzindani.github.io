@@ -1,4 +1,11 @@
 ---
+title: "Lung Abnormalities Detection"
+description: "Computer vision technology developed to identify and analyze <strong>abnormalities in lung</strong> images from <strong>chest X-rays (CXR)</strong> with ability to recognize <strong>8 type of abnormalities</strong>."
+date: "2024-01-15"
+image: "assets/page3.png"
+tags: ["computer-vision", "medical-imaging", "deep-learning"]
+featured: true
+category: "healthcare-ai"
 layout: default
 title: Lungs Abnormalities Detection
 profile: false
