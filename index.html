@@ -146,6 +146,16 @@
         ];
 
 
+        // Generate page list (page1.md to page50.md)
+        function generatePageList() {
+            const pageList = [];
+            for (let i = 1; i <= 50; i++) {
+                pageList.push(`page${i}.md`);
+            }
+            console.log('📄 Generated page list:', pageList);
+            return pageList;
+        }
+
         // Utility Functions
         const Utils = {
             formatDate(dateString) {
@@ -208,339 +218,221 @@
             extractDateFromFilename(filename) {
                 const dateMatch = filename.match(/(\d{4}-\d{2}-\d{2})/);
                 return dateMatch ? dateMatch[1] : null;
-            }
-        };
+            },
 
-        // File Detection
-        class FileDetector {
-            static async detectMdFiles() {
-                const detectedFiles = [];
-                
-                try {
-                    console.log('🔍 Auto-detecting .md files...');
-                    
-                    if (CONFIG.isLocal) {
-                        await this._detectLocalFiles(detectedFiles);
-                    } else {
-                        await this._detectRemoteFiles(detectedFiles);
-                    }
-                    
-                    const uniqueFiles = [...new Set(detectedFiles)].sort();
-                    console.log(`🎯 Auto-detected ${uniqueFiles.length} .md files:`, uniqueFiles);
-                    
-                    return uniqueFiles.length > 0 ? uniqueFiles : CONFIG.fallbackMdFiles;
-                    
-                } catch (error) {
-                    console.warn('⚠️ Auto-detection failed:', error);
-                    return CONFIG.fallbackMdFiles;
-                }
-            }
-
-            static async _detectLocalFiles(detectedFiles) {
-                const commonPatterns = [
-                    ...Array.from({length: 50}, (_, i) => `page${i + 1}.md`),
-                    'index.md', 'readme.md', 'about.md', 'project.md',
-                    'automation.md', 'facial-recognition.md', 'data-analysis.md',
-                    'web-scraping.md', 'machine-learning.md', 'ai-project.md',
-                    'dashboard.md', 'visualization.md', 'neural-network.md',
-                    'deep-learning.md', 'computer-vision.md', 'nlp.md',
-                    'recommendation.md', 'clustering.md', 'classification.md'
-                ];
-                
-                console.log('📁 Scanning for .md files locally...');
-                
-                for (const filename of commonPatterns) {
-                    try {
-                        const response = await fetch(`docs/${filename}`, { method: 'HEAD' });
-                        if (response.ok) {
-                            detectedFiles.push(filename);
-                            console.log(`✅ Found: ${filename}`);
-                        }
-                    } catch (error) {
-                        // File doesn't exist, continue silently
-                    }
-                }
-            }
-
-            static async _detectRemoteFiles(detectedFiles) {
-                try {
-                    // Try directory listing
-                    const response = await fetch('docs/');
-                    if (response.ok) {
-                        const html = await response.text();
-                        const matches = html.match(/href="([^"]*\.md)"/g);
-                        if (matches) {
-                            matches.forEach(match => {
-                                const filename = match.match(/href="([^"]*)"/)[1];
-                                if (filename.endsWith('.md') && !filename.includes('/')) {
-                                    detectedFiles.push(filename);
-                                }
-                            });
-                        }
-                    }
-                } catch (error) {
-                    console.log('📂 Directory listing not available, trying GitHub API...');
-                    await this._tryGitHubAPI(detectedFiles);
-                }
-            }
-
-            static async _tryGitHubAPI(detectedFiles) {
-                try {
-                    const apiUrl = `https://api.github.com/repos/${CONFIG.username}/${CONFIG.repoName}/contents/docs`;
-                    
-                    const apiResponse = await fetch(apiUrl);
-                    if (apiResponse.ok) {
-                        const files = await apiResponse.json();
-                        files.forEach(file => {
-                            if (file.name.endsWith('.md') && file.type === 'file') {
-                                detectedFiles.push(file.name);
-                                console.log(`🐙 GitHub API found: ${file.name}`);
-                            }
-                        });
-                    }
-                } catch (apiError) {
-                    console.log('🔄 GitHub API not accessible, using fallback method...');
-                }
-            }
-        }
-
-        // Portfolio Loader
-        class PortfolioLoader {
-            static async loadProjects() {
-                const portfolioContainer = document.getElementById('portfolio-cards');
-                const loadingDiv = document.getElementById('loading');
-                const projects = [];
-                
-                console.log('🔍 Starting to load projects...');
-                
-                const mdFiles = await FileDetector.detectMdFiles();
-                console.log('📋 Files to process:', mdFiles);
-                
-                try {
-                    await this._processFiles(mdFiles, projects);
-                    
-                    if (projects.length === 0) {
-                        console.warn('🔄 No .md files loaded, using fallback data');
-                        projects.push(...this._getFallbackProjects());
-                    }
-                    
-                    this._sortProjects(projects);
-                    loadingDiv.style.display = 'none';
-                    this._renderProjects(projects, portfolioContainer);
-                    
-                    console.log('✅ Portfolio loading complete!');
-                    this._showDetectionSummary(mdFiles, projects);
-                    
-                } catch (error) {
-                    console.error('💥 Error loading portfolio projects:', error);
-                    this._handleError(loadingDiv, portfolioContainer);
-                }
-            }
-
-            static async _processFiles(mdFiles, projects) {
-                for (const filename of mdFiles) {
-                    try {
-                        console.log(`📄 Attempting to load: docs/${filename}`);
-                        
-                        const response = await fetch(`docs/${filename}`);
-                        if (response.ok) {
-                            const content = await response.text();
-                            const metadata = Utils.parseMarkdownMetadata(content);
-                            
-                            // Skip files without proper metadata
-                            if (!metadata.title && content.length < 100) {
-                                console.log(`⏭️ Skipping ${filename} - insufficient metadata or content`);
-                                continue;
-                            }
-                            
-                            const project = this._createProjectObject(filename, content, metadata);
-                            projects.push(project);
-                            console.log(`✨ Added project: ${project.title}`);
-                        }
-                    } catch (error) {
-                        console.warn(`❌ Error loading ${filename}:`, error);
-                    }
-                }
-            }
-
-            static _createProjectObject(filename, content, metadata) {
+            createProjectObject(filename, content, metadata) {
                 return {
                     filename: filename.replace('.md', '.html'),
-                    title: metadata.title || Utils.extractTitleFromContent(content) || 'Untitled Project',
-                    description: metadata.description || Utils.extractDescriptionFromContent(content) || 'No description available',
-                    image: metadata.image || 'assets/default.png',
-                    date: metadata.date || Utils.extractDateFromFilename(filename) || new Date().toISOString().split('T')[0],
+                    title: metadata.title || this.extractTitleFromContent(content) || `Project ${filename.replace('.md', '')}`,
+                    description: metadata.description || this.extractDescriptionFromContent(content) || 'No description available',
+                    image: metadata.image || `assets/${filename.replace('.md', '.png')}`,
+                    date: metadata.date || this.extractDateFromFilename(filename) || new Date().toISOString().split('T')[0],
                     tags: metadata.tags || [],
                     featured: metadata.featured || false,
                     category: metadata.category || 'general',
                     originalFile: filename
                 };
             }
+        };
 
-            static _sortProjects(projects) {
+        // Check if file exists by trying to fetch it
+        async function checkFileExists(filename) {
+            try {
+                const response = await fetch(`docs/${filename}`, { method: 'HEAD' });
+                return response.ok;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        // Load content from existing file
+        async function loadFileContent(filename) {
+            try {
+                const response = await fetch(`docs/${filename}`);
+                if (response.ok) {
+                    return await response.text();
+                }
+                return null;
+            } catch (error) {
+                console.warn(`❌ Error loading ${filename}:`, error);
+                return null;
+            }
+        }
+
+        // Portfolio Loader
+        async function loadPortfolioProjects() {
+            const portfolioContainer = document.getElementById('portfolio-cards');
+            const loadingDiv = document.getElementById('loading');
+            const projects = [];
+            
+            console.log('🔍 Starting to load projects...');
+            console.log('🌐 Environment:', CONFIG.isLocal ? 'Local' : 'GitHub Pages');
+            
+            // Generate list of pages to check
+            const pageList = generatePageList();
+            let foundFiles = 0;
+            let checkedFiles = 0;
+            
+            try {
+                // Check each page file
+                for (const filename of pageList) {
+                    checkedFiles++;
+                    console.log(`📄 Checking file ${checkedFiles}/50: ${filename}`);
+                    
+                    // Check if file exists
+                    const exists = await checkFileExists(filename);
+                    
+                    if (exists) {
+                        foundFiles++;
+                        console.log(`✅ Found file: ${filename}`);
+                        
+                        // Load file content
+                        const content = await loadFileContent(filename);
+                        
+                        if (content) {
+                            const metadata = Utils.parseMarkdownMetadata(content);
+                            const project = Utils.createProjectObject(filename, content, metadata);
+                            projects.push(project);
+                            console.log(`✨ Added project: ${project.title}`);
+                        }
+                    } else {
+                        console.log(`⏭️ File not found: ${filename}`);
+                    }
+                }
+                
+                console.log(`📊 Summary: Found ${foundFiles} files out of ${checkedFiles} checked`);
+                
+                // If no files found, try fallback
+                if (projects.length === 0) {
+                    console.warn('🔄 No files found, trying fallback files...');
+                    
+                    for (const filename of CONFIG.fallbackMdFiles) {
+                        const exists = await checkFileExists(filename);
+                        if (exists) {
+                            const content = await loadFileContent(filename);
+                            if (content) {
+                                const metadata = Utils.parseMarkdownMetadata(content);
+                                const project = Utils.createProjectObject(filename, content, metadata);
+                                projects.push(project);
+                                console.log(`📋 Added fallback project: ${project.title}`);
+                            }
+                        }
+                    }
+                }
+                
+                // Sort projects (featured first, then by date)
                 projects.sort((a, b) => {
                     if (a.featured && !b.featured) return -1;
                     if (!a.featured && b.featured) return 1;
                     return new Date(b.date) - new Date(a.date);
                 });
-            }
-
-            static _renderProjects(projects, container) {
-                projects.forEach((project, index) => {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    if (project.featured) card.classList.add('featured');
-                    
-                    const linkUrl = CONFIG.isLocal ? 
-                        `docs/${project.filename}` : 
-                        `https://${CONFIG.username}.github.io/${CONFIG.repoName}/docs/${project.filename}`;
-                    
-                    card.innerHTML = `
-                        <a href="${linkUrl}">
-                            <img src="${project.image}" alt="${project.title}" onerror="this.src='assets/default.png'">
-                            <h3>${project.title} ${project.featured ? '⭐' : ''}</h3>
-                            <p>${project.description}</p>
-                            <div class="project-meta">
-                                <span class="project-date">${Utils.formatDate(project.date)}</span>
-                                <div class="project-tags">
-                                    ${project.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-                                </div>
-                                <div class="project-source">
-                                    <span class="source-file">📄 ${project.originalFile}</span>
-                                </div>
-                            </div>
-                        </a>
-                    `;
-                    
-                    container.appendChild(card);
-                });
-            }
-
-            static _getFallbackProjects() {
-                return [
-                    {
-                        filename: 'page10.html',
-                        title: 'Broker Transaction Automation System',
-                        description: 'Integration of robust multi-threaded web scraping process, data management and interactive visualization',
-                        image: 'assets/page10.png',
-                        date: '2024-01-15',
-                        tags: ['automation', 'data-analysis', 'web-scraping'],
-                        featured: true
-                    },
-                    {
-                        filename: 'page5.html',
-                        title: 'Facial Recognition - Large Version',
-                        description: 'Over 500 thousands of facial images collected using multi-threaded process with 97% accuracy',
-                        image: 'assets/page5.png',
-                        date: '2024-01-10',
-                        tags: ['machine-learning', 'computer-vision', 'ai']
-                    }
-                ];
-            }
-
-            static _handleError(loadingDiv, container) {
-                loadingDiv.innerHTML = 'Error loading projects. Please check the console for details.';
                 
-                const fallbackProjects = this._getFallbackProjects();
-                fallbackProjects.forEach(project => {
-                    const card = document.createElement('div');
-                    card.className = 'card fallback';
-                    card.innerHTML = `
-                        <a href="#" onclick="alert('This is a fallback project card')">
-                            <img src="${project.image}" alt="${project.title}">
-                            <h3>${project.title} (Fallback)</h3>
-                            <p>${project.description}</p>
-                        </a>
-                    `;
-                    container.appendChild(card);
-                });
-            }
-
-            static _showDetectionSummary(detectedFiles, loadedProjects) {
-                console.log('\n📊 DETECTION SUMMARY:');
-                console.log(`🔍 Files detected: ${detectedFiles.length}`);
-                console.log(`✅ Projects loaded: ${loadedProjects.length}`);
-                console.log(`📂 Detected files:`, detectedFiles);
-                console.log(`🎯 Loaded projects:`, loadedProjects.map(p => p.originalFile));
+                // Clear loading message
+                loadingDiv.style.display = 'none';
                 
-                const skippedFiles = detectedFiles.filter(file => 
-                    !loadedProjects.some(project => project.originalFile === file)
-                );
-                if (skippedFiles.length > 0) {
-                    console.log(`⏭️ Skipped files:`, skippedFiles);
-                }
-            }
-        }
-
-        // Repository Loader
-        class RepositoryLoader {
-            static async loadRepositories() {
-                const repoContainer = document.getElementById('repo-cards');
-                const repoLoadingDiv = document.getElementById('repo-loading');
-                
-                try {
-                    console.log('🐙 Loading repository projects...');
-                    
-                    // Sort repositories by date (newest first)
-                    const sortedRepos = [...REPOSITORY_PROJECTS].sort((a, b) => 
-                        new Date(b.date) - new Date(a.date)
-                    );
-                    
-                    // Clear loading message
-                    if (repoLoadingDiv) {
-                        repoLoadingDiv.style.display = 'none';
-                    }
-                    
-                    // Generate cards for each repository
-                    sortedRepos.forEach(repo => {
+                // Render projects
+                if (projects.length > 0) {
+                    projects.forEach((project, index) => {
                         const card = document.createElement('div');
-                        card.className = 'sidebar-card';
+                        card.className = 'card';
+                        if (project.featured) card.classList.add('featured');
+                        
+                        const linkUrl = CONFIG.isLocal ? 
+                            `docs/${project.filename}` : 
+                            `https://${CONFIG.username}.github.io/${CONFIG.repoName}/docs/${project.filename}`;
                         
                         card.innerHTML = `
-                            <a href="${repo.url}" target="_blank" rel="noopener noreferrer">
-                                <img src="${repo.image}" alt="${repo.title}" onerror="this.src='assets/default.png'">
-                                <div class="card-content">
-                                    <h4>${repo.title}</h4>
-                                    <p>${repo.description}</p>
-                                    <div class="project-meta">
-                                        <span class="project-date">${Utils.formatDate(repo.date)}</span>
-                                        <div class="project-tags">
-                                            ${repo.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-                                        </div>
+                            <a href="${linkUrl}">
+                                <img src="${project.image}" alt="${project.title}" onerror="this.src='assets/default.png'">
+                                <h3>${project.title} ${project.featured ? '⭐' : ''}</h3>
+                                <p>${project.description}</p>
+                                <div class="project-meta">
+                                    <span class="project-date">${Utils.formatDate(project.date)}</span>
+                                    <div class="project-tags">
+                                        ${project.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                                    </div>
+                                    <div class="project-source">
+                                        <span class="source-file">📄 ${project.originalFile}</span>
                                     </div>
                                 </div>
                             </a>
                         `;
                         
-                        repoContainer.appendChild(card);
+                        portfolioContainer.appendChild(card);
                     });
                     
-                    console.log(`✅ Successfully loaded ${sortedRepos.length} repositories`);
+                    console.log(`✅ Successfully rendered ${projects.length} project cards`);
+                } else {
+                    loadingDiv.innerHTML = 'No projects found in the docs folder.';
+                    console.warn('⚠️ No projects to display');
+                }
+                
+            } catch (error) {
+                console.error('💥 Error loading portfolio projects:', error);
+                loadingDiv.innerHTML = 'Error loading projects. Please check the console for details.';
+            }
+        }
+
+        // Repository Loader
+        async function loadRepositoryProjects() {
+            const repoContainer = document.getElementById('repo-cards');
+            const repoLoadingDiv = document.getElementById('repo-loading');
+            
+            try {
+                console.log('🐙 Loading repository projects...');
+                
+                // Sort repositories by date (newest first)
+                const sortedRepos = [...REPOSITORY_PROJECTS].sort((a, b) => 
+                    new Date(b.date) - new Date(a.date)
+                );
+                
+                // Clear loading message
+                if (repoLoadingDiv) {
+                    repoLoadingDiv.style.display = 'none';
+                }
+                
+                // Generate cards for each repository
+                sortedRepos.forEach(repo => {
+                    const card = document.createElement('div');
+                    card.className = 'sidebar-card';
                     
-                } catch (error) {
-                    console.error('💥 Error loading repository projects:', error);
-                    if (repoLoadingDiv) {
-                        repoLoadingDiv.innerHTML = 'Error loading repositories. Please refresh the page.';
-                    }
+                    card.innerHTML = `
+                        <a href="${repo.url}" target="_blank" rel="noopener noreferrer">
+                            <img src="${repo.image}" alt="${repo.title}" onerror="this.src='assets/default.png'">
+                            <div class="card-content">
+                                <h4>${repo.title}</h4>
+                                <p>${repo.description}</p>
+                                <div class="project-meta">
+                                    <span class="project-date">${Utils.formatDate(repo.date)}</span>
+                                    <div class="project-tags">
+                                        ${repo.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    `;
+                    
+                    repoContainer.appendChild(card);
+                });
+                
+                console.log(`✅ Successfully loaded ${sortedRepos.length} repositories`);
+                
+            } catch (error) {
+                console.error('💥 Error loading repository projects:', error);
+                if (repoLoadingDiv) {
+                    repoLoadingDiv.innerHTML = 'Error loading repositories. Please refresh the page.';
                 }
             }
         }
 
-        // Search Functionality (Optional)
-        class SearchManager {
-            static initialize() {
-                const searchInput = document.createElement('input');
-                searchInput.type = 'text';
-                searchInput.placeholder = 'Search projects...';
-                searchInput.className = 'search-input';
-                
-                searchInput.addEventListener('input', this._handleSearch);
-                
-                const portfolioSection = document.querySelector('.portfolio-main');
-                portfolioSection.insertBefore(searchInput, portfolioSection.firstChild);
-            }
-
-            static _handleSearch(e) {
+        // Search functionality (optional)
+        function addSearchFunctionality() {
+            const searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.placeholder = 'Search projects...';
+            searchInput.className = 'search-input';
+            
+            searchInput.addEventListener('input', (e) => {
                 const searchTerm = e.target.value.toLowerCase();
                 const cards = document.querySelectorAll('.card');
                 
@@ -554,23 +446,28 @@
                         card.style.display = 'none';
                     }
                 });
-            }
+            });
+            
+            // Insert search input before portfolio section
+            const portfolioSection = document.querySelector('.portfolio-main');
+            portfolioSection.insertBefore(searchInput, portfolioSection.firstChild);
         }
 
         // Initialize everything when the DOM is loaded
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('🚀 Initializing portfolio...');
+            console.log('⚙️ Configuration:', CONFIG);
             
             // Load both portfolio projects and repositories in parallel
             await Promise.all([
-                PortfolioLoader.loadProjects(),
-                RepositoryLoader.loadRepositories()
+                loadPortfolioProjects(),
+                loadRepositoryProjects()
             ]);
             
             console.log('🎉 Portfolio initialization complete!');
             
             // Uncomment to add search functionality
-            // SearchManager.initialize();
+            // addSearchFunctionality();
         });
     </script>
 </body>
