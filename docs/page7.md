@@ -1,4 +1,11 @@
 ---
+title: "Financial Statement Excel Web Scraping"
+description: "<strong>Multi-threaded web scraping system</strong> specifically designed to extract various <strong>financial data</strong> from stock exchange databases, focusing exclusively on <strong>collecting financial report tables in Excel</strong> format."
+date: "2024-01-15"
+image: "assets/page7.png"
+tags: ["web-scraping", "finance", "excel-automation"]
+featured: true
+category: "data-engineering"
 layout: default
 title: Financial Statement Excel Web Scraping
 profile: false
