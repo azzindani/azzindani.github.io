@@ -1,4 +1,11 @@
 ---
+title: "Lungs Detection"
+description: "<strong>A computer vision system</strong> developed to have ability of <strong>detecting and localizing lungs</strong> in <strong>medical images</strong> such as <strong>CXR (Chest X-Ray)</strong>."
+date: "2024-01-15"
+image: "assets/page1.jpg"
+tags: ["computer-vision", "medical-imaging", "lung-detection"]
+featured: true
+category: "healthcare-ai"
 layout: default
 title: Lungs Detection
 profile: false
