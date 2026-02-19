@@ -1,20 +1,30 @@
 # Site
-title: "Azzindani's Portfolio"
-description: "Data Science, Machine Learning, and AI Portfolio"
+title: My GitHub Pages Site
+#description: A site using a custom theme
 
-# Use our custom _layouts/default.html instead of an external theme
-# theme: jekyll-theme-cayman  <-- removed; custom layout takes precedence
+theme: jekyll-theme-cayman
 
+#theme: minima
 plugins:
   - jekyll-paginate
-
 paginate: 10
 
-# Markdown processor
+#include: [sidebar.html]
+#remote_theme: pages-themes/cayman@v0.2.0
+#baseurl: "/docs"
+# Plugins
+#plugins: 
+#  - jekyll-feed
+#  - jekyll-sitemap
+#  - jekyll-paginate
+#  - jekyll-seo-tag
+      
+# Syntax
 markdown: GFM
 
-# Exclude admin config from Jekyll processing
-exclude:
-  - admin/config.yml
-  - "*.sh"
-  - vendor/
+# Paginate
+#paginate: 10
+
+# Include custom CSS
+#sass:
+#  style: compressed
