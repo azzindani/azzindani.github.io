@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ page.description | default: site.description | default: 'Azzindani Portfolio' }}">
+    <meta name="author" content="Azzindani">
+    <title>{{ page.title | default: site.title }} - Azzindani Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Link to shared stylesheet from root -->
+    <link rel="stylesheet" href="{{ '/style.css' | relative_url }}">
+    <style>
+        /* Post reading layout */
+        .post-body {
+            background: var(--white);
+        }
+
+        .post-hero {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            padding: 5rem var(--spacing-md) var(--spacing-xxl);
+            text-align: center;
+            color: var(--white);
+        }
+
+        .post-hero h1 {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: var(--font-weight-bold);
+            margin-bottom: var(--spacing-md);
+            line-height: 1.3;
+        }
+
+        .post-hero-meta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-md);
+            flex-wrap: wrap;
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .post-hero-meta .tag {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--white);
+        }
+
+        .post-container {
+            max-width: 52rem;
+            margin: 0 auto;
+            padding: var(--spacing-xxl) var(--spacing-md);
+        }
+
+        /* Markdown / post content styling */
+        .post-content {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xxl);
+            box-shadow: var(--shadow-sm);
+            line-height: 1.8;
+            color: var(--dark-gray);
+        }
+
+        .post-content h1,
+        .post-content h2,
+        .post-content h3,
+        .post-content h4 {
+            color: var(--dark-gray);
+            margin-top: var(--spacing-xxl);
+            margin-bottom: var(--spacing-md);
+            line-height: 1.35;
+        }
+
+        .post-content h1 { font-size: 1.9rem; }
+        .post-content h2 {
+            font-size: 1.5rem;
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 2px solid var(--light-gray);
+        }
+        .post-content h3 { font-size: 1.2rem; }
+
+        .post-content p {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .post-content a {
+            color: var(--primary-color);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .post-content a:hover {
+            color: var(--primary-dark);
+        }
+
+        .post-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            margin: var(--spacing-lg) 0;
+            display: block;
+        }
+
+        .post-content code {
+            background: var(--light-gray);
+            color: var(--primary-dark);
+            padding: 0.15em 0.4em;
+            border-radius: var(--radius-sm);
+            font-size: 0.875em;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .post-content pre {
+            background: #1e1e2e;
+            color: #cdd6f4;
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            overflow-x: auto;
+            margin: var(--spacing-lg) 0;
+            box-shadow: var(--shadow-md);
+        }
+
+        .post-content pre code {
+            background: transparent;
+            color: inherit;
+            padding: 0;
+            font-size: 0.875rem;
+        }
+
+        .post-content blockquote {
+            border-left: 4px solid var(--primary-color);
+            margin: var(--spacing-lg) 0;
+            padding: var(--spacing-md) var(--spacing-lg);
+            background: rgba(21, 153, 87, 0.05);
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            color: var(--gray);
+        }
+
+        .post-content ul,
+        .post-content ol {
+            margin: var(--spacing-md) 0 var(--spacing-lg) var(--spacing-xl);
+        }
+
+        .post-content li {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .post-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: var(--spacing-lg) 0;
+            font-size: 0.9rem;
+        }
+
+        .post-content table th {
+            background: var(--primary-color);
+            color: var(--white);
+            padding: var(--spacing-sm) var(--spacing-md);
+            text-align: left;
+        }
+
+        .post-content table td {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .post-content table tr:hover td {
+            background: #f6fff9;
+        }
+
+        .post-content hr {
+            border: none;
+            border-top: 2px solid var(--light-gray);
+            margin: var(--spacing-xxl) 0;
+        }
+
+        /* Navigation between posts */
+        .post-nav {
+            display: flex;
+            justify-content: space-between;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-xxl);
+        }
+
+        .post-nav a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: var(--font-weight-medium);
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 2px solid var(--primary-color);
+            border-radius: var(--radius-lg);
+            transition: var(--transition-fast);
+        }
+
+        .post-nav a:hover {
+            background: var(--primary-color);
+            color: var(--white);
+        }
+
+        @media (max-width: 768px) {
+            .post-content {
+                padding: var(--spacing-lg);
+            }
+
+            .post-content h1 { font-size: 1.5rem; }
+            .post-content h2 { font-size: 1.25rem; }
+        }
+    </style>
+</head>
+<body class="post-body">
+
+    <!-- Floating background -->
+    <div class="floating-background">
+        <div class="floating-shape floating-circle size-medium float-1"></div>
+        <div class="floating-shape floating-square size-small float-2"></div>
+        <div class="floating-shape floating-hexagon size-medium float-4"></div>
+        <div class="floating-shape floating-circle size-small float-5"></div>
+        <div class="floating-shape floating-triangle size-medium float-7"></div>
+        <div class="floating-shape floating-circle size-extra-large float-9"></div>
+        <div class="floating-shape floating-hexagon size-large float-12"></div>
+    </div>
+
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Navbar -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="navbar-container">
+            <div class="logo">
+                <h1>
+                    <a href="{{ '/' | relative_url }}" aria-label="Portfolio Home">
+                        <span class="logo-text">Azzindani</span>
+                    </a>
+                </h1>
+            </div>
+            <button class="mobile-menu-toggle" aria-label="Toggle mobile menu" aria-expanded="false">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+            <ul class="nav-links" role="menubar">
+                <li role="none"><a href="{{ '/' | relative_url }}" role="menuitem">Home</a></li>
+                <li role="none"><a href="https://github.com/azzindani" role="menuitem" target="_blank" rel="noopener noreferrer">My Github</a></li>
+                <li role="none"><a href="{{ '/aboutme.html' | relative_url }}" role="menuitem">About Me</a></li>
+                <li role="none"><a href="{{ '/#contact' | relative_url }}" role="menuitem">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Post hero header -->
+    <header class="post-hero" id="main-content">
+        <h1>{{ page.title | default: 'Untitled Post' }}</h1>
+        <div class="post-hero-meta">
+            {% if page.date %}
+            <span>📅 {{ page.date | date: "%B %-d, %Y" }}</span>
+            {% endif %}
+            {% if page.category %}
+            <span>📁 {{ page.category | replace: '-', ' ' | capitalize }}</span>
+            {% endif %}
+            {% if page.tags %}
+            {% for tag in page.tags %}
+            <span class="tag">{{ tag }}</span>
+            {% endfor %}
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Post content -->
+    <main class="post-container">
+        <article class="post-content" role="main">
+            {{ content }}
+        </article>
+
+        <nav class="post-nav" aria-label="Post navigation">
+            <a href="{{ '/' | relative_url }}">← Back to Portfolio</a>
+            <a href="{{ '/aboutme.html' | relative_url }}">About Me →</a>
+        </nav>
+    </main>
+
+    <!-- Back to top -->
+    <button class="back-to-top" id="back-to-top" aria-label="Back to top" style="display:none;">
+        <span class="arrow-up">↑</span>
+    </button>
+
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Connect</h4>
+                    <div class="social-links">
+                        <a href="https://github.com/azzindani" target="_blank" rel="noopener noreferrer">GitHub</a>
+                        <a href="https://huggingface.co/azzindani" target="_blank" rel="noopener noreferrer">Hugging Face</a>
+                        <a href="https://www.linkedin.com/in/azzindan1/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                        <a href="mailto:422indani@gmail.com">Email</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <nav class="footer-nav">
+                        <a href="{{ '/' | relative_url }}">Home</a>
+                        <a href="{{ '/aboutme.html' | relative_url }}">About</a>
+                        <a href="https://github.com/azzindani?tab=repositories">Open Source</a>
+                    </nav>
+                </div>
+                <div class="footer-section">
+                    <h4>Technologies</h4>
+                    <div class="tech-tags">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">Machine Learning</span>
+                        <span class="tech-tag">Deep Learning</span>
+                        <span class="tech-tag">AI</span>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Azzindani's Portfolio. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu
+        const toggle = document.querySelector('.mobile-menu-toggle');
+        const links = document.querySelector('.nav-links');
+        if (toggle && links) {
+            toggle.addEventListener('click', () => {
+                const expanded = toggle.getAttribute('aria-expanded') === 'true';
+                toggle.setAttribute('aria-expanded', !expanded);
+                links.classList.toggle('active');
+            });
+        }
+
+        // Back to top
+        const btn = document.getElementById('back-to-top');
+        if (btn) {
+            window.addEventListener('scroll', () => {
+                btn.style.display = window.pageYOffset > 300 ? 'block' : 'none';
+            });
+            btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        }
+    </script>
+</body>
+</html>

@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Portfolio showcasing data analytics, machine learning, and AI projects">
     <meta name="keywords" content="data science, machine learning, AI, portfolio, projects">
-    <meta name="author" content="Your Name">
-    <title>My Portfolio - Home</title>
+    <meta name="author" content="Azzindani">
+    <title>Azzindani Portfolio</title>
     <link rel="icon" type="image/png" href="assets/page0.png" sizes="32x32">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,7 +37,7 @@
             <div class="logo">
                 <h1>
                     <a href="/" aria-label="Portfolio Home">
-                        <span class="logo-text">My Name</span>
+                        <span class="logo-text">Azzindani</span>
                         <!-- <img src="assets/images.png" alt="Portfolio Logo"> -->
                     </a>
                 </h1>
@@ -124,9 +124,13 @@
                 <select id="category-filter" class="category-filter" aria-label="Filter projects by category">
                     <option value="all">All Categories</option>
                     <option value="data-analytics">Data Analytics</option>
+                    <option value="data-science">Data Science</option>
                     <option value="machine-learning">Machine Learning</option>
+                    <option value="data-engineering">Data Engineering</option>
                     <option value="web-development">Web Development</option>
                     <option value="visualization">Data Visualization</option>
+                    <option value="healthcare-ai">Healthcare AI</option>
+                    <option value="automation">Automation</option>
                 </select>
             </div>
             <div class="view-toggle">
@@ -191,7 +195,7 @@
             </div>
 
             <div class="sidebar-footer">
-                <a href="https://github.com/username" class="btn btn-outline btn-small" target="_blank" rel="noopener noreferrer">
+                <a href="https://github.com/azzindani" class="btn btn-outline btn-small" target="_blank" rel="noopener noreferrer">
                     View All on GitHub
                 </a>
             </div>
@@ -210,10 +214,10 @@
                 <div class="footer-section">
                     <h4>Connect</h4>
                     <div class="social-links">
-                        <a href="https://github.com/username" aria-label="GitHub" target="_blank" rel="noopener noreferrer">GitHub</a>
-                        <a href="https://huggingface.co/username" aria-label="Email">Hugging Face</a>
-                        <a href="https://www.linkedin.com/in/username/" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-                        <a href="mailto:username@gmail.com" aria-label="Email">Email</a>
+                        <a href="https://github.com/azzindani" aria-label="GitHub" target="_blank" rel="noopener noreferrer">GitHub</a>
+                        <a href="https://huggingface.co/azzindani" aria-label="Hugging Face" target="_blank" rel="noopener noreferrer">Hugging Face</a>
+                        <a href="https://www.linkedin.com/in/azzindan1/" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                        <a href="mailto:422indani@gmail.com" aria-label="Email">Email</a>
                     </div>
                 </div>
                 <div class="footer-section">
@@ -221,7 +225,7 @@
                     <nav class="footer-nav">
                         <a href="/">Home</a>
                         <a href="aboutme.html">About</a>
-                        <a href="https://github.com/username?tab=repositories">Open Source</a>
+                        <a href="https://github.com/azzindani?tab=repositories">Open Source</a>
                     </nav>
                 </div>
                 <div class="footer-section">
@@ -235,7 +239,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 username's Portfolio. All rights reserved. Built with ❤️ and lots of ☕</p>
+                <p>&copy; 2024 Azzindani's Portfolio. All rights reserved. Built with ❤️ and lots of ☕</p>
                 <p class="footer-note">Last updated: <span id="last-updated"></span></p>
             </div>
         </div>
@@ -244,21 +248,24 @@
     <script>
         // Configuration
         const CONFIG = {
-            username: 'username', // Replace with your GitHub username
-            repoName: 'username.github.io', // Replace with your repository name
-            docsFolder: 'docs', // Folder containing your .md files
-            isLocal: window.location.protocol === 'file:' || 
-                    window.location.hostname === 'localhost' || 
+            username: 'azzindani',
+            repoName: 'azzindani.github.io',
+            docsFolder: 'docs',
+            isLocal: window.location.protocol === 'file:' ||
+                    window.location.hostname === 'localhost' ||
                     window.location.hostname === '127.0.0.1' ||
                     window.location.hostname.includes('192.168.'),
             fallbackMdFiles: ['page5.md', 'page8.md', 'page9.md', 'page10.md'],
-            projectsPerPage: 6 // For pagination
+            projectsPerPage: 6
         };
+
+        // Default fallback image (inline SVG — no external file needed)
+        const DEFAULT_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iMjAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YwZjRmOCIvPjx0ZXh0IHg9IjIwMCIgeT0iMTAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiBmb250LWZhbWlseT0iSW50ZXIsc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNiIgZmlsbD0iI2FkYjViZCI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';
 
         // Repository metadata (manually maintained list)
         const REPOSITORY_PROJECTS = [
             {
-                url: 'https://github.com/username/01_Data_Analytic',
+                url: 'https://github.com/azzindani/01_Data_Analytic',
                 title: 'Data Analysis',
                 description: 'Providing my data analytic projects that I created in single notebook and can be run directly via google colab.',
                 image: 'assets/page11.gif',
@@ -266,7 +273,7 @@
                 tags: ['jupyter', 'colab', 'analytics']
             },
             {
-                url: 'https://github.com/username/01_Streamlit',
+                url: 'https://github.com/azzindani/01_Streamlit',
                 title: 'Data Visualization with Streamlit',
                 description: 'Providing my interactive dashboard project in purpose for web application deployment.',
                 image: 'assets/page12.gif',
@@ -274,7 +281,7 @@
                 tags: ['streamlit', 'dashboard', 'web-app']
             },
             {
-                url: 'https://github.com/username/01_Depth_EDA',
+                url: 'https://github.com/azzindani/01_Depth_EDA',
                 title: 'Deep Exploratory Data Analysis',
                 description: 'EDA (Exploratory Data Analysis) tools that actually will help you to do in-depth data exploration before you create some analytics.',
                 image: 'assets/page13.gif',
@@ -282,7 +289,7 @@
                 tags: ['eda', 'data-exploration', 'analytics']
             },
             {
-                url: 'https://github.com/username/02_Machine_Learning',
+                url: 'https://github.com/azzindani/02_Machine_Learning',
                 title: 'Machine Learning',
                 description: 'Providing my machine learning projects that I created in single notebook and can be run directly via google colab.',
                 image: 'assets/page14.gif',
@@ -290,7 +297,7 @@
                 tags: ['machine-learning', 'jupyter', 'colab']
             },
             {
-                url: 'https://github.com/username/02_Deep_Learning_ANN',
+                url: 'https://github.com/azzindani/02_Deep_Learning_ANN',
                 title: 'Deep Learning ANN',
                 description: 'Providing my deep learning projects using ANN (Artificial Neural Network) model, that I created in single notebook and can be run directly via google colab.',
                 image: 'assets/page15.gif',
@@ -298,7 +305,7 @@
                 tags: ['deep-learning', 'ann', 'neural-networks', 'colab']
             },
             {
-                url: 'https://github.com/username/02_Deep_Learning_NLP',
+                url: 'https://github.com/azzindani/02_Deep_Learning_NLP',
                 title: 'Deep Learning NLP',
                 description: 'Providing my deep learning projects using NLP (Natural Language Processing) model, that I created in single notebook and can be run directly via google colab.',
                 image: 'assets/page16.gif',
@@ -306,7 +313,7 @@
                 tags: ['deep-learning', 'nlp', 'natural-language-processing', 'colab']
             },
             {
-                url: 'https://github.com/username/02_Data_Science',
+                url: 'https://github.com/azzindani/02_Data_Science',
                 title: 'Data Science',
                 description: 'Providing my mixed deep learning projects, that I created in single notebook and can be run directly via google colab.',
                 image: 'assets/page17.gif',
@@ -394,7 +401,9 @@
                     tags: metadata.tags || [],
                     featured: metadata.featured || false,
                     category: metadata.category || 'general',
-                    originalFile: filename
+                    originalFile: filename,
+                    type: metadata.type || 'markdown',
+                    pdf: metadata.pdf || null
                 };
             },
 
@@ -432,19 +441,31 @@
 
         // Create project card HTML
         function createProjectCard(project, index) {
-            const linkUrl = CONFIG.isLocal ? 
-                `docs/${project.filename}` : 
-                `https://${CONFIG.username}.github.io/${CONFIG.docsFolder}/${project.filename}`;
-            
+            let linkUrl;
+            if (project.type === 'pdf' && project.pdf) {
+                linkUrl = `pdf-viewer.html?file=${encodeURIComponent(project.pdf)}`;
+            } else if (CONFIG.isLocal) {
+                linkUrl = `docs/${project.filename}`;
+            } else {
+                linkUrl = `https://${CONFIG.username}.github.io/${CONFIG.docsFolder}/${project.filename}`;
+            }
+
+            const overlayText = project.type === 'pdf' ? 'View PDF Slides →' : 'View Project →';
+            const footerIcon = project.type === 'pdf' ? '📊' : '📄';
+            const footerText = project.type === 'pdf' && project.pdf
+                ? project.pdf.split('/').pop()
+                : project.originalFile;
+
             return `
                 <article class="project-card ${project.featured ? 'featured' : ''}" role="listitem" data-category="${project.category}" style="animation-delay: ${index * 0.1}s">
                     <a href="${linkUrl}" class="card-link" aria-label="View ${project.title} project">
                         <div class="card-image-container">
-                            <img src="${project.image}" alt="${project.title}" class="card-image" loading="lazy" onerror="this.src='assets/default.png'">
+                            <img src="${project.image}" alt="${project.title}" class="card-image" loading="lazy" onerror="this.onerror=null; this.src=DEFAULT_IMAGE;">
                             <div class="card-overlay">
-                                <span class="view-project">View Project →</span>
+                                <span class="view-project">${overlayText}</span>
                             </div>
                             ${project.featured ? '<div class="featured-badge">⭐ Featured</div>' : ''}
+                            ${project.type === 'pdf' ? '<div class="pdf-badge">PDF</div>' : ''}
                         </div>
                         <div class="card-content">
                             <h3 class="card-title">${project.title}</h3>
@@ -459,7 +480,7 @@
                                 </div>
                             </div>
                             <div class="card-footer">
-                                <span class="source-file">📄 ${project.originalFile}</span>
+                                <span class="source-file">${footerIcon} ${footerText}</span>
                             </div>
                         </div>
                     </a>
@@ -473,7 +494,7 @@
                 <article class="repo-card" role="listitem" style="animation-delay: ${index * 0.1}s">
                     <a href="${repo.url}" target="_blank" rel="noopener noreferrer" class="repo-link" aria-label="View ${repo.title} repository on GitHub">
                         <div class="repo-image-container">
-                            <img src="${repo.image}" alt="${repo.title}" class="repo-image" loading="lazy" onerror="this.src='assets/default.png'">
+                            <img src="${repo.image}" alt="${repo.title}" class="repo-image" loading="lazy" onerror="this.onerror=null; this.src=DEFAULT_IMAGE;">
                             <div class="repo-overlay">
                                 <span class="view-repo">View on GitHub →</span>
                             </div>
@@ -1075,18 +1096,6 @@
             }
         });
 
-        // Service Worker registration (optional, for PWA features)
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('SW registered: ', registration);
-                    })
-                    .catch(registrationError => {
-                        console.log('SW registration failed: ', registrationError);
-                    });
-            });
-        }
     </script>
 </body>
 </html>
