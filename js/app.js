@@ -94,6 +94,23 @@ const LibLoader = {
             document.head.appendChild(s);
         });
         return this._pdfjs;
+    },
+
+    _mermaid: null,
+    loadMermaid() {
+        if (this._mermaid) return this._mermaid;
+        this._mermaid = new Promise((resolve, reject) => {
+            if (window.mermaid) { resolve(window.mermaid); return; }
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
+            s.onload = () => {
+                window.mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+                resolve(window.mermaid);
+            };
+            s.onerror = reject;
+            document.head.appendChild(s);
+        });
+        return this._mermaid;
     }
 };
 
@@ -132,6 +149,11 @@ const Router = {
         // Hide reading progress bar unless on post page
         const prog = document.getElementById('reading-progress');
         if (prog) prog.style.width = '0';
+
+        // Update nav active state
+        document.querySelectorAll('.nav-action-btn').forEach(b => b.classList.remove('active'));
+        const activeLabel = hash.startsWith('/admin') ? 'Admin' : 'Feed';
+        document.querySelector(`.nav-action-btn[aria-label="${activeLabel}"]`)?.classList.add('active');
 
         if (this.routes[hash]) {
             this.currentRoute = hash;
@@ -289,8 +311,9 @@ function renderMediaEmbed(media) {
 
 function getYouTubeRenderer() {
     return {
-        paragraph(text) {
-            // Auto-embed YouTube links that appear alone on a line
+        paragraph(src) {
+            // marked v5+ may pass {tokens, raw} object
+            const text = (typeof src === 'object' && src !== null) ? (src.text || src.raw || '') : src;
             const plain = text.replace(/<[^>]+>/g, '').trim();
             const id = Utils.extractYouTubeId(plain);
             if (id && /^https?:\/\//.test(plain)) {
@@ -302,6 +325,91 @@ function getYouTubeRenderer() {
             return `<p>${text}</p>`;
         }
     };
+}
+
+// ── Mermaid rendering helper ──
+
+async function renderMermaidBlocks(containerSelector) {
+    const containers = document.querySelectorAll(`${containerSelector} .mermaid-block`);
+    if (containers.length === 0) return;
+    try {
+        const mermaid = await LibLoader.loadMermaid();
+        for (let i = 0; i < containers.length; i++) {
+            const el = containers[i];
+            const code = el.getAttribute('data-mermaid');
+            if (!code) continue;
+            const id = `mermaid-${Date.now()}-${i}`;
+            try {
+                const { svg } = await mermaid.render(id, code);
+                el.innerHTML = svg;
+                el.classList.add('mermaid-rendered');
+            } catch (e) {
+                el.innerHTML = `<pre class="mermaid-error">Mermaid syntax error:\n${Utils.escapeHtml(e.message || String(e))}</pre>`;
+            }
+        }
+    } catch (e) {
+        containers.forEach(el => {
+            el.innerHTML = `<pre class="mermaid-error">Failed to load Mermaid library</pre>`;
+        });
+    }
+}
+
+// ── Shared marked configuration ──
+
+function configureMarked(options = {}) {
+    const renderer = new marked.Renderer();
+    const ytRenderer = getYouTubeRenderer();
+    renderer.paragraph = ytRenderer.paragraph;
+
+    // Mermaid code blocks → placeholder div; other code → highlighted
+    const defaultCode = new marked.Renderer().code;
+    renderer.code = function(src, language) {
+        // marked v5+ may pass an object {text, lang} as first arg
+        let code = src, lang = language;
+        if (typeof src === 'object' && src !== null) { code = src.text; lang = src.lang; }
+        if (lang === 'mermaid') {
+            const encoded = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            return `<div class="mermaid-block" data-mermaid="${encoded}"><div class="mermaid-loading">Loading diagram...</div></div>`;
+        }
+        if (options.hljs && lang && options.hljs.getLanguage(lang)) {
+            const highlighted = options.hljs.highlight(code, { language: lang }).value;
+            return `<pre><code class="hljs language-${lang}">${highlighted}</code></pre>`;
+        }
+        if (options.hljs) {
+            const highlighted = options.hljs.highlightAuto(code).value;
+            return `<pre><code class="hljs">${highlighted}</code></pre>`;
+        }
+        return `<pre><code>${Utils.escapeHtml(code)}</code></pre>`;
+    };
+
+    // Heading anchors + TOC collection
+    if (options.tocItems) {
+        renderer.heading = function(src, level) {
+            // marked v5+ passes {text, depth, raw} object
+            let text = src, lvl = level;
+            if (typeof src === 'object' && src !== null) { text = src.text || ''; lvl = src.depth || level; }
+            const id = Utils.slugify(text.replace(/<[^>]+>/g, ''));
+            if (lvl === 2 || lvl === 3) {
+                options.tocItems.push({ id, text: text.replace(/<[^>]+>/g, ''), level: lvl });
+            }
+            const anchor = options.slug ? `#/post/${options.slug}#${id}` : `#${id}`;
+            return `<h${lvl} id="${id}"><a class="heading-anchor" href="${anchor}">#</a>${text}</h${lvl}>`;
+        };
+    }
+
+    // Table support — ensure GFM tables render with proper classes
+    renderer.table = function(header, body) {
+        // marked v5+ passes {header, rows} object
+        if (typeof header === 'object' && header !== null && 'header' in header) {
+            const h = header.header.map(cell => `<th>${cell.text}</th>`).join('');
+            const rows = header.rows.map(row => `<tr>${row.map(cell => `<td>${cell.text}</td>`).join('')}</tr>`).join('');
+            return `<div class="table-wrapper"><table><thead><tr>${h}</tr></thead><tbody>${rows}</tbody></table></div>`;
+        }
+        return `<div class="table-wrapper"><table><thead>${header}</thead><tbody>${body}</tbody></table></div>`;
+    };
+
+    marked.setOptions({ breaks: true, gfm: true, renderer });
+    return renderer;
 }
 
 /* ============================================
@@ -370,21 +478,24 @@ async function renderFeedPage() {
     const searchVal = globalSearch ? globalSearch.value : '';
 
     app.innerHTML = `
-    <div class="feed-page">
-        <div class="feed-filter-bar" id="feed-filter-bar">
-            <div class="feed-tabs" id="feed-tabs">
-                <button class="feed-tab active" data-type="all">All</button>
-                <button class="feed-tab" data-type="article">Articles</button>
-                <button class="feed-tab" data-type="pdf">PDFs</button>
-                <button class="feed-tab" data-type="repo">Repos</button>
+    <div class="feed-layout">
+        <div class="feed-page">
+            <div class="feed-filter-bar" id="feed-filter-bar">
+                <div class="feed-tabs" id="feed-tabs">
+                    <button class="feed-tab active" data-type="all">All</button>
+                    <button class="feed-tab" data-type="article">Articles</button>
+                    <button class="feed-tab" data-type="pdf">PDFs</button>
+                    <button class="feed-tab" data-type="repo">Repos</button>
+                </div>
+                <select class="filter-select filter-select-sm" id="feed-category">
+                    <option value="all">All Topics</option>
+                    ${categories.map(c => `<option value="${c}">${c.charAt(0).toUpperCase() + c.slice(1)}</option>`).join('')}
+                </select>
             </div>
-            <select class="filter-select filter-select-sm" id="feed-category">
-                <option value="all">All Topics</option>
-                ${categories.map(c => `<option value="${c}">${c.charAt(0).toUpperCase() + c.slice(1)}</option>`).join('')}
-            </select>
+            <div class="feed-list" id="feed-list"></div>
+            <div id="feed-sentinel" style="height:1px;"></div>
         </div>
-        <div class="feed-list" id="feed-list"></div>
-        <div id="feed-sentinel" style="height:1px;"></div>
+        <aside class="feed-sidebar" id="feed-sidebar"></aside>
     </div>`;
 
     let filtered = [...allPosts];
@@ -459,6 +570,69 @@ async function renderFeedPage() {
 
     // If search had a value, apply it
     if (searchVal) applyFilters();
+
+    // Populate sidebar
+    renderSidebar(allPosts);
+}
+
+// ── Sidebar ──
+
+function renderSidebar(posts) {
+    const sidebar = document.getElementById('feed-sidebar');
+    if (!sidebar) return;
+
+    // Collect tag frequencies
+    const tagCounts = {};
+    posts.forEach(p => {
+        (p.tags || []).forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; });
+    });
+    const topTags = Object.entries(tagCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 8)
+        .map(e => e[0]);
+
+    // Recent posts (up to 5)
+    const recent = posts.slice(0, 5);
+
+    sidebar.innerHTML = `
+        <div class="sidebar-card">
+            <div class="sidebar-profile-avatar">${CONFIG.authorInitial}</div>
+            <div class="sidebar-profile-name">${Utils.escapeHtml(CONFIG.author)}</div>
+            <p class="sidebar-profile-bio">${Utils.escapeHtml(CONFIG.siteDescription)}</p>
+            <div class="sidebar-social">
+                <a href="${CONFIG.social.github}" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a href="${CONFIG.social.linkedin}" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                <a href="mailto:${CONFIG.social.email}">Email</a>
+            </div>
+        </div>
+        ${topTags.length ? `
+        <div class="sidebar-card">
+            <h4>Popular Tags</h4>
+            <div class="sidebar-tags">
+                ${topTags.map(t => `<span class="sidebar-tag" data-tag="${Utils.escapeHtml(t)}">${Utils.escapeHtml(t)}</span>`).join('')}
+            </div>
+        </div>` : ''}
+        <div class="sidebar-card">
+            <h4>Recent Posts</h4>
+            ${recent.map(p => {
+                const link = p.type === 'pdf' ? `#/pdf/${p.slug}` : `#/post/${p.slug}`;
+                return `<div class="sidebar-recent-item">
+                    <a href="${link}" class="sidebar-recent-title">${Utils.escapeHtml(p.title)}</a>
+                    <span class="sidebar-recent-date">${Utils.formatDate(p.date)}</span>
+                </div>`;
+            }).join('')}
+        </div>`;
+
+    // Tag click → set search input and trigger filter
+    sidebar.querySelectorAll('.sidebar-tag').forEach(tag => {
+        tag.addEventListener('click', () => {
+            const search = document.getElementById('global-search');
+            if (search) {
+                search.value = tag.dataset.tag;
+                search.dispatchEvent(new Event('input'));
+            }
+        });
+    });
 }
 
 // ── Inline PDF Carousel ──
@@ -565,27 +739,9 @@ async function renderPostPage({ slug }) {
     // Load highlight.js
     const hljs = await LibLoader.loadHighlightJs();
 
-    // Configure marked with YouTube auto-embed + heading anchors
-    const renderer = new marked.Renderer();
-    const ytRenderer = getYouTubeRenderer();
-    renderer.paragraph = ytRenderer.paragraph;
-
-    // Heading anchors + TOC data collection
+    // Configure marked with YouTube auto-embed, heading anchors, mermaid, tables
     const tocItems = [];
-    renderer.heading = function(text, level) {
-        const id = Utils.slugify(text.replace(/<[^>]+>/g, ''));
-        if (level === 2 || level === 3) {
-            tocItems.push({ id, text: text.replace(/<[^>]+>/g, ''), level });
-        }
-        return `<h${level} id="${id}"><a class="heading-anchor" href="#/post/${slug}#${id}">#</a>${text}</h${level}>`;
-    };
-
-    marked.setOptions({ breaks: true, gfm: true, renderer,
-        highlight: (code, lang) => {
-            if (lang && hljs.getLanguage(lang)) return hljs.highlight(code, { language: lang }).value;
-            return hljs.highlightAuto(code).value;
-        }
-    });
+    configureMarked({ hljs, tocItems, slug });
 
     const htmlContent = marked.parse(post.body);
     const readTime = Utils.readingTime(post.body);
@@ -654,6 +810,9 @@ async function renderPostPage({ slug }) {
             ${tags ? `<div class="post-tags">${tags}</div>` : ''}
             ${relatedHtml}
         </article>`;
+
+    // Render mermaid diagrams
+    renderMermaidBlocks('.post-content');
 
     // Copy code buttons
     document.querySelectorAll('.post-content pre').forEach(pre => {
@@ -1046,8 +1205,34 @@ async function renderEditorPage({ slug } = {}) {
             </div>
         </div>
         <div class="editor-split" id="ed-split">
-            <div class="editor-pane"><div class="editor-pane-header">Markdown</div><textarea class="editor-textarea" id="ed-body">${existingBody}</textarea></div>
-            <div class="editor-pane"><div class="editor-pane-header">Preview</div><div class="editor-preview post-content" id="ed-preview"></div></div>
+            <div class="editor-pane">
+                <div class="editor-pane-header">
+                    <span>Markdown</span>
+                    <div class="md-toolbar" id="md-toolbar">
+                        <button type="button" class="md-btn" data-action="bold" title="Bold (Ctrl+B)"><b>B</b></button>
+                        <button type="button" class="md-btn" data-action="italic" title="Italic (Ctrl+I)"><i>I</i></button>
+                        <button type="button" class="md-btn" data-action="strikethrough" title="Strikethrough"><s>S</s></button>
+                        <span class="md-sep"></span>
+                        <button type="button" class="md-btn" data-action="h2" title="Heading 2">H2</button>
+                        <button type="button" class="md-btn" data-action="h3" title="Heading 3">H3</button>
+                        <span class="md-sep"></span>
+                        <button type="button" class="md-btn" data-action="link" title="Link">&#128279;</button>
+                        <button type="button" class="md-btn" data-action="image" title="Image">&#128247;</button>
+                        <button type="button" class="md-btn" data-action="code" title="Inline Code">&lt;/&gt;</button>
+                        <button type="button" class="md-btn" data-action="codeblock" title="Code Block">&#9635;</button>
+                        <span class="md-sep"></span>
+                        <button type="button" class="md-btn" data-action="ul" title="Bullet List">&#8226;</button>
+                        <button type="button" class="md-btn" data-action="ol" title="Numbered List">1.</button>
+                        <button type="button" class="md-btn" data-action="quote" title="Blockquote">&#8221;</button>
+                        <button type="button" class="md-btn" data-action="table" title="Table">&#9638;</button>
+                        <button type="button" class="md-btn" data-action="hr" title="Horizontal Rule">&#8213;</button>
+                        <span class="md-sep"></span>
+                        <button type="button" class="md-btn md-btn-mermaid" data-action="mermaid" title="Mermaid Diagram">&#9672; Mermaid</button>
+                    </div>
+                </div>
+                <textarea class="editor-textarea" id="ed-body">${existingBody}</textarea>
+            </div>
+            <div class="editor-pane"><div class="editor-pane-header"><span>Preview</span></div><div class="editor-preview post-content" id="ed-preview"></div></div>
         </div>
     </div>`;
 
@@ -1072,14 +1257,78 @@ async function renderEditorPage({ slug } = {}) {
         });
     }
 
-    // Live preview
+    // Markdown toolbar actions
+    const edBody = document.getElementById('ed-body');
+    document.getElementById('md-toolbar').addEventListener('click', (e) => {
+        const btn = e.target.closest('.md-btn');
+        if (!btn) return;
+        const action = btn.dataset.action;
+        const ta = edBody;
+        const start = ta.selectionStart, end = ta.selectionEnd;
+        const sel = ta.value.substring(start, end);
+        let insert = '', cursorOffset = 0;
+
+        switch (action) {
+            case 'bold':    insert = `**${sel || 'bold text'}**`; cursorOffset = sel ? 0 : -2; break;
+            case 'italic':  insert = `*${sel || 'italic text'}*`; cursorOffset = sel ? 0 : -1; break;
+            case 'strikethrough': insert = `~~${sel || 'text'}~~`; cursorOffset = sel ? 0 : -2; break;
+            case 'h2':      insert = `\n## ${sel || 'Heading 2'}\n`; break;
+            case 'h3':      insert = `\n### ${sel || 'Heading 3'}\n`; break;
+            case 'link':    insert = `[${sel || 'link text'}](url)`; cursorOffset = sel ? -1 : -4; break;
+            case 'image':   insert = `![${sel || 'alt text'}](image-url)`; cursorOffset = sel ? -1 : -10; break;
+            case 'code':    insert = `\`${sel || 'code'}\``; cursorOffset = sel ? 0 : -1; break;
+            case 'codeblock': insert = `\n\`\`\`\n${sel || 'code here'}\n\`\`\`\n`; cursorOffset = sel ? 0 : -5; break;
+            case 'ul':      insert = `\n- ${sel || 'list item'}\n`; break;
+            case 'ol':      insert = `\n1. ${sel || 'list item'}\n`; break;
+            case 'quote':   insert = `\n> ${sel || 'quote'}\n`; break;
+            case 'hr':      insert = `\n---\n`; break;
+            case 'table':
+                insert = `\n| Column 1 | Column 2 | Column 3 |\n| -------- | -------- | -------- |\n| Cell 1   | Cell 2   | Cell 3   |\n| Cell 4   | Cell 5   | Cell 6   |\n`;
+                break;
+            case 'mermaid':
+                insert = `\n\`\`\`mermaid\n${sel || 'graph TD\n    A[Start] --> B{Decision}\n    B -->|Yes| C[Result 1]\n    B -->|No| D[Result 2]'}\n\`\`\`\n`;
+                break;
+            default: return;
+        }
+
+        ta.focus();
+        ta.setRangeText(insert, start, end, 'end');
+        if (cursorOffset) ta.selectionStart = ta.selectionEnd = ta.selectionEnd + cursorOffset;
+        ta.dispatchEvent(new Event('input'));
+    });
+
+    // Keyboard shortcuts in editor
+    edBody.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+            e.preventDefault();
+            document.querySelector('.md-btn[data-action="bold"]').click();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'i') {
+            e.preventDefault();
+            document.querySelector('.md-btn[data-action="italic"]').click();
+        }
+        // Tab key inserts 4 spaces instead of changing focus
+        if (e.key === 'Tab') {
+            e.preventDefault();
+            const s = edBody.selectionStart, end = edBody.selectionEnd;
+            edBody.setRangeText('    ', s, end, 'end');
+            edBody.dispatchEvent(new Event('input'));
+        }
+    });
+
+    // Live preview with full rendering (highlight.js, mermaid, YouTube, tables)
     const textarea = document.getElementById('ed-body');
     const preview = document.getElementById('ed-preview');
-    function updatePreview() {
-        marked.setOptions({ breaks: true, gfm: true });
+    let _editorHljs = null;
+    async function updatePreview() {
+        if (!_editorHljs) {
+            try { _editorHljs = await LibLoader.loadHighlightJs(); } catch (e) { _editorHljs = null; }
+        }
+        configureMarked({ hljs: _editorHljs });
         preview.innerHTML = marked.parse(textarea.value || '*Start typing...*');
+        renderMermaidBlocks('#ed-preview');
     }
-    textarea.addEventListener('input', Utils.debounce(updatePreview, 300));
+    textarea.addEventListener('input', Utils.debounce(updatePreview, 400));
     updatePreview();
 
     // Save
@@ -1204,6 +1453,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const btt = document.getElementById('back-to-top');
     window.addEventListener('scroll', () => { btt.classList.toggle('visible', window.scrollY > 400); });
     btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+    // Admin gear toggle — if already on admin, go home; otherwise go to admin
+    const adminBtn = document.querySelector('.nav-action-btn[aria-label="Admin"]');
+    if (adminBtn) {
+        adminBtn.addEventListener('click', e => {
+            e.preventDefault();
+            const current = window.location.hash.slice(1) || '/';
+            window.location.hash = current.startsWith('/admin') ? '#/' : '#/admin';
+        });
+    }
 
     // Start router
     Router.init();

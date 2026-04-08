@@ -50,6 +50,18 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 input, textarea, select { font-family: inherit; font-size: inherit; }
 
 /* ============================================
+   Neural Network Background Canvas
+   ============================================ */
+#neural-bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.45;
+}
+
+/* ============================================
    Navigation (minimal top bar)
    ============================================ */
 .navbar {
@@ -119,6 +131,10 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
     background: var(--color-bg-tertiary);
     color: var(--color-text);
 }
+.nav-action-btn.active {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+}
 
 /* Reading progress bar */
 .reading-progress {
@@ -133,6 +149,8 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
    App Container
    ============================================ */
 .app-container {
+    position: relative;
+    z-index: 1;
     min-height: calc(100vh - var(--nav-height));
     padding-top: var(--nav-height);
 }
@@ -252,11 +270,18 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 /* ============================================
    Feed Layout
    ============================================ */
+.feed-layout {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1fr;
+}
 .feed-page {
     max-width: var(--feed-width);
-    margin: 0 auto;
-    padding: 16px 16px 80px;
+    padding: 16px 0 80px;
 }
+.feed-sidebar { display: none; }
 
 .feed-filter-bar {
     position: sticky;
@@ -309,7 +334,9 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 
 /* ── Feed Item ── */
 .feed-item {
-    background: var(--color-surface);
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-lg);
     padding: 20px 24px;
@@ -469,6 +496,10 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
     max-width: var(--content-width);
     margin: 0 auto;
     padding: 48px 24px 80px;
+    background: rgba(255,255,255,0.93);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: var(--radius-lg);
 }
 
 .post-header {
@@ -1088,7 +1119,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 }
 
 .editor-pane-header {
-    padding: 10px 16px;
+    padding: 8px 12px;
     background: var(--color-bg-secondary);
     border: 1px solid var(--color-border-light);
     border-bottom: none;
@@ -1098,6 +1129,11 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
     color: var(--color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    min-height: 42px;
 }
 
 .editor-textarea {
@@ -1126,6 +1162,116 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
     overflow-y: auto;
     line-height: 1.7;
 }
+
+/* ── Markdown Toolbar ── */
+.md-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-wrap: wrap;
+    margin-left: auto;
+}
+.md-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 6px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    background: none;
+    color: var(--color-text-secondary);
+    font-size: 0.78rem;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+}
+.md-btn:hover {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text);
+    border-color: var(--color-border-light);
+}
+.md-btn:active {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+}
+.md-btn-mermaid {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    gap: 3px;
+}
+.md-sep {
+    width: 1px;
+    height: 18px;
+    background: var(--color-border-light);
+    margin: 0 4px;
+}
+
+/* ── Mermaid Blocks ── */
+.mermaid-block {
+    margin: 24px 0;
+    padding: 20px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    text-align: center;
+    overflow-x: auto;
+}
+.mermaid-block svg {
+    max-width: 100%;
+    height: auto;
+}
+.mermaid-rendered {
+    background: var(--color-surface);
+}
+.mermaid-loading {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    font-style: italic;
+    padding: 20px 0;
+}
+.mermaid-error {
+    color: var(--color-danger);
+    font-size: 0.82rem;
+    font-family: var(--font-mono);
+    text-align: left;
+    background: #fef2f2;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    white-space: pre-wrap;
+}
+
+/* ── Table Wrapper (from markdown) ── */
+.table-wrapper {
+    overflow-x: auto;
+    margin: 20px 0;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+}
+.table-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+.table-wrapper th,
+.table-wrapper td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border-light);
+}
+.table-wrapper th {
+    background: var(--color-bg-secondary);
+    font-weight: 600;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-secondary);
+}
+.table-wrapper tr:last-child td { border-bottom: none; }
+.table-wrapper tr:hover td { background: var(--color-bg-secondary); }
 
 .editor-meta {
     display: grid;
@@ -1256,7 +1402,11 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
    Footer (simplified)
    ============================================ */
 .footer {
-    background: var(--color-bg);
+    position: relative;
+    z-index: 1;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     border-top: 1px solid var(--color-border-light);
     padding: 32px 0 20px;
     margin-top: 60px;
@@ -1388,6 +1538,77 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 }
 
 /* ============================================
+   Sidebar Components
+   ============================================ */
+.sidebar-card {
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 16px;
+}
+.sidebar-card h4 {
+    font-size: 0.78rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--color-text-muted); margin-bottom: 12px;
+}
+.sidebar-profile-avatar {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: var(--color-primary-light); color: var(--color-primary);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; font-weight: 700; margin-bottom: 12px;
+}
+.sidebar-profile-name { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+.sidebar-profile-bio { font-size: 0.83rem; color: var(--color-text-secondary); margin-bottom: 12px; line-height: 1.5; }
+.sidebar-social { display: flex; gap: 12px; }
+.sidebar-social a {
+    font-size: 0.8rem; color: var(--color-primary); text-decoration: none;
+    font-weight: 500;
+}
+.sidebar-social a:hover { text-decoration: underline; }
+.sidebar-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.sidebar-tag {
+    padding: 4px 10px; background: var(--color-bg-tertiary);
+    border-radius: 100px; font-size: 0.78rem;
+    color: var(--color-text-secondary); cursor: pointer;
+    border: 1px solid var(--color-border-light);
+    transition: all var(--transition);
+}
+.sidebar-tag:hover {
+    background: var(--color-primary); color: #fff;
+    border-color: var(--color-primary);
+}
+.sidebar-recent-item {
+    display: flex; flex-direction: column; gap: 2px;
+    padding: 8px 0; border-bottom: 1px solid var(--color-border-light);
+}
+.sidebar-recent-item:last-child { border-bottom: none; }
+.sidebar-recent-title {
+    font-size: 0.85rem; font-weight: 500;
+    color: var(--color-text); text-decoration: none; line-height: 1.3;
+}
+.sidebar-recent-title:hover { color: var(--color-primary); }
+.sidebar-recent-date { font-size: 0.75rem; color: var(--color-text-muted); }
+
+/* ============================================
+   Desktop: Two-Column Feed + Sidebar
+   ============================================ */
+@media (min-width: 1100px) {
+    .feed-layout {
+        grid-template-columns: 1fr 280px;
+        gap: 40px;
+        align-items: start;
+    }
+    .feed-sidebar {
+        display: block;
+        position: sticky;
+        top: calc(var(--nav-height) + 24px);
+    }
+}
+
+/* ============================================
    Responsive
    ============================================ */
 @media (max-width: 768px) {
@@ -1400,6 +1621,10 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
     .editor-split { grid-template-columns: 1fr; }
     .editor-meta { grid-template-columns: 1fr; }
     .form-row { grid-template-columns: 1fr; }
+    .md-toolbar { gap: 1px; }
+    .md-btn { min-width: 26px; height: 26px; font-size: 0.72rem; padding: 0 4px; }
+    .md-btn-mermaid { display: none; }
+    .editor-pane-header { flex-wrap: wrap; padding: 6px 8px; }
 
     .pdf-nav-prev { left: 4px; }
     .pdf-nav-next { right: 4px; }
