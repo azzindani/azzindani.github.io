@@ -50,6 +50,18 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 input, textarea, select { font-family: inherit; font-size: inherit; }
 
 /* ============================================
+   Neural Network Background Canvas
+   ============================================ */
+#neural-bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.45;
+}
+
+/* ============================================
    Navigation (minimal top bar)
    ============================================ */
 .navbar {
@@ -137,6 +149,8 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
    App Container
    ============================================ */
 .app-container {
+    position: relative;
+    z-index: 1;
     min-height: calc(100vh - var(--nav-height));
     padding-top: var(--nav-height);
 }
@@ -320,7 +334,9 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 
 /* ── Feed Item ── */
 .feed-item {
-    background: var(--color-surface);
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-lg);
     padding: 20px 24px;
@@ -480,6 +496,10 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
     max-width: var(--content-width);
     margin: 0 auto;
     padding: 48px 24px 80px;
+    background: rgba(255,255,255,0.93);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: var(--radius-lg);
 }
 
 .post-header {
@@ -1382,7 +1402,11 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
    Footer (simplified)
    ============================================ */
 .footer {
-    background: var(--color-bg);
+    position: relative;
+    z-index: 1;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     border-top: 1px solid var(--color-border-light);
     padding: 32px 0 20px;
     margin-top: 60px;
@@ -1517,7 +1541,9 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
    Sidebar Components
    ============================================ */
 .sidebar-card {
-    background: var(--color-surface);
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-lg);
     padding: 20px;
