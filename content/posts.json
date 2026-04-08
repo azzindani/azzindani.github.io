@@ -1,0 +1,38 @@
+{
+  "posts": [
+    {
+      "slug": "welcome-to-my-portfolio",
+      "title": "Welcome to My Portfolio",
+      "description": "An introduction to this portfolio site and what you'll find here.",
+      "date": "2024-01-15",
+      "category": "general",
+      "tags": ["introduction", "portfolio"],
+      "image": "",
+      "type": "article",
+      "file": "welcome-to-my-portfolio.md"
+    },
+    {
+      "slug": "getting-started-with-data-science",
+      "title": "Getting Started with Data Science",
+      "description": "A beginner-friendly guide covering the fundamentals of data science, tools, and workflows.",
+      "date": "2024-02-10",
+      "category": "data-science",
+      "tags": ["python", "data-science", "tutorial"],
+      "image": "",
+      "type": "article",
+      "file": "getting-started-with-data-science.md"
+    },
+    {
+      "slug": "sample-pdf-presentation",
+      "title": "Sample PDF Presentation",
+      "description": "A demo showing the PDF carousel viewer. Upload your own PDF to see it in action.",
+      "date": "2024-03-01",
+      "category": "demo",
+      "tags": ["pdf", "demo", "presentation"],
+      "image": "",
+      "type": "pdf",
+      "file": "sample-pdf-presentation.md",
+      "pdf": "uploads/pdfs/sample.pdf"
+    }
+  ]
+}
