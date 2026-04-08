@@ -2,16 +2,12 @@
    Phase 1: Configuration, Utilities & Router
    ============================================ */
 
-// Site configuration — all dummy credentials
 const CONFIG = {
     siteName: 'Portfolio',
     siteDescription: 'A personal space for sharing projects, ideas, and explorations.',
     author: 'Your Name',
-    github: {
-        username: 'yourusername',
-        repo: 'yourusername.github.io',
-        branch: 'main'
-    },
+    authorInitial: 'Y',
+    github: { username: 'yourusername', repo: 'yourusername.github.io', branch: 'main' },
     social: {
         github: 'https://github.com/yourusername',
         linkedin: 'https://linkedin.com/in/yourprofile',
@@ -22,150 +18,140 @@ const CONFIG = {
     uploadsPath: 'uploads'
 };
 
-// ── Utility helpers ──
+// ── Utilities ──
 
 const Utils = {
-    formatDate(dateStr) {
-        if (!dateStr) return '';
-        const d = new Date(dateStr);
-        return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    formatDate(d) {
+        if (!d) return '';
+        return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     },
-
-    slugify(text) {
-        return text.toLowerCase().trim()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/[\s_]+/g, '-')
-            .replace(/-+/g, '-');
+    slugify(t) {
+        return t.toLowerCase().trim().replace(/[^\w\s-]/g, '').replace(/[\s_]+/g, '-').replace(/-+/g, '-');
     },
-
     debounce(fn, ms) {
-        let timer;
-        return (...args) => {
-            clearTimeout(timer);
-            timer = setTimeout(() => fn(...args), ms);
-        };
+        let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
     },
-
-    escapeHtml(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
+    escapeHtml(s) {
+        const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
     },
-
     readingTime(text) {
-        const words = text.trim().split(/\s+/).length;
-        const minutes = Math.ceil(words / 200);
-        return `${minutes} min read`;
+        return `${Math.max(1, Math.ceil((text || '').trim().split(/\s+/).length / 200))} min read`;
     },
-
     parseFrontmatter(content) {
-        const match = content.match(/^---\n([\s\S]*?)\n---/);
-        if (!match) return { meta: {}, body: content };
-
+        const m = content.match(/^---\n([\s\S]*?)\n---/);
+        if (!m) return { meta: {}, body: content };
         const meta = {};
-        match[1].split('\n').forEach(line => {
-            const idx = line.indexOf(':');
-            if (idx === -1) return;
-            const key = line.slice(0, idx).trim();
-            let val = line.slice(idx + 1).trim();
-            // remove wrapping quotes
-            val = val.replace(/^["']|["']$/g, '');
-            // parse arrays
-            if (val.startsWith('[') && val.endsWith(']')) {
+        m[1].split('\n').forEach(line => {
+            const i = line.indexOf(':');
+            if (i === -1) return;
+            const key = line.slice(0, i).trim();
+            let val = line.slice(i + 1).trim().replace(/^["']|["']$/g, '');
+            if (val.startsWith('[') && val.endsWith(']'))
                 val = val.slice(1, -1).split(',').map(s => s.trim().replace(/^["']|["']$/g, ''));
-            }
             if (val === 'true') val = true;
             if (val === 'false') val = false;
             meta[key] = val;
         });
+        return { meta, body: content.slice(m[0].length).trim() };
+    },
+    extractYouTubeId(url) {
+        const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+        return m ? m[1] : null;
+    }
+};
 
-        return { meta, body: content.slice(match[0].length).trim() };
+// ── Lazy library loader ──
+
+const LibLoader = {
+    _hljs: null,
+    _pdfjs: null,
+
+    loadHighlightJs() {
+        if (this._hljs) return this._hljs;
+        this._hljs = new Promise((resolve, reject) => {
+            if (window.hljs) { resolve(window.hljs); return; }
+            const s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js';
+            s.onload = () => resolve(window.hljs);
+            s.onerror = reject;
+            document.head.appendChild(s);
+        });
+        return this._hljs;
+    },
+
+    loadPdfJs() {
+        if (this._pdfjs) return this._pdfjs;
+        this._pdfjs = new Promise((resolve, reject) => {
+            if (window.pdfjsLib) { resolve(window.pdfjsLib); return; }
+            const s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+            s.onload = () => {
+                window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+                    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                resolve(window.pdfjsLib);
+            };
+            s.onerror = reject;
+            document.head.appendChild(s);
+        });
+        return this._pdfjs;
     }
 };
 
 // ── Toast notifications ──
 
 function showToast(message, type = 'info') {
-    const container = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.textContent = message;
-    container.appendChild(toast);
-    setTimeout(() => {
-        toast.classList.add('toast-exit');
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast toast-${type}`;
+    t.textContent = message;
+    c.appendChild(t);
+    setTimeout(() => { t.classList.add('toast-exit'); setTimeout(() => t.remove(), 300); }, 3000);
 }
 
-// ── Simple hash router ──
+// ── Cleanup registry (for observers, listeners) ──
+
+const Cleanup = {
+    _fns: [],
+    add(fn) { this._fns.push(fn); },
+    run() { this._fns.forEach(fn => fn()); this._fns = []; }
+};
+
+// ── Router ──
 
 const Router = {
     routes: {},
     currentRoute: null,
 
-    add(pattern, handler) {
-        this.routes[pattern] = handler;
-    },
+    add(pattern, handler) { this.routes[pattern] = handler; },
 
     resolve() {
+        Cleanup.run(); // destroy observers, PDF docs, listeners from previous page
         const hash = window.location.hash.slice(1) || '/';
         window.scrollTo(0, 0);
 
-        // Try exact match first
+        // Hide reading progress bar unless on post page
+        const prog = document.getElementById('reading-progress');
+        if (prog) prog.style.width = '0';
+
         if (this.routes[hash]) {
             this.currentRoute = hash;
             this.routes[hash]();
-            this.updateNavLinks(hash);
             return;
         }
-
-        // Try pattern matching (e.g. /post/:slug)
         for (const pattern of Object.keys(this.routes)) {
             const paramNames = [];
-            const regexStr = pattern.replace(/:([^/]+)/g, (_, name) => {
-                paramNames.push(name);
-                return '([^/]+)';
-            });
-            const match = hash.match(new RegExp(`^${regexStr}$`));
+            const re = pattern.replace(/:([^/]+)/g, (_, n) => { paramNames.push(n); return '([^/]+)'; });
+            const match = hash.match(new RegExp(`^${re}$`));
             if (match) {
                 const params = {};
-                paramNames.forEach((name, i) => params[name] = decodeURIComponent(match[i + 1]));
+                paramNames.forEach((n, i) => params[n] = decodeURIComponent(match[i + 1]));
                 this.currentRoute = pattern;
                 this.routes[pattern](params);
-                this.updateNavLinks(hash);
                 return;
             }
         }
-
-        // 404 fallback
-        this.render404();
-    },
-
-    updateNavLinks(hash) {
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.classList.remove('active');
-            const route = link.getAttribute('data-route');
-            if (route === 'home' && (hash === '/' || hash === '')) {
-                link.classList.add('active');
-            } else if (route === 'posts' && hash.startsWith('/posts')) {
-                link.classList.add('active');
-            } else if (route === 'about' && hash === '/about') {
-                link.classList.add('active');
-            } else if (route === 'admin' && hash.startsWith('/admin')) {
-                link.classList.add('active');
-            }
-        });
-    },
-
-    render404() {
-        const app = document.getElementById('app');
-        app.innerHTML = `
-            <div class="empty-state" style="padding-top:120px;">
-                <div class="empty-state-icon">&#128566;</div>
-                <h3>Page Not Found</h3>
-                <p>The page you're looking for doesn't exist.</p>
-                <a href="#/" class="btn btn-primary" style="margin-top:16px;">Go Home</a>
-            </div>`;
+        document.getElementById('app').innerHTML =
+            '<div class="empty-state" style="padding-top:120px;"><div class="empty-state-icon">&#128566;</div><h3>Page Not Found</h3><p>The page you\'re looking for doesn\'t exist.</p><a href="#/" class="btn btn-primary" style="margin-top:16px;">Go Home</a></div>';
     },
 
     init() {
@@ -175,282 +161,428 @@ const Router = {
 };
 
 /* ============================================
-   Phase 2: Content Service
+   Phase 2: Content Service + Repo README
    ============================================ */
 
 const ContentService = {
     _cache: null,
+    _postCache: new Map(),
+    _readmeCache: new Map(),
 
-    async getPosts() {
-        if (this._cache) return this._cache;
+    async getPosts(includeDrafts = false) {
+        if (this._cache) {
+            return includeDrafts ? this._cache : this._cache.filter(p => !p.draft);
+        }
         try {
-            const resp = await fetch(`${CONFIG.contentPath}/posts.json`);
-            if (!resp.ok) throw new Error('Could not load posts manifest');
-            const data = await resp.json();
-            // Sort by date descending
+            const r = await fetch(`${CONFIG.contentPath}/posts.json`);
+            if (!r.ok) throw new Error('Cannot load manifest');
+            const data = await r.json();
             data.posts.sort((a, b) => new Date(b.date) - new Date(a.date));
             this._cache = data.posts;
-            return this._cache;
-        } catch (err) {
-            console.error('ContentService.getPosts:', err);
-            return [];
-        }
+            return includeDrafts ? this._cache : this._cache.filter(p => !p.draft);
+        } catch (e) { console.error('getPosts:', e); return []; }
     },
 
     async getPost(slug) {
-        const posts = await this.getPosts();
+        if (this._postCache.has(slug)) return this._postCache.get(slug);
+        const posts = await this.getPosts(true);
         const entry = posts.find(p => p.slug === slug);
         if (!entry) return null;
 
+        // Repo type: fetch README from GitHub/HuggingFace
+        if (entry.type === 'repo' && entry.repo) {
+            const body = await this.getRepoReadme(entry.repo);
+            const result = { ...entry, body: body || '*README could not be loaded.*' };
+            this._postCache.set(slug, result);
+            return result;
+        }
+
+        // Regular post: fetch markdown file
         try {
-            const resp = await fetch(`${CONFIG.contentPath}/posts/${entry.file}`);
-            if (!resp.ok) throw new Error('Post file not found');
-            const raw = await resp.text();
+            const r = await fetch(`${CONFIG.contentPath}/posts/${entry.file}`);
+            if (!r.ok) throw new Error('Not found');
+            const raw = await r.text();
             const { meta, body } = Utils.parseFrontmatter(raw);
-            return { ...entry, ...meta, body };
-        } catch (err) {
-            console.error('ContentService.getPost:', err);
-            return null;
+            const result = { ...entry, ...meta, body };
+            this._postCache.set(slug, result);
+            return result;
+        } catch (e) { console.error('getPost:', e); return null; }
+    },
+
+    async getRepoReadme(repoUrl) {
+        if (this._readmeCache.has(repoUrl)) return this._readmeCache.get(repoUrl);
+        try {
+            let body = '';
+            if (repoUrl.includes('github.com')) {
+                // GitHub: /repos/{owner}/{repo}/readme
+                const parts = repoUrl.replace(/\/$/, '').split('/');
+                const repo = parts.pop();
+                const owner = parts.pop();
+                const r = await fetch(`https://api.github.com/repos/${owner}/${repo}/readme`,
+                    { headers: { 'Accept': 'application/vnd.github.v3+json' } });
+                if (r.ok) {
+                    const data = await r.json();
+                    body = atob(data.content.replace(/\n/g, ''));
+                }
+            } else if (repoUrl.includes('huggingface.co')) {
+                // HuggingFace: raw README
+                const parts = repoUrl.replace(/\/$/, '').split('/');
+                const model = parts.pop();
+                const owner = parts.pop();
+                const r = await fetch(`https://huggingface.co/${owner}/${model}/raw/main/README.md`);
+                if (r.ok) body = await r.text();
+            }
+            // Strip YAML frontmatter from README if present
+            const { body: cleanBody } = Utils.parseFrontmatter(body);
+            this._readmeCache.set(repoUrl, cleanBody);
+            return cleanBody;
+        } catch (e) {
+            console.error('getRepoReadme:', e);
+            this._readmeCache.set(repoUrl, '');
+            return '';
         }
     },
 
     getCategories(posts) {
         const cats = new Set();
-        posts.forEach(p => {
-            if (p.category) cats.add(p.category);
-        });
+        posts.forEach(p => { if (p.category) cats.add(p.category); });
         return Array.from(cats).sort();
     },
 
-    filterPosts(posts, { search = '', category = 'all' } = {}) {
+    filterPosts(posts, { search = '', category = 'all', type = 'all' } = {}) {
         return posts.filter(p => {
-            const term = search.toLowerCase();
-            const matchSearch = !term ||
-                p.title.toLowerCase().includes(term) ||
-                (p.description || '').toLowerCase().includes(term) ||
-                (p.tags || []).some(t => t.toLowerCase().includes(term));
-            const matchCat = category === 'all' || p.category === category;
-            return matchSearch && matchCat;
+            const t = search.toLowerCase();
+            const ms = !t || p.title.toLowerCase().includes(t) ||
+                (p.description || '').toLowerCase().includes(t) ||
+                (p.tags || []).some(tag => tag.toLowerCase().includes(t));
+            const mc = category === 'all' || p.category === category;
+            const mt = type === 'all' || p.type === type;
+            return ms && mc && mt;
         });
     },
 
-    invalidateCache() {
-        this._cache = null;
-    }
+    invalidateCache() { this._cache = null; this._postCache.clear(); }
 };
 
+// ── Media embed helpers ──
+
+function renderMediaEmbed(media) {
+    if (!media || !media.url) return '';
+    switch (media.type) {
+        case 'youtube': {
+            const id = Utils.extractYouTubeId(media.url);
+            if (!id) return '';
+            return `<div class="media-embed media-youtube">
+                <iframe src="https://www.youtube-nocookie.com/embed/${id}" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen loading="lazy"></iframe></div>`;
+        }
+        case 'audio':
+            return `<div class="media-embed media-audio">
+                <audio controls preload="metadata" src="${Utils.escapeHtml(media.url)}"></audio></div>`;
+        case 'gif':
+            return `<div class="media-embed media-gif">
+                <img src="${Utils.escapeHtml(media.url)}" alt="Media" loading="lazy"></div>`;
+        default: return '';
+    }
+}
+
+function getYouTubeRenderer() {
+    return {
+        paragraph(text) {
+            // Auto-embed YouTube links that appear alone on a line
+            const plain = text.replace(/<[^>]+>/g, '').trim();
+            const id = Utils.extractYouTubeId(plain);
+            if (id && /^https?:\/\//.test(plain)) {
+                return `<div class="media-embed media-youtube">
+                    <iframe src="https://www.youtube-nocookie.com/embed/${id}" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen loading="lazy"></iframe></div>`;
+            }
+            return `<p>${text}</p>`;
+        }
+    };
+}
+
 /* ============================================
-   Phase 3: Home Page
+   Phase 3: Feed Page + Feed Item Renderer
    ============================================ */
 
-function renderCard(post) {
-    const link = post.type === 'pdf'
-        ? `#/pdf/${post.slug}`
-        : `#/post/${post.slug}`;
+function renderFeedItem(post) {
+    const link = post.type === 'pdf' ? `#/pdf/${post.slug}` : `#/post/${post.slug}`;
+    const tags = (post.tags || []).slice(0, 4).map(t =>
+        `<span class="tag">${Utils.escapeHtml(t)}</span>`).join('');
 
-    const imageHtml = post.image
-        ? `<img class="card-image" src="${post.image}" alt="${Utils.escapeHtml(post.title)}" loading="lazy" onerror="this.outerHTML='<div class=\\'card-image-placeholder\\'>&#128196;</div>'">`
-        : `<div class="card-image-placeholder">&#128196;</div>`;
+    // Type badge
+    let typeBadge = '';
+    if (post.type === 'pdf') typeBadge = '<span class="feed-type-badge feed-type-pdf">PDF</span>';
+    else if (post.type === 'repo') typeBadge = '<span class="feed-type-badge feed-type-repo">Repo</span>';
 
-    const badges = [];
-    if (post.featured) badges.push('<span class="card-badge card-badge-featured">Featured</span>');
-    if (post.type === 'pdf') badges.push('<span class="card-badge card-badge-pdf">PDF</span>');
+    // Repo link
+    let repoLink = '';
+    if (post.type === 'repo' && post.repo) {
+        const platform = post.repo.includes('huggingface') ? 'HuggingFace' : 'GitHub';
+        repoLink = `<a href="${Utils.escapeHtml(post.repo)}" class="feed-repo-link" target="_blank" rel="noopener noreferrer">View on ${platform} &#8599;</a>`;
+    }
 
-    const tags = (post.tags || []).slice(0, 3)
-        .map(t => `<span class="tag">${Utils.escapeHtml(t)}</span>`).join('');
+    // Media zone: inline PDF, media embed, or cover image
+    let mediaZone = '';
+    if (post.type === 'pdf' && post.pdf) {
+        mediaZone = `<div class="inline-pdf" data-pdf="${Utils.escapeHtml(post.pdf)}" data-slug="${post.slug}">
+            <div class="inline-pdf-loading"><div class="spinner"></div></div></div>`;
+    } else if (post.media && post.media.url) {
+        mediaZone = renderMediaEmbed(post.media);
+    } else if (post.image) {
+        mediaZone = `<div class="feed-image"><img src="${Utils.escapeHtml(post.image)}" alt="${Utils.escapeHtml(post.title)}" loading="lazy" onerror="this.parentElement.remove()"></div>`;
+    }
 
     return `
-        <article class="card">
-            <a href="${link}" class="card-link">
-                <div style="position:relative;">
-                    ${imageHtml}
-                    ${badges.join('')}
-                </div>
-                <div class="card-body">
-                    <h3 class="card-title">${Utils.escapeHtml(post.title)}</h3>
-                    <p class="card-excerpt">${Utils.escapeHtml(post.description || '')}</p>
-                    <div class="card-meta">
-                        <span class="card-date">${Utils.formatDate(post.date)}</span>
-                        <div class="card-tags">${tags}</div>
-                    </div>
-                </div>
-            </a>
-        </article>`;
+    <article class="feed-item" id="feed-${post.slug}">
+        <div class="feed-item-header">
+            <div class="feed-avatar">${CONFIG.authorInitial}</div>
+            <div class="feed-item-meta">
+                <span class="feed-author">${Utils.escapeHtml(CONFIG.author)}</span>
+                <span class="feed-date">${Utils.formatDate(post.date)} &middot; ${Utils.readingTime(post.description || '')} ${typeBadge}</span>
+            </div>
+        </div>
+        <a href="${link}" class="feed-item-body">
+            <h3 class="feed-item-title">${Utils.escapeHtml(post.title)}</h3>
+            <p class="feed-item-excerpt">${Utils.escapeHtml(post.description || '')}</p>
+        </a>
+        ${mediaZone}
+        <div class="feed-item-footer">
+            <div class="feed-item-tags">${tags}</div>
+            <div class="feed-item-actions">
+                ${repoLink}
+                <a href="${link}" class="feed-read-more">Read more &#8594;</a>
+            </div>
+        </div>
+    </article>`;
 }
 
-async function renderHomePage() {
-    const app = document.getElementById('app');
-    app.innerHTML = `
-        <section class="hero">
-            <div class="hero-content">
-                <div class="hero-badge">
-                    <span class="hero-badge-dot"></span>
-                    Open to collaborations
-                </div>
-                <h1>Projects, Ideas &amp; <span class="hero-gradient">Explorations</span></h1>
-                <p>${Utils.escapeHtml(CONFIG.siteDescription)}</p>
-                <div class="hero-actions">
-                    <a href="#/posts" class="btn btn-primary">Browse Posts</a>
-                    <a href="${CONFIG.social.github}" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">GitHub</a>
-                </div>
-            </div>
-        </section>
-
-        <section style="padding:60px 0;">
-            <div class="section-header">
-                <h2>Latest Posts</h2>
-                <p>Recent projects and articles</p>
-            </div>
-
-            <div class="card-grid" id="home-cards">
-                <div class="loading-state" style="grid-column:1/-1;">
-                    <div class="spinner"></div>
-                    <p class="loading-text">Loading posts...</p>
-                </div>
-            </div>
-
-            <div style="text-align:center; margin-top:40px;" id="home-more-wrap"></div>
-        </section>`;
-
-    const posts = await ContentService.getPosts();
-    const grid = document.getElementById('home-cards');
-    const moreWrap = document.getElementById('home-more-wrap');
-
-    if (posts.length === 0) {
-        grid.innerHTML = `
-            <div class="empty-state" style="grid-column:1/-1;">
-                <div class="empty-state-icon">&#128221;</div>
-                <h3>No posts yet</h3>
-                <p>Content will appear here once posts are added.</p>
-            </div>`;
-        return;
-    }
-
-    const preview = posts.slice(0, CONFIG.postsPerPage);
-    grid.innerHTML = preview.map(renderCard).join('');
-
-    if (posts.length > CONFIG.postsPerPage) {
-        moreWrap.innerHTML = `<a href="#/posts" class="btn btn-secondary">View All Posts</a>`;
-    }
-}
-
-/* ============================================
-   Phase 4: Posts List Page (search + filter)
-   ============================================ */
-
-async function renderPostsPage() {
+async function renderFeedPage() {
     const app = document.getElementById('app');
     const allPosts = await ContentService.getPosts();
     const categories = ContentService.getCategories(allPosts);
 
-    const catOptions = categories
-        .map(c => `<option value="${c}">${c.charAt(0).toUpperCase() + c.slice(1)}</option>`)
-        .join('');
+    // Sync search bar value
+    const globalSearch = document.getElementById('global-search');
+    const searchVal = globalSearch ? globalSearch.value : '';
 
     app.innerHTML = `
-        <div class="posts-page">
-            <div class="section-header">
-                <h2>All Posts</h2>
-                <p>Browse everything in one place</p>
+    <div class="feed-page">
+        <div class="feed-filter-bar" id="feed-filter-bar">
+            <div class="feed-tabs" id="feed-tabs">
+                <button class="feed-tab active" data-type="all">All</button>
+                <button class="feed-tab" data-type="article">Articles</button>
+                <button class="feed-tab" data-type="pdf">PDFs</button>
+                <button class="feed-tab" data-type="repo">Repos</button>
             </div>
+            <select class="filter-select filter-select-sm" id="feed-category">
+                <option value="all">All Topics</option>
+                ${categories.map(c => `<option value="${c}">${c.charAt(0).toUpperCase() + c.slice(1)}</option>`).join('')}
+            </select>
+        </div>
+        <div class="feed-list" id="feed-list"></div>
+        <div id="feed-sentinel" style="height:1px;"></div>
+    </div>`;
 
-            <div class="filter-bar">
-                <div class="search-box">
-                    <span class="search-box-icon">&#128269;</span>
-                    <input type="text" id="posts-search" placeholder="Search posts...">
-                </div>
-                <select class="filter-select" id="posts-category">
-                    <option value="all">All Categories</option>
-                    ${catOptions}
-                </select>
-            </div>
-
-            <div class="card-grid" id="posts-grid"></div>
-
-            <div style="text-align:center; margin-top:32px;" id="posts-load-more-wrap"></div>
-        </div>`;
-
-    let displayed = 0;
     let filtered = [...allPosts];
+    let displayed = 0;
+    let currentType = 'all';
+    let currentCat = 'all';
 
-    function renderBatch(reset) {
-        const grid = document.getElementById('posts-grid');
-        const moreWrap = document.getElementById('posts-load-more-wrap');
-        if (reset) {
-            grid.innerHTML = '';
-            displayed = 0;
-        }
+    function applyFilters() {
+        const search = document.getElementById('global-search')?.value || '';
+        filtered = ContentService.filterPosts(allPosts, { search, category: currentCat, type: currentType });
+        displayed = 0;
+        document.getElementById('feed-list').innerHTML = '';
+        loadBatch();
+    }
 
-        if (filtered.length === 0 && displayed === 0) {
-            grid.innerHTML = `
-                <div class="empty-state" style="grid-column:1/-1;">
-                    <div class="empty-state-icon">&#128269;</div>
-                    <h3>No results</h3>
-                    <p>Try a different search or category.</p>
-                </div>`;
-            moreWrap.innerHTML = '';
+    function loadBatch() {
+        const list = document.getElementById('feed-list');
+        if (!list) return;
+        const batch = filtered.slice(displayed, displayed + CONFIG.postsPerPage);
+
+        if (batch.length === 0 && displayed === 0) {
+            list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">&#128269;</div><h3>No posts found</h3><p>Try different filters or search terms.</p></div>`;
             return;
         }
 
-        const batch = filtered.slice(displayed, displayed + CONFIG.postsPerPage);
-        grid.insertAdjacentHTML('beforeend', batch.map(renderCard).join(''));
+        batch.forEach(post => {
+            list.insertAdjacentHTML('beforeend', renderFeedItem(post));
+        });
         displayed += batch.length;
 
-        if (displayed < filtered.length) {
-            moreWrap.innerHTML = `<button class="btn btn-secondary" id="load-more-btn">Load More</button>`;
-            document.getElementById('load-more-btn').addEventListener('click', () => renderBatch(false));
-        } else {
-            moreWrap.innerHTML = '';
-        }
+        // Initialize inline PDFs for the newly added items
+        initInlinePdfs();
     }
 
-    function applyFilters() {
-        const search = document.getElementById('posts-search').value;
-        const category = document.getElementById('posts-category').value;
-        filtered = ContentService.filterPosts(allPosts, { search, category });
-        renderBatch(true);
+    // Tab click handlers
+    document.querySelectorAll('.feed-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.feed-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentType = tab.dataset.type;
+            applyFilters();
+        });
+    });
+
+    // Category filter
+    document.getElementById('feed-category').addEventListener('change', (e) => {
+        currentCat = e.target.value;
+        applyFilters();
+    });
+
+    // Global search (in navbar) drives feed filter
+    if (globalSearch) {
+        const handler = Utils.debounce(() => applyFilters(), 300);
+        globalSearch.addEventListener('input', handler);
+        Cleanup.add(() => globalSearch.removeEventListener('input', handler));
     }
 
-    document.getElementById('posts-search').addEventListener('input', Utils.debounce(applyFilters, 300));
-    document.getElementById('posts-category').addEventListener('change', applyFilters);
+    // Infinite scroll sentinel
+    const sentinel = document.getElementById('feed-sentinel');
+    if (sentinel) {
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && displayed < filtered.length) {
+                loadBatch();
+            }
+        }, { rootMargin: '200px' });
+        observer.observe(sentinel);
+        Cleanup.add(() => observer.disconnect());
+    }
 
-    renderBatch(true);
+    // Initial load
+    loadBatch();
+
+    // If search had a value, apply it
+    if (searchVal) applyFilters();
+}
+
+// ── Inline PDF Carousel ──
+
+function initInlinePdfs() {
+    document.querySelectorAll('.inline-pdf:not([data-init])').forEach(container => {
+        container.setAttribute('data-init', '1');
+        const pdfPath = container.dataset.pdf;
+        const slug = container.dataset.slug;
+
+        // Use IntersectionObserver to lazy-load
+        const observer = new IntersectionObserver(async (entries) => {
+            if (!entries[0].isIntersecting) return;
+            observer.disconnect();
+
+            try {
+                const pdfjsLib = await LibLoader.loadPdfJs();
+                const pdfDoc = await pdfjsLib.getDocument(pdfPath).promise;
+                const totalPages = pdfDoc.numPages;
+                let currentPage = 1;
+                let rendering = false;
+
+                container.innerHTML = `
+                    <div class="inline-pdf-stage">
+                        <button class="pdf-nav pdf-nav-prev" disabled>&#8592;</button>
+                        <canvas class="inline-pdf-canvas"></canvas>
+                        <button class="pdf-nav pdf-nav-next" ${totalPages <= 1 ? 'disabled' : ''}>&#8594;</button>
+                    </div>
+                    <div class="inline-pdf-controls">
+                        <span class="inline-pdf-info">Slide 1 of ${totalPages}</span>
+                        <a href="#/pdf/${slug}" class="inline-pdf-fullscreen" title="Fullscreen">&#x26F6;</a>
+                    </div>`;
+
+                const canvas = container.querySelector('canvas');
+                const ctx = canvas.getContext('2d');
+                const prevBtn = container.querySelector('.pdf-nav-prev');
+                const nextBtn = container.querySelector('.pdf-nav-next');
+                const info = container.querySelector('.inline-pdf-info');
+
+                async function renderSlide(num) {
+                    if (rendering) return;
+                    rendering = true;
+                    const page = await pdfDoc.getPage(num);
+                    const containerW = Math.min(container.clientWidth - 80, 620);
+                    const vp1 = page.getViewport({ scale: 1 });
+                    const scale = Math.max(containerW / vp1.width, 0.5);
+                    const viewport = page.getViewport({ scale });
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    await page.render({ canvasContext: ctx, viewport }).promise;
+                    info.textContent = `Slide ${num} of ${totalPages}`;
+                    prevBtn.disabled = num <= 1;
+                    nextBtn.disabled = num >= totalPages;
+                    rendering = false;
+                }
+
+                function go(num) {
+                    if (num < 1 || num > totalPages) return;
+                    currentPage = num;
+                    renderSlide(currentPage);
+                }
+
+                prevBtn.addEventListener('click', (e) => { e.preventDefault(); go(currentPage - 1); });
+                nextBtn.addEventListener('click', (e) => { e.preventDefault(); go(currentPage + 1); });
+
+                // Swipe support
+                let touchX = 0;
+                canvas.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+                canvas.addEventListener('touchend', e => {
+                    const dx = touchX - e.changedTouches[0].clientX;
+                    if (Math.abs(dx) > 50) dx > 0 ? go(currentPage + 1) : go(currentPage - 1);
+                }, { passive: true });
+
+                await renderSlide(1);
+
+                // Memory cleanup when navigating away
+                Cleanup.add(() => { pdfDoc.destroy(); });
+
+            } catch (err) {
+                container.innerHTML = `<div class="inline-pdf-error">Could not load PDF preview</div>`;
+            }
+        }, { rootMargin: '300px' });
+
+        observer.observe(container);
+        Cleanup.add(() => observer.disconnect());
+    });
 }
 
 /* ============================================
-   Phase 5: Single Post Viewer
+   Phase 4: Post View (enhanced)
    ============================================ */
 
 async function renderPostPage({ slug }) {
     const app = document.getElementById('app');
-    app.innerHTML = `
-        <div class="post-view">
-            <div class="loading-state"><div class="spinner"></div><p class="loading-text">Loading post...</p></div>
-        </div>`;
+    app.innerHTML = '<div class="post-view"><div class="loading-state"><div class="spinner"></div></div></div>';
 
     const post = await ContentService.getPost(slug);
-
     if (!post) {
-        app.innerHTML = `
-            <div class="post-view">
-                <a href="#/posts" class="post-back">&#8592; Back to posts</a>
-                <div class="empty-state">
-                    <div class="empty-state-icon">&#128533;</div>
-                    <h3>Post not found</h3>
-                    <p>This post may have been removed or the URL is incorrect.</p>
-                </div>
-            </div>`;
+        app.innerHTML = `<div class="post-view"><a href="#/" class="post-back">&#8592; Back</a>
+            <div class="empty-state"><div class="empty-state-icon">&#128533;</div><h3>Post not found</h3></div></div>`;
         return;
     }
 
-    // Configure marked
-    marked.setOptions({
-        breaks: true,
-        gfm: true,
-        highlight: function(code, lang) {
-            if (lang && hljs.getLanguage(lang)) {
-                return hljs.highlight(code, { language: lang }).value;
-            }
+    // Load highlight.js
+    const hljs = await LibLoader.loadHighlightJs();
+
+    // Configure marked with YouTube auto-embed + heading anchors
+    const renderer = new marked.Renderer();
+    const ytRenderer = getYouTubeRenderer();
+    renderer.paragraph = ytRenderer.paragraph;
+
+    // Heading anchors + TOC data collection
+    const tocItems = [];
+    renderer.heading = function(text, level) {
+        const id = Utils.slugify(text.replace(/<[^>]+>/g, ''));
+        if (level === 2 || level === 3) {
+            tocItems.push({ id, text: text.replace(/<[^>]+>/g, ''), level });
+        }
+        return `<h${level} id="${id}"><a class="heading-anchor" href="#/post/${slug}#${id}">#</a>${text}</h${level}>`;
+    };
+
+    marked.setOptions({ breaks: true, gfm: true, renderer,
+        highlight: (code, lang) => {
+            if (lang && hljs.getLanguage(lang)) return hljs.highlight(code, { language: lang }).value;
             return hljs.highlightAuto(code).value;
         }
     });
@@ -463,10 +595,50 @@ async function renderPostPage({ slug }) {
         ? `<img class="post-cover" src="${post.image}" alt="${Utils.escapeHtml(post.title)}" onerror="this.style.display='none'">`
         : '';
 
+    // Media embed in post
+    const mediaHtml = (post.media && post.media.url) ? renderMediaEmbed(post.media) : '';
+
+    // Repo badge
+    let repoBadge = '';
+    if (post.type === 'repo' && post.repo) {
+        const platform = post.repo.includes('huggingface') ? 'HuggingFace' : 'GitHub';
+        repoBadge = `<a href="${Utils.escapeHtml(post.repo)}" class="feed-repo-link" target="_blank" rel="noopener noreferrer" style="margin-bottom:24px;display:inline-flex;">View on ${platform} &#8599;</a>`;
+    }
+
+    // Table of Contents
+    let tocHtml = '';
+    if (tocItems.length > 2) {
+        tocHtml = `<aside class="toc" id="toc">
+            <div class="toc-header">Contents</div>
+            <nav>${tocItems.map(item =>
+                `<a href="#/post/${slug}#${item.id}" class="toc-link toc-level-${item.level}" data-id="${item.id}">${Utils.escapeHtml(item.text)}</a>`
+            ).join('')}</nav></aside>`;
+    }
+
+    // Related posts
+    const allPosts = await ContentService.getPosts();
+    const related = allPosts
+        .filter(p => p.slug !== slug &&
+            ((p.category && p.category === post.category) ||
+             (p.tags || []).some(t => (post.tags || []).includes(t))))
+        .slice(0, 3);
+
+    const relatedHtml = related.length > 0 ? `
+        <div class="related-posts">
+            <h3>Related Posts</h3>
+            <div class="related-grid">
+                ${related.map(r => `<a href="#/${r.type === 'pdf' ? 'pdf' : 'post'}/${r.slug}" class="related-card">
+                    <h4>${Utils.escapeHtml(r.title)}</h4>
+                    <span class="related-date">${Utils.formatDate(r.date)}</span>
+                </a>`).join('')}
+            </div>
+        </div>` : '';
+
     app.innerHTML = `
+        ${tocHtml}
         <article class="post-view">
             <div class="post-header">
-                <a href="#/posts" class="post-back">&#8592; Back to posts</a>
+                <a href="#/" class="post-back">&#8592; Back to feed</a>
                 <h1 class="post-title">${Utils.escapeHtml(post.title)}</h1>
                 <div class="post-meta-bar">
                     <span>${Utils.formatDate(post.date)}</span>
@@ -474,398 +646,283 @@ async function renderPostPage({ slug }) {
                     <span>${readTime}</span>
                     ${post.category ? `<span class="post-meta-divider"></span><span>${Utils.escapeHtml(post.category)}</span>` : ''}
                 </div>
+                ${repoBadge}
             </div>
             ${coverHtml}
+            ${mediaHtml}
             <div class="post-content">${htmlContent}</div>
             ${tags ? `<div class="post-tags">${tags}</div>` : ''}
+            ${relatedHtml}
         </article>`;
 
-    // Highlight code blocks that marked didn't catch
-    document.querySelectorAll('.post-content pre code').forEach(block => {
-        hljs.highlightElement(block);
+    // Copy code buttons
+    document.querySelectorAll('.post-content pre').forEach(pre => {
+        const btn = document.createElement('button');
+        btn.className = 'code-copy-btn';
+        btn.textContent = 'Copy';
+        btn.addEventListener('click', () => {
+            const code = pre.querySelector('code');
+            navigator.clipboard.writeText(code ? code.textContent : pre.textContent)
+                .then(() => { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 2000); })
+                .catch(() => showToast('Copy failed', 'error'));
+        });
+        pre.style.position = 'relative';
+        pre.appendChild(btn);
     });
+
+    // Reading progress bar
+    const progressBar = document.getElementById('reading-progress');
+    const postContent = document.querySelector('.post-content');
+    if (progressBar && postContent) {
+        const scrollHandler = () => {
+            const rect = postContent.getBoundingClientRect();
+            const total = postContent.offsetHeight;
+            const visible = Math.min(Math.max(-rect.top, 0), total);
+            progressBar.style.width = `${(visible / total) * 100}%`;
+        };
+        window.addEventListener('scroll', scrollHandler, { passive: true });
+        Cleanup.add(() => { window.removeEventListener('scroll', scrollHandler); progressBar.style.width = '0'; });
+    }
+
+    // TOC active tracking
+    if (tocItems.length > 2) {
+        const tocLinks = document.querySelectorAll('.toc-link');
+        const headings = tocItems.map(item => document.getElementById(item.id)).filter(Boolean);
+        const tocScrollHandler = () => {
+            let current = '';
+            headings.forEach(h => {
+                if (h.getBoundingClientRect().top < 120) current = h.id;
+            });
+            tocLinks.forEach(link => {
+                link.classList.toggle('active', link.dataset.id === current);
+            });
+        };
+        window.addEventListener('scroll', tocScrollHandler, { passive: true });
+        Cleanup.add(() => window.removeEventListener('scroll', tocScrollHandler));
+    }
+
+    // Scroll to anchor if hash has one (e.g. #/post/slug#heading-id)
+    const anchor = window.location.hash.split('#').pop();
+    if (anchor && anchor !== slug) {
+        const el = document.getElementById(anchor);
+        if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth' }), 100);
+    }
 }
 
 /* ============================================
-   Phase 6: PDF Carousel Viewer
+   Phase 5: Full-page PDF Viewer
    ============================================ */
 
 async function renderPdfPage({ slug }) {
     const app = document.getElementById('app');
-
-    // Find the post to get the PDF path
-    const posts = await ContentService.getPosts();
+    const posts = await ContentService.getPosts(true);
     const post = posts.find(p => p.slug === slug);
 
     if (!post || !post.pdf) {
-        app.innerHTML = `
-            <div class="pdf-viewer">
-                <a href="#/posts" class="post-back">&#8592; Back to posts</a>
-                <div class="pdf-error">
-                    <p>&#128196;</p>
-                    <h3>PDF not found</h3>
-                    <p>This PDF may have been removed.</p>
-                </div>
-            </div>`;
+        app.innerHTML = `<div class="pdf-viewer"><a href="#/" class="post-back">&#8592; Back</a>
+            <div class="pdf-error"><h3>PDF not found</h3></div></div>`;
         return;
     }
 
     app.innerHTML = `
-        <div class="pdf-viewer">
-            <div class="pdf-viewer-header">
-                <a href="#/posts" class="post-back">&#8592; Back</a>
-                <h2 class="pdf-viewer-title">${Utils.escapeHtml(post.title)}</h2>
-                <a href="${post.pdf}" download class="btn btn-sm btn-secondary">&#8595; Download</a>
+    <div class="pdf-viewer">
+        <div class="pdf-viewer-header">
+            <a href="#/" class="post-back">&#8592; Back</a>
+            <h2 class="pdf-viewer-title">${Utils.escapeHtml(post.title)}</h2>
+            <a href="${post.pdf}" download class="btn btn-sm btn-secondary">&#8595; Download</a>
+        </div>
+        <div class="pdf-stage" id="pdf-stage">
+            <div class="pdf-loading" id="pdf-loading"><div class="spinner"></div><p class="loading-text">Loading PDF...</p></div>
+            <div class="pdf-canvas-wrap" id="pdf-canvas-wrap" style="display:none;">
+                <button class="pdf-nav pdf-nav-prev" id="pdf-prev" disabled>&#8592;</button>
+                <canvas id="pdf-canvas"></canvas>
+                <button class="pdf-nav pdf-nav-next" id="pdf-next" disabled>&#8594;</button>
             </div>
-            <div class="pdf-stage" id="pdf-stage">
-                <div class="pdf-loading" id="pdf-loading">
-                    <div class="spinner"></div>
-                    <p class="loading-text">Loading PDF...</p>
-                </div>
-                <div class="pdf-canvas-wrap" id="pdf-canvas-wrap" style="display:none;">
-                    <button class="pdf-nav pdf-nav-prev" id="pdf-prev" disabled>&#8592;</button>
-                    <canvas id="pdf-canvas"></canvas>
-                    <button class="pdf-nav pdf-nav-next" id="pdf-next" disabled>&#8594;</button>
-                </div>
-            </div>
-            <div class="pdf-controls" id="pdf-controls" style="display:none;">
-                <span class="pdf-page-info" id="pdf-page-info">Slide 1 of 1</span>
-            </div>
-            <div class="pdf-thumbnails" id="pdf-thumbs"></div>
-        </div>`;
+        </div>
+        <div class="pdf-controls" id="pdf-controls" style="display:none;">
+            <span class="pdf-page-info" id="pdf-page-info">Slide 1 of 1</span>
+        </div>
+        <div class="pdf-thumbnails" id="pdf-thumbs"></div>
+    </div>`;
 
-    // Initialize PDF.js
-    pdfjsLib.GlobalWorkerOptions.workerSrc =
-        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-
-    let pdfDoc = null;
-    let currentPage = 1;
-    let totalPages = 0;
-    let rendering = false;
-    let pendingPage = false;
-    const thumbCanvases = [];
-
-    const canvas = document.getElementById('pdf-canvas');
-    const ctx = canvas.getContext('2d');
-
-    function getScale(page) {
-        const containerW = Math.min(document.getElementById('pdf-stage').clientWidth - 120, 860);
-        const vp = page.getViewport({ scale: 1 });
-        return Math.max(containerW / vp.width, 0.5);
-    }
-
-    async function renderSlide(num) {
-        if (rendering) { pendingPage = num; return; }
-        rendering = true;
-        pendingPage = false;
-
-        const page = await pdfDoc.getPage(num);
-        const scale = getScale(page);
-        const viewport = page.getViewport({ scale });
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-
-        await page.render({ canvasContext: ctx, viewport }).promise;
-
-        document.getElementById('pdf-page-info').textContent = `Slide ${num} of ${totalPages}`;
-        document.getElementById('pdf-prev').disabled = num <= 1;
-        document.getElementById('pdf-next').disabled = num >= totalPages;
-
-        // highlight active thumb
-        thumbCanvases.forEach((tc, i) => {
-            tc.parentElement.classList.toggle('active', i === num - 1);
-        });
-        if (thumbCanvases[num - 1]) {
-            thumbCanvases[num - 1].parentElement.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-        }
-
-        rendering = false;
-        if (pendingPage !== false) {
-            const p = pendingPage;
-            pendingPage = false;
-            renderSlide(p);
-        }
-    }
-
-    async function renderThumb(num) {
-        const page = await pdfDoc.getPage(num);
-        const vp = page.getViewport({ scale: 0.18 });
-        const wrap = document.createElement('div');
-        wrap.className = 'pdf-thumb';
-        wrap.addEventListener('click', () => goTo(num));
-        const tc = document.createElement('canvas');
-        tc.width = vp.width;
-        tc.height = vp.height;
-        await page.render({ canvasContext: tc.getContext('2d'), viewport: vp }).promise;
-        wrap.appendChild(tc);
-        document.getElementById('pdf-thumbs').appendChild(wrap);
-        thumbCanvases.push(tc);
-    }
-
-    function goTo(num) {
-        if (!pdfDoc || num < 1 || num > totalPages) return;
-        currentPage = num;
-        renderSlide(currentPage);
-    }
-
-    // Navigation
-    document.getElementById('pdf-prev').addEventListener('click', () => goTo(currentPage - 1));
-    document.getElementById('pdf-next').addEventListener('click', () => goTo(currentPage + 1));
-
-    // Keyboard
-    const keyHandler = (e) => {
-        if (Router.currentRoute !== '/pdf/:slug') {
-            document.removeEventListener('keydown', keyHandler);
-            return;
-        }
-        if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); goTo(currentPage - 1); }
-        if (['ArrowRight', 'ArrowDown', 'PageDown'].includes(e.key)) { e.preventDefault(); goTo(currentPage + 1); }
-        if (e.key === 'Home') goTo(1);
-        if (e.key === 'End') goTo(totalPages);
-    };
-    document.addEventListener('keydown', keyHandler);
-
-    // Touch/swipe
-    let touchX = 0;
-    canvas.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
-    canvas.addEventListener('touchend', e => {
-        const dx = touchX - e.changedTouches[0].clientX;
-        if (Math.abs(dx) > 50) dx > 0 ? goTo(currentPage + 1) : goTo(currentPage - 1);
-    }, { passive: true });
-
-    // Resize
-    let resizeTimer;
-    const resizeHandler = () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => { if (pdfDoc) renderSlide(currentPage); }, 250);
-    };
-    window.addEventListener('resize', resizeHandler);
-
-    // Load PDF
     try {
-        pdfDoc = await pdfjsLib.getDocument(post.pdf).promise;
-        totalPages = pdfDoc.numPages;
+        const pdfjsLib = await LibLoader.loadPdfJs();
+        const pdfDoc = await pdfjsLib.getDocument(post.pdf).promise;
+        const totalPages = pdfDoc.numPages;
+        let currentPage = 1;
+        let rendering = false;
+        let pendingPage = false;
+        const thumbCanvases = [];
+
+        Cleanup.add(() => pdfDoc.destroy());
+
+        const canvas = document.getElementById('pdf-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function getScale(page) {
+            const cw = Math.min(document.getElementById('pdf-stage').clientWidth - 120, 860);
+            return Math.max(cw / page.getViewport({ scale: 1 }).width, 0.5);
+        }
+
+        async function renderSlide(num) {
+            if (rendering) { pendingPage = num; return; }
+            rendering = true; pendingPage = false;
+            const page = await pdfDoc.getPage(num);
+            const viewport = page.getViewport({ scale: getScale(page) });
+            canvas.width = viewport.width; canvas.height = viewport.height;
+            await page.render({ canvasContext: ctx, viewport }).promise;
+            document.getElementById('pdf-page-info').textContent = `Slide ${num} of ${totalPages}`;
+            document.getElementById('pdf-prev').disabled = num <= 1;
+            document.getElementById('pdf-next').disabled = num >= totalPages;
+            thumbCanvases.forEach((tc, i) => tc.parentElement.classList.toggle('active', i === num - 1));
+            if (thumbCanvases[num - 1]) thumbCanvases[num - 1].parentElement.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+            rendering = false;
+            if (pendingPage !== false) { const p = pendingPage; pendingPage = false; renderSlide(p); }
+        }
+
+        async function renderThumb(num) {
+            const page = await pdfDoc.getPage(num);
+            const vp = page.getViewport({ scale: 0.18 });
+            const wrap = document.createElement('div');
+            wrap.className = 'pdf-thumb';
+            wrap.addEventListener('click', () => goTo(num));
+            const tc = document.createElement('canvas');
+            tc.width = vp.width; tc.height = vp.height;
+            await page.render({ canvasContext: tc.getContext('2d'), viewport: vp }).promise;
+            wrap.appendChild(tc);
+            document.getElementById('pdf-thumbs').appendChild(wrap);
+            thumbCanvases.push(tc);
+        }
+
+        function goTo(num) { if (num >= 1 && num <= totalPages) { currentPage = num; renderSlide(currentPage); } }
+
+        document.getElementById('pdf-prev').addEventListener('click', () => goTo(currentPage - 1));
+        document.getElementById('pdf-next').addEventListener('click', () => goTo(currentPage + 1));
+
+        const keyHandler = (e) => {
+            if (Router.currentRoute !== '/pdf/:slug') { document.removeEventListener('keydown', keyHandler); return; }
+            if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); goTo(currentPage - 1); }
+            if (['ArrowRight','ArrowDown','PageDown'].includes(e.key)) { e.preventDefault(); goTo(currentPage + 1); }
+            if (e.key === 'Home') goTo(1);
+            if (e.key === 'End') goTo(totalPages);
+        };
+        document.addEventListener('keydown', keyHandler);
+        Cleanup.add(() => document.removeEventListener('keydown', keyHandler));
+
+        let touchX = 0;
+        canvas.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+        canvas.addEventListener('touchend', e => {
+            const dx = touchX - e.changedTouches[0].clientX;
+            if (Math.abs(dx) > 50) dx > 0 ? goTo(currentPage + 1) : goTo(currentPage - 1);
+        }, { passive: true });
+
+        let rt;
+        const rh = () => { clearTimeout(rt); rt = setTimeout(() => { if (pdfDoc) renderSlide(currentPage); }, 250); };
+        window.addEventListener('resize', rh);
+        Cleanup.add(() => window.removeEventListener('resize', rh));
 
         document.getElementById('pdf-loading').style.display = 'none';
         document.getElementById('pdf-canvas-wrap').style.display = 'flex';
         document.getElementById('pdf-controls').style.display = 'flex';
-
         await renderSlide(1);
+        for (let i = 1; i <= totalPages; i++) { await renderThumb(i); if (i === 1 && thumbCanvases[0]) thumbCanvases[0].parentElement.classList.add('active'); }
 
-        for (let i = 1; i <= totalPages; i++) {
-            await renderThumb(i);
-            if (i === 1 && thumbCanvases[0]) thumbCanvases[0].parentElement.classList.add('active');
-        }
     } catch (err) {
-        console.error('PDF load error:', err);
-        document.getElementById('pdf-loading').innerHTML = `
-            <div class="pdf-error">
-                <p style="font-size:2rem;">&#128196;</p>
-                <h3>Could not load PDF</h3>
-                <p>${Utils.escapeHtml(err.message || 'Unknown error')}</p>
-            </div>`;
+        document.getElementById('pdf-loading').innerHTML = `<div class="pdf-error"><h3>Could not load PDF</h3><p>${Utils.escapeHtml(err.message)}</p></div>`;
     }
 }
 
 /* ============================================
-   Phase 7: About Page
-   ============================================ */
-
-function renderAboutPage() {
-    const app = document.getElementById('app');
-    app.innerHTML = `
-        <div class="about-page">
-            <h1>About</h1>
-            <div class="about-content">
-                <p>
-                    Welcome! This is a personal portfolio for sharing projects, ideas, and
-                    explorations in data science, machine learning, and artificial intelligence.
-                </p>
-                <p>
-                    Every project here represents a chapter in a journey of learning and creating
-                    meaningful solutions through technology, data, and innovation.
-                </p>
-                <p>
-                    This site works as a web application &mdash; you can create posts, upload images
-                    and PDFs, and present projects in a carousel format, all powered by GitHub Pages.
-                </p>
-            </div>
-            <div class="about-links">
-                <a href="${CONFIG.social.github}" class="btn btn-primary" target="_blank" rel="noopener noreferrer">GitHub</a>
-                <a href="${CONFIG.social.linkedin}" class="btn btn-secondary" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-                <a href="mailto:${CONFIG.social.email}" class="btn btn-secondary">Email</a>
-            </div>
-        </div>`;
-}
-
-/* ============================================
-   Phase 8: GitHub API Service (for Admin)
+   Phase 6: GitHub API + Admin + Editor + Upload
    ============================================ */
 
 const GitHubAPI = {
-    getToken() {
-        return localStorage.getItem('gh_token') || '';
-    },
-
-    setToken(token) {
-        localStorage.setItem('gh_token', token);
-    },
-
-    clearToken() {
-        localStorage.removeItem('gh_token');
-    },
-
-    isAuthenticated() {
-        return !!this.getToken();
-    },
-
+    getToken() { return localStorage.getItem('gh_token') || ''; },
+    setToken(t) { localStorage.setItem('gh_token', t); },
+    clearToken() { localStorage.removeItem('gh_token'); },
+    isAuthenticated() { return !!this.getToken(); },
     headers() {
-        return {
-            'Authorization': `token ${this.getToken()}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-        };
+        return { 'Authorization': `token ${this.getToken()}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
     },
-
     async getFile(path) {
-        const resp = await fetch(
-            `https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/contents/${path}?ref=${CONFIG.github.branch}`,
-            { headers: this.headers() }
-        );
-        if (!resp.ok) return null;
-        const data = await resp.json();
-        return {
-            content: atob(data.content.replace(/\n/g, '')),
-            sha: data.sha
-        };
+        const r = await fetch(`https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/contents/${path}?ref=${CONFIG.github.branch}`, { headers: this.headers() });
+        if (!r.ok) return null;
+        const d = await r.json();
+        return { content: atob(d.content.replace(/\n/g, '')), sha: d.sha };
     },
-
     async putFile(path, content, message, sha) {
-        const body = {
-            message,
-            content: btoa(unescape(encodeURIComponent(content))),
-            branch: CONFIG.github.branch
-        };
+        const body = { message, content: btoa(unescape(encodeURIComponent(content))), branch: CONFIG.github.branch };
         if (sha) body.sha = sha;
-
-        const resp = await fetch(
-            `https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/contents/${path}`,
-            { method: 'PUT', headers: this.headers(), body: JSON.stringify(body) }
-        );
-        if (!resp.ok) {
-            const err = await resp.json();
-            throw new Error(err.message || 'Failed to save file');
-        }
-        return resp.json();
+        const r = await fetch(`https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/contents/${path}`, { method: 'PUT', headers: this.headers(), body: JSON.stringify(body) });
+        if (!r.ok) { const e = await r.json(); throw new Error(e.message || 'Save failed'); }
+        return r.json();
     },
-
     async uploadBinary(path, file, message) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = async () => {
-                const base64 = reader.result.split(',')[1];
-                const body = {
-                    message,
-                    content: base64,
-                    branch: CONFIG.github.branch
-                };
                 try {
-                    const resp = await fetch(
-                        `https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/contents/${path}`,
-                        { method: 'PUT', headers: this.headers(), body: JSON.stringify(body) }
-                    );
-                    if (!resp.ok) {
-                        const err = await resp.json();
-                        throw new Error(err.message || 'Upload failed');
-                    }
-                    resolve(await resp.json());
-                } catch (err) {
-                    reject(err);
-                }
+                    const r = await fetch(`https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/contents/${path}`, {
+                        method: 'PUT', headers: this.headers(),
+                        body: JSON.stringify({ message, content: reader.result.split(',')[1], branch: CONFIG.github.branch })
+                    });
+                    if (!r.ok) { const e = await r.json(); throw new Error(e.message); }
+                    resolve(await r.json());
+                } catch (e) { reject(e); }
             };
-            reader.onerror = () => reject(new Error('File read failed'));
+            reader.onerror = () => reject(new Error('Read failed'));
             reader.readAsDataURL(file);
         });
     },
-
     async deleteFile(path, sha, message) {
-        const resp = await fetch(
-            `https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/contents/${path}`,
-            {
-                method: 'DELETE',
-                headers: this.headers(),
-                body: JSON.stringify({ message, sha, branch: CONFIG.github.branch })
-            }
-        );
-        if (!resp.ok) throw new Error('Delete failed');
-        return resp.json();
+        const r = await fetch(`https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/contents/${path}`, {
+            method: 'DELETE', headers: this.headers(), body: JSON.stringify({ message, sha, branch: CONFIG.github.branch })
+        });
+        if (!r.ok) throw new Error('Delete failed');
     }
 };
 
-/* ============================================
-   Phase 9: Admin Panel
-   ============================================ */
+// ── Admin ──
 
 function renderAdminLogin() {
-    const app = document.getElementById('app');
-    app.innerHTML = `
+    document.getElementById('app').innerHTML = `
         <div class="admin-auth">
             <h2>Admin Access</h2>
-            <p>Enter your GitHub Personal Access Token to manage content.<br>
-               The token is stored only in your browser's localStorage.</p>
-            <div class="form-group">
-                <label class="form-label">GitHub Token</label>
-                <input type="password" class="form-input" id="admin-token" placeholder="ghp_xxxxxxxxxxxx">
-            </div>
+            <p>Enter your GitHub Personal Access Token.<br>Stored only in your browser's localStorage.</p>
+            <div class="form-group"><label class="form-label">GitHub Token</label>
+                <input type="password" class="form-input" id="admin-token" placeholder="ghp_xxxxxxxxxxxx"></div>
             <button class="btn btn-primary" id="admin-login-btn" style="width:100%;">Sign In</button>
-            <p style="margin-top:16px; font-size:0.8rem; color:var(--color-text-muted);">
-                Requires a token with <code>repo</code> scope.
-            </p>
+            <p style="margin-top:16px;font-size:0.8rem;color:var(--color-text-muted);">Requires <code>repo</code> scope.</p>
         </div>`;
-
     document.getElementById('admin-login-btn').addEventListener('click', () => {
-        const token = document.getElementById('admin-token').value.trim();
-        if (!token) { showToast('Please enter a token', 'error'); return; }
-        GitHubAPI.setToken(token);
+        const t = document.getElementById('admin-token').value.trim();
+        if (!t) { showToast('Enter a token', 'error'); return; }
+        GitHubAPI.setToken(t);
         renderAdminDashboard();
     });
 }
 
 async function renderAdminDashboard() {
-    if (!GitHubAPI.isAuthenticated()) {
-        renderAdminLogin();
-        return;
-    }
-
+    if (!GitHubAPI.isAuthenticated()) { renderAdminLogin(); return; }
     const app = document.getElementById('app');
     app.innerHTML = `
         <div class="admin-container">
             <div class="admin-header">
                 <h1>Dashboard</h1>
-                <div style="display:flex; gap:8px;">
+                <div style="display:flex;gap:8px;">
                     <a href="#/admin/new" class="btn btn-primary btn-sm">+ New Post</a>
-                    <a href="#/admin/upload" class="btn btn-secondary btn-sm">Upload Files</a>
+                    <a href="#/admin/upload" class="btn btn-secondary btn-sm">Upload</a>
                     <button class="btn btn-ghost btn-sm" id="admin-logout">Sign Out</button>
                 </div>
             </div>
-
             <div class="admin-tabs">
                 <button class="admin-tab active" data-tab="posts">Posts</button>
-                <button class="admin-tab" data-tab="files">Uploaded Files</button>
+                <button class="admin-tab" data-tab="files">Files</button>
             </div>
-
-            <div id="admin-tab-content">
-                <div class="loading-state"><div class="spinner"></div><p class="loading-text">Loading...</p></div>
-            </div>
+            <div id="admin-tab-content"><div class="loading-state"><div class="spinner"></div></div></div>
         </div>`;
 
-    document.getElementById('admin-logout').addEventListener('click', () => {
-        GitHubAPI.clearToken();
-        showToast('Signed out');
-        renderAdminLogin();
-    });
-
-    // Tab switching
+    document.getElementById('admin-logout').addEventListener('click', () => { GitHubAPI.clearToken(); showToast('Signed out'); renderAdminLogin(); });
     document.querySelectorAll('.admin-tab').forEach(tab => {
         tab.addEventListener('click', () => {
             document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
@@ -874,491 +931,270 @@ async function renderAdminDashboard() {
             if (tab.dataset.tab === 'files') loadAdminFiles();
         });
     });
-
     await loadAdminPosts();
 }
 
 async function loadAdminPosts() {
-    const container = document.getElementById('admin-tab-content');
-    container.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
-
+    const c = document.getElementById('admin-tab-content');
+    c.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
     try {
         ContentService.invalidateCache();
-        const posts = await ContentService.getPosts();
-
-        if (posts.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">&#128221;</div>
-                    <h3>No posts yet</h3>
-                    <p>Create your first post to get started.</p>
-                    <a href="#/admin/new" class="btn btn-primary" style="margin-top:12px;">+ New Post</a>
-                </div>`;
-            return;
-        }
-
-        container.innerHTML = `<div class="admin-posts-list">
-            ${posts.map(p => `
-                <div class="admin-post-item">
-                    <div class="admin-post-info">
-                        <h4>${Utils.escapeHtml(p.title)}</h4>
-                        <p>${Utils.formatDate(p.date)} &middot; ${p.type === 'pdf' ? 'PDF' : 'Article'}${p.category ? ' &middot; ' + p.category : ''}</p>
-                    </div>
-                    <div class="admin-post-actions">
-                        <a href="#/admin/edit/${p.slug}" class="btn btn-ghost btn-sm">Edit</a>
-                        <button class="btn btn-ghost btn-sm" data-delete="${p.slug}" style="color:var(--color-danger);">Delete</button>
-                    </div>
-                </div>`).join('')}
-        </div>`;
-
-        // Delete handlers
-        container.querySelectorAll('[data-delete]').forEach(btn => {
+        const posts = await ContentService.getPosts(true);
+        if (!posts.length) { c.innerHTML = '<div class="empty-state"><h3>No posts</h3><a href="#/admin/new" class="btn btn-primary" style="margin-top:12px;">+ New Post</a></div>'; return; }
+        c.innerHTML = `<div class="admin-posts-list">${posts.map(p => `
+            <div class="admin-post-item">
+                <div class="admin-post-info"><h4>${Utils.escapeHtml(p.title)}${p.draft ? ' <span style="color:var(--color-warning);font-size:0.8rem;">(draft)</span>' : ''}</h4>
+                    <p>${Utils.formatDate(p.date)} &middot; ${p.type}${p.category ? ' &middot; ' + p.category : ''}</p></div>
+                <div class="admin-post-actions">
+                    <a href="#/admin/edit/${p.slug}" class="btn btn-ghost btn-sm">Edit</a>
+                    <button class="btn btn-ghost btn-sm" data-delete="${p.slug}" style="color:var(--color-danger);">Delete</button>
+                </div>
+            </div>`).join('')}</div>`;
+        c.querySelectorAll('[data-delete]').forEach(btn => {
             btn.addEventListener('click', async () => {
-                const slug = btn.dataset.delete;
-                if (!confirm(`Delete "${slug}"? This cannot be undone.`)) return;
-                try {
-                    await deletePost(slug);
-                    showToast('Post deleted', 'success');
-                    loadAdminPosts();
-                } catch (err) {
-                    showToast('Delete failed: ' + err.message, 'error');
-                }
+                if (!confirm(`Delete "${btn.dataset.delete}"?`)) return;
+                try { await deletePost(btn.dataset.delete); showToast('Deleted', 'success'); loadAdminPosts(); }
+                catch (e) { showToast('Delete failed: ' + e.message, 'error'); }
             });
         });
-    } catch (err) {
-        container.innerHTML = `<div class="empty-state"><h3>Error loading posts</h3><p>${err.message}</p></div>`;
-    }
+    } catch (e) { c.innerHTML = `<div class="empty-state"><h3>Error</h3><p>${e.message}</p></div>`; }
 }
 
 async function deletePost(slug) {
-    // Get current manifest
-    const file = await GitHubAPI.getFile(`${CONFIG.contentPath}/posts.json`);
-    if (!file) throw new Error('Manifest not found');
-    const manifest = JSON.parse(file.content);
-    const postIdx = manifest.posts.findIndex(p => p.slug === slug);
-    if (postIdx === -1) throw new Error('Post not in manifest');
-
-    const post = manifest.posts[postIdx];
-
-    // Delete the markdown file
-    const mdFile = await GitHubAPI.getFile(`${CONFIG.contentPath}/posts/${post.file}`);
-    if (mdFile) {
-        await GitHubAPI.deleteFile(`${CONFIG.contentPath}/posts/${post.file}`, mdFile.sha, `Delete post: ${post.title}`);
+    const f = await GitHubAPI.getFile(`${CONFIG.contentPath}/posts.json`);
+    if (!f) throw new Error('Manifest not found');
+    const m = JSON.parse(f.content);
+    const idx = m.posts.findIndex(p => p.slug === slug);
+    if (idx === -1) throw new Error('Not in manifest');
+    const post = m.posts[idx];
+    if (post.file) {
+        const mf = await GitHubAPI.getFile(`${CONFIG.contentPath}/posts/${post.file}`);
+        if (mf) await GitHubAPI.deleteFile(`${CONFIG.contentPath}/posts/${post.file}`, mf.sha, `Delete: ${post.title}`);
     }
-
-    // Update manifest
-    manifest.posts.splice(postIdx, 1);
-    await GitHubAPI.putFile(
-        `${CONFIG.contentPath}/posts.json`,
-        JSON.stringify(manifest, null, 2),
-        `Remove ${post.title} from manifest`,
-        file.sha
-    );
-
+    m.posts.splice(idx, 1);
+    await GitHubAPI.putFile(`${CONFIG.contentPath}/posts.json`, JSON.stringify(m, null, 2), `Remove ${post.title}`, f.sha);
     ContentService.invalidateCache();
 }
 
 async function loadAdminFiles() {
-    const container = document.getElementById('admin-tab-content');
-    container.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
-
+    const c = document.getElementById('admin-tab-content');
+    c.innerHTML = '<div class="loading-state"><div class="spinner"></div></div>';
     try {
-        const resp = await fetch(
-            `https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/contents/${CONFIG.uploadsPath}`,
-            { headers: GitHubAPI.headers() }
-        );
-        const items = resp.ok ? await resp.json() : [];
-
-        // Flatten both images/ and pdfs/ directories
-        let allFiles = [];
+        const r = await fetch(`https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/contents/${CONFIG.uploadsPath}`, { headers: GitHubAPI.headers() });
+        const items = r.ok ? await r.json() : [];
+        let all = [];
         for (const item of (Array.isArray(items) ? items : [])) {
             if (item.type === 'dir') {
-                const subResp = await fetch(item.url, { headers: GitHubAPI.headers() });
-                if (subResp.ok) {
-                    const subItems = await subResp.json();
-                    allFiles = allFiles.concat(subItems.filter(f => f.type === 'file' && f.name !== '.gitkeep'));
-                }
-            } else if (item.type === 'file' && item.name !== '.gitkeep') {
-                allFiles.push(item);
-            }
+                const sr = await fetch(item.url, { headers: GitHubAPI.headers() });
+                if (sr.ok) all = all.concat((await sr.json()).filter(f => f.type === 'file' && f.name !== '.gitkeep'));
+            } else if (item.type === 'file' && item.name !== '.gitkeep') all.push(item);
         }
-
-        if (allFiles.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">&#128193;</div>
-                    <h3>No uploaded files</h3>
-                    <p>Upload images and PDFs from the upload page.</p>
-                    <a href="#/admin/upload" class="btn btn-primary" style="margin-top:12px;">Upload Files</a>
-                </div>`;
-            return;
-        }
-
-        container.innerHTML = `<div class="admin-posts-list">
-            ${allFiles.map(f => `
-                <div class="admin-post-item">
-                    <div class="admin-post-info">
-                        <h4>${Utils.escapeHtml(f.name)}</h4>
-                        <p>${f.path} &middot; ${(f.size / 1024).toFixed(1)} KB</p>
-                    </div>
-                    <div class="admin-post-actions">
-                        <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${f.path}'); showToast('Path copied!');">Copy Path</button>
-                    </div>
-                </div>`).join('')}
-        </div>`;
-    } catch (err) {
-        container.innerHTML = `<div class="empty-state"><h3>Error</h3><p>${err.message}</p></div>`;
-    }
+        if (!all.length) { c.innerHTML = '<div class="empty-state"><h3>No files</h3><a href="#/admin/upload" class="btn btn-primary" style="margin-top:12px;">Upload</a></div>'; return; }
+        c.innerHTML = `<div class="admin-posts-list">${all.map(f => `
+            <div class="admin-post-item"><div class="admin-post-info"><h4>${Utils.escapeHtml(f.name)}</h4><p>${f.path} &middot; ${(f.size/1024).toFixed(1)} KB</p></div>
+                <div class="admin-post-actions"><button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText('${f.path}');showToast('Copied!');">Copy Path</button></div></div>`).join('')}</div>`;
+    } catch (e) { c.innerHTML = `<div class="empty-state"><h3>Error</h3><p>${e.message}</p></div>`; }
 }
 
-/* ============================================
-   Phase 10: Post Editor (create / edit)
-   ============================================ */
+// ── Editor (with draft, media, repo fields) ──
 
 async function renderEditorPage({ slug } = {}) {
-    if (!GitHubAPI.isAuthenticated()) {
-        renderAdminLogin();
-        return;
-    }
-
+    if (!GitHubAPI.isAuthenticated()) { renderAdminLogin(); return; }
     const isEdit = !!slug;
-    let existingPost = null;
-    let existingBody = '';
-
+    let post = null, existingBody = '';
     if (isEdit) {
-        existingPost = await ContentService.getPost(slug);
-        if (!existingPost) {
-            showToast('Post not found', 'error');
-            window.location.hash = '#/admin';
-            return;
-        }
-        existingBody = existingPost.body || '';
+        post = await ContentService.getPost(slug);
+        if (!post) { showToast('Not found', 'error'); window.location.hash = '#/admin'; return; }
+        existingBody = post.body || '';
     }
 
     const app = document.getElementById('app');
     app.innerHTML = `
-        <div class="editor-container">
-            <div class="editor-toolbar">
-                <div class="editor-toolbar-left">
-                    <a href="#/admin" class="btn btn-ghost btn-sm">&#8592; Dashboard</a>
-                    <span style="color:var(--color-text-muted); font-size:0.9rem;">${isEdit ? 'Edit Post' : 'New Post'}</span>
-                </div>
-                <div class="editor-toolbar-right">
-                    <button class="btn btn-primary btn-sm" id="editor-save">
-                        ${isEdit ? 'Update' : 'Publish'}
-                    </button>
-                </div>
+    <div class="editor-container">
+        <div class="editor-toolbar">
+            <div class="editor-toolbar-left"><a href="#/admin" class="btn btn-ghost btn-sm">&#8592; Dashboard</a><span style="color:var(--color-text-muted);font-size:0.9rem;">${isEdit ? 'Edit' : 'New'} Post</span></div>
+            <div class="editor-toolbar-right"><button class="btn btn-primary btn-sm" id="editor-save">${isEdit ? 'Update' : 'Publish'}</button></div>
+        </div>
+        <div class="editor-meta">
+            <div class="form-group"><label class="form-label">Title</label><input type="text" class="form-input" id="ed-title" value="${isEdit ? Utils.escapeHtml(post.title) : ''}"></div>
+            <div class="form-group"><label class="form-label">Slug</label><input type="text" class="form-input" id="ed-slug" value="${isEdit ? slug : ''}" ${isEdit ? 'readonly' : ''}></div>
+            <div class="form-group"><label class="form-label">Description</label><input type="text" class="form-input" id="ed-desc" value="${isEdit ? Utils.escapeHtml(post.description||'') : ''}"></div>
+            <div class="form-group"><label class="form-label">Category</label><input type="text" class="form-input" id="ed-cat" value="${isEdit ? Utils.escapeHtml(post.category||'') : ''}"></div>
+            <div class="form-group"><label class="form-label">Tags (comma separated)</label><input type="text" class="form-input" id="ed-tags" value="${isEdit && post.tags ? post.tags.join(', ') : ''}"></div>
+            <div class="form-group"><label class="form-label">Cover Image Path</label><input type="text" class="form-input" id="ed-image" value="${isEdit ? Utils.escapeHtml(post.image||'') : ''}"></div>
+            <div class="form-group"><label class="form-label">Type</label>
+                <select class="form-select" id="ed-type">
+                    <option value="article" ${!isEdit || post.type === 'article' ? 'selected' : ''}>Article</option>
+                    <option value="pdf" ${isEdit && post.type === 'pdf' ? 'selected' : ''}>PDF</option>
+                    <option value="repo" ${isEdit && post.type === 'repo' ? 'selected' : ''}>Repo</option>
+                </select></div>
+            <div class="form-group"><label class="form-label" style="display:flex;align-items:center;gap:8px;">
+                <input type="checkbox" id="ed-draft" ${isEdit && post.draft ? 'checked' : ''}> Draft (hidden from feed)</label></div>
+            <div class="form-group" id="ed-pdf-group" style="${isEdit && post.type === 'pdf' ? '' : 'display:none;'}">
+                <label class="form-label">PDF Path</label><input type="text" class="form-input" id="ed-pdf" value="${isEdit && post.pdf ? Utils.escapeHtml(post.pdf) : ''}"></div>
+            <div class="form-group" id="ed-repo-group" style="${isEdit && post.type === 'repo' ? '' : 'display:none;'}">
+                <label class="form-label">Repo URL</label><input type="text" class="form-input" id="ed-repo" placeholder="https://github.com/user/repo" value="${isEdit && post.repo ? Utils.escapeHtml(post.repo) : ''}"></div>
+            <div class="form-group" id="ed-media-group">
+                <label class="form-label">Media Embed</label>
+                <select class="form-select" id="ed-media-type" style="margin-bottom:8px;">
+                    <option value="none" ${!isEdit || !post.media ? 'selected' : ''}>None</option>
+                    <option value="youtube" ${isEdit && post.media?.type === 'youtube' ? 'selected' : ''}>YouTube</option>
+                    <option value="audio" ${isEdit && post.media?.type === 'audio' ? 'selected' : ''}>Audio</option>
+                    <option value="gif" ${isEdit && post.media?.type === 'gif' ? 'selected' : ''}>GIF</option>
+                </select>
+                <input type="text" class="form-input" id="ed-media-url" placeholder="Media URL" value="${isEdit && post.media?.url ? Utils.escapeHtml(post.media.url) : ''}" style="${isEdit && post.media ? '' : 'display:none;'}">
             </div>
+        </div>
+        <div class="editor-split" id="ed-split">
+            <div class="editor-pane"><div class="editor-pane-header">Markdown</div><textarea class="editor-textarea" id="ed-body">${existingBody}</textarea></div>
+            <div class="editor-pane"><div class="editor-pane-header">Preview</div><div class="editor-preview post-content" id="ed-preview"></div></div>
+        </div>
+    </div>`;
 
-            <div class="editor-meta">
-                <div class="form-group">
-                    <label class="form-label">Title</label>
-                    <input type="text" class="form-input" id="editor-title" placeholder="Post title..." value="${isEdit ? Utils.escapeHtml(existingPost.title) : ''}">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Slug</label>
-                    <input type="text" class="form-input" id="editor-slug" placeholder="post-url-slug" value="${isEdit ? slug : ''}" ${isEdit ? 'readonly' : ''}>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Description</label>
-                    <input type="text" class="form-input" id="editor-desc" placeholder="Short description..." value="${isEdit ? Utils.escapeHtml(existingPost.description || '') : ''}">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Category</label>
-                    <input type="text" class="form-input" id="editor-category" placeholder="e.g. data-science" value="${isEdit ? Utils.escapeHtml(existingPost.category || '') : ''}">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Tags (comma separated)</label>
-                    <input type="text" class="form-input" id="editor-tags" placeholder="python, ml, data" value="${isEdit && existingPost.tags ? existingPost.tags.join(', ') : ''}">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Cover Image Path</label>
-                    <input type="text" class="form-input" id="editor-image" placeholder="uploads/images/cover.jpg" value="${isEdit ? Utils.escapeHtml(existingPost.image || '') : ''}">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Type</label>
-                    <select class="form-select" id="editor-type">
-                        <option value="article" ${!isEdit || existingPost.type !== 'pdf' ? 'selected' : ''}>Article</option>
-                        <option value="pdf" ${isEdit && existingPost.type === 'pdf' ? 'selected' : ''}>PDF Presentation</option>
-                    </select>
-                </div>
-                <div class="form-group" id="editor-pdf-group" style="${isEdit && existingPost.type === 'pdf' ? '' : 'display:none;'}">
-                    <label class="form-label">PDF File Path</label>
-                    <input type="text" class="form-input" id="editor-pdf" placeholder="uploads/pdfs/presentation.pdf" value="${isEdit && existingPost.pdf ? Utils.escapeHtml(existingPost.pdf) : ''}">
-                </div>
-            </div>
+    // Type field toggles
+    const typeEl = document.getElementById('ed-type');
+    typeEl.addEventListener('change', () => {
+        document.getElementById('ed-pdf-group').style.display = typeEl.value === 'pdf' ? '' : 'none';
+        document.getElementById('ed-repo-group').style.display = typeEl.value === 'repo' ? '' : 'none';
+        document.getElementById('ed-split').style.display = typeEl.value === 'repo' ? 'none' : '';
+    });
+    if (isEdit && post.type === 'repo') document.getElementById('ed-split').style.display = 'none';
 
-            <div class="editor-split">
-                <div class="editor-pane">
-                    <div class="editor-pane-header">Markdown</div>
-                    <textarea class="editor-textarea" id="editor-body" placeholder="Write your content in Markdown...">${existingBody}</textarea>
-                </div>
-                <div class="editor-pane">
-                    <div class="editor-pane-header">Preview</div>
-                    <div class="editor-preview post-content" id="editor-preview"></div>
-                </div>
-            </div>
-        </div>`;
+    // Media type toggle
+    document.getElementById('ed-media-type').addEventListener('change', (e) => {
+        document.getElementById('ed-media-url').style.display = e.target.value === 'none' ? 'none' : '';
+    });
 
-    // Auto-generate slug from title
+    // Auto slug
     if (!isEdit) {
-        document.getElementById('editor-title').addEventListener('input', (e) => {
-            document.getElementById('editor-slug').value = Utils.slugify(e.target.value);
+        document.getElementById('ed-title').addEventListener('input', (e) => {
+            document.getElementById('ed-slug').value = Utils.slugify(e.target.value);
         });
     }
 
-    // Show/hide PDF field
-    document.getElementById('editor-type').addEventListener('change', (e) => {
-        document.getElementById('editor-pdf-group').style.display = e.target.value === 'pdf' ? '' : 'none';
-    });
-
     // Live preview
-    const textarea = document.getElementById('editor-body');
-    const preview = document.getElementById('editor-preview');
-
+    const textarea = document.getElementById('ed-body');
+    const preview = document.getElementById('ed-preview');
     function updatePreview() {
         marked.setOptions({ breaks: true, gfm: true });
-        preview.innerHTML = marked.parse(textarea.value || '*Start typing to see preview...*');
-        preview.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
+        preview.innerHTML = marked.parse(textarea.value || '*Start typing...*');
     }
-
     textarea.addEventListener('input', Utils.debounce(updatePreview, 300));
     updatePreview();
 
-    // Save handler
+    // Save
     document.getElementById('editor-save').addEventListener('click', async () => {
-        const title = document.getElementById('editor-title').value.trim();
-        const postSlug = document.getElementById('editor-slug').value.trim();
-        const description = document.getElementById('editor-desc').value.trim();
-        const category = document.getElementById('editor-category').value.trim();
-        const tagsStr = document.getElementById('editor-tags').value.trim();
-        const image = document.getElementById('editor-image').value.trim();
-        const type = document.getElementById('editor-type').value;
-        const pdfPath = document.getElementById('editor-pdf').value.trim();
+        const title = document.getElementById('ed-title').value.trim();
+        const postSlug = document.getElementById('ed-slug').value.trim();
+        if (!title || !postSlug) { showToast('Title and slug required', 'error'); return; }
+
+        const desc = document.getElementById('ed-desc').value.trim();
+        const cat = document.getElementById('ed-cat').value.trim();
+        const tags = document.getElementById('ed-tags').value.trim().split(',').map(t => t.trim()).filter(Boolean);
+        const image = document.getElementById('ed-image').value.trim();
+        const type = document.getElementById('ed-type').value;
+        const draft = document.getElementById('ed-draft').checked;
+        const pdfPath = document.getElementById('ed-pdf').value.trim();
+        const repoUrl = document.getElementById('ed-repo').value.trim();
+        const mediaType = document.getElementById('ed-media-type').value;
+        const mediaUrl = document.getElementById('ed-media-url').value.trim();
         const body = textarea.value;
-
-        if (!title || !postSlug) {
-            showToast('Title and slug are required', 'error');
-            return;
-        }
-
-        const tags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [];
-        const date = isEdit ? existingPost.date : new Date().toISOString().split('T')[0];
+        const date = isEdit ? post.date : new Date().toISOString().split('T')[0];
         const fileName = `${postSlug}.md`;
 
-        // Build frontmatter
-        const frontmatter = [
-            '---',
-            `title: "${title}"`,
-            `description: "${description}"`,
-            `date: "${date}"`,
-            `category: "${category}"`,
-            `tags: [${tags.map(t => `"${t}"`).join(', ')}]`,
-            image ? `image: "${image}"` : null,
-            `type: "${type}"`,
-            type === 'pdf' && pdfPath ? `pdf: "${pdfPath}"` : null,
-            '---'
-        ].filter(Boolean).join('\n');
-
-        const fileContent = `${frontmatter}\n\n${body}`;
+        const entry = { slug: postSlug, title, description: desc, date, category: cat, tags, image, type, file: fileName, draft };
+        if (type === 'pdf' && pdfPath) entry.pdf = pdfPath;
+        if (type === 'repo' && repoUrl) entry.repo = repoUrl;
+        if (mediaType !== 'none' && mediaUrl) entry.media = { type: mediaType, url: mediaUrl };
 
         try {
             document.getElementById('editor-save').disabled = true;
             document.getElementById('editor-save').textContent = 'Saving...';
 
-            // Save markdown file
-            let mdSha = null;
-            if (isEdit) {
-                const existing = await GitHubAPI.getFile(`${CONFIG.contentPath}/posts/${fileName}`);
-                if (existing) mdSha = existing.sha;
+            // Save markdown file (skip for repo type)
+            if (type !== 'repo') {
+                const fm = ['---', `title: "${title}"`, `description: "${desc}"`, `date: "${date}"`, `category: "${cat}"`,
+                    `tags: [${tags.map(t => `"${t}"`).join(', ')}]`, image ? `image: "${image}"` : null,
+                    `type: "${type}"`, type === 'pdf' && pdfPath ? `pdf: "${pdfPath}"` : null, `draft: ${draft}`, '---'].filter(Boolean).join('\n');
+                let mdSha = null;
+                if (isEdit) { const ex = await GitHubAPI.getFile(`${CONFIG.contentPath}/posts/${fileName}`); if (ex) mdSha = ex.sha; }
+                await GitHubAPI.putFile(`${CONFIG.contentPath}/posts/${fileName}`, `${fm}\n\n${body}`, `${isEdit ? 'Update' : 'Add'}: ${title}`, mdSha);
             }
-
-            await GitHubAPI.putFile(
-                `${CONFIG.contentPath}/posts/${fileName}`,
-                fileContent,
-                isEdit ? `Update post: ${title}` : `Add post: ${title}`,
-                mdSha
-            );
 
             // Update manifest
-            const manifestFile = await GitHubAPI.getFile(`${CONFIG.contentPath}/posts.json`);
-            let manifest = { posts: [] };
-            let manifestSha = null;
-
-            if (manifestFile) {
-                manifest = JSON.parse(manifestFile.content);
-                manifestSha = manifestFile.sha;
-            }
-
-            const postEntry = {
-                slug: postSlug,
-                title,
-                description,
-                date,
-                category,
-                tags,
-                image,
-                type,
-                file: fileName,
-                ...(type === 'pdf' && pdfPath ? { pdf: pdfPath } : {})
-            };
-
-            const existingIdx = manifest.posts.findIndex(p => p.slug === postSlug);
-            if (existingIdx >= 0) {
-                manifest.posts[existingIdx] = postEntry;
-            } else {
-                manifest.posts.push(postEntry);
-            }
-
-            await GitHubAPI.putFile(
-                `${CONFIG.contentPath}/posts.json`,
-                JSON.stringify(manifest, null, 2),
-                `Update manifest: ${title}`,
-                manifestSha
-            );
+            const mf = await GitHubAPI.getFile(`${CONFIG.contentPath}/posts.json`);
+            let manifest = { posts: [] }, mSha = null;
+            if (mf) { manifest = JSON.parse(mf.content); mSha = mf.sha; }
+            const idx = manifest.posts.findIndex(p => p.slug === postSlug);
+            if (idx >= 0) manifest.posts[idx] = entry; else manifest.posts.push(entry);
+            await GitHubAPI.putFile(`${CONFIG.contentPath}/posts.json`, JSON.stringify(manifest, null, 2), `Manifest: ${title}`, mSha);
 
             ContentService.invalidateCache();
-            showToast(isEdit ? 'Post updated!' : 'Post published!', 'success');
+            showToast(isEdit ? 'Updated!' : 'Published!', 'success');
             window.location.hash = '#/admin';
-
-        } catch (err) {
-            console.error('Save error:', err);
-            showToast('Save failed: ' + err.message, 'error');
+        } catch (e) {
+            showToast('Save failed: ' + e.message, 'error');
             document.getElementById('editor-save').disabled = false;
             document.getElementById('editor-save').textContent = isEdit ? 'Update' : 'Publish';
         }
     });
 }
 
-/* ============================================
-   Phase 11: File Upload Page
-   ============================================ */
+// ── Upload page ──
 
 function renderUploadPage() {
-    if (!GitHubAPI.isAuthenticated()) {
-        renderAdminLogin();
-        return;
-    }
+    if (!GitHubAPI.isAuthenticated()) { renderAdminLogin(); return; }
+    document.getElementById('app').innerHTML = `
+    <div class="editor-container">
+        <div class="editor-toolbar"><div class="editor-toolbar-left"><a href="#/admin" class="btn btn-ghost btn-sm">&#8592; Dashboard</a><span style="color:var(--color-text-muted);font-size:0.9rem;">Upload Files</span></div></div>
+        <div class="form-row" style="margin-bottom:24px;">
+            <div><h3 style="margin-bottom:16px;">Images</h3>
+                <div class="file-upload-area" id="img-area"><div class="file-upload-icon">&#128247;</div><p><strong>Drop images here</strong> or click</p><input type="file" id="img-input" accept="image/*" multiple hidden></div>
+                <div class="uploaded-files" id="img-list"></div></div>
+            <div><h3 style="margin-bottom:16px;">PDFs</h3>
+                <div class="file-upload-area" id="pdf-area"><div class="file-upload-icon">&#128196;</div><p><strong>Drop PDFs here</strong> or click</p><input type="file" id="pdf-input" accept=".pdf" multiple hidden></div>
+                <div class="uploaded-files" id="pdf-list"></div></div>
+        </div></div>`;
 
-    const app = document.getElementById('app');
-    app.innerHTML = `
-        <div class="editor-container">
-            <div class="editor-toolbar">
-                <div class="editor-toolbar-left">
-                    <a href="#/admin" class="btn btn-ghost btn-sm">&#8592; Dashboard</a>
-                    <span style="color:var(--color-text-muted); font-size:0.9rem;">Upload Files</span>
-                </div>
-            </div>
-
-            <div class="form-row" style="margin-bottom:24px;">
-                <div>
-                    <h3 style="margin-bottom:16px;">Images</h3>
-                    <div class="file-upload-area" id="image-upload-area">
-                        <div class="file-upload-icon">&#128247;</div>
-                        <p><strong>Drop images here</strong> or click to browse</p>
-                        <p style="font-size:0.8rem; color:var(--color-text-muted);">PNG, JPG, GIF, WebP</p>
-                        <input type="file" id="image-upload-input" accept="image/*" multiple hidden>
-                    </div>
-                    <div class="uploaded-files" id="image-upload-list"></div>
-                </div>
-                <div>
-                    <h3 style="margin-bottom:16px;">PDFs</h3>
-                    <div class="file-upload-area" id="pdf-upload-area">
-                        <div class="file-upload-icon">&#128196;</div>
-                        <p><strong>Drop PDFs here</strong> or click to browse</p>
-                        <p style="font-size:0.8rem; color:var(--color-text-muted);">PDF files only</p>
-                        <input type="file" id="pdf-upload-input" accept=".pdf" multiple hidden>
-                    </div>
-                    <div class="uploaded-files" id="pdf-upload-list"></div>
-                </div>
-            </div>
-        </div>`;
-
-    function setupUploadArea(areaId, inputId, listId, subdir) {
-        const area = document.getElementById(areaId);
-        const input = document.getElementById(inputId);
-        const list = document.getElementById(listId);
-
+    function setup(areaId, inputId, listId, subdir) {
+        const area = document.getElementById(areaId), input = document.getElementById(inputId), list = document.getElementById(listId);
         area.addEventListener('click', () => input.click());
-
-        area.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            area.classList.add('drag-over');
-        });
-
+        area.addEventListener('dragover', e => { e.preventDefault(); area.classList.add('drag-over'); });
         area.addEventListener('dragleave', () => area.classList.remove('drag-over'));
-
-        area.addEventListener('drop', (e) => {
-            e.preventDefault();
-            area.classList.remove('drag-over');
-            handleFiles(e.dataTransfer.files);
-        });
-
-        input.addEventListener('change', (e) => handleFiles(e.target.files));
-
-        async function handleFiles(files) {
+        area.addEventListener('drop', e => { e.preventDefault(); area.classList.remove('drag-over'); handle(e.dataTransfer.files); });
+        input.addEventListener('change', e => handle(e.target.files));
+        async function handle(files) {
             for (const file of files) {
-                const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-                const path = `${CONFIG.uploadsPath}/${subdir}/${safeName}`;
-
-                const item = document.createElement('div');
-                item.className = 'uploaded-file';
-                item.innerHTML = `<span>${Utils.escapeHtml(safeName)}</span> <span style="color:var(--color-text-muted);">uploading...</span>`;
+                const name = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+                const path = `${CONFIG.uploadsPath}/${subdir}/${name}`;
+                const item = document.createElement('div'); item.className = 'uploaded-file';
+                item.innerHTML = `<span>${Utils.escapeHtml(name)}</span> <span style="color:var(--color-text-muted);">uploading...</span>`;
                 list.appendChild(item);
-
                 try {
-                    await GitHubAPI.uploadBinary(path, file, `Upload ${subdir}: ${safeName}`);
-                    item.innerHTML = `
-                        <span>${Utils.escapeHtml(safeName)}</span>
-                        <button class="uploaded-file-remove" onclick="navigator.clipboard.writeText('${path}'); showToast('Path copied!');">Copy Path</button>`;
-                    showToast(`Uploaded: ${safeName}`, 'success');
-                } catch (err) {
-                    item.innerHTML = `<span>${Utils.escapeHtml(safeName)}</span> <span style="color:var(--color-danger);">failed</span>`;
-                    showToast('Upload failed: ' + err.message, 'error');
-                }
+                    await GitHubAPI.uploadBinary(path, file, `Upload ${subdir}: ${name}`);
+                    item.innerHTML = `<span>${Utils.escapeHtml(name)}</span><button class="uploaded-file-remove" onclick="navigator.clipboard.writeText('${path}');showToast('Copied!');">Copy Path</button>`;
+                    showToast(`Uploaded: ${name}`, 'success');
+                } catch (e) { item.innerHTML = `<span>${Utils.escapeHtml(name)}</span> <span style="color:var(--color-danger);">failed</span>`; }
             }
         }
     }
-
-    setupUploadArea('image-upload-area', 'image-upload-input', 'image-upload-list', 'images');
-    setupUploadArea('pdf-upload-area', 'pdf-upload-input', 'pdf-upload-list', 'pdfs');
+    setup('img-area', 'img-input', 'img-list', 'images');
+    setup('pdf-area', 'pdf-input', 'pdf-list', 'pdfs');
 }
 
 /* ============================================
-   Phase 12: Route Registration & Init
+   Phase 7: Route Registration & Init
    ============================================ */
 
-// Register all routes
-Router.add('/', renderHomePage);
-Router.add('/posts', renderPostsPage);
+Router.add('/', renderFeedPage);
 Router.add('/post/:slug', renderPostPage);
 Router.add('/pdf/:slug', renderPdfPage);
-Router.add('/about', renderAboutPage);
 Router.add('/admin', renderAdminDashboard);
 Router.add('/admin/new', renderEditorPage);
 Router.add('/admin/edit/:slug', renderEditorPage);
 Router.add('/admin/upload', renderUploadPage);
 
-// ── Global UI init ──
-
 document.addEventListener('DOMContentLoaded', () => {
-    // Mobile menu toggle
-    const toggle = document.getElementById('nav-toggle');
-    const navLinks = document.getElementById('nav-links');
-    if (toggle) {
-        toggle.addEventListener('click', () => {
-            toggle.classList.toggle('active');
-            navLinks.classList.toggle('open');
-        });
-        // Close on link click
-        navLinks.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                toggle.classList.remove('active');
-                navLinks.classList.remove('open');
-            });
-        });
-    }
-
     // Navbar scroll shadow
     window.addEventListener('scroll', () => {
         document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
@@ -1366,12 +1202,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Back to top
     const btt = document.getElementById('back-to-top');
-    window.addEventListener('scroll', () => {
-        btt.classList.toggle('visible', window.scrollY > 400);
-    });
-    btt.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+    window.addEventListener('scroll', () => { btt.classList.toggle('visible', window.scrollY > 400); });
+    btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
     // Start router
     Router.init();

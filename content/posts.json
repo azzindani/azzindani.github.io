@@ -9,7 +9,8 @@
       "tags": ["introduction", "portfolio"],
       "image": "",
       "type": "article",
-      "file": "welcome-to-my-portfolio.md"
+      "file": "welcome-to-my-portfolio.md",
+      "draft": false
     },
     {
       "slug": "getting-started-with-data-science",
@@ -20,7 +21,8 @@
       "tags": ["python", "data-science", "tutorial"],
       "image": "",
       "type": "article",
-      "file": "getting-started-with-data-science.md"
+      "file": "getting-started-with-data-science.md",
+      "draft": false
     },
     {
       "slug": "sample-pdf-presentation",
@@ -32,7 +34,36 @@
       "image": "",
       "type": "pdf",
       "file": "sample-pdf-presentation.md",
-      "pdf": "uploads/pdfs/sample.pdf"
+      "pdf": "uploads/pdfs/sample.pdf",
+      "draft": false
+    },
+    {
+      "slug": "demo-media-embeds",
+      "title": "Media Embeds Demo",
+      "description": "Showcasing YouTube videos, audio players, and GIF support built into the feed.",
+      "date": "2024-03-15",
+      "category": "demo",
+      "tags": ["media", "youtube", "demo"],
+      "image": "",
+      "type": "article",
+      "file": "demo-media-embeds.md",
+      "media": {
+        "type": "youtube",
+        "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+      },
+      "draft": false
+    },
+    {
+      "slug": "sample-repo-readme",
+      "title": "External Repo README Demo",
+      "description": "This post pulls its content directly from a GitHub repository README file.",
+      "date": "2024-04-01",
+      "category": "demo",
+      "tags": ["github", "repo", "demo"],
+      "image": "",
+      "type": "repo",
+      "repo": "https://github.com/yourusername/yourusername.github.io",
+      "draft": false
     }
   ]
 }
