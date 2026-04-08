@@ -133,6 +133,11 @@ const Router = {
         const prog = document.getElementById('reading-progress');
         if (prog) prog.style.width = '0';
 
+        // Update nav active state
+        document.querySelectorAll('.nav-action-btn').forEach(b => b.classList.remove('active'));
+        const activeLabel = hash.startsWith('/admin') ? 'Admin' : 'Feed';
+        document.querySelector(`.nav-action-btn[aria-label="${activeLabel}"]`)?.classList.add('active');
+
         if (this.routes[hash]) {
             this.currentRoute = hash;
             this.routes[hash]();
@@ -370,21 +375,24 @@ async function renderFeedPage() {
     const searchVal = globalSearch ? globalSearch.value : '';
 
     app.innerHTML = `
-    <div class="feed-page">
-        <div class="feed-filter-bar" id="feed-filter-bar">
-            <div class="feed-tabs" id="feed-tabs">
-                <button class="feed-tab active" data-type="all">All</button>
-                <button class="feed-tab" data-type="article">Articles</button>
-                <button class="feed-tab" data-type="pdf">PDFs</button>
-                <button class="feed-tab" data-type="repo">Repos</button>
+    <div class="feed-layout">
+        <div class="feed-page">
+            <div class="feed-filter-bar" id="feed-filter-bar">
+                <div class="feed-tabs" id="feed-tabs">
+                    <button class="feed-tab active" data-type="all">All</button>
+                    <button class="feed-tab" data-type="article">Articles</button>
+                    <button class="feed-tab" data-type="pdf">PDFs</button>
+                    <button class="feed-tab" data-type="repo">Repos</button>
+                </div>
+                <select class="filter-select filter-select-sm" id="feed-category">
+                    <option value="all">All Topics</option>
+                    ${categories.map(c => `<option value="${c}">${c.charAt(0).toUpperCase() + c.slice(1)}</option>`).join('')}
+                </select>
             </div>
-            <select class="filter-select filter-select-sm" id="feed-category">
-                <option value="all">All Topics</option>
-                ${categories.map(c => `<option value="${c}">${c.charAt(0).toUpperCase() + c.slice(1)}</option>`).join('')}
-            </select>
+            <div class="feed-list" id="feed-list"></div>
+            <div id="feed-sentinel" style="height:1px;"></div>
         </div>
-        <div class="feed-list" id="feed-list"></div>
-        <div id="feed-sentinel" style="height:1px;"></div>
+        <aside class="feed-sidebar" id="feed-sidebar"></aside>
     </div>`;
 
     let filtered = [...allPosts];
@@ -459,6 +467,69 @@ async function renderFeedPage() {
 
     // If search had a value, apply it
     if (searchVal) applyFilters();
+
+    // Populate sidebar
+    renderSidebar(allPosts);
+}
+
+// ── Sidebar ──
+
+function renderSidebar(posts) {
+    const sidebar = document.getElementById('feed-sidebar');
+    if (!sidebar) return;
+
+    // Collect tag frequencies
+    const tagCounts = {};
+    posts.forEach(p => {
+        (p.tags || []).forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; });
+    });
+    const topTags = Object.entries(tagCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 8)
+        .map(e => e[0]);
+
+    // Recent posts (up to 5)
+    const recent = posts.slice(0, 5);
+
+    sidebar.innerHTML = `
+        <div class="sidebar-card">
+            <div class="sidebar-profile-avatar">${CONFIG.authorInitial}</div>
+            <div class="sidebar-profile-name">${Utils.escapeHtml(CONFIG.author)}</div>
+            <p class="sidebar-profile-bio">${Utils.escapeHtml(CONFIG.siteDescription)}</p>
+            <div class="sidebar-social">
+                <a href="${CONFIG.social.github}" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a href="${CONFIG.social.linkedin}" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                <a href="mailto:${CONFIG.social.email}">Email</a>
+            </div>
+        </div>
+        ${topTags.length ? `
+        <div class="sidebar-card">
+            <h4>Popular Tags</h4>
+            <div class="sidebar-tags">
+                ${topTags.map(t => `<span class="sidebar-tag" data-tag="${Utils.escapeHtml(t)}">${Utils.escapeHtml(t)}</span>`).join('')}
+            </div>
+        </div>` : ''}
+        <div class="sidebar-card">
+            <h4>Recent Posts</h4>
+            ${recent.map(p => {
+                const link = p.type === 'pdf' ? `#/pdf/${p.slug}` : `#/post/${p.slug}`;
+                return `<div class="sidebar-recent-item">
+                    <a href="${link}" class="sidebar-recent-title">${Utils.escapeHtml(p.title)}</a>
+                    <span class="sidebar-recent-date">${Utils.formatDate(p.date)}</span>
+                </div>`;
+            }).join('')}
+        </div>`;
+
+    // Tag click → set search input and trigger filter
+    sidebar.querySelectorAll('.sidebar-tag').forEach(tag => {
+        tag.addEventListener('click', () => {
+            const search = document.getElementById('global-search');
+            if (search) {
+                search.value = tag.dataset.tag;
+                search.dispatchEvent(new Event('input'));
+            }
+        });
+    });
 }
 
 // ── Inline PDF Carousel ──
@@ -1204,6 +1275,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const btt = document.getElementById('back-to-top');
     window.addEventListener('scroll', () => { btt.classList.toggle('visible', window.scrollY > 400); });
     btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+    // Admin gear toggle — if already on admin, go home; otherwise go to admin
+    const adminBtn = document.querySelector('.nav-action-btn[aria-label="Admin"]');
+    if (adminBtn) {
+        adminBtn.addEventListener('click', e => {
+            e.preventDefault();
+            const current = window.location.hash.slice(1) || '/';
+            window.location.hash = current.startsWith('/admin') ? '#/' : '#/admin';
+        });
+    }
 
     // Start router
     Router.init();
