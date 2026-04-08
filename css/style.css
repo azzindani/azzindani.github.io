@@ -1099,7 +1099,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 }
 
 .editor-pane-header {
-    padding: 10px 16px;
+    padding: 8px 12px;
     background: var(--color-bg-secondary);
     border: 1px solid var(--color-border-light);
     border-bottom: none;
@@ -1109,6 +1109,11 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
     color: var(--color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    min-height: 42px;
 }
 
 .editor-textarea {
@@ -1137,6 +1142,116 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
     overflow-y: auto;
     line-height: 1.7;
 }
+
+/* ── Markdown Toolbar ── */
+.md-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-wrap: wrap;
+    margin-left: auto;
+}
+.md-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 6px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    background: none;
+    color: var(--color-text-secondary);
+    font-size: 0.78rem;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+}
+.md-btn:hover {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text);
+    border-color: var(--color-border-light);
+}
+.md-btn:active {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+}
+.md-btn-mermaid {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    gap: 3px;
+}
+.md-sep {
+    width: 1px;
+    height: 18px;
+    background: var(--color-border-light);
+    margin: 0 4px;
+}
+
+/* ── Mermaid Blocks ── */
+.mermaid-block {
+    margin: 24px 0;
+    padding: 20px;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    text-align: center;
+    overflow-x: auto;
+}
+.mermaid-block svg {
+    max-width: 100%;
+    height: auto;
+}
+.mermaid-rendered {
+    background: var(--color-surface);
+}
+.mermaid-loading {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    font-style: italic;
+    padding: 20px 0;
+}
+.mermaid-error {
+    color: var(--color-danger);
+    font-size: 0.82rem;
+    font-family: var(--font-mono);
+    text-align: left;
+    background: #fef2f2;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    white-space: pre-wrap;
+}
+
+/* ── Table Wrapper (from markdown) ── */
+.table-wrapper {
+    overflow-x: auto;
+    margin: 20px 0;
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+}
+.table-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+.table-wrapper th,
+.table-wrapper td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-border-light);
+}
+.table-wrapper th {
+    background: var(--color-bg-secondary);
+    font-weight: 600;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-secondary);
+}
+.table-wrapper tr:last-child td { border-bottom: none; }
+.table-wrapper tr:hover td { background: var(--color-bg-secondary); }
 
 .editor-meta {
     display: grid;
@@ -1480,6 +1595,10 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
     .editor-split { grid-template-columns: 1fr; }
     .editor-meta { grid-template-columns: 1fr; }
     .form-row { grid-template-columns: 1fr; }
+    .md-toolbar { gap: 1px; }
+    .md-btn { min-width: 26px; height: 26px; font-size: 0.72rem; padding: 0 4px; }
+    .md-btn-mermaid { display: none; }
+    .editor-pane-header { flex-wrap: wrap; padding: 6px 8px; }
 
     .pdf-nav-prev { left: 4px; }
     .pdf-nav-next { right: 4px; }

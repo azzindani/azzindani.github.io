@@ -52,6 +52,22 @@ print(df.info())
 | **scikit-learn** | Machine learning |
 | **tensorflow** | Deep learning |
 
+## Data Science Workflow Diagram
+
+```mermaid
+graph TD
+    A[Define Problem] --> B[Collect Data]
+    B --> C[Clean & Prepare]
+    C --> D[Explore & Visualize]
+    D --> E{Choose Approach}
+    E -->|Statistical| F[Statistical Analysis]
+    E -->|Machine Learning| G[ML Modeling]
+    F --> H[Communicate Results]
+    G --> I[Evaluate Model]
+    I -->|Good| H
+    I -->|Poor| C
+```
+
 ## A Simple ML Pipeline
 
 ```python
