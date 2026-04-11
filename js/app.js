@@ -5,12 +5,12 @@
 const CONFIG = {
     siteName: 'Portfolio',
     siteDescription: 'A personal space for sharing projects, ideas, and explorations.',
-    author: 'Your Name',
-    authorInitial: 'Y',
-    github: { username: 'yourusername', repo: 'yourusername.github.io', branch: 'main' },
+    author: 'Azzindani',
+    authorInitial: 'A',
+    github: { username: 'azzindani', repo: 'azzindani.github.io', branch: 'main' },
     social: {
-        github: 'https://github.com/yourusername',
-        linkedin: 'https://linkedin.com/in/yourprofile',
+        github: 'https://github.com/azzindani',
+        linkedin: 'https://linkedin.com/in/azzindani',
         email: 'user@example.com'
     },
     postsPerPage: 9,
@@ -1053,12 +1053,32 @@ function renderAdminLogin() {
             <button class="btn btn-primary" id="admin-login-btn" style="width:100%;">Sign In</button>
             <p style="margin-top:16px;font-size:0.8rem;color:var(--color-text-muted);">Requires <code>repo</code> scope.</p>
         </div>`;
-    document.getElementById('admin-login-btn').addEventListener('click', () => {
+
+    async function doLogin() {
+        const btn = document.getElementById('admin-login-btn');
         const t = document.getElementById('admin-token').value.trim();
         if (!t) { showToast('Enter a token', 'error'); return; }
-        GitHubAPI.setToken(t);
-        renderAdminDashboard();
-    });
+        btn.disabled = true;
+        btn.textContent = 'Verifying...';
+        try {
+            // Validate token against GitHub API before saving
+            const r = await fetch(`https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}`, {
+                headers: { 'Authorization': `token ${t}`, 'Accept': 'application/vnd.github.v3+json' }
+            });
+            if (r.status === 401) { showToast('Invalid token — check your PAT', 'error'); return; }
+            if (r.status === 404) { showToast('Repo not found — check token scope (needs repo)', 'error'); return; }
+            if (!r.ok) { showToast(`GitHub API error: ${r.status}`, 'error'); return; }
+            GitHubAPI.setToken(t);
+            renderAdminDashboard();
+        } catch (e) {
+            showToast('Connection error: ' + e.message, 'error');
+        } finally {
+            if (btn) { btn.disabled = false; btn.textContent = 'Sign In'; }
+        }
+    }
+
+    document.getElementById('admin-login-btn').addEventListener('click', doLogin);
+    document.getElementById('admin-token').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 }
 
 async function renderAdminDashboard() {
@@ -1351,7 +1371,8 @@ async function renderEditorPage({ slug } = {}) {
         const date = isEdit ? post.date : new Date().toISOString().split('T')[0];
         const fileName = `${postSlug}.md`;
 
-        const entry = { slug: postSlug, title, description: desc, date, category: cat, tags, image, type, file: fileName, draft };
+        const entry = { slug: postSlug, title, description: desc, date, category: cat, tags, image, type, draft };
+        if (type !== 'repo') entry.file = fileName;
         if (type === 'pdf' && pdfPath) entry.pdf = pdfPath;
         if (type === 'repo' && repoUrl) entry.repo = repoUrl;
         if (mediaType !== 'none' && mediaUrl) entry.media = { type: mediaType, url: mediaUrl };
