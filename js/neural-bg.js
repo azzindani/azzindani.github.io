@@ -10,12 +10,14 @@
         NEURON_COUNT_MOBILE: 90,
         AI_RATIO: 0.45,
         CONNECTION_DIST: 180,
-        SIGNAL_SPEED: 0.006,
-        SIGNAL_SPAWN_RATE: 0.015,
-        MAX_SIGNALS: 50,
+        SIGNAL_SPEED: 0.0085,
+        SIGNAL_SPAWN_RATE: 0.025,
+        MAX_SIGNALS: 80,
         PERSPECTIVE: 800,
         DEPTH_RANGE: 600,
         DRIFT_SPEED: 0.25,
+        TRAIL_LENGTH: 14,             // # of trail points per signal
+        ARRIVAL_PULSE_FRAMES: 22,
         COLOR_AI: [37, 99, 235],
         COLOR_AI_GLOW: [96, 165, 250],
         COLOR_BIO: [168, 85, 247],
@@ -164,8 +166,23 @@
     function updateSignals(dt) {
         // Advance existing
         for (let k = signals.length - 1; k >= 0; k--) {
-            signals[k].progress += signals[k].speed * dt;
+            const sig = signals[k];
+            sig.progress += sig.speed * dt;
+
+            // Record trail point (current 3D pos)
+            const a = neurons[sig.fromIdx], b = neurons[sig.toIdx];
+            if (a && b) {
+                const t = sig.progress;
+                sig.trail.push({
+                    x: a.x + (b.x - a.x) * t,
+                    y: a.y + (b.y - a.y) * t,
+                    z: a.z + (b.z - a.z) * t,
+                });
+                if (sig.trail.length > CFG.TRAIL_LENGTH) sig.trail.shift();
+            }
+
             if (signals[k].progress >= 1) {
+                triggerArrival(signals[k].toIdx);
                 // Bridge cascade: spawn 1 follow-up signal from target
                 const s = signals[k];
                 if (s.type === 'bridge' && signals.length < CFG.MAX_SIGNALS) {
@@ -183,6 +200,7 @@
                             fromIdx: fromI, toIdx: toI,
                             progress: 0, speed: CFG.SIGNAL_SPEED * rand(0.8, 1.2),
                             type: targetKind,
+                            trail: [],
                         });
                     }
                 }
@@ -201,11 +219,19 @@
                         progress: 0,
                         speed: CFG.SIGNAL_SPEED * rand(0.7, 1.3),
                         type: conn.type,
+                        trail: [],   // 3D positions of recent points (for afterglow)
                     });
                     if (signals.length >= CFG.MAX_SIGNALS) break;
                 }
             }
         }
+    }
+
+    // Trigger an arrival "ping" on the target neuron when a signal completes.
+    function triggerArrival(idx) {
+        const n = neurons[idx];
+        if (!n) return;
+        n.pulseUntil = frameCount + CFG.ARRIVAL_PULSE_FRAMES;
     }
 
     // ── Render ──
@@ -260,11 +286,11 @@
             ctx.stroke();
         }
 
-        // Draw signals
+        // Draw signals (with motion trails)
         for (const sig of signals) {
             const a = neurons[sig.fromIdx], b = neurons[sig.toIdx];
+            if (!a || !b) continue;
             const t = sig.progress;
-            // Interpolate in 3D, then project
             const sx = a.x + (b.x - a.x) * t;
             const sy = a.y + (b.y - a.y) * t;
             const sz = a.z + (b.z - a.z) * t;
@@ -272,22 +298,33 @@
 
             let color, r, glowR;
             if (sig.type === 'bridge') {
-                color = CFG.COLOR_SIGNAL_BRIDGE;
-                r = 3 * p.s;
-                glowR = 8 * p.s;
+                color = CFG.COLOR_SIGNAL_BRIDGE; r = 3 * p.s; glowR = 9 * p.s;
             } else if (sig.type === 'ai') {
-                color = CFG.COLOR_SIGNAL_AI;
-                r = 2 * p.s;
-                glowR = 5 * p.s;
+                color = CFG.COLOR_SIGNAL_AI; r = 2.2 * p.s; glowR = 6 * p.s;
             } else {
-                color = CFG.COLOR_SIGNAL_BIO;
-                r = 2.5 * p.s;
-                glowR = 6 * p.s;
+                color = CFG.COLOR_SIGNAL_BIO; r = 2.5 * p.s; glowR = 7 * p.s;
+            }
+
+            // Trail — fading line through trail points
+            if (sig.trail.length > 1) {
+                ctx.lineCap = 'round';
+                for (let i = 1; i < sig.trail.length; i++) {
+                    const t0 = sig.trail[i - 1], t1 = sig.trail[i];
+                    const p0 = project(t0.x, t0.y, t0.z);
+                    const p1 = project(t1.x, t1.y, t1.z);
+                    const segAlpha = (i / sig.trail.length) * 0.45 * p.s;
+                    ctx.strokeStyle = rgba(color, segAlpha);
+                    ctx.lineWidth = (i / sig.trail.length) * r * 1.4;
+                    ctx.beginPath();
+                    ctx.moveTo(p0.sx, p0.sy);
+                    ctx.lineTo(p1.sx, p1.sy);
+                    ctx.stroke();
+                }
             }
 
             // Glow
             const grd = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, glowR);
-            grd.addColorStop(0, rgba(color, 0.6 * p.s));
+            grd.addColorStop(0, rgba(color, 0.7 * p.s));
             grd.addColorStop(1, rgba(color, 0));
             ctx.fillStyle = grd;
             ctx.beginPath();
@@ -295,7 +332,7 @@
             ctx.fill();
 
             // Core
-            ctx.fillStyle = rgba(color, 0.9 * p.s);
+            ctx.fillStyle = rgba(color, 0.95 * p.s);
             ctx.beginPath();
             ctx.arc(p.sx, p.sy, r, 0, Math.PI * 2);
             ctx.fill();
@@ -304,10 +341,28 @@
         // Draw neurons (sorted back to front)
         for (const { n, idx } of sorted) {
             const p = proj[idx];
-            const pulse = 1 + Math.sin(n.pulsePhase) * 0.08;
+            let pulse = 1 + Math.sin(n.pulsePhase) * 0.08;
+            // Arrival burst: brief expand + flash when a signal hits this neuron.
+            let arrival = 0;
+            if (n.pulseUntil && frameCount < n.pulseUntil) {
+                const left = (n.pulseUntil - frameCount) / CFG.ARRIVAL_PULSE_FRAMES;
+                arrival = left;
+                pulse += 0.6 * left;
+            }
             const r = n.radius * p.s * pulse;
             const alpha = Math.min(p.s * 0.8, 0.85);
             if (r < 0.3 || alpha < 0.02) continue;
+
+            // Arrival ring (fades outward)
+            if (arrival > 0) {
+                const ringR = r + (1 - arrival) * 18 * p.s;
+                const ringColor = n.kind === 'ai' ? CFG.COLOR_AI_GLOW : CFG.COLOR_BIO_GLOW;
+                ctx.strokeStyle = rgba(ringColor, arrival * 0.7);
+                ctx.lineWidth = 1.2 * p.s;
+                ctx.beginPath();
+                ctx.arc(p.sx, p.sy, ringR, 0, Math.PI * 2);
+                ctx.stroke();
+            }
 
             if (n.kind === 'ai') {
                 // AI: crisp circle

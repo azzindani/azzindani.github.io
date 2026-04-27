@@ -60,6 +60,11 @@ const Utils = {
     }
 };
 
+// Repo URL helpers live in js/lib/pure.js (window.Pure). They're loaded
+// by index.html before this script. Aliases for readability:
+const parseRepoUrl = Pure.parseRepoUrl;
+const rewriteRelativeAssetPaths = Pure.rewriteRelativeAssetPaths;
+
 // ── Lazy library loader ──
 
 const LibLoader = {
@@ -111,6 +116,28 @@ const LibLoader = {
             document.head.appendChild(s);
         });
         return this._mermaid;
+    },
+
+    _katex: null,
+    loadKatex() {
+        if (this._katex) return this._katex;
+        this._katex = new Promise((resolve, reject) => {
+            if (window.katex) { resolve(window.katex); return; }
+            // CSS first
+            if (!document.querySelector('link[data-katex]')) {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = 'https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css';
+                link.setAttribute('data-katex', '1');
+                document.head.appendChild(link);
+            }
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js';
+            s.onload = () => resolve(window.katex);
+            s.onerror = reject;
+            document.head.appendChild(s);
+        });
+        return this._katex;
     }
 };
 
@@ -234,34 +261,55 @@ const ContentService = {
     async getRepoReadme(repoUrl) {
         if (this._readmeCache.has(repoUrl)) return this._readmeCache.get(repoUrl);
         try {
-            let body = '';
-            if (repoUrl.includes('github.com')) {
-                // GitHub: /repos/{owner}/{repo}/readme
-                const parts = repoUrl.replace(/\/$/, '').split('/');
-                const repo = parts.pop();
-                const owner = parts.pop();
-                const r = await fetch(`https://api.github.com/repos/${owner}/${repo}/readme`,
-                    { headers: { 'Accept': 'application/vnd.github.v3+json' } });
-                if (r.ok) {
-                    const data = await r.json();
-                    body = atob(data.content.replace(/\n/g, ''));
+            const info = parseRepoUrl(repoUrl);
+            if (!info) throw new Error('Unsupported repo URL');
+
+            let body = '', branch = info.branch;
+            if (info.host === 'github') {
+                const r = await fetch(
+                    `https://api.github.com/repos/${info.owner}/${info.name}/readme`,
+                    { headers: { 'Accept': 'application/vnd.github.v3+json' } }
+                );
+                if (!r.ok) throw new Error(`GitHub API ${r.status}`);
+                const data = await r.json();
+                body = atob(data.content.replace(/\n/g, ''));
+                branch = data.url?.match(/ref=([^&]+)/)?.[1] || 'main';
+            } else if (info.host === 'huggingface') {
+                // Try main, then master. Owner may be empty for canonical datasets.
+                let pathPart;
+                if (info.subtype) {
+                    pathPart = info.owner
+                        ? `${info.subtype}/${info.owner}/${info.name}`
+                        : `${info.subtype}/${info.name}`;
+                } else {
+                    pathPart = `${info.owner}/${info.name}`;
                 }
-            } else if (repoUrl.includes('huggingface.co')) {
-                // HuggingFace: raw README
-                const parts = repoUrl.replace(/\/$/, '').split('/');
-                const model = parts.pop();
-                const owner = parts.pop();
-                const r = await fetch(`https://huggingface.co/${owner}/${model}/raw/main/README.md`);
-                if (r.ok) body = await r.text();
+                const base = `https://huggingface.co/${pathPart}`;
+                let r = await fetch(`${base}/raw/main/README.md`);
+                if (!r.ok) r = await fetch(`${base}/raw/master/README.md`);
+                if (!r.ok) throw new Error(`HuggingFace ${r.status}`);
+                body = await r.text();
+                branch = 'main';
+            } else if (info.host === 'gitlab') {
+                let r = await fetch(
+                    `https://gitlab.com/${info.owner}/${info.name}/-/raw/main/README.md`
+                );
+                if (!r.ok) r = await fetch(
+                    `https://gitlab.com/${info.owner}/${info.name}/-/raw/master/README.md`
+                );
+                if (!r.ok) throw new Error(`GitLab ${r.status}`);
+                body = await r.text();
             }
-            // Strip YAML frontmatter from README if present
+
             const { body: cleanBody } = Utils.parseFrontmatter(body);
-            this._readmeCache.set(repoUrl, cleanBody);
-            return cleanBody;
+            const rewritten = rewriteRelativeAssetPaths(cleanBody, info, branch);
+            this._readmeCache.set(repoUrl, rewritten);
+            return rewritten;
         } catch (e) {
             console.error('getRepoReadme:', e);
-            this._readmeCache.set(repoUrl, '');
-            return '';
+            const msg = `*README could not be loaded — ${Utils.escapeHtml(e.message || 'unknown error')}.*`;
+            this._readmeCache.set(repoUrl, msg);
+            return msg;
         }
     },
 
@@ -325,6 +373,83 @@ function getYouTubeRenderer() {
             return `<p>${text}</p>`;
         }
     };
+}
+
+// ── LaTeX / KaTeX support ──
+//
+// We extract math expressions BEFORE marked.parse so its tokenizer can't
+// mangle them (e.g. underscores becoming italic). Each expression is
+// replaced with a placeholder span; after marked, we swap placeholders
+// for KaTeX-rendered HTML.
+
+const MathExtractor = {
+    _store: new Map(),
+
+    reset() { this._store.clear(); },
+
+    // Replace each math span with a placeholder span that survives marked.parse.
+    // Skips fenced code blocks and inline code so we don't touch syntax inside.
+    extract(md) {
+        if (!md) return md;
+        this._store.clear();
+
+        const codeBlocks = [];
+        let safe = md.replace(/```[\s\S]*?```/g, (m) => {
+            codeBlocks.push(m); return `CB${codeBlocks.length - 1}`;
+        });
+        const inlineCode = [];
+        safe = safe.replace(/`[^`\n]+`/g, (m) => {
+            inlineCode.push(m); return `IC${inlineCode.length - 1}`;
+        });
+
+        const place = (display, expr) => {
+            const id = `kx-${this._store.size}`;
+            this._store.set(id, { display, expr });
+            return `<span class="math-placeholder" data-id="${id}"></span>`;
+        };
+
+        safe = safe.replace(/\$\$([\s\S]+?)\$\$/g, (_, expr) => place(true, expr.trim()));
+        safe = safe.replace(
+            /(^|[^\\$])\$([^\s$][^$\n]*?[^\s$]|[^\s$])\$(?!\d)/g,
+            (_, pre, expr) => `${pre}${place(false, expr)}`
+        );
+
+        safe = safe.replace(/IC(\d+)/g, (_, i) => inlineCode[+i]);
+        safe = safe.replace(/CB(\d+)/g, (_, i) => codeBlocks[+i]);
+        return safe;
+    },
+
+    // After marked.parse, swap placeholder spans for KaTeX HTML.
+    async render(html) {
+        if (this._store.size === 0) return html;
+        let katex;
+        try { katex = await LibLoader.loadKatex(); }
+        catch { return html.replace(/<span class="math-placeholder"[^>]*><\/span>/g, ''); }
+
+        return html.replace(
+            /<span class="math-placeholder" data-id="(kx-\d+)"><\/span>/g,
+            (_, id) => {
+                const item = this._store.get(id);
+                if (!item) return '';
+                try {
+                    return katex.renderToString(item.expr, {
+                        displayMode: item.display,
+                        throwOnError: false,
+                        output: 'html',
+                    });
+                } catch (e) {
+                    return `<span class="katex-error" title="${Utils.escapeHtml(e.message || '')}">${Utils.escapeHtml(item.expr)}</span>`;
+                }
+            }
+        );
+    }
+};
+
+// Parse markdown (with math support) and place rendered HTML into a target.
+async function renderMarkdownInto(targetEl, markdown) {
+    const withPlaceholders = MathExtractor.extract(markdown || '');
+    const rawHtml = marked.parse(withPlaceholders);
+    targetEl.innerHTML = await MathExtractor.render(rawHtml);
 }
 
 // ── Mermaid rendering helper ──
@@ -477,15 +602,33 @@ async function renderFeedPage() {
     const globalSearch = document.getElementById('global-search');
     const searchVal = globalSearch ? globalSearch.value : '';
 
+    // Featured strip at the top — only shows when not searching/filtering.
+    const featured = allPosts.filter(p => p.featured).slice(0, 3);
+    const featuredHtml = featured.length ? `
+        <section class="featured-row" id="featured-row">
+            <div class="featured-row-header"><h3>Featured</h3></div>
+            <div class="featured-grid">
+                ${featured.map(p => {
+                    const link = p.type === 'pdf' ? `#/pdf/${p.slug}` : `#/post/${p.slug}`;
+                    return `<a class="featured-card" href="${link}">
+                        <h4>${Utils.escapeHtml(p.title)}</h4>
+                        <p>${Utils.escapeHtml(p.description || '')}</p>
+                    </a>`;
+                }).join('')}
+            </div>
+        </section>` : '';
+
     app.innerHTML = `
     <div class="feed-layout">
         <div class="feed-page">
+            ${featuredHtml}
             <div class="feed-filter-bar" id="feed-filter-bar">
                 <div class="feed-tabs" id="feed-tabs">
                     <button class="feed-tab active" data-type="all">All</button>
                     <button class="feed-tab" data-type="article">Articles</button>
                     <button class="feed-tab" data-type="pdf">PDFs</button>
                     <button class="feed-tab" data-type="repo">Repos</button>
+                    <button class="feed-tab" data-type="doc">Docs</button>
                 </div>
                 <select class="filter-select filter-select-sm" id="feed-category">
                     <option value="all">All Topics</option>
@@ -498,6 +641,15 @@ async function renderFeedPage() {
         <aside class="feed-sidebar" id="feed-sidebar"></aside>
     </div>`;
 
+    // Hide featured strip when actively filtering or searching.
+    function toggleFeatured() {
+        const row = document.getElementById('featured-row');
+        if (!row) return;
+        const search = document.getElementById('global-search')?.value?.trim() || '';
+        const isFiltering = search || currentType !== 'all' || currentCat !== 'all';
+        row.style.display = isFiltering ? 'none' : '';
+    }
+
     let filtered = [...allPosts];
     let displayed = 0;
     let currentType = 'all';
@@ -508,6 +660,7 @@ async function renderFeedPage() {
         filtered = ContentService.filterPosts(allPosts, { search, category: currentCat, type: currentType });
         displayed = 0;
         document.getElementById('feed-list').innerHTML = '';
+        toggleFeatured();
         loadBatch();
     }
 
@@ -594,6 +747,9 @@ function renderSidebar(posts) {
     // Recent posts (up to 5)
     const recent = posts.slice(0, 5);
 
+    const collectionCount = new Set(posts.filter(p => p.collection).map(p => p.collection)).size;
+    const docCount = posts.filter(p => p.type === 'doc').length;
+
     sidebar.innerHTML = `
         <div class="sidebar-card">
             <div class="sidebar-profile-avatar">${CONFIG.authorInitial}</div>
@@ -605,6 +761,18 @@ function renderSidebar(posts) {
                 <a href="mailto:${CONFIG.social.email}">Email</a>
             </div>
         </div>
+        ${(collectionCount || docCount) ? `
+        <div class="sidebar-card">
+            <h4>Browse</h4>
+            ${collectionCount ? `<div class="sidebar-recent-item">
+                <a href="#/collections" class="sidebar-recent-title">Collections</a>
+                <span class="sidebar-recent-date">${collectionCount} series</span>
+            </div>` : ''}
+            ${docCount ? `<div class="sidebar-recent-item">
+                <a href="#/docs" class="sidebar-recent-title">Documentation</a>
+                <span class="sidebar-recent-date">${docCount} doc${docCount === 1 ? '' : 's'}</span>
+            </div>` : ''}
+        </div>` : ''}
         ${topTags.length ? `
         <div class="sidebar-card">
             <h4>Popular Tags</h4>
@@ -743,7 +911,10 @@ async function renderPostPage({ slug }) {
     const tocItems = [];
     configureMarked({ hljs, tocItems, slug });
 
-    const htmlContent = marked.parse(post.body);
+    // Run math extraction *before* marked, KaTeX render *after*.
+    const withMath = MathExtractor.extract(post.body);
+    const rawHtml = marked.parse(withMath);
+    const htmlContent = await MathExtractor.render(rawHtml);
     const readTime = Utils.readingTime(post.body);
     const tags = (post.tags || []).map(t => `<span class="tag tag-primary">${Utils.escapeHtml(t)}</span>`).join('');
 
@@ -995,49 +1166,119 @@ async function renderPdfPage({ slug }) {
    Phase 6: GitHub API + Admin + Editor + Upload
    ============================================ */
 
+// UTF-8 safe base64 encode (replaces deprecated unescape(encodeURIComponent(...)))
+function b64EncodeUtf8(str) {
+    const bytes = new TextEncoder().encode(str);
+    let binary = '';
+    const chunk = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+    }
+    return btoa(binary);
+}
+
+// Read file → base64 (no data: prefix)
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const r = reader.result;
+            const idx = r.indexOf(',');
+            resolve(idx >= 0 ? r.slice(idx + 1) : r);
+        };
+        reader.onerror = () => reject(new Error('Read failed'));
+        reader.readAsDataURL(file);
+    });
+}
+
+// Surface a useful error from a GitHub API response.
+async function ghError(r, defaultMsg) {
+    let detail = defaultMsg || `GitHub API ${r.status}`;
+    try {
+        const e = await r.json();
+        if (e && e.message) detail = e.message;
+        if (r.status === 403 && r.headers.get('X-RateLimit-Remaining') === '0') {
+            const reset = +r.headers.get('X-RateLimit-Reset');
+            const waitS = reset ? Math.max(0, reset - Math.floor(Date.now() / 1000)) : 60;
+            detail = `Rate-limited — retry in ${Math.ceil(waitS / 60)} min`;
+        }
+        if (r.status === 422) detail = `${detail} (file may already exist or path invalid)`;
+    } catch { /* swallow */ }
+    return new Error(detail);
+}
+
 const GitHubAPI = {
+    GITHUB_FILE_LIMIT: 100 * 1024 * 1024, // 100 MB hard ceiling
+    UPLOAD_WARN_LIMIT: 25 * 1024 * 1024,  // warn at 25 MB
+
     getToken() { return localStorage.getItem('gh_token') || ''; },
     setToken(t) { localStorage.setItem('gh_token', t); },
     clearToken() { localStorage.removeItem('gh_token'); },
     isAuthenticated() { return !!this.getToken(); },
     headers() {
-        return { 'Authorization': `token ${this.getToken()}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' };
+        return {
+            'Authorization': `token ${this.getToken()}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json',
+        };
     },
+
     async getFile(path) {
-        const r = await fetch(`https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/contents/${path}?ref=${CONFIG.github.branch}`, { headers: this.headers() });
-        if (!r.ok) return null;
+        const r = await fetch(
+            `https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/contents/${path}?ref=${CONFIG.github.branch}`,
+            { headers: this.headers() }
+        );
+        if (r.status === 404) return null;
+        if (!r.ok) throw await ghError(r, 'getFile failed');
         const d = await r.json();
         return { content: atob(d.content.replace(/\n/g, '')), sha: d.sha };
     },
+
     async putFile(path, content, message, sha) {
-        const body = { message, content: btoa(unescape(encodeURIComponent(content))), branch: CONFIG.github.branch };
+        const body = { message, content: b64EncodeUtf8(content), branch: CONFIG.github.branch };
         if (sha) body.sha = sha;
-        const r = await fetch(`https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/contents/${path}`, { method: 'PUT', headers: this.headers(), body: JSON.stringify(body) });
-        if (!r.ok) { const e = await r.json(); throw new Error(e.message || 'Save failed'); }
+        const r = await fetch(
+            `https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/contents/${path}`,
+            { method: 'PUT', headers: this.headers(), body: JSON.stringify(body) }
+        );
+        if (!r.ok) throw await ghError(r, 'Save failed');
         return r.json();
     },
-    async uploadBinary(path, file, message) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = async () => {
-                try {
-                    const r = await fetch(`https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/contents/${path}`, {
-                        method: 'PUT', headers: this.headers(),
-                        body: JSON.stringify({ message, content: reader.result.split(',')[1], branch: CONFIG.github.branch })
-                    });
-                    if (!r.ok) { const e = await r.json(); throw new Error(e.message); }
-                    resolve(await r.json());
-                } catch (e) { reject(e); }
-            };
-            reader.onerror = () => reject(new Error('Read failed'));
-            reader.readAsDataURL(file);
-        });
+
+    // Binary upload with size validation and optional progress callback (0..1).
+    async uploadBinary(path, file, message, onProgress) {
+        if (file.size > this.GITHUB_FILE_LIMIT) {
+            throw new Error(`File too large (${(file.size / 1024 / 1024).toFixed(1)} MB). GitHub limit is 100 MB.`);
+        }
+        if (onProgress) onProgress(0.05);
+        const b64 = await fileToBase64(file);
+        if (onProgress) onProgress(0.4);
+
+        // If file already exists, fetch its sha so PUT can overwrite.
+        let existingSha = null;
+        try {
+            const existing = await this.getFile(path);
+            if (existing) existingSha = existing.sha;
+        } catch { /* probably 404, fine */ }
+
+        const body = { message, content: b64, branch: CONFIG.github.branch };
+        if (existingSha) body.sha = existingSha;
+
+        const r = await fetch(
+            `https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/contents/${path}`,
+            { method: 'PUT', headers: this.headers(), body: JSON.stringify(body) }
+        );
+        if (!r.ok) throw await ghError(r, 'Upload failed');
+        if (onProgress) onProgress(1);
+        return r.json();
     },
+
     async deleteFile(path, sha, message) {
-        const r = await fetch(`https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/contents/${path}`, {
-            method: 'DELETE', headers: this.headers(), body: JSON.stringify({ message, sha, branch: CONFIG.github.branch })
-        });
-        if (!r.ok) throw new Error('Delete failed');
+        const r = await fetch(
+            `https://api.github.com/repos/${CONFIG.github.username}/${CONFIG.github.repo}/contents/${path}`,
+            { method: 'DELETE', headers: this.headers(), body: JSON.stringify({ message, sha, branch: CONFIG.github.branch }) }
+        );
+        if (!r.ok) throw await ghError(r, 'Delete failed');
     }
 };
 
@@ -1206,11 +1447,27 @@ async function renderEditorPage({ slug } = {}) {
                     <option value="article" ${!isEdit || post.type === 'article' ? 'selected' : ''}>Article</option>
                     <option value="pdf" ${isEdit && post.type === 'pdf' ? 'selected' : ''}>PDF</option>
                     <option value="repo" ${isEdit && post.type === 'repo' ? 'selected' : ''}>Repo</option>
+                    <option value="doc" ${isEdit && post.type === 'doc' ? 'selected' : ''}>Doc</option>
                 </select></div>
+            <div class="form-group"><label class="form-label">Collection (groups posts as a series)</label>
+                <input type="text" class="form-input" id="ed-collection" placeholder="e.g. intro-to-ml" value="${isEdit && post.collection ? Utils.escapeHtml(post.collection) : ''}"></div>
+            <div class="form-group"><label class="form-label">Order (within collection)</label>
+                <input type="number" class="form-input" id="ed-order" placeholder="1" value="${isEdit && post.order != null ? post.order : ''}"></div>
+            <div class="form-group"><label class="form-label" style="display:flex;align-items:center;gap:8px;">
+                <input type="checkbox" id="ed-featured" ${isEdit && post.featured ? 'checked' : ''}> Featured (pin to top)</label></div>
             <div class="form-group"><label class="form-label" style="display:flex;align-items:center;gap:8px;">
                 <input type="checkbox" id="ed-draft" ${isEdit && post.draft ? 'checked' : ''}> Draft (hidden from feed)</label></div>
             <div class="form-group" id="ed-pdf-group" style="${isEdit && post.type === 'pdf' ? '' : 'display:none;'}">
-                <label class="form-label">PDF Path</label><input type="text" class="form-input" id="ed-pdf" value="${isEdit && post.pdf ? Utils.escapeHtml(post.pdf) : ''}"></div>
+                <label class="form-label">PDF File</label>
+                <input type="text" class="form-input" id="ed-pdf" placeholder="uploads/pdfs/file.pdf" value="${isEdit && post.pdf ? Utils.escapeHtml(post.pdf) : ''}">
+                <div class="editor-pdf-upload" id="ed-pdf-upload">
+                    <div>&#128196; Click or drop a PDF here to upload</div>
+                    <div class="editor-pdf-upload-state" id="ed-pdf-upload-state"></div>
+                    <div class="editor-pdf-upload-progress" id="ed-pdf-upload-progress" style="display:none;">
+                        <div class="editor-pdf-upload-progress-bar" id="ed-pdf-upload-bar" style="width:0%;"></div>
+                    </div>
+                    <input type="file" id="ed-pdf-file" accept="application/pdf" hidden>
+                </div></div>
             <div class="form-group" id="ed-repo-group" style="${isEdit && post.type === 'repo' ? '' : 'display:none;'}">
                 <label class="form-label">Repo URL</label><input type="text" class="form-input" id="ed-repo" placeholder="https://github.com/user/repo" value="${isEdit && post.repo ? Utils.escapeHtml(post.repo) : ''}"></div>
             <div class="form-group" id="ed-media-group">
@@ -1269,6 +1526,64 @@ async function renderEditorPage({ slug } = {}) {
     document.getElementById('ed-media-type').addEventListener('change', (e) => {
         document.getElementById('ed-media-url').style.display = e.target.value === 'none' ? 'none' : '';
     });
+
+    // PDF inline upload — drag/drop or click
+    const pdfDrop  = document.getElementById('ed-pdf-upload');
+    const pdfInput = document.getElementById('ed-pdf-file');
+    const pdfPathInput = document.getElementById('ed-pdf');
+    const pdfState = document.getElementById('ed-pdf-upload-state');
+    const pdfProg  = document.getElementById('ed-pdf-upload-progress');
+    const pdfBar   = document.getElementById('ed-pdf-upload-bar');
+
+    if (pdfDrop) {
+        pdfDrop.addEventListener('click', (e) => {
+            // ignore clicks on the path input itself
+            if (e.target.tagName === 'INPUT') return;
+            pdfInput.click();
+        });
+        pdfDrop.addEventListener('dragover', (e) => { e.preventDefault(); pdfDrop.classList.add('drag-over'); });
+        pdfDrop.addEventListener('dragleave', () => pdfDrop.classList.remove('drag-over'));
+        pdfDrop.addEventListener('drop', (e) => {
+            e.preventDefault();
+            pdfDrop.classList.remove('drag-over');
+            if (e.dataTransfer.files[0]) handlePdfUpload(e.dataTransfer.files[0]);
+        });
+        pdfInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) handlePdfUpload(e.target.files[0]);
+        });
+    }
+
+    async function handlePdfUpload(file) {
+        if (file.type && file.type !== 'application/pdf') {
+            showToast('Not a PDF', 'error'); return;
+        }
+        const sizeMb = (file.size / 1024 / 1024).toFixed(1);
+        if (file.size > GitHubAPI.GITHUB_FILE_LIMIT) {
+            showToast(`File too large (${sizeMb} MB) — GitHub limit 100 MB`, 'error');
+            return;
+        }
+        if (file.size > GitHubAPI.UPLOAD_WARN_LIMIT) {
+            showToast(`Large file (${sizeMb} MB) — upload may take a while`, 'info');
+        }
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const path = `${CONFIG.uploadsPath}/pdfs/${safeName}`;
+        pdfState.textContent = `Uploading ${safeName} (${sizeMb} MB)…`;
+        pdfState.style.color = 'var(--color-text-secondary)';
+        pdfProg.style.display = '';
+        pdfBar.style.width = '0%';
+        try {
+            await GitHubAPI.uploadBinary(path, file, `Upload PDF: ${safeName}`,
+                (frac) => { pdfBar.style.width = `${Math.round(frac * 100)}%`; });
+            pdfPathInput.value = path;
+            pdfState.innerHTML = `Uploaded &#10004; <code>${Utils.escapeHtml(path)}</code>`;
+            pdfState.style.color = 'var(--color-success)';
+            showToast('PDF uploaded', 'success');
+        } catch (e) {
+            pdfState.textContent = `Upload failed: ${e.message}`;
+            pdfState.style.color = 'var(--color-danger)';
+            showToast(`Upload failed: ${e.message}`, 'error');
+        }
+    }
 
     // Auto slug
     if (!isEdit) {
@@ -1345,7 +1660,7 @@ async function renderEditorPage({ slug } = {}) {
             try { _editorHljs = await LibLoader.loadHighlightJs(); } catch (e) { _editorHljs = null; }
         }
         configureMarked({ hljs: _editorHljs });
-        preview.innerHTML = marked.parse(textarea.value || '*Start typing...*');
+        await renderMarkdownInto(preview, textarea.value || '*Start typing...*');
         renderMermaidBlocks('#ed-preview');
     }
     textarea.addEventListener('input', Utils.debounce(updatePreview, 400));
@@ -1363,6 +1678,10 @@ async function renderEditorPage({ slug } = {}) {
         const image = document.getElementById('ed-image').value.trim();
         const type = document.getElementById('ed-type').value;
         const draft = document.getElementById('ed-draft').checked;
+        const featured = document.getElementById('ed-featured').checked;
+        const collection = document.getElementById('ed-collection').value.trim();
+        const orderRaw = document.getElementById('ed-order').value.trim();
+        const order = orderRaw ? parseInt(orderRaw, 10) : null;
         const pdfPath = document.getElementById('ed-pdf').value.trim();
         const repoUrl = document.getElementById('ed-repo').value.trim();
         const mediaType = document.getElementById('ed-media-type').value;
@@ -1376,6 +1695,9 @@ async function renderEditorPage({ slug } = {}) {
         if (type === 'pdf' && pdfPath) entry.pdf = pdfPath;
         if (type === 'repo' && repoUrl) entry.repo = repoUrl;
         if (mediaType !== 'none' && mediaUrl) entry.media = { type: mediaType, url: mediaUrl };
+        if (featured) entry.featured = true;
+        if (collection) entry.collection = collection;
+        if (order != null && !Number.isNaN(order)) entry.order = order;
 
         try {
             document.getElementById('editor-save').disabled = true;
@@ -1438,18 +1760,180 @@ function renderUploadPage() {
                 const name = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
                 const path = `${CONFIG.uploadsPath}/${subdir}/${name}`;
                 const item = document.createElement('div'); item.className = 'uploaded-file';
-                item.innerHTML = `<span>${Utils.escapeHtml(name)}</span> <span style="color:var(--color-text-muted);">uploading...</span>`;
+                const sizeMb = (file.size / 1024 / 1024).toFixed(1);
+                item.innerHTML = `
+                    <span>${Utils.escapeHtml(name)} <span style="color:var(--color-text-muted);font-size:0.8em;">(${sizeMb} MB)</span></span>
+                    <span class="upload-status" style="color:var(--color-text-muted);">uploading...</span>
+                    <div class="editor-pdf-upload-progress"><div class="editor-pdf-upload-progress-bar" style="width:0%;"></div></div>`;
                 list.appendChild(item);
+                if (file.size > GitHubAPI.UPLOAD_WARN_LIMIT) {
+                    showToast(`Large file (${sizeMb} MB) — upload may take a while`, 'info');
+                }
+                const status = item.querySelector('.upload-status');
+                const bar = item.querySelector('.editor-pdf-upload-progress-bar');
                 try {
-                    await GitHubAPI.uploadBinary(path, file, `Upload ${subdir}: ${name}`);
-                    item.innerHTML = `<span>${Utils.escapeHtml(name)}</span><button class="uploaded-file-remove" onclick="navigator.clipboard.writeText('${path}');showToast('Copied!');">Copy Path</button>`;
+                    await GitHubAPI.uploadBinary(path, file, `Upload ${subdir}: ${name}`,
+                        (frac) => { bar.style.width = `${Math.round(frac * 100)}%`; });
+                    item.innerHTML = `<span>${Utils.escapeHtml(name)}</span>
+                        <button class="uploaded-file-remove" data-path="${Utils.escapeHtml(path)}">Copy Path</button>`;
+                    item.querySelector('button').addEventListener('click', () => {
+                        navigator.clipboard.writeText(path).then(() => showToast('Copied!', 'success'));
+                    });
                     showToast(`Uploaded: ${name}`, 'success');
-                } catch (e) { item.innerHTML = `<span>${Utils.escapeHtml(name)}</span> <span style="color:var(--color-danger);">failed</span>`; }
+                } catch (e) {
+                    status.textContent = e.message || 'failed';
+                    status.style.color = 'var(--color-danger)';
+                    bar.style.background = 'var(--color-danger)';
+                }
             }
         }
     }
     setup('img-area', 'img-input', 'img-list', 'images');
     setup('pdf-area', 'pdf-input', 'pdf-list', 'pdfs');
+}
+
+/* ============================================
+   Phase 6b: Collections (post series)
+   ============================================ */
+
+async function renderCollectionsIndex() {
+    const app = document.getElementById('app');
+    const posts = await ContentService.getPosts();
+
+    // Group posts by collection
+    const groups = new Map();
+    posts.forEach(p => {
+        if (!p.collection) return;
+        if (!groups.has(p.collection)) groups.set(p.collection, []);
+        groups.get(p.collection).push(p);
+    });
+
+    if (groups.size === 0) {
+        app.innerHTML = `<div class="collection-detail">
+            <a href="#/" class="post-back">&#8592; Back to feed</a>
+            <h1>Collections</h1>
+            <p class="collection-desc">No collections yet. Add a <code>collection</code> field to a post to start one.</p>
+        </div>`;
+        return;
+    }
+
+    // Sort each group by order then date.
+    const cards = [];
+    for (const [name, list] of groups) {
+        list.sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || new Date(a.date) - new Date(b.date));
+        cards.push({ slug: name, name, count: list.length, posts: list.slice(0, 3) });
+    }
+    cards.sort((a, b) => b.count - a.count);
+
+    app.innerHTML = `
+        <div class="collection-detail">
+            <a href="#/" class="post-back">&#8592; Back to feed</a>
+            <h1>Collections</h1>
+            <p class="collection-desc">Series of related posts grouped by topic.</p>
+            <div class="collections-grid">
+                ${cards.map(c => `
+                    <a class="collection-card" href="#/collection/${encodeURIComponent(c.slug)}">
+                        <h3>${Utils.escapeHtml(c.name.replace(/-/g, ' '))}</h3>
+                        <span class="count">${c.count} post${c.count === 1 ? '' : 's'}</span>
+                        <div class="collection-card-list">
+                            ${c.posts.map(p => `<span>&#9656; ${Utils.escapeHtml(p.title)}</span>`).join('')}
+                        </div>
+                    </a>`).join('')}
+            </div>
+        </div>`;
+}
+
+async function renderCollectionDetail({ slug }) {
+    const app = document.getElementById('app');
+    const posts = await ContentService.getPosts();
+    const list = posts.filter(p => p.collection === slug);
+    if (list.length === 0) {
+        app.innerHTML = `<div class="collection-detail">
+            <a href="#/collections" class="post-back">&#8592; Back to collections</a>
+            <h1>Not found</h1>
+            <p class="collection-desc">No posts in this collection.</p>
+        </div>`;
+        return;
+    }
+    list.sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || new Date(a.date) - new Date(b.date));
+
+    app.innerHTML = `
+        <div class="collection-detail">
+            <a href="#/collections" class="post-back">&#8592; All collections</a>
+            <h1>${Utils.escapeHtml(slug.replace(/-/g, ' '))}</h1>
+            <p class="collection-desc">${list.length} post${list.length === 1 ? '' : 's'} in this series.</p>
+            ${list.map((p, i) => {
+                const link = p.type === 'pdf' ? `#/pdf/${p.slug}` : `#/post/${p.slug}`;
+                return `<a class="collection-step" href="${link}">
+                    <div class="collection-step-num">${i + 1}</div>
+                    <div class="collection-step-info">
+                        <h4>${Utils.escapeHtml(p.title)}</h4>
+                        <p>${Utils.escapeHtml(p.description || '')}</p>
+                    </div>
+                </a>`;
+            }).join('')}
+        </div>`;
+}
+
+/* ============================================
+   Phase 6c: Docs (GitHub-Pages style)
+   ============================================ */
+
+async function renderDocsPage({ slug } = {}) {
+    const app = document.getElementById('app');
+    const posts = await ContentService.getPosts();
+    const docs = posts.filter(p => p.type === 'doc');
+
+    if (docs.length === 0) {
+        app.innerHTML = `<div class="collection-detail">
+            <a href="#/" class="post-back">&#8592; Back to feed</a>
+            <h1>Documentation</h1>
+            <p class="collection-desc">No docs yet. Add a post with <code>type: "doc"</code> to start writing.</p>
+        </div>`;
+        return;
+    }
+
+    // Group docs by collection (sidebar sections)
+    const groups = new Map();
+    docs.forEach(d => {
+        const g = d.collection || 'General';
+        if (!groups.has(g)) groups.set(g, []);
+        groups.get(g).push(d);
+    });
+    for (const list of groups.values()) {
+        list.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+    }
+
+    const target = slug ? docs.find(d => d.slug === slug) : docs[0];
+    if (!target) { app.innerHTML = '<p style="padding:48px;text-align:center;">Doc not found.</p>'; return; }
+
+    app.innerHTML = `
+        <div class="docs-layout">
+            <aside class="docs-sidebar">
+                ${[...groups.entries()].map(([name, list]) => `
+                    <h4>${Utils.escapeHtml(name.replace(/-/g, ' '))}</h4>
+                    ${list.map(d => `
+                        <a class="${d.slug === target.slug ? 'active' : ''}" href="#/docs/${d.slug}">
+                            ${Utils.escapeHtml(d.title)}
+                        </a>`).join('')}
+                `).join('')}
+            </aside>
+            <article class="docs-content post-content" id="docs-content">
+                <div class="loading-state"><div class="spinner"></div></div>
+            </article>
+        </div>`;
+
+    // Load and render the target doc
+    const post = await ContentService.getPost(target.slug);
+    if (!post) {
+        document.getElementById('docs-content').innerHTML = '<p>Doc could not be loaded.</p>';
+        return;
+    }
+
+    const hljs = await LibLoader.loadHighlightJs();
+    configureMarked({ hljs });
+    await renderMarkdownInto(document.getElementById('docs-content'), post.body);
+    renderMermaidBlocks('#docs-content');
 }
 
 /* ============================================
@@ -1459,6 +1943,10 @@ function renderUploadPage() {
 Router.add('/', renderFeedPage);
 Router.add('/post/:slug', renderPostPage);
 Router.add('/pdf/:slug', renderPdfPage);
+Router.add('/collections', renderCollectionsIndex);
+Router.add('/collection/:slug', renderCollectionDetail);
+Router.add('/docs', renderDocsPage);
+Router.add('/docs/:slug', renderDocsPage);
 Router.add('/admin', renderAdminDashboard);
 Router.add('/admin/new', renderEditorPage);
 Router.add('/admin/edit/:slug', renderEditorPage);
