@@ -118,6 +118,20 @@ const LibLoader = {
         return this._mermaid;
     },
 
+    _purify: null,
+    loadPurify() {
+        if (this._purify) return this._purify;
+        this._purify = new Promise((resolve, reject) => {
+            if (window.DOMPurify) { resolve(window.DOMPurify); return; }
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js';
+            s.onload = () => resolve(window.DOMPurify);
+            s.onerror = reject;
+            document.head.appendChild(s);
+        });
+        return this._purify;
+    },
+
     _katex: null,
     loadKatex() {
         if (this._katex) return this._katex;
@@ -158,6 +172,74 @@ const Cleanup = {
     _fns: [],
     add(fn) { this._fns.push(fn); },
     run() { this._fns.forEach(fn => fn()); this._fns = []; }
+};
+
+// ── Head: per-route document title, description, OG/Twitter, JSON-LD ──
+//
+// Updates the tags that already exist in index.html and (optionally) injects
+// a JSON-LD <script type="application/ld+json"> for posts so search engines
+// understand them as articles.
+
+const SITE_ORIGIN = (typeof window !== 'undefined' && window.location && window.location.origin)
+    ? window.location.origin
+    : '';
+
+const Head = {
+    _setMeta(selector, attr, value) {
+        const el = document.querySelector(selector);
+        if (el) el.setAttribute(attr, value);
+    },
+    set({ title, description, image, url, type = 'website', publishedDate }) {
+        const fullTitle = title ? `${title} — ${CONFIG.siteName}` : CONFIG.siteName;
+        document.title = fullTitle;
+        const desc = description || CONFIG.siteDescription;
+        const canonical = url || (SITE_ORIGIN + window.location.pathname + window.location.hash);
+
+        this._setMeta('meta[name="description"]', 'content', desc);
+        this._setMeta('meta[property="og:title"]', 'content', fullTitle);
+        this._setMeta('meta[property="og:description"]', 'content', desc);
+        this._setMeta('meta[property="og:type"]', 'content', type);
+        this._setMeta('meta[name="twitter:title"]', 'content', fullTitle);
+        this._setMeta('meta[name="twitter:description"]', 'content', desc);
+        this._setMeta('link[rel="canonical"]', 'href', canonical);
+
+        // og:url & og:image are added/removed dynamically.
+        const setOrCreate = (selector, attr, value) => {
+            let el = document.querySelector(selector);
+            if (!value) { if (el) el.remove(); return; }
+            if (!el) {
+                el = document.createElement('meta');
+                if (selector.includes('property')) {
+                    el.setAttribute('property', selector.match(/property="([^"]+)"/)[1]);
+                } else {
+                    el.setAttribute('name', selector.match(/name="([^"]+)"/)[1]);
+                }
+                document.head.appendChild(el);
+            }
+            el.setAttribute(attr, value);
+        };
+        setOrCreate('meta[property="og:url"]', 'content', canonical);
+        setOrCreate('meta[property="og:image"]', 'content', image || '');
+        setOrCreate('meta[name="twitter:image"]', 'content', image || '');
+
+        // Article-specific OG fields
+        setOrCreate('meta[property="article:published_time"]', 'content', publishedDate || '');
+    },
+    setJsonLd(json) {
+        let s = document.querySelector('script[data-jsonld]');
+        if (!json) { if (s) s.remove(); return; }
+        if (!s) {
+            s = document.createElement('script');
+            s.type = 'application/ld+json';
+            s.setAttribute('data-jsonld', '1');
+            document.head.appendChild(s);
+        }
+        s.textContent = JSON.stringify(json);
+    },
+    reset() {
+        this.set({ title: '', description: '' });
+        this.setJsonLd(null);
+    }
 };
 
 // ── Router ──
@@ -496,15 +578,22 @@ function configureMarked(options = {}) {
             const encoded = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
             return `<div class="mermaid-block" data-mermaid="${encoded}"><div class="mermaid-loading">Loading diagram...</div></div>`;
         }
+        // Wrap every code block in .code-block so we can show a language label
+        // and a copy button via CSS / a single delegated event listener.
+        const labelText = lang ? Utils.escapeHtml(lang) : 'code';
+        const wrap = (inner) => `<div class="code-block" data-lang="${labelText}">
+            <span class="code-lang-label">${labelText}</span>
+            ${inner}
+        </div>`;
         if (options.hljs && lang && options.hljs.getLanguage(lang)) {
             const highlighted = options.hljs.highlight(code, { language: lang }).value;
-            return `<pre><code class="hljs language-${lang}">${highlighted}</code></pre>`;
+            return wrap(`<pre><code class="hljs language-${lang}">${highlighted}</code></pre>`);
         }
         if (options.hljs) {
             const highlighted = options.hljs.highlightAuto(code).value;
-            return `<pre><code class="hljs">${highlighted}</code></pre>`;
+            return wrap(`<pre><code class="hljs">${highlighted}</code></pre>`);
         }
-        return `<pre><code>${Utils.escapeHtml(code)}</code></pre>`;
+        return wrap(`<pre><code>${Utils.escapeHtml(code)}</code></pre>`);
     };
 
     // Heading anchors + TOC collection
@@ -544,7 +633,7 @@ function configureMarked(options = {}) {
 function renderFeedItem(post) {
     const link = post.type === 'pdf' ? `#/pdf/${post.slug}` : `#/post/${post.slug}`;
     const tags = (post.tags || []).slice(0, 4).map(t =>
-        `<span class="tag">${Utils.escapeHtml(t)}</span>`).join('');
+        `<a class="tag" href="#/tag/${encodeURIComponent(t)}">${Utils.escapeHtml(t)}</a>`).join('');
 
     // Type badge
     let typeBadge = '';
@@ -594,6 +683,7 @@ function renderFeedItem(post) {
 }
 
 async function renderFeedPage() {
+    Head.reset();
     const app = document.getElementById('app');
     const allPosts = await ContentService.getPosts();
     const categories = ContentService.getCategories(allPosts);
@@ -777,7 +867,7 @@ function renderSidebar(posts) {
         <div class="sidebar-card">
             <h4>Popular Tags</h4>
             <div class="sidebar-tags">
-                ${topTags.map(t => `<span class="sidebar-tag" data-tag="${Utils.escapeHtml(t)}">${Utils.escapeHtml(t)}</span>`).join('')}
+                ${topTags.map(t => `<a class="sidebar-tag" href="#/tag/${encodeURIComponent(t)}">${Utils.escapeHtml(t)}</a>`).join('')}
             </div>
         </div>` : ''}
         <div class="sidebar-card">
@@ -791,16 +881,41 @@ function renderSidebar(posts) {
             }).join('')}
         </div>`;
 
-    // Tag click → set search input and trigger filter
-    sidebar.querySelectorAll('.sidebar-tag').forEach(tag => {
-        tag.addEventListener('click', () => {
-            const search = document.getElementById('global-search');
-            if (search) {
-                search.value = tag.dataset.tag;
-                search.dispatchEvent(new Event('input'));
-            }
+    // (tag clicks are real links to /#/tag/:slug now — no JS handler needed)
+}
+
+// ── Image lightbox ──
+//
+// Single global lightbox element, lazily created. Delegates clicks from the
+// container selector — any <img> inside, except those wrapped in <a>, opens
+// the lightbox.
+function initLightbox(containerSelector) {
+    const container = document.querySelector(containerSelector);
+    if (!container) return;
+    let box = document.querySelector('.lightbox');
+    if (!box) {
+        box = document.createElement('div');
+        box.className = 'lightbox';
+        box.innerHTML = '<button class="lightbox-close" aria-label="Close" type="button">&times;</button><img alt="">';
+        document.body.appendChild(box);
+        const close = () => box.classList.remove('open');
+        box.querySelector('.lightbox-close').addEventListener('click', close);
+        box.addEventListener('click', (e) => { if (e.target === box) close(); });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && box.classList.contains('open')) close();
         });
-    });
+    }
+    const handler = (e) => {
+        const img = e.target.closest('img');
+        if (!img || img.closest('a') || img.closest('.feed-avatar')) return;
+        e.preventDefault();
+        const lb = box.querySelector('img');
+        lb.src = img.src;
+        lb.alt = img.alt || '';
+        box.classList.add('open');
+    };
+    container.addEventListener('click', handler);
+    Cleanup.add(() => container.removeEventListener('click', handler));
 }
 
 // ── Inline PDF Carousel ──
@@ -911,12 +1026,49 @@ async function renderPostPage({ slug }) {
     const tocItems = [];
     configureMarked({ hljs, tocItems, slug });
 
+    // SEO / sharing tags for this post
+    Head.set({
+        title: post.title,
+        description: post.description || '',
+        image: post.image ? new URL(post.image, SITE_ORIGIN + '/').href : '',
+        type: 'article',
+        publishedDate: post.date,
+    });
+    Head.setJsonLd({
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: post.title,
+        datePublished: post.date,
+        author: { '@type': 'Person', name: CONFIG.author },
+        description: post.description || '',
+        image: post.image ? [new URL(post.image, SITE_ORIGIN + '/').href] : undefined,
+        keywords: (post.tags || []).join(', '),
+        articleSection: post.category || undefined,
+        url: SITE_ORIGIN + '/#/post/' + slug,
+    });
+
     // Run math extraction *before* marked, KaTeX render *after*.
     const withMath = MathExtractor.extract(post.body);
-    const rawHtml = marked.parse(withMath);
+    let rawHtml = marked.parse(withMath);
+    // External-source content (repo READMEs) is sanitized with DOMPurify
+    // before being injected — it contained user-written HTML we don't trust.
+    if (post.type === 'repo') {
+        try {
+            const DOMPurify = await LibLoader.loadPurify();
+            rawHtml = DOMPurify.sanitize(rawHtml, {
+                ADD_TAGS: ['span'], // allow KaTeX placeholder spans
+                ADD_ATTR: ['data-id', 'data-mermaid'],
+                FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form'],
+            });
+        } catch (e) {
+            console.warn('DOMPurify failed to load; falling back to unsanitized render');
+        }
+    }
     const htmlContent = await MathExtractor.render(rawHtml);
     const readTime = Utils.readingTime(post.body);
-    const tags = (post.tags || []).map(t => `<span class="tag tag-primary">${Utils.escapeHtml(t)}</span>`).join('');
+    const tags = (post.tags || []).map(t =>
+        `<a class="tag tag-primary" href="#/tag/${encodeURIComponent(t)}">${Utils.escapeHtml(t)}</a>`
+    ).join('');
 
     const coverHtml = post.image
         ? `<img class="post-cover" src="${post.image}" alt="${Utils.escapeHtml(post.title)}" onerror="this.style.display='none'">`
@@ -950,6 +1102,46 @@ async function renderPostPage({ slug }) {
              (p.tags || []).some(t => (post.tags || []).includes(t))))
         .slice(0, 3);
 
+    // Prev / next navigation
+    const linearList = allPosts.filter(p => p.type !== 'doc');
+    const myIdx = linearList.findIndex(p => p.slug === slug);
+    const prev = myIdx > 0 ? linearList[myIdx - 1] : null;
+    const next = myIdx >= 0 && myIdx < linearList.length - 1 ? linearList[myIdx + 1] : null;
+    function navHref(p) {
+        return (p.type === 'pdf' ? '#/pdf/' : '#/post/') + p.slug;
+    }
+    const prevNextHtml = (prev || next) ? `
+        <nav class="post-prev-next" aria-label="Previous and next post">
+            ${prev ? `<a class="post-prev" href="${navHref(prev)}">
+                <span class="post-prev-next-label">&#8592; Newer</span>
+                <span class="post-prev-next-title">${Utils.escapeHtml(prev.title)}</span>
+            </a>` : '<div></div>'}
+            ${next ? `<a class="post-next" href="${navHref(next)}">
+                <span class="post-prev-next-label">Older &#8594;</span>
+                <span class="post-prev-next-title">${Utils.escapeHtml(next.title)}</span>
+            </a>` : '<div></div>'}
+        </nav>` : '';
+
+    // Share + edit-on-github action bar
+    const postUrl = `${SITE_ORIGIN}/#/post/${slug}`;
+    const shareLinks = {
+        twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(postUrl)}`,
+        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`,
+    };
+    const editPath = post.file
+        ? `https://github.com/${CONFIG.github.username}/${CONFIG.github.repo}/edit/${CONFIG.github.branch}/${CONFIG.contentPath}/posts/${post.file}`
+        : null;
+    const actionBarHtml = `
+        <div class="post-actions" role="toolbar" aria-label="Post actions">
+            <button class="post-action-btn" id="post-share-copy" type="button" title="Copy link">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                Copy link
+            </button>
+            <a class="post-action-btn" href="${shareLinks.twitter}" target="_blank" rel="noopener noreferrer" title="Share on Twitter">Twitter</a>
+            <a class="post-action-btn" href="${shareLinks.linkedin}" target="_blank" rel="noopener noreferrer" title="Share on LinkedIn">LinkedIn</a>
+            ${editPath ? `<a class="post-action-btn" href="${editPath}" target="_blank" rel="noopener noreferrer" title="Edit this page on GitHub">Edit on GitHub</a>` : ''}
+        </div>`;
+
     const relatedHtml = related.length > 0 ? `
         <div class="related-posts">
             <h3>Related Posts</h3>
@@ -979,25 +1171,42 @@ async function renderPostPage({ slug }) {
             ${mediaHtml}
             <div class="post-content">${htmlContent}</div>
             ${tags ? `<div class="post-tags">${tags}</div>` : ''}
+            ${actionBarHtml}
+            ${prevNextHtml}
             ${relatedHtml}
         </article>`;
+
+    // Wire copy-link button
+    const copyBtn = document.getElementById('post-share-copy');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(postUrl)
+                .then(() => showToast('Link copied!', 'success'))
+                .catch(() => showToast('Copy failed', 'error'));
+        });
+    }
+
+    // Image lightbox: clicking any post-content image opens a fullscreen view.
+    initLightbox('.post-content');
 
     // Render mermaid diagrams
     renderMermaidBlocks('.post-content');
 
-    // Copy code buttons
-    document.querySelectorAll('.post-content pre').forEach(pre => {
+    // Copy code buttons (delegated to .code-block wrapper)
+    document.querySelectorAll('.post-content .code-block').forEach(block => {
         const btn = document.createElement('button');
         btn.className = 'code-copy-btn';
+        btn.type = 'button';
         btn.textContent = 'Copy';
+        btn.setAttribute('aria-label', 'Copy code to clipboard');
         btn.addEventListener('click', () => {
-            const code = pre.querySelector('code');
-            navigator.clipboard.writeText(code ? code.textContent : pre.textContent)
+            const code = block.querySelector('code');
+            const text = code ? code.textContent : block.textContent;
+            navigator.clipboard.writeText(text)
                 .then(() => { btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = 'Copy', 2000); })
                 .catch(() => showToast('Copy failed', 'error'));
         });
-        pre.style.position = 'relative';
-        pre.appendChild(btn);
+        block.appendChild(btn);
     });
 
     // Reading progress bar
@@ -1047,6 +1256,8 @@ async function renderPdfPage({ slug }) {
     const app = document.getElementById('app');
     const posts = await ContentService.getPosts(true);
     const post = posts.find(p => p.slug === slug);
+
+    if (post) Head.set({ title: post.title, description: post.description, type: 'article' });
 
     if (!post || !post.pdf) {
         app.innerHTML = `<div class="pdf-viewer"><a href="#/" class="post-back">&#8592; Back</a>
@@ -1651,6 +1862,77 @@ async function renderEditorPage({ slug } = {}) {
         }
     });
 
+    // ── Draft autosave ──
+    // Snapshots all editor fields to localStorage every 2s of inactivity.
+    // On load, if a draft exists for this slug (or the "new" key), offer it.
+    const DRAFT_KEY = `editor_draft:${isEdit ? slug : '__new'}`;
+    function captureDraft() {
+        return {
+            ts: Date.now(),
+            title: document.getElementById('ed-title')?.value || '',
+            slug: document.getElementById('ed-slug')?.value || '',
+            description: document.getElementById('ed-desc')?.value || '',
+            category: document.getElementById('ed-cat')?.value || '',
+            tags: document.getElementById('ed-tags')?.value || '',
+            image: document.getElementById('ed-image')?.value || '',
+            type: document.getElementById('ed-type')?.value || 'article',
+            collection: document.getElementById('ed-collection')?.value || '',
+            order: document.getElementById('ed-order')?.value || '',
+            featured: document.getElementById('ed-featured')?.checked || false,
+            draft: document.getElementById('ed-draft')?.checked || false,
+            pdf: document.getElementById('ed-pdf')?.value || '',
+            repo: document.getElementById('ed-repo')?.value || '',
+            mediaType: document.getElementById('ed-media-type')?.value || 'none',
+            mediaUrl: document.getElementById('ed-media-url')?.value || '',
+            body: document.getElementById('ed-body')?.value || '',
+        };
+    }
+    const saveDraft = Utils.debounce(() => {
+        try {
+            const d = captureDraft();
+            // Don't save empty drafts.
+            if (!d.title && !d.body) return;
+            localStorage.setItem(DRAFT_KEY, JSON.stringify(d));
+        } catch {}
+    }, 2000);
+
+    // Restore prompt: if there's a draft newer than what we just rendered, offer it.
+    try {
+        const raw = localStorage.getItem(DRAFT_KEY);
+        if (raw) {
+            const d = JSON.parse(raw);
+            const ageMin = Math.round((Date.now() - (d.ts || 0)) / 60000);
+            const currentBody = document.getElementById('ed-body').value;
+            if (d.body && d.body !== currentBody) {
+                const restore = confirm(`A local draft from ~${ageMin} min ago exists. Restore it?`);
+                if (restore) {
+                    document.getElementById('ed-title').value = d.title;
+                    document.getElementById('ed-slug').value = d.slug;
+                    document.getElementById('ed-desc').value = d.description;
+                    document.getElementById('ed-cat').value = d.category;
+                    document.getElementById('ed-tags').value = d.tags;
+                    document.getElementById('ed-image').value = d.image;
+                    document.getElementById('ed-type').value = d.type;
+                    document.getElementById('ed-type').dispatchEvent(new Event('change'));
+                    document.getElementById('ed-collection').value = d.collection;
+                    document.getElementById('ed-order').value = d.order;
+                    document.getElementById('ed-featured').checked = d.featured;
+                    document.getElementById('ed-draft').checked = d.draft;
+                    document.getElementById('ed-pdf').value = d.pdf;
+                    document.getElementById('ed-repo').value = d.repo;
+                    document.getElementById('ed-media-type').value = d.mediaType;
+                    document.getElementById('ed-media-type').dispatchEvent(new Event('change'));
+                    document.getElementById('ed-media-url').value = d.mediaUrl;
+                    document.getElementById('ed-body').value = d.body;
+                }
+            }
+        }
+    } catch {}
+
+    // Listen on every input in the editor for autosave.
+    document.querySelector('.editor-container').addEventListener('input', saveDraft);
+    document.querySelector('.editor-container').addEventListener('change', saveDraft);
+
     // Live preview with full rendering (highlight.js, mermaid, YouTube, tables)
     const textarea = document.getElementById('ed-body');
     const preview = document.getElementById('ed-preview');
@@ -1722,6 +2004,7 @@ async function renderEditorPage({ slug } = {}) {
             await GitHubAPI.putFile(`${CONFIG.contentPath}/posts.json`, JSON.stringify(manifest, null, 2), `Manifest: ${title}`, mSha);
 
             ContentService.invalidateCache();
+            try { localStorage.removeItem(DRAFT_KEY); } catch {}
             showToast(isEdit ? 'Updated!' : 'Published!', 'success');
             window.location.hash = '#/admin';
         } catch (e) {
@@ -1797,6 +2080,7 @@ function renderUploadPage() {
    ============================================ */
 
 async function renderCollectionsIndex() {
+    Head.set({ title: 'Collections', description: 'Series of related posts.' });
     const app = document.getElementById('app');
     const posts = await ContentService.getPosts();
 
@@ -1876,6 +2160,49 @@ async function renderCollectionDetail({ slug }) {
 }
 
 /* ============================================
+   Phase 6d: Tag & Category index pages
+   ============================================ */
+
+async function renderTagPage({ slug }) {
+    const decoded = decodeURIComponent(slug);
+    Head.set({ title: `Tag: ${decoded}`, description: `Posts tagged "${decoded}".` });
+    const app = document.getElementById('app');
+    const posts = await ContentService.getPosts();
+    const filtered = posts.filter(p => (p.tags || []).includes(decoded));
+    renderTaxonomyPage(app, `Tag: ${decoded}`, filtered, '#/');
+}
+
+async function renderCategoryPage({ slug }) {
+    const decoded = decodeURIComponent(slug);
+    Head.set({ title: `Category: ${decoded}`, description: `Posts in "${decoded}".` });
+    const app = document.getElementById('app');
+    const posts = await ContentService.getPosts();
+    const filtered = posts.filter(p => p.category === decoded);
+    renderTaxonomyPage(app, `Category: ${decoded.replace(/-/g, ' ')}`, filtered, '#/');
+}
+
+function renderTaxonomyPage(app, heading, posts, backHref) {
+    if (!posts.length) {
+        app.innerHTML = `<div class="collection-detail">
+            <a href="${backHref}" class="post-back">&#8592; Back</a>
+            <h1>${Utils.escapeHtml(heading)}</h1>
+            <p class="collection-desc">No posts found.</p>
+        </div>`;
+        return;
+    }
+    app.innerHTML = `
+        <div class="collection-detail">
+            <a href="${backHref}" class="post-back">&#8592; Back to feed</a>
+            <h1>${Utils.escapeHtml(heading)}</h1>
+            <p class="collection-desc">${posts.length} post${posts.length === 1 ? '' : 's'}.</p>
+            <div class="feed-list">
+                ${posts.map(p => renderFeedItem(p)).join('')}
+            </div>
+        </div>`;
+    initInlinePdfs();
+}
+
+/* ============================================
    Phase 6c: Docs (GitHub-Pages style)
    ============================================ */
 
@@ -1883,6 +2210,7 @@ async function renderDocsPage({ slug } = {}) {
     const app = document.getElementById('app');
     const posts = await ContentService.getPosts();
     const docs = posts.filter(p => p.type === 'doc');
+    Head.set({ title: 'Docs', description: 'Documentation and tutorials.' });
 
     if (docs.length === 0) {
         app.innerHTML = `<div class="collection-detail">
@@ -1945,6 +2273,8 @@ Router.add('/post/:slug', renderPostPage);
 Router.add('/pdf/:slug', renderPdfPage);
 Router.add('/collections', renderCollectionsIndex);
 Router.add('/collection/:slug', renderCollectionDetail);
+Router.add('/tag/:slug', renderTagPage);
+Router.add('/category/:slug', renderCategoryPage);
 Router.add('/docs', renderDocsPage);
 Router.add('/docs/:slug', renderDocsPage);
 Router.add('/admin', renderAdminDashboard);
@@ -1953,15 +2283,43 @@ Router.add('/admin/edit/:slug', renderEditorPage);
 Router.add('/admin/upload', renderUploadPage);
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Navbar scroll shadow
-    window.addEventListener('scroll', () => {
-        document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
-    });
+    // ── Theme toggle ──
+    const themeToggle = document.getElementById('theme-toggle');
+    if (themeToggle) {
+        const apply = (t) => {
+            if (t) document.documentElement.setAttribute('data-theme', t);
+            else document.documentElement.removeAttribute('data-theme');
+        };
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            // Cycle: (system) → light → dark → system
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const next =
+                !current ? (prefersDark ? 'light' : 'dark') :
+                current === 'light' ? 'dark' :
+                'light';
+            try { localStorage.setItem('theme', next); } catch {}
+            apply(next);
+        });
+    }
 
-    // Back to top
+    // ── Coalesced scroll listener (replaces multiple individual ones) ──
+    let scrollRaf = null;
+    window.addEventListener('scroll', () => {
+        if (scrollRaf) return;
+        scrollRaf = requestAnimationFrame(() => {
+            scrollRaf = null;
+            const y = window.scrollY;
+            const nav = document.getElementById('navbar');
+            if (nav) nav.classList.toggle('scrolled', y > 10);
+            const btt = document.getElementById('back-to-top');
+            if (btt) btt.classList.toggle('visible', y > 400);
+        });
+    }, { passive: true });
+
+    // Back-to-top — visibility is handled by the coalesced scroll listener above.
     const btt = document.getElementById('back-to-top');
-    window.addEventListener('scroll', () => { btt.classList.toggle('visible', window.scrollY > 400); });
-    btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    if (btt) btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
     // Admin gear toggle — if already on admin, go home; otherwise go to admin
     const adminBtn = document.querySelector('.nav-action-btn[aria-label="Admin"]');

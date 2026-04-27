@@ -169,6 +169,45 @@ properties:
 If you boost particle count, also boost `MAX_SIGNALS` proportionally and
 re-test on a mid-tier phone.
 
+## Theming
+
+CSS variables are split into two layers in `css/style.css`:
+
+- A theme-independent `:root` block holds typography, radii, shadows, transitions.
+- Theme color blocks live under `:root, [data-theme="light"]` and
+  `[data-theme="dark"]`. A `prefers-color-scheme: dark` media query mirrors
+  the dark block for users who haven't explicitly chosen a theme.
+
+The early inline script in `index.html` reads `localStorage.theme` and sets
+`data-theme` on `<html>` *before* paint to avoid theme flash. The toggle
+button cycles `system → light → dark → light → dark…`. **Never hard-code
+backgrounds or text colors in CSS** — always use the variables.
+
+## SEO and per-page metadata
+
+`Head` (in `js/app.js`) updates `<title>`, `<meta name="description">`, all
+OpenGraph and Twitter Card tags, the `<link rel="canonical">`, and a
+`<script type="application/ld+json">` blob on every route change. Each
+route renderer that should differ from the default calls `Head.set(...)`;
+post pages also call `Head.setJsonLd(...)` with a `BlogPosting` schema.
+
+`tools/build-content-files.js` reads `content/posts.json` and writes
+`sitemap.xml` and `feed.xml` (Atom 1.0). Run it after editing posts:
+
+```
+node tools/build-content-files.js
+```
+
+## Accessibility
+
+- Skip link (`.skip-link`) lives outside the navbar so keyboard/SR users
+  can jump straight to `<main id="app">`.
+- The neural canvas has `aria-hidden="true"` and respects
+  `prefers-reduced-motion: reduce` (no drift, no signal updates,
+  ~30fps render).
+- A global `prefers-reduced-motion` media query in CSS also
+  disables transitions and animations site-wide.
+
 ## Pure helpers (`js/lib/pure.js`)
 
 A small UMD module holding side-effect-free utilities:
