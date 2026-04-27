@@ -45,6 +45,10 @@
     function rand(min, max) { return min + Math.random() * (max - min); }
 
     // ── Neuron Creation ──
+    //
+    // Bio neuron: soma (cell body) + nucleus + nucleolus + branching dendrite
+    //             tree + a single longer axon ending in a terminal bulb.
+    // AI neuron:  hexagon ('node') or hex-with-inner-hex ('layer'), crisp edges.
     function createNeuron() {
         const isAI = Math.random() < CFG.AI_RATIO;
         const kind = isAI ? 'ai' : 'bio';
@@ -52,11 +56,12 @@
 
         if (isAI) {
             subtype = Math.random() < 0.33 ? 'layer' : 'node';
-            radius = subtype === 'layer' ? rand(4, 6) : rand(2, 3.5);
+            radius = subtype === 'layer' ? rand(5, 7) : rand(3, 4.5);
             color = CFG.COLOR_AI;
         } else {
-            subtype = Math.random() < 0.36 ? 'nucleus' : 'synapse';
-            radius = subtype === 'nucleus' ? rand(4.5, 7) : rand(2, 3.5);
+            // 'pyramidal' (large) vs 'interneuron' (small) — both look cell-like.
+            subtype = Math.random() < 0.5 ? 'pyramidal' : 'interneuron';
+            radius = subtype === 'pyramidal' ? rand(6, 9) : rand(3.5, 5);
             color = CFG.COLOR_BIO;
         }
 
@@ -70,21 +75,80 @@
             vz: rand(-CFG.DRIFT_SPEED * 0.3, CFG.DRIFT_SPEED * 0.3),
             radius, kind, subtype, color,
             pulsePhase: rand(0, Math.PI * 2),
+            rotation: rand(0, Math.PI * 2),    // for AI hex orientation
+            soma: null,
             dendrites: null,
+            axon: null,
+            nucleus: null,
         };
 
-        // Bio neurons get dendrite stubs
-        if (!isAI) {
-            const count = subtype === 'nucleus' ? Math.floor(rand(4, 7)) : Math.floor(rand(2, 4));
-            n.dendrites = [];
-            for (let i = 0; i < count; i++) {
-                n.dendrites.push({
-                    angle: rand(0, Math.PI * 2),
-                    length: rand(1.5, 3) * radius,
-                    curve: rand(-0.4, 0.4), // bezier control point offset factor
+        if (isAI) {
+            // Random orientation for hex variety.
+            return n;
+        }
+
+        // ── Build bio anatomy ──
+
+        // Soma (cell body) — slightly irregular polygon for organic look.
+        // Pre-compute relative-to-center vertices once.
+        const somaPoints = subtype === 'pyramidal' ? 7 : 6;
+        n.soma = [];
+        for (let i = 0; i < somaPoints; i++) {
+            const a = (i / somaPoints) * Math.PI * 2;
+            const wobble = rand(0.85, 1.15);
+            n.soma.push({ angle: a, r: radius * wobble });
+        }
+
+        // Nucleus inside soma, slightly off-center.
+        n.nucleus = {
+            offX: rand(-0.15, 0.15) * radius,
+            offY: rand(-0.15, 0.15) * radius,
+            r: radius * 0.45,
+            nucleolusR: radius * 0.13,
+        };
+
+        // Branching dendrite tree.
+        const dendCount = subtype === 'pyramidal'
+            ? Math.floor(rand(5, 8))
+            : Math.floor(rand(3, 5));
+
+        // Bias dendrites away from where the axon will go (so they don't overlap).
+        const axonAngle = rand(0, Math.PI * 2);
+        n.dendrites = [];
+        for (let i = 0; i < dendCount; i++) {
+            // Distribute dendrites in the half-plane opposite the axon.
+            const baseAngle = axonAngle + Math.PI + rand(-Math.PI * 0.65, Math.PI * 0.65);
+            const length = rand(2.0, 3.4) * radius;
+            const dend = {
+                angle: baseAngle,
+                length,
+                curve: rand(-0.5, 0.5),
+                width: rand(0.5, 0.9),
+                branches: [],
+            };
+            // Each dendrite has 0–2 sub-branches starting at ~60–80% of length.
+            const subCount = Math.random() < 0.7 ? Math.floor(rand(1, 3)) : 0;
+            for (let j = 0; j < subCount; j++) {
+                dend.branches.push({
+                    fromT: rand(0.55, 0.85),
+                    angleOff: rand(-Math.PI * 0.45, Math.PI * 0.45),
+                    length: length * rand(0.35, 0.6),
+                    curve: rand(-0.4, 0.4),
                 });
             }
+            n.dendrites.push(dend);
         }
+
+        // Axon: 1 long line opposite the dendrite cluster, ending in a terminal bulb.
+        n.axon = {
+            angle: axonAngle,
+            length: rand(4.5, 7) * radius,
+            curve: rand(-0.25, 0.25),
+            width: rand(0.7, 1.0),
+            terminalR: radius * 0.35,
+            // Optional: 0–2 small terminal branches (axon arborization)
+            terminals: Math.random() < 0.5 ? Math.floor(rand(1, 3)) : 0,
+        };
 
         return n;
     }
@@ -365,58 +429,213 @@
             }
 
             if (n.kind === 'ai') {
-                // AI: crisp circle
-                ctx.fillStyle = rgba(n.color, alpha);
-                ctx.beginPath();
-                ctx.arc(p.sx, p.sy, r, 0, Math.PI * 2);
-                ctx.fill();
+                drawAINeuron(n, p, r, alpha);
+            } else {
+                drawBioNeuron(n, p, r, alpha, pulse);
+            }
+        }
+    }
 
-                // Layer subtype: concentric ring
-                if (n.subtype === 'layer') {
-                    ctx.strokeStyle = rgba(CFG.COLOR_AI_GLOW, alpha * 0.4);
-                    ctx.lineWidth = 0.6 * p.s;
+    // ── AI neuron drawing — hexagons & nested hexagons ──
+    function drawAINeuron(n, p, r, alpha) {
+        const sides = 6;
+        const rot = n.rotation;
+
+        // Outer glow halo
+        const halo = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, r * 2.2);
+        halo.addColorStop(0, rgba(CFG.COLOR_AI_GLOW, alpha * 0.25));
+        halo.addColorStop(1, rgba(CFG.COLOR_AI_GLOW, 0));
+        ctx.fillStyle = halo;
+        ctx.beginPath();
+        ctx.arc(p.sx, p.sy, r * 2.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Filled hexagon body
+        ctx.beginPath();
+        for (let i = 0; i < sides; i++) {
+            const a = rot + (i / sides) * Math.PI * 2;
+            const x = p.sx + Math.cos(a) * r;
+            const y = p.sy + Math.sin(a) * r;
+            i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+        }
+        ctx.closePath();
+        ctx.fillStyle = rgba(n.color, alpha * 0.9);
+        ctx.fill();
+
+        // Crisp outer stroke
+        ctx.strokeStyle = rgba(CFG.COLOR_AI_GLOW, alpha);
+        ctx.lineWidth = Math.max(0.6, 0.8 * p.s);
+        ctx.stroke();
+
+        if (n.subtype === 'layer') {
+            // Inner hex (smaller, rotated 30°) for "layer node" look
+            ctx.beginPath();
+            for (let i = 0; i < sides; i++) {
+                const a = rot + Math.PI / sides + (i / sides) * Math.PI * 2;
+                const x = p.sx + Math.cos(a) * r * 0.55;
+                const y = p.sy + Math.sin(a) * r * 0.55;
+                i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+            }
+            ctx.closePath();
+            ctx.strokeStyle = rgba(CFG.COLOR_AI_GLOW, alpha * 0.85);
+            ctx.lineWidth = Math.max(0.5, 0.7 * p.s);
+            ctx.stroke();
+        }
+
+        // Center dot — pulse anchor
+        ctx.fillStyle = rgba(CFG.COLOR_AI_GLOW, alpha);
+        ctx.beginPath();
+        ctx.arc(p.sx, p.sy, Math.max(0.8, r * 0.18), 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // ── Bio neuron drawing — soma + nucleus + dendrite tree + axon ──
+    function drawBioNeuron(n, p, r, alpha, pulse) {
+        const ps = p.s;
+
+        // Soft cell-body glow (only for larger pyramidal cells so it's not noisy)
+        if (n.subtype === 'pyramidal') {
+            const grd = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, r * 3.2);
+            grd.addColorStop(0, rgba(CFG.COLOR_BIO_GLOW, alpha * 0.2));
+            grd.addColorStop(1, rgba(CFG.COLOR_BIO_GLOW, 0));
+            ctx.fillStyle = grd;
+            ctx.beginPath();
+            ctx.arc(p.sx, p.sy, r * 3.2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // ── Dendrites (drawn first so soma sits on top of their roots) ──
+        if (n.dendrites) {
+            ctx.lineCap = 'round';
+            for (const d of n.dendrites) {
+                const baseLen = d.length * ps * pulse;
+                const cosA = Math.cos(d.angle), sinA = Math.sin(d.angle);
+                // Tangent unit perpendicular for curving control point
+                const perpX = -sinA, perpY = cosA;
+                const endX = p.sx + cosA * baseLen;
+                const endY = p.sy + sinA * baseLen;
+                const cpX = p.sx + cosA * baseLen * 0.55 + perpX * d.curve * baseLen * 0.45;
+                const cpY = p.sy + sinA * baseLen * 0.55 + perpY * d.curve * baseLen * 0.45;
+
+                // Tapering line (slightly thicker near soma)
+                ctx.strokeStyle = rgba(n.color, alpha * 0.65);
+                ctx.lineWidth = Math.max(0.4, d.width * ps);
+                ctx.beginPath();
+                ctx.moveTo(p.sx, p.sy);
+                ctx.quadraticCurveTo(cpX, cpY, endX, endY);
+                ctx.stroke();
+
+                // Sub-branches (give the "tree" feel)
+                for (const b of d.branches) {
+                    // Quadratic-bezier point at parameter t
+                    const t = b.fromT, mt = 1 - t;
+                    const bx = mt * mt * p.sx + 2 * mt * t * cpX + t * t * endX;
+                    const by = mt * mt * p.sy + 2 * mt * t * cpY + t * t * endY;
+                    const childAngle = d.angle + b.angleOff;
+                    const cLen = b.length * ps * pulse;
+                    const childCosA = Math.cos(childAngle), childSinA = Math.sin(childAngle);
+                    const childPerpX = -childSinA, childPerpY = childCosA;
+                    const cEndX = bx + childCosA * cLen;
+                    const cEndY = by + childSinA * cLen;
+                    const cCpX = bx + childCosA * cLen * 0.55 + childPerpX * b.curve * cLen * 0.5;
+                    const cCpY = by + childSinA * cLen * 0.55 + childPerpY * b.curve * cLen * 0.5;
+                    ctx.lineWidth = Math.max(0.3, d.width * ps * 0.7);
                     ctx.beginPath();
-                    ctx.arc(p.sx, p.sy, r * 1.8, 0, Math.PI * 2);
+                    ctx.moveTo(bx, by);
+                    ctx.quadraticCurveTo(cCpX, cCpY, cEndX, cEndY);
                     ctx.stroke();
                 }
-            } else {
-                // Bio: soft glow for nucleus
-                if (n.subtype === 'nucleus') {
-                    const grd = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, r * 3);
-                    grd.addColorStop(0, rgba(CFG.COLOR_BIO_GLOW, alpha * 0.15));
-                    grd.addColorStop(1, rgba(CFG.COLOR_BIO_GLOW, 0));
-                    ctx.fillStyle = grd;
+            }
+        }
+
+        // ── Axon (single long curved line + terminal bulb) ──
+        if (n.axon) {
+            const a = n.axon;
+            const len = a.length * ps * pulse;
+            const cosA = Math.cos(a.angle), sinA = Math.sin(a.angle);
+            const perpX = -sinA, perpY = cosA;
+            const endX = p.sx + cosA * len;
+            const endY = p.sy + sinA * len;
+            const cpX = p.sx + cosA * len * 0.5 + perpX * a.curve * len * 0.4;
+            const cpY = p.sy + sinA * len * 0.5 + perpY * a.curve * len * 0.4;
+
+            ctx.strokeStyle = rgba(n.color, alpha * 0.55);
+            ctx.lineWidth = Math.max(0.5, a.width * ps);
+            ctx.beginPath();
+            ctx.moveTo(p.sx, p.sy);
+            ctx.quadraticCurveTo(cpX, cpY, endX, endY);
+            ctx.stroke();
+
+            // Terminal bulb (synaptic bouton)
+            const bulbR = Math.max(0.6, a.terminalR * ps);
+            ctx.fillStyle = rgba(CFG.COLOR_BIO_GLOW, alpha * 0.85);
+            ctx.beginPath();
+            ctx.arc(endX, endY, bulbR, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Optional: tiny axon-terminal branches
+            if (a.terminals > 0) {
+                ctx.strokeStyle = rgba(n.color, alpha * 0.45);
+                ctx.lineWidth = Math.max(0.3, a.width * ps * 0.6);
+                for (let i = 0; i < a.terminals; i++) {
+                    const ta = a.angle + ((i - (a.terminals - 1) / 2) * 0.6);
+                    const tlen = len * 0.18;
+                    const tx = endX + Math.cos(ta) * tlen;
+                    const ty = endY + Math.sin(ta) * tlen;
                     ctx.beginPath();
-                    ctx.arc(p.sx, p.sy, r * 3, 0, Math.PI * 2);
+                    ctx.moveTo(endX, endY);
+                    ctx.lineTo(tx, ty);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.arc(tx, ty, bulbR * 0.6, 0, Math.PI * 2);
+                    ctx.fillStyle = rgba(CFG.COLOR_BIO_GLOW, alpha * 0.7);
                     ctx.fill();
                 }
-
-                // Cell body with gradient
-                const bodyGrd = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, r);
-                bodyGrd.addColorStop(0, rgba(CFG.COLOR_BIO_GLOW, alpha * 0.9));
-                bodyGrd.addColorStop(1, rgba(n.color, alpha));
-                ctx.fillStyle = bodyGrd;
-                ctx.beginPath();
-                ctx.arc(p.sx, p.sy, r, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Dendrite stubs
-                if (n.dendrites) {
-                    ctx.strokeStyle = rgba(n.color, alpha * 0.5);
-                    ctx.lineWidth = 0.6 * p.s;
-                    for (const d of n.dendrites) {
-                        const len = d.length * p.s * pulse;
-                        const endX = p.sx + Math.cos(d.angle) * len;
-                        const endY = p.sy + Math.sin(d.angle) * len;
-                        const cpX = p.sx + Math.cos(d.angle) * len * 0.6 + d.curve * len * 0.4;
-                        const cpY = p.sy + Math.sin(d.angle) * len * 0.6 + d.curve * len * 0.4;
-                        ctx.beginPath();
-                        ctx.moveTo(p.sx, p.sy);
-                        ctx.quadraticCurveTo(cpX, cpY, endX, endY);
-                        ctx.stroke();
-                    }
-                }
             }
+        }
+
+        // ── Soma (cell body) — irregular polygon, gradient-filled ──
+        if (n.soma && n.soma.length) {
+            ctx.beginPath();
+            for (let i = 0; i < n.soma.length; i++) {
+                const v = n.soma[i];
+                const sr = v.r * ps * pulse;
+                const x = p.sx + Math.cos(v.angle) * sr;
+                const y = p.sy + Math.sin(v.angle) * sr;
+                i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+            }
+            ctx.closePath();
+            const bodyGrd = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, r);
+            bodyGrd.addColorStop(0, rgba(CFG.COLOR_BIO_GLOW, alpha * 0.95));
+            bodyGrd.addColorStop(1, rgba(n.color, alpha));
+            ctx.fillStyle = bodyGrd;
+            ctx.fill();
+            // Faint cell-membrane outline
+            ctx.strokeStyle = rgba(n.color, alpha * 0.6);
+            ctx.lineWidth = Math.max(0.4, 0.5 * ps);
+            ctx.stroke();
+        }
+
+        // ── Nucleus + nucleolus inside the soma ──
+        if (n.nucleus) {
+            const nx = p.sx + n.nucleus.offX * ps;
+            const ny = p.sy + n.nucleus.offY * ps;
+            const nr = n.nucleus.r * ps * pulse;
+
+            // Nucleus
+            const nucGrd = ctx.createRadialGradient(nx, ny, 0, nx, ny, nr);
+            nucGrd.addColorStop(0, rgba([255, 220, 250], alpha * 0.55));
+            nucGrd.addColorStop(1, rgba(n.color, alpha * 0.4));
+            ctx.fillStyle = nucGrd;
+            ctx.beginPath();
+            ctx.arc(nx, ny, nr, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Nucleolus (small dark spot inside nucleus)
+            ctx.fillStyle = rgba([90, 30, 110], alpha * 0.65);
+            ctx.beginPath();
+            ctx.arc(nx, ny, Math.max(0.5, n.nucleus.nucleolusR * ps), 0, Math.PI * 2);
+            ctx.fill();
         }
     }
 
