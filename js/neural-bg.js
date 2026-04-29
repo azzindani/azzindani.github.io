@@ -16,8 +16,15 @@
         PERSPECTIVE: 800,
         DEPTH_RANGE: 600,
         DRIFT_SPEED: 0.25,
-        TRAIL_LENGTH: 14,             // # of trail points per signal
+        TRAIL_LENGTH: 14,
         ARRIVAL_PULSE_FRAMES: 22,
+        BUBBLE_LIFE_FRAMES: 70,
+        BUBBLE_RISE: 0.45,
+        // Wire (connection) visibility
+        WIRE_ALPHA_BASE: 0.28,
+        WIRE_ALPHA_ACTIVE: 0.85,
+        WIRE_WIDTH_BASE: 0.7,
+        WIRE_WIDTH_ACTIVE: 1.6,
         COLOR_AI: [37, 99, 235],
         COLOR_AI_GLOW: [96, 165, 250],
         COLOR_BIO: [168, 85, 247],
@@ -29,7 +36,7 @@
     };
 
     let canvas, ctx, W, H, dpr;
-    let neurons = [], connections = [], signals = [];
+    let neurons = [], connections = [], signals = [], numberBubbles = [];
     let frameCount = 0, lastTime = 0, paused = false;
     const isMobile = window.matchMedia('(max-width: 768px)').matches;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -294,11 +301,69 @@
         }
     }
 
+    // Random readable float for a "neuron is computing" feel.
+    // Returns strings like "0.482", "-0.193", "1.024".
+    function randomFloatText() {
+        const v = (Math.random() * 2 - 1) * (Math.random() < 0.15 ? 10 : 1);
+        const fixed = v.toFixed(Math.random() < 0.5 ? 3 : 4);
+        // Use a real minus sign for typographic crispness.
+        return fixed.replace('-', '−');
+    }
+
+    // Spawn a small floating-point number bubble at a neuron position.
+    function spawnNumberBubble(idx) {
+        const n = neurons[idx];
+        if (!n || numberBubbles.length > 60) return;
+        numberBubbles.push({
+            x: n.x + rand(-n.radius, n.radius),
+            y: n.y - n.radius * 1.6,
+            z: n.z,
+            vx: rand(-0.15, 0.15),
+            vy: -CFG.BUBBLE_RISE - rand(0, 0.25),
+            text: randomFloatText(),
+            kind: n.kind,
+            age: 0,
+            maxAge: CFG.BUBBLE_LIFE_FRAMES,
+        });
+    }
+
     // Trigger an arrival "ping" on the target neuron when a signal completes.
     function triggerArrival(idx) {
         const n = neurons[idx];
         if (!n) return;
         n.pulseUntil = frameCount + CFG.ARRIVAL_PULSE_FRAMES;
+        // ~70% of arrivals show a floating number — sparse enough to feel alive,
+        // not noisy. Skipped entirely under reduced motion.
+        if (!reducedMotion && Math.random() < 0.7) spawnNumberBubble(idx);
+    }
+
+    // Stroke the wire from a→b. Bio↔bio wires are slightly curved for an
+    // axon-like feel; ai/bridge wires are straight (PCB-trace style).
+    function drawWirePath(conn, a, b, pa, pb) {
+        ctx.beginPath();
+        if (conn.type === 'bio') {
+            const mx = (pa.sx + pb.sx) / 2 + (pa.sy - pb.sy) * 0.1;
+            const my = (pa.sy + pb.sy) / 2 + (pb.sx - pa.sx) * 0.1;
+            ctx.moveTo(pa.sx, pa.sy);
+            ctx.quadraticCurveTo(mx, my, pb.sx, pb.sy);
+        } else {
+            ctx.moveTo(pa.sx, pa.sy);
+            ctx.lineTo(pb.sx, pb.sy);
+        }
+        ctx.stroke();
+    }
+
+    // ── Update Number Bubbles ──
+    function updateNumberBubbles(dt) {
+        for (let k = numberBubbles.length - 1; k >= 0; k--) {
+            const b = numberBubbles[k];
+            b.x += b.vx * dt;
+            b.y += b.vy * dt;
+            b.age += dt;
+            // Decelerate and fade over time
+            b.vy *= 0.985;
+            if (b.age >= b.maxAge) numberBubbles.splice(k, 1);
+        }
     }
 
     // ── Render ──
@@ -314,43 +379,58 @@
             proj[i] = project(neurons[i].x, neurons[i].y, neurons[i].z);
         }
 
-        // Draw connections
+        // Build a set of "wire is currently carrying a signal" pairs so we can
+        // light those wires up as the data travels through them.
+        const activeWires = new Set();
+        for (const sig of signals) {
+            const lo = Math.min(sig.fromIdx, sig.toIdx);
+            const hi = Math.max(sig.fromIdx, sig.toIdx);
+            activeWires.add(lo * 10000 + hi);
+        }
+
+        // Draw connections (wires) — visible enough to read as a network.
         for (const conn of connections) {
             const a = neurons[conn.i], b = neurons[conn.j];
             const pa = proj[conn.i], pb = proj[conn.j];
             const avgScale = (pa.s + pb.s) / 2;
-            const alpha = (1 - conn.dist / CFG.CONNECTION_DIST) * 0.12 * avgScale;
-            if (alpha < 0.005) continue;
+            const distFalloff = (1 - conn.dist / CFG.CONNECTION_DIST);
+            const lo = Math.min(conn.i, conn.j);
+            const hi = Math.max(conn.i, conn.j);
+            const isActive = activeWires.has(lo * 10000 + hi);
 
-            ctx.lineWidth = 0.5 * avgScale;
+            const baseAlpha = (isActive ? CFG.WIRE_ALPHA_ACTIVE : CFG.WIRE_ALPHA_BASE)
+                * distFalloff * avgScale;
+            if (baseAlpha < 0.01) continue;
+            const baseWidth = (isActive ? CFG.WIRE_WIDTH_ACTIVE : CFG.WIRE_WIDTH_BASE) * avgScale;
 
+            // Bridge connections are colorful gradients; same-kind wires take
+            // their parent neuron color.
             if (conn.type === 'bridge') {
-                // Gradient from AI blue to Bio purple
                 const grad = ctx.createLinearGradient(pa.sx, pa.sy, pb.sx, pb.sy);
                 const aColor = a.kind === 'ai' ? CFG.COLOR_AI : CFG.COLOR_BIO;
                 const bColor = b.kind === 'ai' ? CFG.COLOR_AI : CFG.COLOR_BIO;
-                grad.addColorStop(0, rgba(aColor, alpha * 1.5));
-                grad.addColorStop(1, rgba(bColor, alpha * 1.5));
+                grad.addColorStop(0, rgba(aColor, baseAlpha));
+                grad.addColorStop(1, rgba(bColor, baseAlpha));
                 ctx.strokeStyle = grad;
-                ctx.lineWidth = 0.7 * avgScale;
             } else if (conn.type === 'ai') {
-                ctx.strokeStyle = rgba(CFG.COLOR_AI, alpha);
+                ctx.strokeStyle = rgba(CFG.COLOR_AI, baseAlpha);
             } else {
-                ctx.strokeStyle = rgba(CFG.COLOR_BIO, alpha);
+                ctx.strokeStyle = rgba(CFG.COLOR_BIO, baseAlpha);
             }
+            ctx.lineWidth = baseWidth;
+            ctx.lineCap = 'round';
 
-            ctx.beginPath();
-            if (conn.type === 'bio') {
-                // Slightly curved bio connections
-                const mx = (pa.sx + pb.sx) / 2 + (pa.sy - pb.sy) * 0.1;
-                const my = (pa.sy + pb.sy) / 2 + (pb.sx - pa.sx) * 0.1;
-                ctx.moveTo(pa.sx, pa.sy);
-                ctx.quadraticCurveTo(mx, my, pb.sx, pb.sy);
-            } else {
-                ctx.moveTo(pa.sx, pa.sy);
-                ctx.lineTo(pb.sx, pb.sy);
+            // Optional faint glow under active wires for a "current" feel.
+            if (isActive) {
+                const glowColor = conn.type === 'bridge' ? CFG.COLOR_SIGNAL_BRIDGE
+                    : conn.type === 'ai' ? CFG.COLOR_SIGNAL_AI : CFG.COLOR_SIGNAL_BIO;
+                ctx.save();
+                ctx.shadowColor = rgba(glowColor, 0.85);
+                ctx.shadowBlur = 8 * avgScale;
+                drawWirePath(conn, a, b, pa, pb);
+                ctx.restore();
             }
-            ctx.stroke();
+            drawWirePath(conn, a, b, pa, pb);
         }
 
         // Draw signals (with motion trails)
@@ -437,6 +517,31 @@
                 drawBioNeuron(n, p, r, alpha, pulse);
             }
         }
+
+        // ── Number bubbles (rendered last so they sit on top) ──
+        ctx.font = `500 11px ${getComputedStyle(document.documentElement).getPropertyValue('--font-mono') || 'monospace'}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        for (const b of numberBubbles) {
+            const p = project(b.x, b.y, b.z);
+            if (p.s < 0.2) continue;
+            const lifeFrac = 1 - b.age / b.maxAge;
+            const alpha = Math.min(1, lifeFrac * 1.4) * p.s;
+            if (alpha < 0.02) continue;
+
+            const color = b.kind === 'ai' ? CFG.COLOR_SIGNAL_AI : CFG.COLOR_SIGNAL_BIO;
+            const fontPx = Math.max(8, 11 * p.s);
+            ctx.font = `500 ${fontPx}px var(--font-mono), 'JetBrains Mono', monospace`;
+
+            // Soft halo behind text for legibility against the page background
+            ctx.shadowColor = rgba(color, 0.55 * alpha);
+            ctx.shadowBlur = 10 * p.s;
+            ctx.fillStyle = rgba(color, Math.min(1, alpha * 1.1));
+            ctx.fillText(b.text, p.sx, p.sy);
+            ctx.shadowBlur = 0;
+        }
+        ctx.textAlign = 'start';
+        ctx.textBaseline = 'alphabetic';
     }
 
     // ── AI neuron drawing — hexagons & nested hexagons ──
@@ -656,7 +761,10 @@
             buildConnections();
         }
 
-        if (!reducedMotion) updateSignals(dt);
+        if (!reducedMotion) {
+            updateSignals(dt);
+            updateNumberBubbles(dt);
+        }
         render(now);
 
         // Throttle to ~30fps when motion is reduced (still draw, but cheaper).
