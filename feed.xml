@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Portfolio</title>
+  <subtitle>Personal portfolio and blog — Data Science, ML &amp; AI projects</subtitle>
+  <link href="https://azzindani.github.io/feed.xml" rel="self"/>
+  <link href="https://azzindani.github.io/"/>
+  <updated>2024-04-25T00:00:00.000Z</updated>
+  <id>https://azzindani.github.io/</id>
+  <author><name>Azzindani</name></author>
+  <entry>
+    <title>Getting Started</title>
+    <link href="https://azzindani.github.io/#/post/docs-getting-started"/>
+    <id>https://azzindani.github.io/#/post/docs-getting-started</id>
+    <updated>2024-04-25T00:00:00.000Z</updated>
+    <published>2024-04-25T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Welcome to the documentation site.</summary>
+    <category term="docs"/>
+  </entry>
+  <entry>
+    <title>Writing Posts</title>
+    <link href="https://azzindani.github.io/#/post/docs-writing-posts"/>
+    <id>https://azzindani.github.io/#/post/docs-writing-posts</id>
+    <updated>2024-04-25T00:00:00.000Z</updated>
+    <published>2024-04-25T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>How to publish articles, PDFs, and repo READMEs.</summary>
+    <category term="docs"/>
+  </entry>
+  <entry>
+    <title>Markdown Showcase: Math, Mermaid, Code</title>
+    <link href="https://azzindani.github.io/#/post/math-and-mermaid-showcase"/>
+    <id>https://azzindani.github.io/#/post/math-and-mermaid-showcase</id>
+    <updated>2024-04-20T00:00:00.000Z</updated>
+    <published>2024-04-20T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>LaTeX math, Mermaid diagrams, code highlighting, and tables in one post.</summary>
+    <category term="latex"/>
+    <category term="mermaid"/>
+    <category term="showcase"/>
+  </entry>
+  <entry>
+    <title>External Repo README Demo</title>
+    <link href="https://azzindani.github.io/#/post/sample-repo-readme"/>
+    <id>https://azzindani.github.io/#/post/sample-repo-readme</id>
+    <updated>2024-04-01T00:00:00.000Z</updated>
+    <published>2024-04-01T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>This post pulls its content directly from a GitHub repository README file.</summary>
+    <category term="github"/>
+    <category term="repo"/>
+    <category term="demo"/>
+  </entry>
+  <entry>
+    <title>Media Embeds Demo</title>
+    <link href="https://azzindani.github.io/#/post/demo-media-embeds"/>
+    <id>https://azzindani.github.io/#/post/demo-media-embeds</id>
+    <updated>2024-03-15T00:00:00.000Z</updated>
+    <published>2024-03-15T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Showcasing YouTube videos, audio players, and GIF support built into the feed.</summary>
+    <category term="media"/>
+    <category term="youtube"/>
+    <category term="demo"/>
+  </entry>
+  <entry>
+    <title>Sample PDF Presentation</title>
+    <link href="https://azzindani.github.io/#/pdf/sample-pdf-presentation"/>
+    <id>https://azzindani.github.io/#/pdf/sample-pdf-presentation</id>
+    <updated>2024-03-01T00:00:00.000Z</updated>
+    <published>2024-03-01T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>A demo showing the PDF carousel viewer. Upload your own PDF to see it in action.</summary>
+    <category term="pdf"/>
+    <category term="demo"/>
+    <category term="presentation"/>
+  </entry>
+  <entry>
+    <title>Getting Started with Data Science</title>
+    <link href="https://azzindani.github.io/#/post/getting-started-with-data-science"/>
+    <id>https://azzindani.github.io/#/post/getting-started-with-data-science</id>
+    <updated>2024-02-10T00:00:00.000Z</updated>
+    <published>2024-02-10T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>A beginner-friendly guide covering the fundamentals of data science, tools, and workflows.</summary>
+    <category term="python"/>
+    <category term="data-science"/>
+    <category term="tutorial"/>
+  </entry>
+  <entry>
+    <title>Welcome to My Portfolio</title>
+    <link href="https://azzindani.github.io/#/post/welcome-to-my-portfolio"/>
+    <id>https://azzindani.github.io/#/post/welcome-to-my-portfolio</id>
+    <updated>2024-01-15T00:00:00.000Z</updated>
+    <published>2024-01-15T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>An introduction to this portfolio site and what you&apos;ll find here.</summary>
+    <category term="introduction"/>
+    <category term="portfolio"/>
+  </entry>
+</feed>

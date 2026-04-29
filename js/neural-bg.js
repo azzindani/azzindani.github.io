@@ -32,7 +32,10 @@
     let neurons = [], connections = [], signals = [];
     let frameCount = 0, lastTime = 0, paused = false;
     const isMobile = window.matchMedia('(max-width: 768px)').matches;
-    const neuronCount = isMobile ? CFG.NEURON_COUNT_MOBILE : CFG.NEURON_COUNT;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const neuronCount = reducedMotion
+        ? Math.floor((isMobile ? CFG.NEURON_COUNT_MOBILE : CFG.NEURON_COUNT) * 0.5)
+        : (isMobile ? CFG.NEURON_COUNT_MOBILE : CFG.NEURON_COUNT);
 
     // ── 3D → 2D Projection ──
     function project(x, y, z) {
@@ -645,17 +648,23 @@
         const dt = Math.min((now - lastTime) / 16.667, 3); // normalize to ~60fps, cap at 3
         lastTime = now;
 
-        updateNeurons(dt);
+        // Reduced-motion users get a (mostly) static frame: no drift, slow signals.
+        if (!reducedMotion) updateNeurons(dt);
 
         frameCount++;
         if (frameCount % CFG.CONN_RECALC_INTERVAL === 0) {
             buildConnections();
         }
 
-        updateSignals(dt);
+        if (!reducedMotion) updateSignals(dt);
         render(now);
 
-        requestAnimationFrame(animate);
+        // Throttle to ~30fps when motion is reduced (still draw, but cheaper).
+        if (reducedMotion) {
+            setTimeout(() => requestAnimationFrame(animate), 33);
+        } else {
+            requestAnimationFrame(animate);
+        }
     }
 
     // ── Start ──
