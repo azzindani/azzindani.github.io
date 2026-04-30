@@ -631,6 +631,33 @@ function configureMarked(options = {}) {
         return `<div class="table-wrapper"><table><thead>${header}</thead><tbody>${body}</tbody></table></div>`;
     };
 
+    // Callout / admonition blocks — GitHub-style > [!NOTE] syntax
+    renderer.blockquote = function(src) {
+        let body = src;
+        if (typeof src === 'object' && src !== null) body = src.body || src.text || '';
+        const typeMap = {
+            note:      { icon: 'ℹ',  label: 'Note'      },
+            tip:       { icon: '✦',  label: 'Tip'       },
+            important: { icon: '★',  label: 'Important' },
+            warning:   { icon: '⚠',  label: 'Warning'   },
+            caution:   { icon: '⚡', label: 'Caution'   },
+        };
+        const m = body.match(/^<p>\[!(note|tip|important|warning|caution)\](<br\s*\/?>|<\/p>)/i);
+        if (m) {
+            const type = m[1].toLowerCase();
+            const { icon, label } = typeMap[type];
+            const content = body
+                .replace(/^<p>\[![\w]+\]<br\s*\/?>/i, '<p>')
+                .replace(/^<p>\[![\w]+\]<\/p>/i, '')
+                .trim();
+            return `<div class="callout callout-${type}">` +
+                   `<div class="callout-header"><span class="callout-icon">${icon}</span><span class="callout-title">${label}</span></div>` +
+                   `<div class="callout-body">${content}</div>` +
+                   `</div>`;
+        }
+        return `<blockquote>${body}</blockquote>`;
+    };
+
     marked.setOptions({ breaks: true, gfm: true, renderer });
     return renderer;
 }
@@ -2440,6 +2467,168 @@ Router.add('/admin/new', renderEditorPage);
 Router.add('/admin/edit/:slug', renderEditorPage);
 Router.add('/admin/upload', renderUploadPage);
 
+/* ============================================
+   Phase 9: Command Palette (⌘K)
+   ============================================ */
+
+const CommandPalette = (() => {
+    let overlay = null, input = null, results = null;
+    let items = [], activeIdx = -1;
+
+    function build() {
+        if (overlay) return;
+        overlay = document.createElement('div');
+        overlay.id = 'cmd-palette-overlay';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-label', 'Command palette');
+        overlay.hidden = true;
+        overlay.innerHTML = `
+            <div class="cmd-palette">
+                <div class="cmd-palette-header">
+                    <svg class="cmd-palette-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <input type="text" class="cmd-palette-input" placeholder="Search posts, docs, tags…" autocomplete="off" spellcheck="false">
+                    <kbd class="cmd-palette-esc">esc</kbd>
+                </div>
+                <div class="cmd-palette-results" role="listbox"></div>
+                <div class="cmd-palette-footer">
+                    <span><kbd>↑↓</kbd> navigate</span>
+                    <span><kbd>⏎</kbd> open</span>
+                    <span><kbd>esc</kbd> close</span>
+                </div>
+            </div>`;
+        input = overlay.querySelector('.cmd-palette-input');
+        results = overlay.querySelector('.cmd-palette-results');
+        overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+        overlay.querySelector('.cmd-palette-esc').addEventListener('click', close);
+        input.addEventListener('input', () => render(input.value));
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { e.preventDefault(); close(); }
+            else if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+            else if (e.key === 'Enter') { e.preventDefault(); selectActive(); }
+        });
+        document.body.appendChild(overlay);
+    }
+
+    async function open() {
+        build();
+        overlay.hidden = false;
+        document.body.classList.add('cmd-open');
+        setTimeout(() => { input.focus(); input.select(); }, 10);
+        const posts = await ContentService.getPosts();
+        render(input.value, posts);
+    }
+
+    function close() {
+        if (!overlay) return;
+        overlay.hidden = true;
+        document.body.classList.remove('cmd-open');
+        input.value = '';
+        results.innerHTML = '';
+        items = [];
+        activeIdx = -1;
+    }
+
+    function render(query, allPosts) {
+        const posts = allPosts || ContentService._cache || [];
+        const q = query.trim().toLowerCase();
+        const filtered = q
+            ? posts.filter(p =>
+                (p.title || '').toLowerCase().includes(q) ||
+                (p.description || '').toLowerCase().includes(q) ||
+                (p.tags || []).some(t => t.toLowerCase().includes(q)) ||
+                (p.category || '').toLowerCase().includes(q))
+            : posts.slice(0, 8);
+
+        items = [];
+        let html = '';
+        const docs = filtered.filter(p => p.type === 'doc').slice(0, 4);
+        const others = filtered.filter(p => p.type !== 'doc').slice(0, 6);
+
+        const iconFor = p => p.type === 'pdf' ? '📄' : p.type === 'repo' ? '📦' : p.type === 'doc' ? '📖' : '📝';
+        const hrefFor = p => p.type === 'pdf' ? `#/pdf/${p.slug}` : p.type === 'doc' ? `#/docs/${p.slug}` : `#/post/${p.slug}`;
+
+        const row = p => {
+            const idx = items.length;
+            items.push({ href: hrefFor(p) });
+            return `<div class="cmd-item" data-idx="${idx}" role="option">
+                <span class="cmd-item-icon">${iconFor(p)}</span>
+                <span class="cmd-item-body">
+                    <span class="cmd-item-title">${Utils.escapeHtml(p.title)}</span>
+                    ${p.description ? `<span class="cmd-item-sub">${Utils.escapeHtml(p.description)}</span>` : ''}
+                </span>
+                ${p.date ? `<span class="cmd-item-date">${p.date.slice(0, 7)}</span>` : ''}
+            </div>`;
+        };
+
+        if (others.length) { html += `<div class="cmd-group">${q ? 'Results' : 'Recent Posts'}</div>`; html += others.map(row).join(''); }
+        if (docs.length)   { html += `<div class="cmd-group">Documentation</div>`; html += docs.map(row).join(''); }
+
+        if (q) {
+            const tagSet = new Set();
+            posts.forEach(p => (p.tags || []).forEach(t => { if (t.toLowerCase().includes(q)) tagSet.add(t); }));
+            const tags = [...tagSet].slice(0, 3);
+            if (tags.length) {
+                html += `<div class="cmd-group">Tags</div>`;
+                tags.forEach(t => {
+                    const idx = items.length;
+                    items.push({ href: `#/tag/${encodeURIComponent(t)}` });
+                    html += `<div class="cmd-item" data-idx="${idx}" role="option">
+                        <span class="cmd-item-icon">#</span>
+                        <span class="cmd-item-body"><span class="cmd-item-title">${Utils.escapeHtml(t)}</span></span>
+                    </div>`;
+                });
+            }
+        }
+
+        if (!html) html = `<div class="cmd-empty">No results for "<strong>${Utils.escapeHtml(query)}</strong>"</div>`;
+
+        results.innerHTML = html;
+        activeIdx = -1;
+        results.querySelectorAll('.cmd-item').forEach(el => {
+            el.addEventListener('click', () => go(parseInt(el.dataset.idx, 10)));
+            el.addEventListener('mouseenter', () => { activeIdx = parseInt(el.dataset.idx, 10); highlight(); });
+        });
+    }
+
+    function move(dir) {
+        if (!items.length) return;
+        activeIdx = (activeIdx + dir + items.length) % items.length;
+        highlight();
+        results.querySelector(`.cmd-item[data-idx="${activeIdx}"]`)?.scrollIntoView({ block: 'nearest' });
+    }
+
+    function highlight() {
+        results.querySelectorAll('.cmd-item').forEach(el =>
+            el.classList.toggle('active', parseInt(el.dataset.idx, 10) === activeIdx));
+    }
+
+    function selectActive() {
+        if (activeIdx >= 0 && activeIdx < items.length) go(activeIdx);
+    }
+
+    function go(idx) {
+        const item = items[idx];
+        if (!item) return;
+        close();
+        window.location.hash = item.href;
+    }
+
+    return {
+        open,
+        close,
+        init() {
+            document.addEventListener('keydown', e => {
+                if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); open(); }
+            });
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape' && overlay && !overlay.hidden) close();
+            });
+        }
+    };
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
     // ── Mobile nav drawer ──
     const navMenu = document.getElementById('nav-mobile-menu');
@@ -2511,6 +2700,11 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.hash = current.startsWith('/admin') ? '#/' : '#/admin';
         });
     }
+
+    // ⌘K command palette
+    CommandPalette.init();
+    const cmdBtn = document.getElementById('cmd-palette-btn');
+    if (cmdBtn) cmdBtn.addEventListener('click', () => CommandPalette.open());
 
     // Start router
     Router.init();
