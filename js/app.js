@@ -247,22 +247,31 @@ const Head = {
 const Router = {
     routes: {},
     currentRoute: null,
+    query: new URLSearchParams(),
 
     add(pattern, handler) { this.routes[pattern] = handler; },
 
     resolve() {
         Cleanup.run(); // destroy observers, PDF docs, listeners from previous page
-        const hash = window.location.hash.slice(1) || '/';
+        // Hash format: #/path/here?key=value
+        const fullHash = window.location.hash.slice(1) || '/';
+        const qIdx = fullHash.indexOf('?');
+        const hash = qIdx >= 0 ? fullHash.slice(0, qIdx) : fullHash;
+        this.query = new URLSearchParams(qIdx >= 0 ? fullHash.slice(qIdx + 1) : '');
         window.scrollTo(0, 0);
 
         // Hide reading progress bar unless on post page
         const prog = document.getElementById('reading-progress');
         if (prog) prog.style.width = '0';
 
-        // Update nav active state
-        document.querySelectorAll('.nav-action-btn').forEach(b => b.classList.remove('active'));
-        const activeLabel = hash.startsWith('/admin') ? 'Admin' : 'Feed';
-        document.querySelector(`.nav-action-btn[aria-label="${activeLabel}"]`)?.classList.add('active');
+        // Highlight current navbar tab
+        document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+        const tabKey = hash === '/' ? 'projects'
+            : hash.startsWith('/blog') ? 'blog'
+            : hash.startsWith('/docs') ? 'docs'
+            : hash.startsWith('/admin') ? 'admin'
+            : '';
+        if (tabKey) document.querySelectorAll(`.nav-tab[data-tab="${tabKey}"]`).forEach(t => t.classList.add('active'));
 
         if (this.routes[hash]) {
             this.currentRoute = hash;
@@ -622,6 +631,33 @@ function configureMarked(options = {}) {
         return `<div class="table-wrapper"><table><thead>${header}</thead><tbody>${body}</tbody></table></div>`;
     };
 
+    // Callout / admonition blocks — GitHub-style > [!NOTE] syntax
+    renderer.blockquote = function(src) {
+        let body = src;
+        if (typeof src === 'object' && src !== null) body = src.body || src.text || '';
+        const typeMap = {
+            note:      { icon: 'ℹ',  label: 'Note'      },
+            tip:       { icon: '✦',  label: 'Tip'       },
+            important: { icon: '★',  label: 'Important' },
+            warning:   { icon: '⚠',  label: 'Warning'   },
+            caution:   { icon: '⚡', label: 'Caution'   },
+        };
+        const m = body.match(/^<p>\[!(note|tip|important|warning|caution)\](<br\s*\/?>|<\/p>)/i);
+        if (m) {
+            const type = m[1].toLowerCase();
+            const { icon, label } = typeMap[type];
+            const content = body
+                .replace(/^<p>\[![\w]+\]<br\s*\/?>/i, '<p>')
+                .replace(/^<p>\[![\w]+\]<\/p>/i, '')
+                .trim();
+            return `<div class="callout callout-${type}">` +
+                   `<div class="callout-header"><span class="callout-icon">${icon}</span><span class="callout-title">${label}</span></div>` +
+                   `<div class="callout-body">${content}</div>` +
+                   `</div>`;
+        }
+        return `<blockquote>${body}</blockquote>`;
+    };
+
     marked.setOptions({ breaks: true, gfm: true, renderer });
     return renderer;
 }
@@ -682,18 +718,35 @@ function renderFeedItem(post) {
     </article>`;
 }
 
-async function renderFeedPage() {
-    Head.reset();
+// kindFilter: 'project' | 'blog' | null (null = all kinds, used by /collection etc.)
+async function renderFeedPage(opts = {}) {
+    const kindFilter = opts.kindFilter || null;
+    // Home page (/) is the Projects feed — use the plain site name there.
+    // Only label the page when it's an explicitly separate route (/blog).
+    Head.set({
+        title: kindFilter === 'blog' ? 'Blog' : '',
+        description: kindFilter === 'blog' ? 'Posts and write-ups.'
+            : kindFilter === 'project' ? 'Showcase work and projects.'
+            : CONFIG.siteDescription,
+    });
+
     const app = document.getElementById('app');
     const allPosts = await ContentService.getPosts();
-    const categories = ContentService.getCategories(allPosts);
+    // Apply kind filter at the top so featured / counts / categories all reflect the page.
+    const kindMatch = (p) => {
+        if (!kindFilter) return p.type !== 'doc';        // home/blog/projects all hide docs
+        if (kindFilter === 'project') return postKind(p) === 'project';
+        if (kindFilter === 'blog')    return postKind(p) === 'blog';
+        return true;
+    };
+    const scopedPosts = allPosts.filter(kindMatch);
+    const categories = ContentService.getCategories(scopedPosts);
 
-    // Sync search bar value
     const globalSearch = document.getElementById('global-search');
     const searchVal = globalSearch ? globalSearch.value : '';
 
     // Featured strip at the top — only shows when not searching/filtering.
-    const featured = allPosts.filter(p => p.featured).slice(0, 3);
+    const featured = scopedPosts.filter(p => p.featured).slice(0, 3);
     const featuredHtml = featured.length ? `
         <section class="featured-row" id="featured-row">
             <div class="featured-row-header"><h3>Featured</h3></div>
@@ -708,9 +761,19 @@ async function renderFeedPage() {
             </div>
         </section>` : '';
 
+    const heading = kindFilter === 'project' ? 'Projects'
+        : kindFilter === 'blog' ? 'Blog'
+        : 'Latest';
+
     app.innerHTML = `
     <div class="feed-layout">
         <div class="feed-page">
+            <header class="feed-page-header">
+                <h1>${heading}</h1>
+                <p class="feed-page-sub">${kindFilter === 'project' ? 'Showcase work and projects.'
+                    : kindFilter === 'blog' ? 'Posts and write-ups.'
+                    : 'Recent posts and projects.'}</p>
+            </header>
             ${featuredHtml}
             <div class="feed-filter-bar" id="feed-filter-bar">
                 <div class="feed-tabs" id="feed-tabs">
@@ -718,7 +781,6 @@ async function renderFeedPage() {
                     <button class="feed-tab" data-type="article">Articles</button>
                     <button class="feed-tab" data-type="pdf">PDFs</button>
                     <button class="feed-tab" data-type="repo">Repos</button>
-                    <button class="feed-tab" data-type="doc">Docs</button>
                 </div>
                 <select class="filter-select filter-select-sm" id="feed-category">
                     <option value="all">All Topics</option>
@@ -726,51 +788,91 @@ async function renderFeedPage() {
                 </select>
             </div>
             <div class="feed-list" id="feed-list"></div>
-            <div id="feed-sentinel" style="height:1px;"></div>
+            <nav class="pagination" id="pagination" aria-label="Pagination"></nav>
         </div>
         <aside class="feed-sidebar" id="feed-sidebar"></aside>
     </div>`;
 
-    // Hide featured strip when actively filtering or searching.
     function toggleFeatured() {
         const row = document.getElementById('featured-row');
         if (!row) return;
         const search = document.getElementById('global-search')?.value?.trim() || '';
-        const isFiltering = search || currentType !== 'all' || currentCat !== 'all';
+        const isFiltering = search || currentType !== 'all' || currentCat !== 'all' || currentPage > 1;
         row.style.display = isFiltering ? 'none' : '';
     }
 
-    let filtered = [...allPosts];
-    let displayed = 0;
+    let filtered = [...scopedPosts];
     let currentType = 'all';
     let currentCat = 'all';
+    let currentPage = Math.max(1, parseInt(Router.query.get('p') || '1', 10) || 1);
 
-    function applyFilters() {
+    function applyFilters({ resetPage = true } = {}) {
         const search = document.getElementById('global-search')?.value || '';
-        filtered = ContentService.filterPosts(allPosts, { search, category: currentCat, type: currentType });
-        displayed = 0;
-        document.getElementById('feed-list').innerHTML = '';
+        filtered = ContentService.filterPosts(scopedPosts, { search, category: currentCat, type: currentType });
+        if (resetPage) currentPage = 1;
+        renderPage();
         toggleFeatured();
-        loadBatch();
     }
 
-    function loadBatch() {
+    function renderPage() {
         const list = document.getElementById('feed-list');
         if (!list) return;
-        const batch = filtered.slice(displayed, displayed + CONFIG.postsPerPage);
+        const totalPages = Math.max(1, Math.ceil(filtered.length / CONFIG.postsPerPage));
+        if (currentPage > totalPages) currentPage = totalPages;
+        const startIdx = (currentPage - 1) * CONFIG.postsPerPage;
+        const slice = filtered.slice(startIdx, startIdx + CONFIG.postsPerPage);
 
-        if (batch.length === 0 && displayed === 0) {
+        if (slice.length === 0) {
             list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">&#128269;</div><h3>No posts found</h3><p>Try different filters or search terms.</p></div>`;
-            return;
+        } else {
+            list.innerHTML = slice.map(renderFeedItem).join('');
+            initInlinePdfs();
         }
+        renderPagination(totalPages);
+    }
 
-        batch.forEach(post => {
-            list.insertAdjacentHTML('beforeend', renderFeedItem(post));
+    function renderPagination(totalPages) {
+        const el = document.getElementById('pagination');
+        if (!el) return;
+        if (totalPages <= 1) { el.innerHTML = ''; return; }
+
+        const cur = currentPage;
+        // Build a small range around current page with ellipses.
+        const pages = [];
+        const add = (n) => pages.push(n);
+        const range = (a, b) => { for (let i = a; i <= b; i++) add(i); };
+        if (totalPages <= 7) range(1, totalPages);
+        else if (cur <= 4)             { range(1, 5); add('…'); add(totalPages); }
+        else if (cur >= totalPages - 3) { add(1); add('…'); range(totalPages - 4, totalPages); }
+        else                            { add(1); add('…'); range(cur - 1, cur + 1); add('…'); add(totalPages); }
+
+        const link = (n, label = n, extraClass = '') => {
+            const active = n === cur ? 'active' : '';
+            return `<button type="button" class="pagination-btn ${extraClass} ${active}" data-page="${n}" ${active ? 'aria-current="page"' : ''}>${label}</button>`;
+        };
+
+        el.innerHTML = `
+            <button type="button" class="pagination-btn pagination-arrow" data-page="${Math.max(1, cur - 1)}" ${cur === 1 ? 'disabled' : ''} aria-label="Previous page">&#8592;</button>
+            ${pages.map(p => p === '…' ? '<span class="pagination-ellipsis">…</span>' : link(p)).join('')}
+            <button type="button" class="pagination-btn pagination-arrow" data-page="${Math.min(totalPages, cur + 1)}" ${cur === totalPages ? 'disabled' : ''} aria-label="Next page">&#8594;</button>
+            <span class="pagination-meta">Page ${cur} of ${totalPages}</span>
+        `;
+        el.querySelectorAll('button[data-page]').forEach(btn => {
+            btn.addEventListener('click', () => goToPage(+btn.dataset.page));
         });
-        displayed += batch.length;
+    }
 
-        // Initialize inline PDFs for the newly added items
-        initInlinePdfs();
+    function goToPage(n) {
+        currentPage = n;
+        // Update URL so the page is shareable / back-button works.
+        const base = window.location.hash.split('?')[0] || '#/';
+        const newHash = n > 1 ? `${base}?p=${n}` : base;
+        // Update without triggering hashchange resolve (we render in place).
+        history.replaceState(null, '', newHash);
+        renderPage();
+        toggleFeatured();
+        // Scroll to feed top so the new page is in view
+        document.getElementById('feed-filter-bar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     // Tab click handlers
@@ -783,40 +885,36 @@ async function renderFeedPage() {
         });
     });
 
-    // Category filter
     document.getElementById('feed-category').addEventListener('change', (e) => {
         currentCat = e.target.value;
         applyFilters();
     });
 
-    // Global search (in navbar) drives feed filter
     if (globalSearch) {
         const handler = Utils.debounce(() => applyFilters(), 300);
         globalSearch.addEventListener('input', handler);
         Cleanup.add(() => globalSearch.removeEventListener('input', handler));
     }
 
-    // Infinite scroll sentinel
-    const sentinel = document.getElementById('feed-sentinel');
-    if (sentinel) {
-        const observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting && displayed < filtered.length) {
-                loadBatch();
-            }
-        }, { rootMargin: '200px' });
-        observer.observe(sentinel);
-        Cleanup.add(() => observer.disconnect());
-    }
+    // Initial render uses query-param page if present
+    applyFilters({ resetPage: false });
 
-    // Initial load
-    loadBatch();
-
-    // If search had a value, apply it
     if (searchVal) applyFilters();
 
-    // Populate sidebar
-    renderSidebar(allPosts);
+    renderSidebar(scopedPosts);
 }
+
+// What kind is a post? Defaults to 'blog' if not explicitly set, with one
+// heuristic: type=='repo' is treated as a project unless overridden.
+function postKind(p) {
+    if (p.kind === 'project' || p.kind === 'blog') return p.kind;
+    if (p.type === 'repo') return 'project';
+    return 'blog';
+}
+
+// Convenience routes that delegate to renderFeedPage with a kind filter.
+function renderProjectsPage() { return renderFeedPage({ kindFilter: 'project' }); }
+function renderBlogPage()     { return renderFeedPage({ kindFilter: 'blog' }); }
 
 // ── Sidebar ──
 
@@ -1684,6 +1782,11 @@ async function renderEditorPage({ slug } = {}) {
                     <option value="repo" ${isEdit && post.type === 'repo' ? 'selected' : ''}>Repo</option>
                     <option value="doc" ${isEdit && post.type === 'doc' ? 'selected' : ''}>Doc</option>
                 </select></div>
+            <div class="form-group"><label class="form-label">Kind (which tab does this appear in?)</label>
+                <select class="form-select" id="ed-kind">
+                    <option value="blog" ${(!isEdit || (post.kind || (post.type === 'repo' ? 'project' : 'blog')) === 'blog') ? 'selected' : ''}>Blog post</option>
+                    <option value="project" ${(isEdit && (post.kind === 'project' || (!post.kind && post.type === 'repo'))) ? 'selected' : ''}>Project (showcase)</option>
+                </select></div>
             <div class="form-group"><label class="form-label">Collection (groups posts as a series)</label>
                 <input type="text" class="form-input" id="ed-collection" placeholder="e.g. intro-to-ml" value="${isEdit && post.collection ? Utils.escapeHtml(post.collection) : ''}"></div>
             <div class="form-group"><label class="form-label">Order (within collection)</label>
@@ -1901,6 +2004,7 @@ async function renderEditorPage({ slug } = {}) {
             image: document.getElementById('ed-image')?.value || '',
             type: document.getElementById('ed-type')?.value || 'article',
             collection: document.getElementById('ed-collection')?.value || '',
+            kind: document.getElementById('ed-kind')?.value || 'blog',
             order: document.getElementById('ed-order')?.value || '',
             featured: document.getElementById('ed-featured')?.checked || false,
             draft: document.getElementById('ed-draft')?.checked || false,
@@ -1939,6 +2043,7 @@ async function renderEditorPage({ slug } = {}) {
                     document.getElementById('ed-type').value = d.type;
                     document.getElementById('ed-type').dispatchEvent(new Event('change'));
                     document.getElementById('ed-collection').value = d.collection;
+                    if (document.getElementById('ed-kind') && d.kind) document.getElementById('ed-kind').value = d.kind;
                     document.getElementById('ed-order').value = d.order;
                     document.getElementById('ed-featured').checked = d.featured;
                     document.getElementById('ed-draft').checked = d.draft;
@@ -1985,6 +2090,7 @@ async function renderEditorPage({ slug } = {}) {
         const type = document.getElementById('ed-type').value;
         const draft = document.getElementById('ed-draft').checked;
         const featured = document.getElementById('ed-featured').checked;
+        const kind = document.getElementById('ed-kind')?.value || 'blog';
         const collection = document.getElementById('ed-collection').value.trim();
         const orderRaw = document.getElementById('ed-order').value.trim();
         const order = orderRaw ? parseInt(orderRaw, 10) : null;
@@ -2004,6 +2110,7 @@ async function renderEditorPage({ slug } = {}) {
         if (featured) entry.featured = true;
         if (collection) entry.collection = collection;
         if (order != null && !Number.isNaN(order)) entry.order = order;
+        if (kind && kind !== 'blog') entry.kind = kind;
 
         try {
             document.getElementById('editor-save').disabled = true;
@@ -2347,7 +2454,8 @@ async function renderDocsPage({ slug } = {}) {
    Phase 7: Route Registration & Init
    ============================================ */
 
-Router.add('/', renderFeedPage);
+Router.add('/', renderProjectsPage);
+Router.add('/blog', renderBlogPage);
 Router.add('/post/:slug', renderPostPage);
 Router.add('/pdf/:slug', renderPdfPage);
 Router.add('/collections', renderCollectionsIndex);
@@ -2361,7 +2469,192 @@ Router.add('/admin/new', renderEditorPage);
 Router.add('/admin/edit/:slug', renderEditorPage);
 Router.add('/admin/upload', renderUploadPage);
 
+/* ============================================
+   Phase 9: Command Palette (⌘K)
+   ============================================ */
+
+const CommandPalette = (() => {
+    let overlay = null, input = null, results = null;
+    let items = [], activeIdx = -1;
+
+    function build() {
+        if (overlay) return;
+        overlay = document.createElement('div');
+        overlay.id = 'cmd-palette-overlay';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-label', 'Command palette');
+        overlay.hidden = true;
+        overlay.innerHTML = `
+            <div class="cmd-palette">
+                <div class="cmd-palette-header">
+                    <svg class="cmd-palette-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <input type="text" class="cmd-palette-input" placeholder="Search posts, docs, tags…" autocomplete="off" spellcheck="false">
+                    <kbd class="cmd-palette-esc">esc</kbd>
+                </div>
+                <div class="cmd-palette-results" role="listbox"></div>
+                <div class="cmd-palette-footer">
+                    <span><kbd>↑↓</kbd> navigate</span>
+                    <span><kbd>⏎</kbd> open</span>
+                    <span><kbd>esc</kbd> close</span>
+                </div>
+            </div>`;
+        input = overlay.querySelector('.cmd-palette-input');
+        results = overlay.querySelector('.cmd-palette-results');
+        overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+        overlay.querySelector('.cmd-palette-esc').addEventListener('click', close);
+        input.addEventListener('input', () => render(input.value));
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Escape') { e.preventDefault(); close(); }
+            else if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
+            else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+            else if (e.key === 'Enter') { e.preventDefault(); selectActive(); }
+        });
+        document.body.appendChild(overlay);
+    }
+
+    async function open() {
+        build();
+        overlay.hidden = false;
+        document.body.classList.add('cmd-open');
+        setTimeout(() => { input.focus(); input.select(); }, 10);
+        const posts = await ContentService.getPosts();
+        render(input.value, posts);
+    }
+
+    function close() {
+        if (!overlay) return;
+        overlay.hidden = true;
+        document.body.classList.remove('cmd-open');
+        input.value = '';
+        results.innerHTML = '';
+        items = [];
+        activeIdx = -1;
+    }
+
+    function render(query, allPosts) {
+        const posts = allPosts || ContentService._cache || [];
+        const q = query.trim().toLowerCase();
+        const filtered = q
+            ? posts.filter(p =>
+                (p.title || '').toLowerCase().includes(q) ||
+                (p.description || '').toLowerCase().includes(q) ||
+                (p.tags || []).some(t => t.toLowerCase().includes(q)) ||
+                (p.category || '').toLowerCase().includes(q))
+            : posts.slice(0, 8);
+
+        items = [];
+        let html = '';
+        const docs = filtered.filter(p => p.type === 'doc').slice(0, 4);
+        const others = filtered.filter(p => p.type !== 'doc').slice(0, 6);
+
+        const iconFor = p => p.type === 'pdf' ? '📄' : p.type === 'repo' ? '📦' : p.type === 'doc' ? '📖' : '📝';
+        const hrefFor = p => p.type === 'pdf' ? `#/pdf/${p.slug}` : p.type === 'doc' ? `#/docs/${p.slug}` : `#/post/${p.slug}`;
+
+        const row = p => {
+            const idx = items.length;
+            items.push({ href: hrefFor(p) });
+            return `<div class="cmd-item" data-idx="${idx}" role="option">
+                <span class="cmd-item-icon">${iconFor(p)}</span>
+                <span class="cmd-item-body">
+                    <span class="cmd-item-title">${Utils.escapeHtml(p.title)}</span>
+                    ${p.description ? `<span class="cmd-item-sub">${Utils.escapeHtml(p.description)}</span>` : ''}
+                </span>
+                ${p.date ? `<span class="cmd-item-date">${p.date.slice(0, 7)}</span>` : ''}
+            </div>`;
+        };
+
+        if (others.length) { html += `<div class="cmd-group">${q ? 'Results' : 'Recent Posts'}</div>`; html += others.map(row).join(''); }
+        if (docs.length)   { html += `<div class="cmd-group">Documentation</div>`; html += docs.map(row).join(''); }
+
+        if (q) {
+            const tagSet = new Set();
+            posts.forEach(p => (p.tags || []).forEach(t => { if (t.toLowerCase().includes(q)) tagSet.add(t); }));
+            const tags = [...tagSet].slice(0, 3);
+            if (tags.length) {
+                html += `<div class="cmd-group">Tags</div>`;
+                tags.forEach(t => {
+                    const idx = items.length;
+                    items.push({ href: `#/tag/${encodeURIComponent(t)}` });
+                    html += `<div class="cmd-item" data-idx="${idx}" role="option">
+                        <span class="cmd-item-icon">#</span>
+                        <span class="cmd-item-body"><span class="cmd-item-title">${Utils.escapeHtml(t)}</span></span>
+                    </div>`;
+                });
+            }
+        }
+
+        if (!html) html = `<div class="cmd-empty">No results for "<strong>${Utils.escapeHtml(query)}</strong>"</div>`;
+
+        results.innerHTML = html;
+        activeIdx = -1;
+        results.querySelectorAll('.cmd-item').forEach(el => {
+            el.addEventListener('click', () => go(parseInt(el.dataset.idx, 10)));
+            el.addEventListener('mouseenter', () => { activeIdx = parseInt(el.dataset.idx, 10); highlight(); });
+        });
+    }
+
+    function move(dir) {
+        if (!items.length) return;
+        activeIdx = (activeIdx + dir + items.length) % items.length;
+        highlight();
+        results.querySelector(`.cmd-item[data-idx="${activeIdx}"]`)?.scrollIntoView({ block: 'nearest' });
+    }
+
+    function highlight() {
+        results.querySelectorAll('.cmd-item').forEach(el =>
+            el.classList.toggle('active', parseInt(el.dataset.idx, 10) === activeIdx));
+    }
+
+    function selectActive() {
+        if (activeIdx >= 0 && activeIdx < items.length) go(activeIdx);
+    }
+
+    function go(idx) {
+        const item = items[idx];
+        if (!item) return;
+        close();
+        window.location.hash = item.href;
+    }
+
+    return {
+        open,
+        close,
+        init() {
+            document.addEventListener('keydown', e => {
+                if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); open(); }
+            });
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape' && overlay && !overlay.hidden) close();
+            });
+        }
+    };
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
+    // ── Mobile nav drawer ──
+    const navMenu = document.getElementById('nav-mobile-menu');
+    const navDrawer = document.getElementById('nav-mobile-drawer');
+    if (navMenu && navDrawer) {
+        const closeDrawer = () => navDrawer.setAttribute('hidden', '');
+        const openDrawer  = () => navDrawer.removeAttribute('hidden');
+        navMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
+            navDrawer.hasAttribute('hidden') ? openDrawer() : closeDrawer();
+        });
+        // Tap a link inside the drawer or anywhere outside → close
+        navDrawer.addEventListener('click', (e) => {
+            if (e.target.closest('.nav-tab')) closeDrawer();
+        });
+        document.addEventListener('click', (e) => {
+            if (!navDrawer.hasAttribute('hidden')
+                && !navDrawer.contains(e.target)
+                && !navMenu.contains(e.target)) closeDrawer();
+        });
+        // Close on route change
+        window.addEventListener('hashchange', closeDrawer);
+    }
+
     // ── Theme toggle ──
     const themeToggle = document.getElementById('theme-toggle');
     if (themeToggle) {
@@ -2409,6 +2702,11 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.hash = current.startsWith('/admin') ? '#/' : '#/admin';
         });
     }
+
+    // ⌘K command palette
+    CommandPalette.init();
+    const cmdBtn = document.getElementById('cmd-palette-btn');
+    if (cmdBtn) cmdBtn.addEventListener('click', () => CommandPalette.open());
 
     // Start router
     Router.init();

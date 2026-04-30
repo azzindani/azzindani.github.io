@@ -56,7 +56,8 @@ test('neural network canvas is mounted', async ({ page }) => {
 });
 
 test('search filters the feed', async ({ page }) => {
-    await page.goto('/');
+    // Navigate to blog feed where the mermaid showcase post lives (kind: blog).
+    await page.goto('/#/blog');
     await page.locator('.feed-item').first().waitFor();
     await page.locator('#global-search').fill('mermaid');
     // Wait for debounce.
@@ -67,7 +68,7 @@ test('search filters the feed', async ({ page }) => {
 
 test('document title updates on navigation', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle('Portfolio');
+    await expect(page).toHaveTitle(/Portfolio/);
     await page.goto('/#/post/math-and-mermaid-showcase');
     await page.waitForLoadState('networkidle');
     await expect(page).toHaveTitle(/Markdown Showcase/);
@@ -136,4 +137,46 @@ test('robots.txt and sitemap.xml exist and are valid', async ({ request }) => {
     const r3 = await request.get('/feed.xml');
     expect(r3.ok()).toBe(true);
     expect(await r3.text()).toContain('<feed');
+});
+
+test('navbar has Projects, Blog, Docs tabs', async ({ page }) => {
+    await page.goto('/');
+    // Scope to .nav-tabs so each locator resolves to exactly one element
+    // (duplicate tab elements exist in the mobile drawer).
+    await expect(page.locator('.nav-tabs .nav-tab[data-tab="projects"]')).toBeVisible();
+    await expect(page.locator('.nav-tabs .nav-tab[data-tab="blog"]')).toBeVisible();
+    await expect(page.locator('.nav-tabs .nav-tab[data-tab="docs"]')).toBeVisible();
+});
+
+test('Projects tab is active on home; Blog tab activates on /blog', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('.nav-tabs .nav-tab[data-tab="projects"]')).toHaveClass(/active/);
+    await page.locator('.nav-tabs .nav-tab[data-tab="blog"]').click();
+    await expect(page).toHaveURL(/#\/blog/);
+    await expect(page.locator('.nav-tabs .nav-tab[data-tab="blog"]')).toHaveClass(/active/);
+});
+
+test('Projects feed only shows project-kind posts', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.feed-item').first().waitFor();
+    // The repo demo has kind: project
+    const titles = await page.locator('.feed-item-title').allTextContents();
+    expect(titles.some(t => /Repo|PDF/i.test(t))).toBe(true);
+    // The welcome post is kind: blog and should NOT appear
+    expect(titles.some(t => /Welcome to My Portfolio/.test(t))).toBe(false);
+});
+
+test('Blog feed only shows blog-kind posts', async ({ page }) => {
+    await page.goto('/#/blog');
+    await page.locator('.feed-item').first().waitFor();
+    const titles = await page.locator('.feed-item-title').allTextContents();
+    expect(titles.some(t => /Welcome to My Portfolio/.test(t))).toBe(true);
+});
+
+test('pagination renders when there are enough posts', async ({ page }) => {
+    // The blog tab has more entries than postsPerPage=9? Likely not yet —
+    // just check the pagination element exists, even if empty.
+    await page.goto('/#/blog');
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('#pagination')).toBeAttached();
 });

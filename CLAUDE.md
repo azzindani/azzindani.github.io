@@ -59,24 +59,38 @@ performant on mobile.
 
 ## Routing
 
-Hash-based router in `js/app.js` (search for `Router.add`). Routes:
+Hash-based router in `js/app.js` (search for `Router.add`). Hash format
+is `#/path?key=value` — `Router.query` exposes the parsed query string.
 
-| Hash                       | Page                                             |
-| -------------------------- | ------------------------------------------------ |
-| `#/`                       | Feed (filterable list of posts).                 |
-| `#/post/:slug`             | Single post view (markdown rendered).            |
-| `#/pdf/:slug`              | Full-page PDF viewer.                            |
-| `#/collection/:slug`       | Posts grouped by `collection` field.             |
-| `#/collections`            | Index of all collections.                        |
-| `#/docs`                   | Docs landing (sidebar + first doc).              |
-| `#/docs/:slug`             | Specific doc page.                               |
-| `#/admin`                  | Admin dashboard (PAT-gated).                     |
-| `#/admin/new`              | New-post editor.                                 |
-| `#/admin/edit/:slug`       | Edit existing post.                              |
-| `#/admin/upload`           | File upload UI for images & PDFs.                |
+| Hash                       | Page                                              |
+| -------------------------- | ------------------------------------------------- |
+| `#/`                       | Projects feed (`kind: "project"`).                |
+| `#/blog`                   | Blog feed (`kind: "blog"`).                       |
+| `#/?p=2`, `#/blog?p=2`     | Pagination (page param, persists via `history.replaceState`). |
+| `#/post/:slug`             | Single post view (markdown rendered).             |
+| `#/pdf/:slug`              | Full-page PDF viewer.                             |
+| `#/collection/:slug`       | Posts grouped by `collection` field.              |
+| `#/collections`            | Index of all collections.                         |
+| `#/tag/:slug`              | Posts with that tag.                              |
+| `#/category/:slug`         | Posts in that category.                           |
+| `#/docs`                   | Docs landing (left tree + first doc + right TOC). |
+| `#/docs/:slug`             | Specific doc page.                                |
+| `#/admin`                  | Admin dashboard (PAT-gated).                      |
+| `#/admin/new`              | New-post editor.                                  |
+| `#/admin/edit/:slug`       | Edit existing post.                               |
+| `#/admin/upload`           | File upload UI for images & PDFs.                 |
 
 Adding a new route: register it in the `Router.add` block at the bottom of
-`app.js` and write a `renderXxxPage` function next to its peers.
+`app.js` and write a `renderXxxPage` function next to its peers. If the
+route should appear in the navbar, also add a `<a class="nav-tab">` to
+`index.html` and a corresponding entry in `Router.resolve()`'s tabKey map.
+
+## Pagination
+
+`renderFeedPage` uses numbered pagination (not infinite scroll). Page size
+is `CONFIG.postsPerPage`. The current page comes from `Router.query.get('p')`.
+Page changes call `history.replaceState` so the URL stays shareable but
+no `hashchange` event fires (we render in place).
 
 ## Post manifest schema (`content/posts.json`)
 
@@ -92,6 +106,7 @@ Every post is an entry in `posts.json`. Fields:
   "tags":        ["python", "tutorial"], // any number
   "image":       "uploads/images/x.png",  // optional cover image
   "type":        "article|pdf|repo|doc",  // controls rendering
+  "kind":        "project|blog",          // controls which top-nav tab it appears in
   "file":        "slug.md",               // markdown file (for article/pdf/doc)
   "draft":       false,                   // hide from feed if true
   "featured":    false,                   // pin to top of feed
@@ -103,6 +118,17 @@ Every post is an entry in `posts.json`. Fields:
                    "url": "https://..." }
 }
 ```
+
+### `type` vs `kind`
+
+- `type` controls the **renderer**: how the post body is fetched and shown
+  (article = markdown file, pdf = carousel viewer, repo = fetch README,
+  doc = markdown in docs sidebar layout).
+- `kind` controls the **navigation tab**: `"project"` posts appear under
+  the Projects tab (the home `/`), `"blog"` posts appear under `/blog`.
+  Defaults: explicit `kind` wins; otherwise `type === "repo"` is treated
+  as `project`, everything else as `blog`. Docs (`type === "doc"`) ignore
+  `kind` and live under `/docs`.
 
 When you edit the manifest manually, keep it sorted by date (descending) —
 the admin UI sorts on read but human edits should match.

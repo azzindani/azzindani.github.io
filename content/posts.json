@@ -38,6 +38,7 @@
       "image": "",
       "type": "article",
       "file": "math-and-mermaid-showcase.md",
+      "kind": "blog",
       "featured": true,
       "draft": false
     },
@@ -51,6 +52,8 @@
       "image": "",
       "type": "repo",
       "repo": "https://github.com/azzindani/azzindani.github.io",
+      "kind": "project",
+      "featured": true,
       "draft": false
     },
     {
@@ -63,6 +66,7 @@
       "image": "",
       "type": "article",
       "file": "demo-media-embeds.md",
+      "kind": "blog",
       "media": {
         "type": "youtube",
         "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
@@ -80,6 +84,7 @@
       "type": "pdf",
       "file": "sample-pdf-presentation.md",
       "pdf": "uploads/pdfs/sample.pdf",
+      "kind": "project",
       "draft": false
     },
     {
@@ -92,6 +97,7 @@
       "image": "",
       "type": "article",
       "file": "getting-started-with-data-science.md",
+      "kind": "blog",
       "featured": true,
       "draft": false
     },
@@ -105,6 +111,7 @@
       "image": "",
       "type": "article",
       "file": "welcome-to-my-portfolio.md",
+      "kind": "blog",
       "draft": false
     }
   ]
