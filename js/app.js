@@ -1154,27 +1154,32 @@ async function renderPostPage({ slug }) {
         </div>` : '';
 
     app.innerHTML = `
-        ${tocHtml}
-        <article class="post-view">
-            <div class="post-header">
-                <a href="#/" class="post-back">&#8592; Back to feed</a>
-                <h1 class="post-title">${Utils.escapeHtml(post.title)}</h1>
-                <div class="post-meta-bar">
-                    <span>${Utils.formatDate(post.date)}</span>
-                    <span class="post-meta-divider"></span>
-                    <span>${readTime}</span>
-                    ${post.category ? `<span class="post-meta-divider"></span><span>${Utils.escapeHtml(post.category)}</span>` : ''}
+        <div class="post-layout">
+            <article class="post-view">
+                <div class="post-header">
+                    <a href="#/" class="post-back">&#8592; Back to feed</a>
+                    <h1 class="post-title">${Utils.escapeHtml(post.title)}</h1>
+                    <div class="post-meta-bar">
+                        <span>${Utils.formatDate(post.date)}</span>
+                        <span class="post-meta-divider"></span>
+                        <span>${readTime}</span>
+                        ${post.category ? `<span class="post-meta-divider"></span><a href="#/category/${encodeURIComponent(post.category)}">${Utils.escapeHtml(post.category)}</a>` : ''}
+                    </div>
+                    ${repoBadge}
                 </div>
-                ${repoBadge}
-            </div>
-            ${coverHtml}
-            ${mediaHtml}
-            <div class="post-content">${htmlContent}</div>
-            ${tags ? `<div class="post-tags">${tags}</div>` : ''}
-            ${actionBarHtml}
-            ${prevNextHtml}
-            ${relatedHtml}
-        </article>`;
+                ${coverHtml}
+                ${mediaHtml}
+                <div class="post-content">${htmlContent}</div>
+                ${tags ? `<div class="post-tags">${tags}</div>` : ''}
+                ${actionBarHtml}
+                ${prevNextHtml}
+                ${relatedHtml}
+            </article>
+            ${tocHtml}
+        </div>
+        ${tocItems.length > 2 ? '<button class="toc-mobile-toggle" type="button" id="toc-mobile-toggle" aria-label="Show table of contents">&#9776; Contents</button>' : ''}
+    `;
+    document.body.classList.toggle('has-toc', tocItems.length > 2);
 
     // Wire copy-link button
     const copyBtn = document.getElementById('post-share-copy');
@@ -1188,6 +1193,25 @@ async function renderPostPage({ slug }) {
 
     // Image lightbox: clicking any post-content image opens a fullscreen view.
     initLightbox('.post-content');
+
+    // Mobile TOC toggle
+    const tocToggle = document.getElementById('toc-mobile-toggle');
+    const tocEl = document.querySelector('.toc');
+    if (tocToggle && tocEl) {
+        tocToggle.addEventListener('click', () => {
+            const open = tocEl.getAttribute('data-mobile-open') === '1';
+            tocEl.setAttribute('data-mobile-open', open ? '0' : '1');
+        });
+        // Tap outside to close
+        document.addEventListener('click', (e) => {
+            if (!tocEl.contains(e.target) && e.target !== tocToggle) {
+                tocEl.setAttribute('data-mobile-open', '0');
+            }
+        });
+        Cleanup.add(() => document.body.classList.remove('has-toc'));
+    } else {
+        Cleanup.add(() => document.body.classList.remove('has-toc'));
+    }
 
     // Render mermaid diagrams
     renderMermaidBlocks('.post-content');
@@ -2235,9 +2259,15 @@ async function renderDocsPage({ slug } = {}) {
     const target = slug ? docs.find(d => d.slug === slug) : docs[0];
     if (!target) { app.innerHTML = '<p style="padding:48px;text-align:center;">Doc not found.</p>'; return; }
 
+    Head.set({
+        title: target.title || 'Docs',
+        description: target.description || 'Documentation and tutorials.',
+    });
+
     app.innerHTML = `
+        <button class="docs-mobile-toggle" type="button" id="docs-nav-toggle" aria-label="Show documentation menu">&#9776; Docs menu</button>
         <div class="docs-layout">
-            <aside class="docs-sidebar">
+            <aside class="docs-sidebar" id="docs-sidebar">
                 ${[...groups.entries()].map(([name, list]) => `
                     <h4>${Utils.escapeHtml(name.replace(/-/g, ' '))}</h4>
                     ${list.map(d => `
@@ -2249,7 +2279,23 @@ async function renderDocsPage({ slug } = {}) {
             <article class="docs-content post-content" id="docs-content">
                 <div class="loading-state"><div class="spinner"></div></div>
             </article>
-        </div>`;
+            <aside class="toc" id="docs-toc" aria-label="On this page" hidden>
+                <div class="toc-header">On this page</div>
+                <nav id="docs-toc-nav"></nav>
+            </aside>
+        </div>
+        <button class="toc-mobile-toggle" type="button" id="toc-mobile-toggle" aria-label="Show on-page contents" hidden>&#9776; Contents</button>
+    `;
+
+    // Wire mobile docs-sidebar toggle
+    const navToggle = document.getElementById('docs-nav-toggle');
+    const sidebar = document.getElementById('docs-sidebar');
+    if (navToggle && sidebar) {
+        navToggle.addEventListener('click', () => {
+            const open = sidebar.getAttribute('data-mobile-open') === '1';
+            sidebar.setAttribute('data-mobile-open', open ? '0' : '1');
+        });
+    }
 
     // Load and render the target doc
     const post = await ContentService.getPost(target.slug);
@@ -2258,10 +2304,43 @@ async function renderDocsPage({ slug } = {}) {
         return;
     }
 
+    // Same configureMarked path as posts so headings are slugged into a TOC.
     const hljs = await LibLoader.loadHighlightJs();
-    configureMarked({ hljs });
+    const docTocItems = [];
+    configureMarked({ hljs, tocItems: docTocItems });
     await renderMarkdownInto(document.getElementById('docs-content'), post.body);
     renderMermaidBlocks('#docs-content');
+
+    // Populate the on-this-page TOC if the doc has enough headings.
+    if (docTocItems.length > 1) {
+        const tocAside = document.getElementById('docs-toc');
+        const tocNav = document.getElementById('docs-toc-nav');
+        tocNav.innerHTML = docTocItems.map(item =>
+            `<a href="#${item.id}" class="toc-link toc-level-${item.level}" data-id="${item.id}">${Utils.escapeHtml(item.text)}</a>`
+        ).join('');
+        tocAside.removeAttribute('hidden');
+        document.body.classList.add('has-toc');
+        Cleanup.add(() => document.body.classList.remove('has-toc'));
+        const tocToggle = document.getElementById('toc-mobile-toggle');
+        if (tocToggle) {
+            tocToggle.removeAttribute('hidden');
+            tocToggle.addEventListener('click', () => {
+                const open = tocAside.getAttribute('data-mobile-open') === '1';
+                tocAside.setAttribute('data-mobile-open', open ? '0' : '1');
+            });
+        }
+
+        // Active heading tracking
+        const links = tocNav.querySelectorAll('a');
+        const headings = docTocItems.map(i => document.getElementById(i.id)).filter(Boolean);
+        const handler = () => {
+            let curr = '';
+            headings.forEach(h => { if (h.getBoundingClientRect().top < 140) curr = h.id; });
+            links.forEach(a => a.classList.toggle('active', a.dataset.id === curr));
+        };
+        window.addEventListener('scroll', handler, { passive: true });
+        Cleanup.add(() => window.removeEventListener('scroll', handler));
+    }
 }
 
 /* ============================================
