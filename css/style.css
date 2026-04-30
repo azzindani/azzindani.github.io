@@ -186,9 +186,13 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
     margin: 0 auto; padding: 0 20px;
     height: 100%;
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto auto 1fr auto;
     gap: 16px;
     align-items: center;
+}
+@media (max-width: 900px) {
+    .nav-container { grid-template-columns: auto 1fr auto; }
+    .nav-tabs { display: none; }
 }
 
 .nav-logo {
@@ -221,6 +225,59 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
     background: var(--color-bg);
+}
+
+/* Top-nav tab links */
+.nav-tabs {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+.nav-tab {
+    padding: 7px 14px;
+    border-radius: 100px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    transition: all var(--transition);
+    white-space: nowrap;
+}
+.nav-tab:hover {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text);
+}
+.nav-tab.active {
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+}
+
+/* Mobile-only hamburger menu (desktop hides it) */
+.nav-mobile-menu { display: none; }
+@media (max-width: 900px) {
+    .nav-mobile-menu { display: inline-flex; }
+}
+
+/* Mobile slide-down drawer */
+.nav-mobile-drawer {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(var(--color-surface-rgb), 0.98);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--color-border-light);
+    padding: 8px 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+}
+.nav-mobile-drawer .nav-tab {
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    border-radius: var(--radius-sm);
 }
 
 .nav-actions { display: flex; gap: 4px; }
@@ -453,6 +510,75 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 }
 
 .feed-list { display: flex; flex-direction: column; gap: 12px; }
+
+/* Per-page header (Projects / Blog / Latest) */
+.feed-page-header {
+    margin-bottom: 12px;
+    padding: 4px 0 0;
+}
+.feed-page-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+}
+.feed-page-sub {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin: 32px 0 16px;
+}
+.pagination-btn {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border-light);
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+.pagination-btn:hover:not(:disabled):not(.active) {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+.pagination-btn.active {
+    background: var(--color-primary);
+    color: #fff;
+    border-color: var(--color-primary);
+    cursor: default;
+}
+.pagination-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.pagination-arrow { font-size: 1rem; }
+.pagination-ellipsis {
+    padding: 0 6px;
+    color: var(--color-text-muted);
+    user-select: none;
+}
+.pagination-meta {
+    margin-left: 8px;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    width: 100%;
+    text-align: center;
+}
+@media (min-width: 600px) {
+    .pagination-meta { width: auto; margin-left: 16px; }
+}
 
 /* ── Feed Item ── */
 .feed-item {

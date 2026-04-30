@@ -38,9 +38,10 @@ function xmlEscape(s) {
 
 // ── sitemap.xml ───────────────────────────────────────────────────────
 const sitemapEntries = [
-    { loc: ORIGIN + '/', lastmod: new Date().toISOString(), priority: '1.0' },
-    { loc: ORIGIN + '/#/collections', lastmod: new Date().toISOString(), priority: '0.6' },
-    { loc: ORIGIN + '/#/docs', lastmod: new Date().toISOString(), priority: '0.6' },
+    { loc: ORIGIN + '/',                lastmod: new Date().toISOString(), priority: '1.0' },
+    { loc: ORIGIN + '/#/blog',          lastmod: new Date().toISOString(), priority: '0.9' },
+    { loc: ORIGIN + '/#/docs',          lastmod: new Date().toISOString(), priority: '0.7' },
+    { loc: ORIGIN + '/#/collections',   lastmod: new Date().toISOString(), priority: '0.6' },
     ...posts.map(p => ({
         loc: postUrl(p),
         lastmod: p.date,

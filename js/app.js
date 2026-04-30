@@ -247,22 +247,31 @@ const Head = {
 const Router = {
     routes: {},
     currentRoute: null,
+    query: new URLSearchParams(),
 
     add(pattern, handler) { this.routes[pattern] = handler; },
 
     resolve() {
         Cleanup.run(); // destroy observers, PDF docs, listeners from previous page
-        const hash = window.location.hash.slice(1) || '/';
+        // Hash format: #/path/here?key=value
+        const fullHash = window.location.hash.slice(1) || '/';
+        const qIdx = fullHash.indexOf('?');
+        const hash = qIdx >= 0 ? fullHash.slice(0, qIdx) : fullHash;
+        this.query = new URLSearchParams(qIdx >= 0 ? fullHash.slice(qIdx + 1) : '');
         window.scrollTo(0, 0);
 
         // Hide reading progress bar unless on post page
         const prog = document.getElementById('reading-progress');
         if (prog) prog.style.width = '0';
 
-        // Update nav active state
-        document.querySelectorAll('.nav-action-btn').forEach(b => b.classList.remove('active'));
-        const activeLabel = hash.startsWith('/admin') ? 'Admin' : 'Feed';
-        document.querySelector(`.nav-action-btn[aria-label="${activeLabel}"]`)?.classList.add('active');
+        // Highlight current navbar tab
+        document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+        const tabKey = hash === '/' ? 'projects'
+            : hash.startsWith('/blog') ? 'blog'
+            : hash.startsWith('/docs') ? 'docs'
+            : hash.startsWith('/admin') ? 'admin'
+            : '';
+        if (tabKey) document.querySelector(`.nav-tab[data-tab="${tabKey}"]`)?.classList.add('active');
 
         if (this.routes[hash]) {
             this.currentRoute = hash;
@@ -682,18 +691,33 @@ function renderFeedItem(post) {
     </article>`;
 }
 
-async function renderFeedPage() {
-    Head.reset();
+// kindFilter: 'project' | 'blog' | null (null = all kinds, used by /collection etc.)
+async function renderFeedPage(opts = {}) {
+    const kindFilter = opts.kindFilter || null;
+    Head.set({
+        title: kindFilter === 'project' ? 'Projects' : kindFilter === 'blog' ? 'Blog' : '',
+        description: kindFilter === 'project' ? 'Showcase work and projects.'
+            : kindFilter === 'blog' ? 'Posts and write-ups.'
+            : CONFIG.siteDescription,
+    });
+
     const app = document.getElementById('app');
     const allPosts = await ContentService.getPosts();
-    const categories = ContentService.getCategories(allPosts);
+    // Apply kind filter at the top so featured / counts / categories all reflect the page.
+    const kindMatch = (p) => {
+        if (!kindFilter) return p.type !== 'doc';        // home/blog/projects all hide docs
+        if (kindFilter === 'project') return postKind(p) === 'project';
+        if (kindFilter === 'blog')    return postKind(p) === 'blog';
+        return true;
+    };
+    const scopedPosts = allPosts.filter(kindMatch);
+    const categories = ContentService.getCategories(scopedPosts);
 
-    // Sync search bar value
     const globalSearch = document.getElementById('global-search');
     const searchVal = globalSearch ? globalSearch.value : '';
 
     // Featured strip at the top — only shows when not searching/filtering.
-    const featured = allPosts.filter(p => p.featured).slice(0, 3);
+    const featured = scopedPosts.filter(p => p.featured).slice(0, 3);
     const featuredHtml = featured.length ? `
         <section class="featured-row" id="featured-row">
             <div class="featured-row-header"><h3>Featured</h3></div>
@@ -708,9 +732,19 @@ async function renderFeedPage() {
             </div>
         </section>` : '';
 
+    const heading = kindFilter === 'project' ? 'Projects'
+        : kindFilter === 'blog' ? 'Blog'
+        : 'Latest';
+
     app.innerHTML = `
     <div class="feed-layout">
         <div class="feed-page">
+            <header class="feed-page-header">
+                <h1>${heading}</h1>
+                <p class="feed-page-sub">${kindFilter === 'project' ? 'Showcase work and projects.'
+                    : kindFilter === 'blog' ? 'Posts and write-ups.'
+                    : 'Recent posts and projects.'}</p>
+            </header>
             ${featuredHtml}
             <div class="feed-filter-bar" id="feed-filter-bar">
                 <div class="feed-tabs" id="feed-tabs">
@@ -718,7 +752,6 @@ async function renderFeedPage() {
                     <button class="feed-tab" data-type="article">Articles</button>
                     <button class="feed-tab" data-type="pdf">PDFs</button>
                     <button class="feed-tab" data-type="repo">Repos</button>
-                    <button class="feed-tab" data-type="doc">Docs</button>
                 </div>
                 <select class="filter-select filter-select-sm" id="feed-category">
                     <option value="all">All Topics</option>
@@ -726,51 +759,91 @@ async function renderFeedPage() {
                 </select>
             </div>
             <div class="feed-list" id="feed-list"></div>
-            <div id="feed-sentinel" style="height:1px;"></div>
+            <nav class="pagination" id="pagination" aria-label="Pagination"></nav>
         </div>
         <aside class="feed-sidebar" id="feed-sidebar"></aside>
     </div>`;
 
-    // Hide featured strip when actively filtering or searching.
     function toggleFeatured() {
         const row = document.getElementById('featured-row');
         if (!row) return;
         const search = document.getElementById('global-search')?.value?.trim() || '';
-        const isFiltering = search || currentType !== 'all' || currentCat !== 'all';
+        const isFiltering = search || currentType !== 'all' || currentCat !== 'all' || currentPage > 1;
         row.style.display = isFiltering ? 'none' : '';
     }
 
-    let filtered = [...allPosts];
-    let displayed = 0;
+    let filtered = [...scopedPosts];
     let currentType = 'all';
     let currentCat = 'all';
+    let currentPage = Math.max(1, parseInt(Router.query.get('p') || '1', 10) || 1);
 
-    function applyFilters() {
+    function applyFilters({ resetPage = true } = {}) {
         const search = document.getElementById('global-search')?.value || '';
-        filtered = ContentService.filterPosts(allPosts, { search, category: currentCat, type: currentType });
-        displayed = 0;
-        document.getElementById('feed-list').innerHTML = '';
+        filtered = ContentService.filterPosts(scopedPosts, { search, category: currentCat, type: currentType });
+        if (resetPage) currentPage = 1;
+        renderPage();
         toggleFeatured();
-        loadBatch();
     }
 
-    function loadBatch() {
+    function renderPage() {
         const list = document.getElementById('feed-list');
         if (!list) return;
-        const batch = filtered.slice(displayed, displayed + CONFIG.postsPerPage);
+        const totalPages = Math.max(1, Math.ceil(filtered.length / CONFIG.postsPerPage));
+        if (currentPage > totalPages) currentPage = totalPages;
+        const startIdx = (currentPage - 1) * CONFIG.postsPerPage;
+        const slice = filtered.slice(startIdx, startIdx + CONFIG.postsPerPage);
 
-        if (batch.length === 0 && displayed === 0) {
+        if (slice.length === 0) {
             list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">&#128269;</div><h3>No posts found</h3><p>Try different filters or search terms.</p></div>`;
-            return;
+        } else {
+            list.innerHTML = slice.map(renderFeedItem).join('');
+            initInlinePdfs();
         }
+        renderPagination(totalPages);
+    }
 
-        batch.forEach(post => {
-            list.insertAdjacentHTML('beforeend', renderFeedItem(post));
+    function renderPagination(totalPages) {
+        const el = document.getElementById('pagination');
+        if (!el) return;
+        if (totalPages <= 1) { el.innerHTML = ''; return; }
+
+        const cur = currentPage;
+        // Build a small range around current page with ellipses.
+        const pages = [];
+        const add = (n) => pages.push(n);
+        const range = (a, b) => { for (let i = a; i <= b; i++) add(i); };
+        if (totalPages <= 7) range(1, totalPages);
+        else if (cur <= 4)             { range(1, 5); add('…'); add(totalPages); }
+        else if (cur >= totalPages - 3) { add(1); add('…'); range(totalPages - 4, totalPages); }
+        else                            { add(1); add('…'); range(cur - 1, cur + 1); add('…'); add(totalPages); }
+
+        const link = (n, label = n, extraClass = '') => {
+            const active = n === cur ? 'active' : '';
+            return `<button type="button" class="pagination-btn ${extraClass} ${active}" data-page="${n}" ${active ? 'aria-current="page"' : ''}>${label}</button>`;
+        };
+
+        el.innerHTML = `
+            <button type="button" class="pagination-btn pagination-arrow" data-page="${Math.max(1, cur - 1)}" ${cur === 1 ? 'disabled' : ''} aria-label="Previous page">&#8592;</button>
+            ${pages.map(p => p === '…' ? '<span class="pagination-ellipsis">…</span>' : link(p)).join('')}
+            <button type="button" class="pagination-btn pagination-arrow" data-page="${Math.min(totalPages, cur + 1)}" ${cur === totalPages ? 'disabled' : ''} aria-label="Next page">&#8594;</button>
+            <span class="pagination-meta">Page ${cur} of ${totalPages}</span>
+        `;
+        el.querySelectorAll('button[data-page]').forEach(btn => {
+            btn.addEventListener('click', () => goToPage(+btn.dataset.page));
         });
-        displayed += batch.length;
+    }
 
-        // Initialize inline PDFs for the newly added items
-        initInlinePdfs();
+    function goToPage(n) {
+        currentPage = n;
+        // Update URL so the page is shareable / back-button works.
+        const base = window.location.hash.split('?')[0] || '#/';
+        const newHash = n > 1 ? `${base}?p=${n}` : base;
+        // Update without triggering hashchange resolve (we render in place).
+        history.replaceState(null, '', newHash);
+        renderPage();
+        toggleFeatured();
+        // Scroll to feed top so the new page is in view
+        document.getElementById('feed-filter-bar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     // Tab click handlers
@@ -783,40 +856,36 @@ async function renderFeedPage() {
         });
     });
 
-    // Category filter
     document.getElementById('feed-category').addEventListener('change', (e) => {
         currentCat = e.target.value;
         applyFilters();
     });
 
-    // Global search (in navbar) drives feed filter
     if (globalSearch) {
         const handler = Utils.debounce(() => applyFilters(), 300);
         globalSearch.addEventListener('input', handler);
         Cleanup.add(() => globalSearch.removeEventListener('input', handler));
     }
 
-    // Infinite scroll sentinel
-    const sentinel = document.getElementById('feed-sentinel');
-    if (sentinel) {
-        const observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting && displayed < filtered.length) {
-                loadBatch();
-            }
-        }, { rootMargin: '200px' });
-        observer.observe(sentinel);
-        Cleanup.add(() => observer.disconnect());
-    }
+    // Initial render uses query-param page if present
+    applyFilters({ resetPage: false });
 
-    // Initial load
-    loadBatch();
-
-    // If search had a value, apply it
     if (searchVal) applyFilters();
 
-    // Populate sidebar
-    renderSidebar(allPosts);
+    renderSidebar(scopedPosts);
 }
+
+// What kind is a post? Defaults to 'blog' if not explicitly set, with one
+// heuristic: type=='repo' is treated as a project unless overridden.
+function postKind(p) {
+    if (p.kind === 'project' || p.kind === 'blog') return p.kind;
+    if (p.type === 'repo') return 'project';
+    return 'blog';
+}
+
+// Convenience routes that delegate to renderFeedPage with a kind filter.
+function renderProjectsPage() { return renderFeedPage({ kindFilter: 'project' }); }
+function renderBlogPage()     { return renderFeedPage({ kindFilter: 'blog' }); }
 
 // ── Sidebar ──
 
@@ -1684,6 +1753,11 @@ async function renderEditorPage({ slug } = {}) {
                     <option value="repo" ${isEdit && post.type === 'repo' ? 'selected' : ''}>Repo</option>
                     <option value="doc" ${isEdit && post.type === 'doc' ? 'selected' : ''}>Doc</option>
                 </select></div>
+            <div class="form-group"><label class="form-label">Kind (which tab does this appear in?)</label>
+                <select class="form-select" id="ed-kind">
+                    <option value="blog" ${(!isEdit || (post.kind || (post.type === 'repo' ? 'project' : 'blog')) === 'blog') ? 'selected' : ''}>Blog post</option>
+                    <option value="project" ${(isEdit && (post.kind === 'project' || (!post.kind && post.type === 'repo'))) ? 'selected' : ''}>Project (showcase)</option>
+                </select></div>
             <div class="form-group"><label class="form-label">Collection (groups posts as a series)</label>
                 <input type="text" class="form-input" id="ed-collection" placeholder="e.g. intro-to-ml" value="${isEdit && post.collection ? Utils.escapeHtml(post.collection) : ''}"></div>
             <div class="form-group"><label class="form-label">Order (within collection)</label>
@@ -1901,6 +1975,7 @@ async function renderEditorPage({ slug } = {}) {
             image: document.getElementById('ed-image')?.value || '',
             type: document.getElementById('ed-type')?.value || 'article',
             collection: document.getElementById('ed-collection')?.value || '',
+            kind: document.getElementById('ed-kind')?.value || 'blog',
             order: document.getElementById('ed-order')?.value || '',
             featured: document.getElementById('ed-featured')?.checked || false,
             draft: document.getElementById('ed-draft')?.checked || false,
@@ -1939,6 +2014,7 @@ async function renderEditorPage({ slug } = {}) {
                     document.getElementById('ed-type').value = d.type;
                     document.getElementById('ed-type').dispatchEvent(new Event('change'));
                     document.getElementById('ed-collection').value = d.collection;
+                    if (document.getElementById('ed-kind') && d.kind) document.getElementById('ed-kind').value = d.kind;
                     document.getElementById('ed-order').value = d.order;
                     document.getElementById('ed-featured').checked = d.featured;
                     document.getElementById('ed-draft').checked = d.draft;
@@ -1985,6 +2061,7 @@ async function renderEditorPage({ slug } = {}) {
         const type = document.getElementById('ed-type').value;
         const draft = document.getElementById('ed-draft').checked;
         const featured = document.getElementById('ed-featured').checked;
+        const kind = document.getElementById('ed-kind')?.value || 'blog';
         const collection = document.getElementById('ed-collection').value.trim();
         const orderRaw = document.getElementById('ed-order').value.trim();
         const order = orderRaw ? parseInt(orderRaw, 10) : null;
@@ -2004,6 +2081,7 @@ async function renderEditorPage({ slug } = {}) {
         if (featured) entry.featured = true;
         if (collection) entry.collection = collection;
         if (order != null && !Number.isNaN(order)) entry.order = order;
+        if (kind && kind !== 'blog') entry.kind = kind;
 
         try {
             document.getElementById('editor-save').disabled = true;
@@ -2347,7 +2425,8 @@ async function renderDocsPage({ slug } = {}) {
    Phase 7: Route Registration & Init
    ============================================ */
 
-Router.add('/', renderFeedPage);
+Router.add('/', renderProjectsPage);
+Router.add('/blog', renderBlogPage);
 Router.add('/post/:slug', renderPostPage);
 Router.add('/pdf/:slug', renderPdfPage);
 Router.add('/collections', renderCollectionsIndex);
@@ -2362,6 +2441,29 @@ Router.add('/admin/edit/:slug', renderEditorPage);
 Router.add('/admin/upload', renderUploadPage);
 
 document.addEventListener('DOMContentLoaded', () => {
+    // ── Mobile nav drawer ──
+    const navMenu = document.getElementById('nav-mobile-menu');
+    const navDrawer = document.getElementById('nav-mobile-drawer');
+    if (navMenu && navDrawer) {
+        const closeDrawer = () => navDrawer.setAttribute('hidden', '');
+        const openDrawer  = () => navDrawer.removeAttribute('hidden');
+        navMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
+            navDrawer.hasAttribute('hidden') ? openDrawer() : closeDrawer();
+        });
+        // Tap a link inside the drawer or anywhere outside → close
+        navDrawer.addEventListener('click', (e) => {
+            if (e.target.closest('.nav-tab')) closeDrawer();
+        });
+        document.addEventListener('click', (e) => {
+            if (!navDrawer.hasAttribute('hidden')
+                && !navDrawer.contains(e.target)
+                && !navMenu.contains(e.target)) closeDrawer();
+        });
+        // Close on route change
+        window.addEventListener('hashchange', closeDrawer);
+    }
+
     // ── Theme toggle ──
     const themeToggle = document.getElementById('theme-toggle');
     if (themeToggle) {
