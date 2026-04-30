@@ -721,10 +721,12 @@ function renderFeedItem(post) {
 // kindFilter: 'project' | 'blog' | null (null = all kinds, used by /collection etc.)
 async function renderFeedPage(opts = {}) {
     const kindFilter = opts.kindFilter || null;
+    // Home page (/) is the Projects feed — use the plain site name there.
+    // Only label the page when it's an explicitly separate route (/blog).
     Head.set({
-        title: kindFilter === 'project' ? 'Projects' : kindFilter === 'blog' ? 'Blog' : '',
-        description: kindFilter === 'project' ? 'Showcase work and projects.'
-            : kindFilter === 'blog' ? 'Posts and write-ups.'
+        title: kindFilter === 'blog' ? 'Blog' : '',
+        description: kindFilter === 'blog' ? 'Posts and write-ups.'
+            : kindFilter === 'project' ? 'Showcase work and projects.'
             : CONFIG.siteDescription,
     });
 

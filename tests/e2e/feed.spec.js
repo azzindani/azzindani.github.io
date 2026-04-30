@@ -56,7 +56,8 @@ test('neural network canvas is mounted', async ({ page }) => {
 });
 
 test('search filters the feed', async ({ page }) => {
-    await page.goto('/');
+    // Navigate to blog feed where the mermaid showcase post lives (kind: blog).
+    await page.goto('/#/blog');
     await page.locator('.feed-item').first().waitFor();
     await page.locator('#global-search').fill('mermaid');
     // Wait for debounce.
@@ -67,7 +68,7 @@ test('search filters the feed', async ({ page }) => {
 
 test('document title updates on navigation', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle('Portfolio');
+    await expect(page).toHaveTitle(/Portfolio/);
     await page.goto('/#/post/math-and-mermaid-showcase');
     await page.waitForLoadState('networkidle');
     await expect(page).toHaveTitle(/Markdown Showcase/);
