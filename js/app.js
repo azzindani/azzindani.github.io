@@ -271,7 +271,7 @@ const Router = {
             : hash.startsWith('/docs') ? 'docs'
             : hash.startsWith('/admin') ? 'admin'
             : '';
-        if (tabKey) document.querySelector(`.nav-tab[data-tab="${tabKey}"]`)?.classList.add('active');
+        if (tabKey) document.querySelectorAll(`.nav-tab[data-tab="${tabKey}"]`).forEach(t => t.classList.add('active'));
 
         if (this.routes[hash]) {
             this.currentRoute = hash;

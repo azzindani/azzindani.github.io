@@ -141,17 +141,19 @@ test('robots.txt and sitemap.xml exist and are valid', async ({ request }) => {
 
 test('navbar has Projects, Blog, Docs tabs', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('.nav-tab[data-tab="projects"]')).toBeVisible();
-    await expect(page.locator('.nav-tab[data-tab="blog"]')).toBeVisible();
-    await expect(page.locator('.nav-tab[data-tab="docs"]')).toBeVisible();
+    // Scope to .nav-tabs so each locator resolves to exactly one element
+    // (duplicate tab elements exist in the mobile drawer).
+    await expect(page.locator('.nav-tabs .nav-tab[data-tab="projects"]')).toBeVisible();
+    await expect(page.locator('.nav-tabs .nav-tab[data-tab="blog"]')).toBeVisible();
+    await expect(page.locator('.nav-tabs .nav-tab[data-tab="docs"]')).toBeVisible();
 });
 
 test('Projects tab is active on home; Blog tab activates on /blog', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('.nav-tab[data-tab="projects"]')).toHaveClass(/active/);
-    await page.locator('.nav-tab[data-tab="blog"]').click();
+    await expect(page.locator('.nav-tabs .nav-tab[data-tab="projects"]')).toHaveClass(/active/);
+    await page.locator('.nav-tabs .nav-tab[data-tab="blog"]').click();
     await expect(page).toHaveURL(/#\/blog/);
-    await expect(page.locator('.nav-tab[data-tab="blog"]')).toHaveClass(/active/);
+    await expect(page.locator('.nav-tabs .nav-tab[data-tab="blog"]')).toHaveClass(/active/);
 });
 
 test('Projects feed only shows project-kind posts', async ({ page }) => {
