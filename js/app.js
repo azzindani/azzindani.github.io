@@ -37,9 +37,13 @@ const Utils = {
     readingTime(text) {
         return `${Math.max(1, Math.ceil((text || '').trim().split(/\s+/).length / 200))} min read`;
     },
+    titleCase(s) {
+        return String(s || '').replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    },
     parseFrontmatter(content) {
-        const m = content.match(/^---\n([\s\S]*?)\n---/);
-        if (!m) return { meta: {}, body: content };
+        const text = String(content || '').replace(/\r\n/g, '\n');
+        const m = text.match(/^---\n([\s\S]*?)\n---/);
+        if (!m) return { meta: {}, body: text };
         const meta = {};
         m[1].split('\n').forEach(line => {
             const i = line.indexOf(':');
@@ -52,7 +56,7 @@ const Utils = {
             if (val === 'false') val = false;
             meta[key] = val;
         });
-        return { meta, body: content.slice(m[0].length).trim() };
+        return { meta, body: text.slice(m[0].length).trim() };
     },
     extractYouTubeId(url) {
         const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
@@ -64,6 +68,75 @@ const Utils = {
 // by index.html before this script. Aliases for readability:
 const parseRepoUrl = Pure.parseRepoUrl;
 const rewriteRelativeAssetPaths = Pure.rewriteRelativeAssetPaths;
+
+// Smooth-scrolls to an in-page heading, accounting for the fixed navbar height.
+function scrollToAnchor(id) {
+    if (!id) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    const offset = (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-height')) || 56) + 16;
+    const y = el.getBoundingClientRect().top + window.scrollY - offset;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+}
+
+// Friendly 404 page — full post-card aesthetic so it doesn't look like an error.
+function renderNotFound(badPath) {
+    Head.set({ title: 'Page not found', description: 'That page doesn\'t exist on this site.' });
+    const safe = (badPath || '').replace(/[<>"&]/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;','&':'&amp;'})[c]);
+    document.getElementById('app').innerHTML = `
+    <div class="not-found-layout">
+        <section class="not-found-card">
+            <div class="not-found-status">404</div>
+            <h1 class="not-found-title">This page wandered off</h1>
+            <p class="not-found-sub">${safe ? `<code>#${safe}</code> doesn't match any route on this site.` : 'The page you were looking for doesn\'t exist or has been moved.'}</p>
+            <div class="not-found-actions">
+                <a href="#/" class="btn btn-primary">Go to projects</a>
+                <a href="#/blog" class="btn btn-secondary">Browse blog</a>
+                <a href="#/docs" class="btn btn-secondary">Read the docs</a>
+            </div>
+            <p class="not-found-hint">Or try searching with <kbd>⌘ K</kbd> / <kbd>Ctrl K</kbd> from anywhere.</p>
+        </section>
+    </div>`;
+}
+
+// Inline SVG glyphs replacing unicode arrows so the typography stays
+// consistent with the rest of the site's stroked-icon style.
+const ICON = {
+    chevronLeft:  '<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>',
+    chevronRight: '<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>',
+    arrowDown:    '<svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>',
+    arrowUp:      '<svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>',
+};
+
+// Pre-process a fetched GitHub/HF/GitLab README so it renders cleanly in the
+// SPA. GitHub READMEs commonly contain things that break or look ugly here:
+//
+//  • `---` immediately after a paragraph turns that paragraph into a setext
+//    H2 heading in CommonMark. We insert a blank line so it becomes a real HR.
+//  • `<a id="readme-top"></a>` anchors and `(back to top)` widgets are pointless
+//    in our SPA (they target page IDs that don't exist on this domain).
+//  • `<details><summary>Table of Contents</summary>…</details>` duplicates the
+//    auto-TOC the site renders in the right column.
+//  • `[!NOTE]` / `[!TIP]` GitHub admonition blocks stay as the existing
+//    callout pipeline already handles them.
+function cleanReadmeMarkdown(md) {
+    if (!md) return md;
+    let out = String(md).replace(/\r\n/g, '\n');
+
+    // Ensure a blank line precedes any standalone `---` (HR marker) so the
+    // line above isn't reinterpreted as a setext heading.
+    out = out.replace(/^([^\n].*)\n(---+)\s*$/gm, '$1\n\n$2');
+
+    // Strip readme-top anchors and "back to top" widgets.
+    out = out.replace(/<a\s+id=["']readme-top["']><\/a>\s*/gi, '');
+    out = out.replace(/<p\s+align=["']right["']>\s*\(\s*<a\s+href=["']#readme-top["']>\s*back to top\s*<\/a>\s*\)\s*<\/p>\s*/gi, '');
+
+    // Strip the legacy <details><summary>Table of Contents</summary>…</details>
+    // block — the site renders its own TOC from the headings.
+    out = out.replace(/<details>\s*<summary>\s*(?:<strong>)?\s*table of contents\s*(?:<\/strong>)?\s*<\/summary>[\s\S]*?<\/details>\s*/gi, '');
+
+    return out;
+}
 
 // ── Lazy library loader ──
 
@@ -109,7 +182,10 @@ const LibLoader = {
             const s = document.createElement('script');
             s.src = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js';
             s.onload = () => {
-                window.mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+                const dark = (document.documentElement.getAttribute('data-theme') ||
+                    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark';
+                window.mermaid.initialize({ startOnLoad: false, securityLevel: 'loose',
+                    theme: dark ? 'dark' : 'default' });
                 resolve(window.mermaid);
             };
             s.onerror = reject;
@@ -252,12 +328,29 @@ const Router = {
     add(pattern, handler) { this.routes[pattern] = handler; },
 
     resolve() {
-        Cleanup.run(); // destroy observers, PDF docs, listeners from previous page
-        // Hash format: #/path/here?key=value
-        const fullHash = window.location.hash.slice(1) || '/';
+        // Hash format: #/path?key=value#anchor   ← only the route part is used
+        // for route matching; the in-page #anchor is restored after render so
+        // TOC links of the form #/post/foo#section still work correctly.
+        let fullHash = window.location.hash.slice(1) || '/';
+        const aIdx = fullHash.indexOf('#');
+        const anchor = aIdx >= 0 ? fullHash.slice(aIdx + 1) : '';
+        if (aIdx >= 0) fullHash = fullHash.slice(0, aIdx);
         const qIdx = fullHash.indexOf('?');
         const hash = qIdx >= 0 ? fullHash.slice(0, qIdx) : fullHash;
-        this.query = new URLSearchParams(qIdx >= 0 ? fullHash.slice(qIdx + 1) : '');
+        const queryStr = qIdx >= 0 ? fullHash.slice(qIdx + 1) : '';
+
+        // Same route, only the in-page anchor changed → don't re-render the
+        // whole page. Just scroll to the new heading.
+        const sameRoute = (this._lastHash === hash) && (this._lastQuery === queryStr);
+        this._lastHash = hash;
+        this._lastQuery = queryStr;
+        this.query = new URLSearchParams(queryStr);
+        if (sameRoute) {
+            scrollToAnchor(anchor);
+            return;
+        }
+
+        Cleanup.run(); // destroy observers, PDF docs, listeners from previous page
         window.scrollTo(0, 0);
 
         // Hide reading progress bar unless on post page
@@ -273,9 +366,11 @@ const Router = {
             : '';
         if (tabKey) document.querySelectorAll(`.nav-tab[data-tab="${tabKey}"]`).forEach(t => t.classList.add('active'));
 
+        const finishRender = () => { if (anchor) requestAnimationFrame(() => scrollToAnchor(anchor)); };
         if (this.routes[hash]) {
             this.currentRoute = hash;
-            this.routes[hash]();
+            const r = this.routes[hash]();
+            Promise.resolve(r).finally(finishRender);
             return;
         }
         for (const pattern of Object.keys(this.routes)) {
@@ -286,12 +381,13 @@ const Router = {
                 const params = {};
                 paramNames.forEach((n, i) => params[n] = decodeURIComponent(match[i + 1]));
                 this.currentRoute = pattern;
-                this.routes[pattern](params);
+                const r = this.routes[pattern](params);
+                Promise.resolve(r).finally(finishRender);
                 return;
             }
         }
-        document.getElementById('app').innerHTML =
-            '<div class="empty-state" style="padding-top:120px;"><div class="empty-state-icon">&#128566;</div><h3>Page Not Found</h3><p>The page you\'re looking for doesn\'t exist.</p><a href="#/" class="btn btn-primary" style="margin-top:16px;">Go Home</a></div>';
+        this.currentRoute = '/404';
+        renderNotFound(hash);
     },
 
     init() {
@@ -343,7 +439,9 @@ const ContentService = {
             if (!r.ok) throw new Error('Not found');
             const raw = await r.text();
             const { meta, body } = Utils.parseFrontmatter(raw);
-            const result = { ...entry, ...meta, body };
+            // Manifest fields should win over markdown frontmatter so the manifest
+            // is single-source-of-truth (matches docs in CLAUDE.md).
+            const result = { ...meta, ...entry, body };
             this._postCache.set(slug, result);
             return result;
         } catch (e) { console.error('getPost:', e); return null; }
@@ -357,14 +455,32 @@ const ContentService = {
 
             let body = '', branch = info.branch;
             if (info.host === 'github') {
-                const r = await fetch(
-                    `https://api.github.com/repos/${info.owner}/${info.name}/readme`,
-                    { headers: { 'Accept': 'application/vnd.github.v3+json' } }
-                );
-                if (!r.ok) throw new Error(`GitHub API ${r.status}`);
-                const data = await r.json();
-                body = atob(data.content.replace(/\n/g, ''));
-                branch = data.url?.match(/ref=([^&]+)/)?.[1] || 'main';
+                // Anonymous github.com API is 60 req/h per IP — too tight for
+                // a portfolio with many repo posts. Try raw.githubusercontent.com
+                // first (no rate limit, always works for public repos), only fall
+                // back to the API if raw misses (uncommon README casing, etc.) and
+                // a stored PAT is available to lift the limit.
+                const tryRaw = async (b) => {
+                    for (const fname of ['README.md', 'readme.md', 'README.MD', 'Readme.md']) {
+                        const r = await fetch(`https://raw.githubusercontent.com/${info.owner}/${info.name}/${b}/${fname}`);
+                        if (r.ok) return { text: await r.text(), branch: b };
+                    }
+                    return null;
+                };
+                const raw = await tryRaw('main') || await tryRaw('master');
+                if (raw) {
+                    body = raw.text;
+                    branch = raw.branch;
+                } else {
+                    const token = (() => { try { return localStorage.getItem('gh_token') || ''; } catch { return ''; } })();
+                    const headers = { 'Accept': 'application/vnd.github.v3+json' };
+                    if (token) headers.Authorization = `Bearer ${token}`;
+                    const r = await fetch(`https://api.github.com/repos/${info.owner}/${info.name}/readme`, { headers });
+                    if (!r.ok) throw new Error(`GitHub ${r.status}`);
+                    const data = await r.json();
+                    body = atob(data.content.replace(/\n/g, ''));
+                    branch = data.url?.match(/ref=([^&]+)/)?.[1] || 'main';
+                }
             } else if (info.host === 'huggingface') {
                 // Try main, then master. Owner may be empty for canonical datasets.
                 let pathPart;
@@ -393,7 +509,8 @@ const ContentService = {
             }
 
             const { body: cleanBody } = Utils.parseFrontmatter(body);
-            const rewritten = rewriteRelativeAssetPaths(cleanBody, info, branch);
+            const cleaned = cleanReadmeMarkdown(cleanBody);
+            const rewritten = rewriteRelativeAssetPaths(cleaned, info, branch);
             this._readmeCache.set(repoUrl, rewritten);
             return rewritten;
         } catch (e) {
@@ -451,17 +568,28 @@ function renderMediaEmbed(media) {
 function getYouTubeRenderer() {
     return {
         paragraph(src) {
-            // marked v5+ may pass {tokens, raw} object
-            const text = (typeof src === 'object' && src !== null) ? (src.text || src.raw || '') : src;
-            const plain = text.replace(/<[^>]+>/g, '').trim();
-            const id = Utils.extractYouTubeId(plain);
-            if (id && /^https?:\/\//.test(plain)) {
+            // marked v5+ passes {tokens, raw, text}; v4 passes the rendered string.
+            // Use the *raw* (unparsed) text to detect a bare YouTube URL line; if
+            // not YouTube, fall back to inline-rendering the tokens so links,
+            // images, badges, etc. all render correctly.
+            let raw, rendered;
+            if (typeof src === 'object' && src !== null) {
+                raw = (src.raw || src.text || '').trim();
+                rendered = src.tokens && this.parser
+                    ? this.parser.parseInline(src.tokens)
+                    : (src.text || '');
+            } else {
+                raw = String(src || '').replace(/<[^>]+>/g, '').trim();
+                rendered = src;
+            }
+            const id = Utils.extractYouTubeId(raw);
+            if (id && /^https?:\/\//.test(raw) && !raw.includes('\n')) {
                 return `<div class="media-embed media-youtube">
                     <iframe src="https://www.youtube-nocookie.com/embed/${id}" frameborder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowfullscreen loading="lazy"></iframe></div>`;
             }
-            return `<p>${text}</p>`;
+            return `<p>${rendered}</p>`;
         }
     };
 }
@@ -546,7 +674,8 @@ async function renderMarkdownInto(targetEl, markdown) {
 // ── Mermaid rendering helper ──
 
 async function renderMermaidBlocks(containerSelector) {
-    const containers = document.querySelectorAll(`${containerSelector} .mermaid-block`);
+    const sel = (containerSelector || '') + ' .mermaid-block:not([data-rendered="1"])';
+    const containers = document.querySelectorAll(sel.trim() ? sel : '.mermaid-block:not([data-rendered="1"])');
     if (containers.length === 0) return;
     try {
         const mermaid = await LibLoader.loadMermaid();
@@ -559,6 +688,7 @@ async function renderMermaidBlocks(containerSelector) {
                 const { svg } = await mermaid.render(id, code);
                 el.innerHTML = svg;
                 el.classList.add('mermaid-rendered');
+                el.setAttribute('data-rendered', '1');
             } catch (e) {
                 el.innerHTML = `<pre class="mermaid-error">Mermaid syntax error:\n${Utils.escapeHtml(e.message || String(e))}</pre>`;
             }
@@ -669,7 +799,7 @@ function configureMarked(options = {}) {
 function renderFeedItem(post) {
     const link = post.type === 'pdf' ? `#/pdf/${post.slug}` : `#/post/${post.slug}`;
     const tags = (post.tags || []).slice(0, 4).map(t =>
-        `<a class="tag" href="#/tag/${encodeURIComponent(t)}">${Utils.escapeHtml(t)}</a>`).join('');
+        `<a class="tag" href="#/tag/${encodeURIComponent(t)}">${Utils.escapeHtml(t.replace(/-/g, ' '))}</a>`).join('');
 
     // Type badge
     let typeBadge = '';
@@ -712,7 +842,7 @@ function renderFeedItem(post) {
             <div class="feed-item-tags">${tags}</div>
             <div class="feed-item-actions">
                 ${repoLink}
-                <a href="${link}" class="feed-read-more">Read more &#8594;</a>
+                <a href="${link}" class="feed-read-more">Read more ${ICON.chevronRight}</a>
             </div>
         </div>
     </article>`;
@@ -775,6 +905,7 @@ async function renderFeedPage(opts = {}) {
                     : 'Recent posts and projects.'}</p>
             </header>
             ${featuredHtml}
+            <div class="feed-mobile-tags" id="feed-mobile-tags"></div>
             <div class="feed-filter-bar" id="feed-filter-bar">
                 <div class="feed-tabs" id="feed-tabs">
                     <button class="feed-tab active" data-type="all">All</button>
@@ -852,9 +983,9 @@ async function renderFeedPage(opts = {}) {
         };
 
         el.innerHTML = `
-            <button type="button" class="pagination-btn pagination-arrow" data-page="${Math.max(1, cur - 1)}" ${cur === 1 ? 'disabled' : ''} aria-label="Previous page">&#8592;</button>
+            <button type="button" class="pagination-btn pagination-arrow" data-page="${Math.max(1, cur - 1)}" ${cur === 1 ? 'disabled' : ''} aria-label="Previous page">${ICON.chevronLeft}</button>
             ${pages.map(p => p === '…' ? '<span class="pagination-ellipsis">…</span>' : link(p)).join('')}
-            <button type="button" class="pagination-btn pagination-arrow" data-page="${Math.min(totalPages, cur + 1)}" ${cur === totalPages ? 'disabled' : ''} aria-label="Next page">&#8594;</button>
+            <button type="button" class="pagination-btn pagination-arrow" data-page="${Math.min(totalPages, cur + 1)}" ${cur === totalPages ? 'disabled' : ''} aria-label="Next page">${ICON.chevronRight}</button>
             <span class="pagination-meta">Page ${cur} of ${totalPages}</span>
         `;
         el.querySelectorAll('button[data-page]').forEach(btn => {
@@ -939,7 +1070,7 @@ function renderSidebar(posts) {
     const docCount = posts.filter(p => p.type === 'doc').length;
 
     sidebar.innerHTML = `
-        <div class="sidebar-card">
+        <div class="sidebar-card sidebar-card-profile">
             <div class="sidebar-profile-avatar">${CONFIG.authorInitial}</div>
             <div class="sidebar-profile-name">${Utils.escapeHtml(CONFIG.author)}</div>
             <p class="sidebar-profile-bio">${Utils.escapeHtml(CONFIG.siteDescription)}</p>
@@ -965,7 +1096,7 @@ function renderSidebar(posts) {
         <div class="sidebar-card">
             <h4>Popular Tags</h4>
             <div class="sidebar-tags">
-                ${topTags.map(t => `<a class="sidebar-tag" href="#/tag/${encodeURIComponent(t)}">${Utils.escapeHtml(t)}</a>`).join('')}
+                ${topTags.map(t => `<a class="sidebar-tag" href="#/tag/${encodeURIComponent(t)}">${Utils.escapeHtml(t.replace(/-/g, ' '))}</a>`).join('')}
             </div>
         </div>` : ''}
         <div class="sidebar-card">
@@ -979,7 +1110,12 @@ function renderSidebar(posts) {
             }).join('')}
         </div>`;
 
-    // (tag clicks are real links to /#/tag/:slug now — no JS handler needed)
+    const mobileTagsEl = document.getElementById('feed-mobile-tags');
+    if (mobileTagsEl && topTags.length) {
+        mobileTagsEl.innerHTML = topTags.map(t =>
+            `<a class="sidebar-tag" href="#/tag/${encodeURIComponent(t)}">${Utils.escapeHtml(t.replace(/-/g, ' '))}</a>`
+        ).join('');
+    }
 }
 
 // ── Image lightbox ──
@@ -1016,6 +1152,182 @@ function initLightbox(containerSelector) {
     Cleanup.add(() => container.removeEventListener('click', handler));
 }
 
+// ── LinkedIn-style PDF carousel ──
+//
+// `mountCarousel(pdfDoc, stage, opts)` builds a horizontal flex track with one
+// slide per page, sized to leave a peek of the neighbours visible. The user
+// drags the whole track with pointer events; on release we snap to the
+// nearest slide. PDF pages are rendered lazily into their slide canvases on
+// demand (current ± 1) to keep memory bounded for long documents.
+async function mountCarousel(pdfDoc, stage, opts = {}) {
+    const total = pdfDoc.numPages;
+    const peek = opts.peek ?? 32;            // px of next slide visible past the right edge
+    const gap  = opts.gap  ?? 14;
+    const onChange = opts.onChange || (() => {});
+    let current = 1;
+
+    // Determine slide aspect from the first page.
+    const firstPage = await pdfDoc.getPage(1);
+    const fp = firstPage.getViewport({ scale: 1 });
+    const aspect = fp.height / fp.width;
+
+    // Build track + slides.
+    const track = document.createElement('div');
+    track.className = 'pdf-track';
+    const slides = [];
+    for (let i = 1; i <= total; i++) {
+        const slide = document.createElement('div');
+        slide.className = 'pdf-slide';
+        const placeholder = document.createElement('div');
+        placeholder.className = 'pdf-slide-placeholder';
+        placeholder.textContent = `Page ${i}`;
+        slide.appendChild(placeholder);
+        const canvas = document.createElement('canvas');
+        slide.appendChild(canvas);
+        slide._canvas = canvas;
+        slide._rendered = false;
+        slide._placeholder = placeholder;
+        track.appendChild(slide);
+        slides.push(slide);
+    }
+    stage.innerHTML = '';
+    stage.appendChild(track);
+
+    // ── sizing ──
+    let slideW = 0, slideH = 0, baseOffset = 0;
+    function layout() {
+        const stageW = stage.clientWidth || stage.getBoundingClientRect().width;
+        slideW = Math.max(120, stageW - peek);
+        slideH = Math.round(slideW * aspect);
+        for (const s of slides) {
+            s.style.width  = slideW + 'px';
+            s.style.height = slideH + 'px';
+        }
+        baseOffset = (stageW - slideW) / 2;     // centres the first slide, leaves equal peek both sides
+        stage.style.height = slideH + 'px';
+        applyTransform(0, false);
+    }
+
+    // ── transform helpers ──
+    function offsetForIndex(i) {
+        return baseOffset - i * (slideW + gap);
+    }
+    function applyTransform(extraDx = 0, animate = true) {
+        const x = offsetForIndex(current - 1) + extraDx;
+        track.style.transition = animate ? '' : 'none';
+        track.style.transform = `translateX(${x}px)`;
+        if (!animate) {
+            // re-flow so the next paint has transition restored
+            // eslint-disable-next-line no-unused-expressions
+            track.offsetHeight;
+            track.style.transition = '';
+        }
+    }
+
+    // ── page rendering (lazy) ──
+    async function renderSlide(idx) {
+        const slide = slides[idx - 1];
+        if (!slide || slide._rendered || slide._renderingPromise) return slide?._renderingPromise;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        slide._renderingPromise = (async () => {
+            const page = await pdfDoc.getPage(idx);
+            const vp1 = page.getViewport({ scale: 1 });
+            const cssScale = slideW / vp1.width;
+            const viewport = page.getViewport({ scale: cssScale * dpr });
+            const cv = slide._canvas;
+            cv.width  = Math.round(viewport.width);
+            cv.height = Math.round(viewport.height);
+            cv.style.width  = '100%';
+            cv.style.height = '100%';
+            await page.render({ canvasContext: cv.getContext('2d'), viewport }).promise;
+            slide._rendered = true;
+            slide._placeholder.remove();
+        })();
+        return slide._renderingPromise;
+    }
+    function renderNeighbors() {
+        renderSlide(current);
+        if (current > 1)     renderSlide(current - 1);
+        if (current < total) renderSlide(current + 1);
+    }
+
+    function goTo(n) {
+        const next = Math.min(Math.max(1, n), total);
+        if (next === current) { applyTransform(0, true); return; }
+        current = next;
+        applyTransform(0, true);
+        renderNeighbors();
+        onChange(current, total);
+    }
+
+    // ── pointer drag ──
+    let dragging = false, startX = 0, pointerId = null, lastDx = 0;
+    function onDown(e) {
+        if (e.button !== undefined && e.button !== 0) return;
+        // Don't hijack clicks on overlay UI (fullscreen icon, etc).
+        if (e.target.closest('a, button')) return;
+        dragging = true;
+        startX = e.clientX;
+        lastDx = 0;
+        pointerId = e.pointerId;
+        try { stage.setPointerCapture(pointerId); } catch (_) {}
+        stage.classList.add('dragging');
+    }
+    function onMove(e) {
+        if (!dragging) return;
+        const dx = e.clientX - startX;
+        const atStart = current === 1 && dx > 0;
+        const atEnd   = current === total && dx < 0;
+        const eff = (atStart || atEnd) ? dx * 0.3 : dx;
+        lastDx = eff;
+        applyTransform(eff, false);
+    }
+    function onUp() {
+        if (!dragging) return;
+        dragging = false;
+        stage.classList.remove('dragging');
+        try { stage.releasePointerCapture(pointerId); } catch (_) {}
+        const stageW = stage.clientWidth;
+        const threshold = Math.max(40, stageW * 0.12);
+        if (Math.abs(lastDx) > threshold) {
+            goTo(current + (lastDx < 0 ? 1 : -1));
+        } else {
+            applyTransform(0, true);
+        }
+    }
+    stage.addEventListener('pointerdown', onDown);
+    stage.addEventListener('pointermove', onMove);
+    stage.addEventListener('pointerup',     onUp);
+    stage.addEventListener('pointercancel', onUp);
+    stage.addEventListener('dragstart', e => e.preventDefault());
+
+    // ── responsive re-layout ──
+    let rt;
+    const onResize = () => {
+        clearTimeout(rt);
+        rt = setTimeout(() => {
+            layout();
+            // re-render visible slides at the new size for crispness
+            for (const s of slides) { s._rendered = false; s._renderingPromise = null; }
+            renderNeighbors();
+        }, 200);
+    };
+    window.addEventListener('resize', onResize);
+
+    layout();
+    renderNeighbors();
+    onChange(current, total);
+
+    return {
+        goTo,
+        getCurrent: () => current,
+        total,
+        destroy() {
+            window.removeEventListener('resize', onResize);
+        }
+    };
+}
+
 // ── Inline PDF Carousel ──
 
 function initInlinePdfs() {
@@ -1033,64 +1345,33 @@ function initInlinePdfs() {
                 const pdfjsLib = await LibLoader.loadPdfJs();
                 const pdfDoc = await pdfjsLib.getDocument(pdfPath).promise;
                 const totalPages = pdfDoc.numPages;
-                let currentPage = 1;
-                let rendering = false;
+
+                const dotsHtml = totalPages <= 12
+                    ? `<div class="inline-pdf-dots">${Array.from({length: totalPages}, (_, i) =>
+                        `<span class="inline-pdf-dot${i === 0 ? ' active' : ''}"></span>`).join('')}</div>`
+                    : '';
 
                 container.innerHTML = `
-                    <div class="inline-pdf-stage">
-                        <button class="pdf-nav pdf-nav-prev" disabled>&#8592;</button>
-                        <canvas class="inline-pdf-canvas"></canvas>
-                        <button class="pdf-nav pdf-nav-next" ${totalPages <= 1 ? 'disabled' : ''}>&#8594;</button>
-                    </div>
-                    <div class="inline-pdf-controls">
-                        <span class="inline-pdf-info">Slide 1 of ${totalPages}</span>
-                        <a href="#/pdf/${slug}" class="inline-pdf-fullscreen" title="Fullscreen">&#x26F6;</a>
-                    </div>`;
+                    <div class="inline-pdf-stage"></div>
+                    <span class="inline-pdf-page-indicator">1 / ${totalPages}</span>
+                    <a href="#/pdf/${slug}" class="inline-pdf-fullscreen" title="Fullscreen">&#x26F6;</a>
+                    ${dotsHtml}`;
+                // The indicator + fullscreen pills are siblings of the stage so
+                // they sit visually on the carousel without absorbing pointer events.
+                container.style.position = 'relative';
+                const stage = container.querySelector('.inline-pdf-stage');
+                const indicator = container.querySelector('.inline-pdf-page-indicator');
+                const dots = container.querySelectorAll('.inline-pdf-dot');
 
-                const canvas = container.querySelector('canvas');
-                const ctx = canvas.getContext('2d');
-                const prevBtn = container.querySelector('.pdf-nav-prev');
-                const nextBtn = container.querySelector('.pdf-nav-next');
-                const info = container.querySelector('.inline-pdf-info');
+                const carousel = await mountCarousel(pdfDoc, stage, {
+                    peek: 32, gap: 14,
+                    onChange: (n) => {
+                        indicator.textContent = `${n} / ${totalPages}`;
+                        dots.forEach((d, i) => d.classList.toggle('active', i === n - 1));
+                    },
+                });
 
-                async function renderSlide(num) {
-                    if (rendering) return;
-                    rendering = true;
-                    const page = await pdfDoc.getPage(num);
-                    const containerW = Math.min(container.clientWidth - 80, 620);
-                    const vp1 = page.getViewport({ scale: 1 });
-                    const scale = Math.max(containerW / vp1.width, 0.5);
-                    const viewport = page.getViewport({ scale });
-                    canvas.width = viewport.width;
-                    canvas.height = viewport.height;
-                    await page.render({ canvasContext: ctx, viewport }).promise;
-                    info.textContent = `Slide ${num} of ${totalPages}`;
-                    prevBtn.disabled = num <= 1;
-                    nextBtn.disabled = num >= totalPages;
-                    rendering = false;
-                }
-
-                function go(num) {
-                    if (num < 1 || num > totalPages) return;
-                    currentPage = num;
-                    renderSlide(currentPage);
-                }
-
-                prevBtn.addEventListener('click', (e) => { e.preventDefault(); go(currentPage - 1); });
-                nextBtn.addEventListener('click', (e) => { e.preventDefault(); go(currentPage + 1); });
-
-                // Swipe support
-                let touchX = 0;
-                canvas.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
-                canvas.addEventListener('touchend', e => {
-                    const dx = touchX - e.changedTouches[0].clientX;
-                    if (Math.abs(dx) > 50) dx > 0 ? go(currentPage + 1) : go(currentPage - 1);
-                }, { passive: true });
-
-                await renderSlide(1);
-
-                // Memory cleanup when navigating away
-                Cleanup.add(() => { pdfDoc.destroy(); });
+                Cleanup.add(() => { carousel.destroy(); pdfDoc.destroy(); });
 
             } catch (err) {
                 container.innerHTML = `<div class="inline-pdf-error">Could not load PDF preview</div>`;
@@ -1112,7 +1393,7 @@ async function renderPostPage({ slug }) {
 
     const post = await ContentService.getPost(slug);
     if (!post) {
-        app.innerHTML = `<div class="post-view"><a href="#/" class="post-back">&#8592; Back</a>
+        app.innerHTML = `<div class="post-view"><a href="#/" class="post-back">${ICON.chevronLeft} Back</a>
             <div class="empty-state"><div class="empty-state-icon">&#128533;</div><h3>Post not found</h3></div></div>`;
         return;
     }
@@ -1165,7 +1446,7 @@ async function renderPostPage({ slug }) {
     const htmlContent = await MathExtractor.render(rawHtml);
     const readTime = Utils.readingTime(post.body);
     const tags = (post.tags || []).map(t =>
-        `<a class="tag tag-primary" href="#/tag/${encodeURIComponent(t)}">${Utils.escapeHtml(t)}</a>`
+        `<a class="tag tag-primary" href="#/tag/${encodeURIComponent(t)}">${Utils.escapeHtml(t.replace(/-/g, ' '))}</a>`
     ).join('');
 
     const coverHtml = post.image
@@ -1211,11 +1492,11 @@ async function renderPostPage({ slug }) {
     const prevNextHtml = (prev || next) ? `
         <nav class="post-prev-next" aria-label="Previous and next post">
             ${prev ? `<a class="post-prev" href="${navHref(prev)}">
-                <span class="post-prev-next-label">&#8592; Newer</span>
+                <span class="post-prev-next-label">${ICON.chevronLeft} Newer</span>
                 <span class="post-prev-next-title">${Utils.escapeHtml(prev.title)}</span>
             </a>` : '<div></div>'}
             ${next ? `<a class="post-next" href="${navHref(next)}">
-                <span class="post-prev-next-label">Older &#8594;</span>
+                <span class="post-prev-next-label">Older ${ICON.chevronRight}</span>
                 <span class="post-prev-next-title">${Utils.escapeHtml(next.title)}</span>
             </a>` : '<div></div>'}
         </nav>` : '';
@@ -1255,7 +1536,7 @@ async function renderPostPage({ slug }) {
         <div class="post-layout">
             <article class="post-view">
                 <div class="post-header">
-                    <a href="#/" class="post-back">&#8592; Back to feed</a>
+                    <a href="#/" class="post-back">${ICON.chevronLeft} Back to feed</a>
                     <h1 class="post-title">${Utils.escapeHtml(post.title)}</h1>
                     <div class="post-meta-bar">
                         <span>${Utils.formatDate(post.date)}</span>
@@ -1382,7 +1663,7 @@ async function renderPdfPage({ slug }) {
     if (post) Head.set({ title: post.title, description: post.description, type: 'article' });
 
     if (!post || !post.pdf) {
-        app.innerHTML = `<div class="pdf-viewer"><a href="#/" class="post-back">&#8592; Back</a>
+        app.innerHTML = `<div class="pdf-viewer"><a href="#/" class="post-back">${ICON.chevronLeft} Back</a>
             <div class="pdf-error"><h3>PDF not found</h3></div></div>`;
         return;
     }
@@ -1390,16 +1671,14 @@ async function renderPdfPage({ slug }) {
     app.innerHTML = `
     <div class="pdf-viewer">
         <div class="pdf-viewer-header">
-            <a href="#/" class="post-back">&#8592; Back</a>
+            <a href="#/" class="post-back">${ICON.chevronLeft} Back</a>
             <h2 class="pdf-viewer-title">${Utils.escapeHtml(post.title)}</h2>
-            <a href="${post.pdf}" download class="btn btn-sm btn-secondary">&#8595; Download</a>
+            <a href="${post.pdf}" download class="btn btn-sm btn-secondary">${ICON.arrowDown} Download</a>
         </div>
         <div class="pdf-stage" id="pdf-stage">
             <div class="pdf-loading" id="pdf-loading"><div class="spinner"></div><p class="loading-text">Loading PDF...</p></div>
             <div class="pdf-canvas-wrap" id="pdf-canvas-wrap" style="display:none;">
-                <button class="pdf-nav pdf-nav-prev" id="pdf-prev" disabled>&#8592;</button>
                 <canvas id="pdf-canvas"></canvas>
-                <button class="pdf-nav pdf-nav-next" id="pdf-next" disabled>&#8594;</button>
             </div>
         </div>
         <div class="pdf-controls" id="pdf-controls" style="display:none;">
@@ -1412,43 +1691,36 @@ async function renderPdfPage({ slug }) {
         const pdfjsLib = await LibLoader.loadPdfJs();
         const pdfDoc = await pdfjsLib.getDocument(post.pdf).promise;
         const totalPages = pdfDoc.numPages;
-        let currentPage = 1;
-        let rendering = false;
-        let pendingPage = false;
         const thumbCanvases = [];
 
         Cleanup.add(() => pdfDoc.destroy());
 
-        const canvas = document.getElementById('pdf-canvas');
-        const ctx = canvas.getContext('2d');
+        // The dedicated viewer is just a bigger version of the inline carousel:
+        // hide the loading spinner + the legacy single-canvas wrap, mount the
+        // multi-slide track straight into .pdf-stage.
+        document.getElementById('pdf-loading').style.display = 'none';
+        document.getElementById('pdf-canvas-wrap').style.display = 'none';
+        document.getElementById('pdf-controls').style.display = 'flex';
 
-        function getScale(page) {
-            const cw = Math.min(document.getElementById('pdf-stage').clientWidth - 120, 860);
-            return Math.max(cw / page.getViewport({ scale: 1 }).width, 0.5);
-        }
-
-        async function renderSlide(num) {
-            if (rendering) { pendingPage = num; return; }
-            rendering = true; pendingPage = false;
-            const page = await pdfDoc.getPage(num);
-            const viewport = page.getViewport({ scale: getScale(page) });
-            canvas.width = viewport.width; canvas.height = viewport.height;
-            await page.render({ canvasContext: ctx, viewport }).promise;
-            document.getElementById('pdf-page-info').textContent = `Slide ${num} of ${totalPages}`;
-            document.getElementById('pdf-prev').disabled = num <= 1;
-            document.getElementById('pdf-next').disabled = num >= totalPages;
-            thumbCanvases.forEach((tc, i) => tc.parentElement.classList.toggle('active', i === num - 1));
-            if (thumbCanvases[num - 1]) thumbCanvases[num - 1].parentElement.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-            rendering = false;
-            if (pendingPage !== false) { const p = pendingPage; pendingPage = false; renderSlide(p); }
-        }
+        const stage = document.getElementById('pdf-stage');
+        const carousel = await mountCarousel(pdfDoc, stage, {
+            peek: 56, gap: 20,
+            onChange: (n) => {
+                document.getElementById('pdf-page-info').textContent = `Slide ${n} of ${totalPages}`;
+                thumbCanvases.forEach((tc, i) => tc.parentElement.classList.toggle('active', i === n - 1));
+                if (thumbCanvases[n - 1]) {
+                    thumbCanvases[n - 1].parentElement.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                }
+            },
+        });
+        Cleanup.add(() => carousel.destroy());
 
         async function renderThumb(num) {
             const page = await pdfDoc.getPage(num);
             const vp = page.getViewport({ scale: 0.18 });
             const wrap = document.createElement('div');
             wrap.className = 'pdf-thumb';
-            wrap.addEventListener('click', () => goTo(num));
+            wrap.addEventListener('click', () => carousel.goTo(num));
             const tc = document.createElement('canvas');
             tc.width = vp.width; tc.height = vp.height;
             await page.render({ canvasContext: tc.getContext('2d'), viewport: vp }).promise;
@@ -1457,38 +1729,21 @@ async function renderPdfPage({ slug }) {
             thumbCanvases.push(tc);
         }
 
-        function goTo(num) { if (num >= 1 && num <= totalPages) { currentPage = num; renderSlide(currentPage); } }
-
-        document.getElementById('pdf-prev').addEventListener('click', () => goTo(currentPage - 1));
-        document.getElementById('pdf-next').addEventListener('click', () => goTo(currentPage + 1));
-
         const keyHandler = (e) => {
             if (Router.currentRoute !== '/pdf/:slug') { document.removeEventListener('keydown', keyHandler); return; }
-            if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key)) { e.preventDefault(); goTo(currentPage - 1); }
-            if (['ArrowRight','ArrowDown','PageDown'].includes(e.key)) { e.preventDefault(); goTo(currentPage + 1); }
-            if (e.key === 'Home') goTo(1);
-            if (e.key === 'End') goTo(totalPages);
+            const cur = carousel.getCurrent();
+            if (['ArrowLeft','ArrowUp','PageUp'].includes(e.key))   { e.preventDefault(); carousel.goTo(cur - 1); }
+            if (['ArrowRight','ArrowDown','PageDown'].includes(e.key)) { e.preventDefault(); carousel.goTo(cur + 1); }
+            if (e.key === 'Home') carousel.goTo(1);
+            if (e.key === 'End')  carousel.goTo(totalPages);
         };
         document.addEventListener('keydown', keyHandler);
         Cleanup.add(() => document.removeEventListener('keydown', keyHandler));
 
-        let touchX = 0;
-        canvas.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
-        canvas.addEventListener('touchend', e => {
-            const dx = touchX - e.changedTouches[0].clientX;
-            if (Math.abs(dx) > 50) dx > 0 ? goTo(currentPage + 1) : goTo(currentPage - 1);
-        }, { passive: true });
-
-        let rt;
-        const rh = () => { clearTimeout(rt); rt = setTimeout(() => { if (pdfDoc) renderSlide(currentPage); }, 250); };
-        window.addEventListener('resize', rh);
-        Cleanup.add(() => window.removeEventListener('resize', rh));
-
-        document.getElementById('pdf-loading').style.display = 'none';
-        document.getElementById('pdf-canvas-wrap').style.display = 'flex';
-        document.getElementById('pdf-controls').style.display = 'flex';
-        await renderSlide(1);
-        for (let i = 1; i <= totalPages; i++) { await renderThumb(i); if (i === 1 && thumbCanvases[0]) thumbCanvases[0].parentElement.classList.add('active'); }
+        for (let i = 1; i <= totalPages; i++) {
+            await renderThumb(i);
+            if (i === 1 && thumbCanvases[0]) thumbCanvases[0].parentElement.classList.add('active');
+        }
 
     } catch (err) {
         document.getElementById('pdf-loading').innerHTML = `<div class="pdf-error"><h3>Could not load PDF</h3><p>${Utils.escapeHtml(err.message)}</p></div>`;
@@ -1765,7 +2020,7 @@ async function renderEditorPage({ slug } = {}) {
     app.innerHTML = `
     <div class="editor-container">
         <div class="editor-toolbar">
-            <div class="editor-toolbar-left"><a href="#/admin" class="btn btn-ghost btn-sm">&#8592; Dashboard</a><span style="color:var(--color-text-muted);font-size:0.9rem;">${isEdit ? 'Edit' : 'New'} Post</span></div>
+            <div class="editor-toolbar-left"><a href="#/admin" class="btn btn-ghost btn-sm">${ICON.chevronLeft} Dashboard</a><span style="color:var(--color-text-muted);font-size:0.9rem;">${isEdit ? 'Edit' : 'New'} Post</span></div>
             <div class="editor-toolbar-right"><button class="btn btn-primary btn-sm" id="editor-save">${isEdit ? 'Update' : 'Publish'}</button></div>
         </div>
         <div class="editor-meta">
@@ -2152,7 +2407,7 @@ function renderUploadPage() {
     if (!GitHubAPI.isAuthenticated()) { renderAdminLogin(); return; }
     document.getElementById('app').innerHTML = `
     <div class="editor-container">
-        <div class="editor-toolbar"><div class="editor-toolbar-left"><a href="#/admin" class="btn btn-ghost btn-sm">&#8592; Dashboard</a><span style="color:var(--color-text-muted);font-size:0.9rem;">Upload Files</span></div></div>
+        <div class="editor-toolbar"><div class="editor-toolbar-left"><a href="#/admin" class="btn btn-ghost btn-sm">${ICON.chevronLeft} Dashboard</a><span style="color:var(--color-text-muted);font-size:0.9rem;">Upload Files</span></div></div>
         <div class="form-row" style="margin-bottom:24px;">
             <div><h3 style="margin-bottom:16px;">Images</h3>
                 <div class="file-upload-area" id="img-area"><div class="file-upload-icon">&#128247;</div><p><strong>Drop images here</strong> or click</p><input type="file" id="img-input" accept="image/*" multiple hidden></div>
@@ -2225,7 +2480,7 @@ async function renderCollectionsIndex() {
 
     if (groups.size === 0) {
         app.innerHTML = `<div class="collection-detail">
-            <a href="#/" class="post-back">&#8592; Back to feed</a>
+            <a href="#/" class="post-back">${ICON.chevronLeft} Back to feed</a>
             <h1>Collections</h1>
             <p class="collection-desc">No collections yet. Add a <code>collection</code> field to a post to start one.</p>
         </div>`;
@@ -2242,13 +2497,13 @@ async function renderCollectionsIndex() {
 
     app.innerHTML = `
         <div class="collection-detail">
-            <a href="#/" class="post-back">&#8592; Back to feed</a>
+            <a href="#/" class="post-back">${ICON.chevronLeft} Back to feed</a>
             <h1>Collections</h1>
             <p class="collection-desc">Series of related posts grouped by topic.</p>
             <div class="collections-grid">
                 ${cards.map(c => `
                     <a class="collection-card" href="#/collection/${encodeURIComponent(c.slug)}">
-                        <h3>${Utils.escapeHtml(c.name.replace(/-/g, ' '))}</h3>
+                        <h3>${Utils.escapeHtml(Utils.titleCase(c.name))}</h3>
                         <span class="count">${c.count} post${c.count === 1 ? '' : 's'}</span>
                         <div class="collection-card-list">
                             ${c.posts.map(p => `<span>&#9656; ${Utils.escapeHtml(p.title)}</span>`).join('')}
@@ -2264,7 +2519,7 @@ async function renderCollectionDetail({ slug }) {
     const list = posts.filter(p => p.collection === slug);
     if (list.length === 0) {
         app.innerHTML = `<div class="collection-detail">
-            <a href="#/collections" class="post-back">&#8592; Back to collections</a>
+            <a href="#/collections" class="post-back">${ICON.chevronLeft} Back to collections</a>
             <h1>Not found</h1>
             <p class="collection-desc">No posts in this collection.</p>
         </div>`;
@@ -2274,7 +2529,7 @@ async function renderCollectionDetail({ slug }) {
 
     app.innerHTML = `
         <div class="collection-detail">
-            <a href="#/collections" class="post-back">&#8592; All collections</a>
+            <a href="#/collections" class="post-back">${ICON.chevronLeft} All collections</a>
             <h1>${Utils.escapeHtml(slug.replace(/-/g, ' '))}</h1>
             <p class="collection-desc">${list.length} post${list.length === 1 ? '' : 's'} in this series.</p>
             ${list.map((p, i) => {
@@ -2315,7 +2570,7 @@ async function renderCategoryPage({ slug }) {
 function renderTaxonomyPage(app, heading, posts, backHref) {
     if (!posts.length) {
         app.innerHTML = `<div class="collection-detail">
-            <a href="${backHref}" class="post-back">&#8592; Back</a>
+            <a href="${backHref}" class="post-back">${ICON.chevronLeft} Back</a>
             <h1>${Utils.escapeHtml(heading)}</h1>
             <p class="collection-desc">No posts found.</p>
         </div>`;
@@ -2323,7 +2578,7 @@ function renderTaxonomyPage(app, heading, posts, backHref) {
     }
     app.innerHTML = `
         <div class="collection-detail">
-            <a href="${backHref}" class="post-back">&#8592; Back to feed</a>
+            <a href="${backHref}" class="post-back">${ICON.chevronLeft} Back to feed</a>
             <h1>${Utils.escapeHtml(heading)}</h1>
             <p class="collection-desc">${posts.length} post${posts.length === 1 ? '' : 's'}.</p>
             <div class="feed-list">
@@ -2345,7 +2600,7 @@ async function renderDocsPage({ slug } = {}) {
 
     if (docs.length === 0) {
         app.innerHTML = `<div class="collection-detail">
-            <a href="#/" class="post-back">&#8592; Back to feed</a>
+            <a href="#/" class="post-back">${ICON.chevronLeft} Back to feed</a>
             <h1>Documentation</h1>
             <p class="collection-desc">No docs yet. Add a post with <code>type: "doc"</code> to start writing.</p>
         </div>`;
@@ -2376,7 +2631,7 @@ async function renderDocsPage({ slug } = {}) {
         <div class="docs-layout">
             <aside class="docs-sidebar" id="docs-sidebar">
                 ${[...groups.entries()].map(([name, list]) => `
-                    <h4>${Utils.escapeHtml(name.replace(/-/g, ' '))}</h4>
+                    <h4>${Utils.escapeHtml(Utils.titleCase(name))}</h4>
                     ${list.map(d => `
                         <a class="${d.slug === target.slug ? 'active' : ''}" href="#/docs/${d.slug}">
                             ${Utils.escapeHtml(d.title)}
@@ -2394,14 +2649,28 @@ async function renderDocsPage({ slug } = {}) {
         <button class="toc-mobile-toggle" type="button" id="toc-mobile-toggle" aria-label="Show on-page contents" hidden>&#9776; Contents</button>
     `;
 
-    // Wire mobile docs-sidebar toggle
+    // Wire mobile docs-sidebar toggle + backdrop
     const navToggle = document.getElementById('docs-nav-toggle');
     const sidebar = document.getElementById('docs-sidebar');
     if (navToggle && sidebar) {
+        const backdrop = document.createElement('div');
+        backdrop.className = 'docs-sidebar-backdrop';
+        document.body.appendChild(backdrop);
+        Cleanup.add(() => backdrop.remove());
+
+        const openSidebar = () => {
+            sidebar.setAttribute('data-mobile-open', '1');
+            backdrop.classList.add('visible');
+        };
+        const closeSidebar = () => {
+            sidebar.setAttribute('data-mobile-open', '0');
+            backdrop.classList.remove('visible');
+        };
+
         navToggle.addEventListener('click', () => {
-            const open = sidebar.getAttribute('data-mobile-open') === '1';
-            sidebar.setAttribute('data-mobile-open', open ? '0' : '1');
+            sidebar.getAttribute('data-mobile-open') === '1' ? closeSidebar() : openSidebar();
         });
+        backdrop.addEventListener('click', closeSidebar);
     }
 
     // Load and render the target doc
@@ -2656,12 +2925,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ── Theme toggle ──
+    // Effective theme = explicit data-theme, else the OS preference. When it
+    // changes we (a) set data-theme, (b) swap the active hljs stylesheet, and
+    // (c) re-render any visible mermaid diagrams with the matching theme.
     const themeToggle = document.getElementById('theme-toggle');
+    function effectiveTheme() {
+        return document.documentElement.getAttribute('data-theme')
+            || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    }
+    function syncThemeAssets() {
+        const t = effectiveTheme();
+        if (window.mermaid) {
+            try {
+                window.mermaid.initialize({ startOnLoad: false, securityLevel: 'loose',
+                    theme: t === 'dark' ? 'dark' : 'default' });
+            } catch (_) {}
+            // Re-render any already-rendered mermaid blocks so they pick up the new theme.
+            document.querySelectorAll('.mermaid-block[data-rendered="1"]').forEach(el => {
+                el.removeAttribute('data-rendered');
+                el.innerHTML = `<div class="mermaid-loading">Loading diagram...</div>`;
+            });
+            if (typeof renderMermaidBlocks === 'function') renderMermaidBlocks();
+        }
+    }
+    syncThemeAssets();
     if (themeToggle) {
-        const apply = (t) => {
-            if (t) document.documentElement.setAttribute('data-theme', t);
-            else document.documentElement.removeAttribute('data-theme');
-        };
         themeToggle.addEventListener('click', () => {
             const current = document.documentElement.getAttribute('data-theme');
             // Cycle: (system) → light → dark → system
@@ -2671,9 +2959,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 current === 'light' ? 'dark' :
                 'light';
             try { localStorage.setItem('theme', next); } catch {}
-            apply(next);
+            if (next) document.documentElement.setAttribute('data-theme', next);
+            else document.documentElement.removeAttribute('data-theme');
+            syncThemeAssets();
         });
     }
+    // Follow the OS if the user hasn't picked an explicit theme.
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => {
+        if (!document.documentElement.getAttribute('data-theme')) syncThemeAssets();
+    });
 
     // ── Coalesced scroll listener (replaces multiple individual ones) ──
     let scrollRaf = null;

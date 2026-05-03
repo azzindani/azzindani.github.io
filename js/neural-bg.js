@@ -9,7 +9,8 @@
         NEURON_COUNT: 180,
         NEURON_COUNT_MOBILE: 90,
         AI_RATIO: 0.45,
-        CONNECTION_DIST: 180,
+        CONNECTION_DIST: 220,
+        MIN_NEIGHBORS: 3,
         SIGNAL_SPEED: 0.0085,
         SIGNAL_SPAWN_RATE: 0.025,
         MAX_SIGNALS: 80,
@@ -216,22 +217,55 @@
     }
 
     // ── Build Connections (throttled) ──
+    // Two-pass: (1) all pairs within CONNECTION_DIST, (2) each neuron is force-
+    // connected to its MIN_NEIGHBORS nearest neighbors so nothing is "floating".
     function buildConnections() {
         connections = [];
+        const seen = new Set();
         const dist2 = CFG.CONNECTION_DIST * CFG.CONNECTION_DIST;
-        for (let i = 0; i < neurons.length; i++) {
-            for (let j = i + 1; j < neurons.length; j++) {
+        const N = neurons.length;
+        const dists = new Array(N);
+        for (let i = 0; i < N; i++) dists[i] = [];
+
+        const pairKey = (i, j) => i < j ? i * 100000 + j : j * 100000 + i;
+        const typeOf = (a, b) =>
+            (a.kind === 'ai' && b.kind === 'ai') ? 'ai'
+            : (a.kind === 'bio' && b.kind === 'bio') ? 'bio'
+            : 'bridge';
+
+        for (let i = 0; i < N; i++) {
+            for (let j = i + 1; j < N; j++) {
                 const a = neurons[i], b = neurons[j];
                 const dx = a.x - b.x, dy = a.y - b.y, dz = a.z - b.z;
                 const d2 = dx * dx + dy * dy + dz * dz;
+                const dist = Math.sqrt(d2);
+                dists[i].push({ idx: j, dist });
+                dists[j].push({ idx: i, dist });
                 if (d2 < dist2) {
-                    const dist = Math.sqrt(d2);
-                    let type;
-                    if (a.kind === 'ai' && b.kind === 'ai') type = 'ai';
-                    else if (a.kind === 'bio' && b.kind === 'bio') type = 'bio';
-                    else type = 'bridge';
-                    connections.push({ i, j, dist, type });
+                    const key = pairKey(i, j);
+                    if (!seen.has(key)) {
+                        seen.add(key);
+                        connections.push({ i, j, dist, type: typeOf(a, b) });
+                    }
                 }
+            }
+        }
+
+        // Guarantee every neuron has at least MIN_NEIGHBORS connections.
+        const minN = CFG.MIN_NEIGHBORS;
+        const degree = new Array(N).fill(0);
+        for (const c of connections) { degree[c.i]++; degree[c.j]++; }
+        for (let i = 0; i < N; i++) {
+            if (degree[i] >= minN) continue;
+            dists[i].sort((a, b) => a.dist - b.dist);
+            for (const cand of dists[i]) {
+                if (degree[i] >= minN) break;
+                const key = pairKey(i, cand.idx);
+                if (seen.has(key)) continue;
+                seen.add(key);
+                const a = neurons[i], b = neurons[cand.idx];
+                connections.push({ i, j: cand.idx, dist: cand.dist, type: typeOf(a, b) });
+                degree[i]++; degree[cand.idx]++;
             }
         }
     }
@@ -393,7 +427,7 @@
             const a = neurons[conn.i], b = neurons[conn.j];
             const pa = proj[conn.i], pb = proj[conn.j];
             const avgScale = (pa.s + pb.s) / 2;
-            const distFalloff = (1 - conn.dist / CFG.CONNECTION_DIST);
+            const distFalloff = Math.max(0.15, 1 - conn.dist / CFG.CONNECTION_DIST);
             const lo = Math.min(conn.i, conn.j);
             const hi = Math.max(conn.i, conn.j);
             const isActive = activeWires.has(lo * 10000 + hi);

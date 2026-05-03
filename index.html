@@ -110,14 +110,19 @@
     </footer>
 
     <!-- Back to top -->
-    <button class="back-to-top" id="back-to-top" aria-label="Back to top">&#8593;</button>
+    <button class="back-to-top" id="back-to-top" aria-label="Back to top">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+    </button>
 
     <!-- Toast notification -->
     <div class="toast-container" id="toast-container"></div>
 
     <!-- Only marked.js loaded eagerly (tiny). Highlight.js & PDF.js loaded on demand. -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <!-- Code blocks are always rendered on a dark terminal-style background
+         (--color-code-bg) in both light & dark theme, so highlight.js uses
+         github-dark in either mode for legible token colors. -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-dark">
 
     <!-- App Scripts -->
     <script src="js/lib/pure.js"></script>

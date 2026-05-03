@@ -159,10 +159,12 @@ test('Projects tab is active on home; Blog tab activates on /blog', async ({ pag
 test('Projects feed only shows project-kind posts', async ({ page }) => {
     await page.goto('/');
     await page.locator('.feed-item').first().waitFor();
-    // The repo demo has kind: project
     const titles = await page.locator('.feed-item-title').allTextContents();
-    expect(titles.some(t => /Repo|PDF/i.test(t))).toBe(true);
-    // The welcome post is kind: blog and should NOT appear
+    // At least one project-kind post must render. Match generously across the
+    // current real content: MCP servers, ID Regulation PDFs, Hugging Face
+    // models/datasets, GRPO, the legacy CV/data projects.
+    expect(titles.some(t => /MCP|GRPO|Regulation|Detection|Recognition|Broker|Statement|Qwen|Deepseek|Dataset/i.test(t))).toBe(true);
+    // Blog-kind posts must NOT appear on the Projects feed.
     expect(titles.some(t => /Welcome to My Portfolio/.test(t))).toBe(false);
 });
 
