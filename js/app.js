@@ -9,9 +9,10 @@ const CONFIG = {
     authorInitial: 'A',
     github: { username: 'azzindani', repo: 'azzindani.github.io', branch: 'main' },
     social: {
-        github: 'https://github.com/azzindani',
         linkedin: 'https://linkedin.com/in/azzindani',
-        email: 'user@example.com'
+        email: 'user@example.com',
+        huggingface: 'https://huggingface.co/Azzindani',
+        github: 'https://github.com/azzindani'
     },
     postsPerPage: 9,
     contentPath: 'content',
@@ -1075,9 +1076,10 @@ function renderSidebar(posts) {
             <div class="sidebar-profile-name">${Utils.escapeHtml(CONFIG.author)}</div>
             <p class="sidebar-profile-bio">${Utils.escapeHtml(CONFIG.siteDescription)}</p>
             <div class="sidebar-social">
-                <a href="${CONFIG.social.github}" target="_blank" rel="noopener noreferrer">GitHub</a>
                 <a href="${CONFIG.social.linkedin}" target="_blank" rel="noopener noreferrer">LinkedIn</a>
                 <a href="mailto:${CONFIG.social.email}">Email</a>
+                <a href="${CONFIG.social.huggingface}" target="_blank" rel="noopener noreferrer">Hugging Face</a>
+                <a href="${CONFIG.social.github}" target="_blank" rel="noopener noreferrer">GitHub</a>
             </div>
         </div>
         ${(collectionCount || docCount) ? `
