@@ -9,8 +9,8 @@ const CONFIG = {
     authorInitial: 'A',
     github: { username: 'azzindani', repo: 'azzindani.github.io', branch: 'main' },
     social: {
-        linkedin: 'https://linkedin.com/in/azzindani',
-        email: 'user@example.com',
+        linkedin: 'https://www.linkedin.com/in/azzindan1',
+        email: 'afzaazzindani@gmail.com',
         huggingface: 'https://huggingface.co/Azzindani',
         github: 'https://github.com/azzindani'
     },
@@ -1506,7 +1506,6 @@ async function renderPostPage({ slug }) {
     // Share + edit-on-github action bar
     const postUrl = `${SITE_ORIGIN}/#/post/${slug}`;
     const shareLinks = {
-        twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(postUrl)}`,
         linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`,
     };
     const editPath = post.file
@@ -1518,8 +1517,9 @@ async function renderPostPage({ slug }) {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                 Copy link
             </button>
-            <a class="post-action-btn" href="${shareLinks.twitter}" target="_blank" rel="noopener noreferrer" title="Share on Twitter">Twitter</a>
             <a class="post-action-btn" href="${shareLinks.linkedin}" target="_blank" rel="noopener noreferrer" title="Share on LinkedIn">LinkedIn</a>
+            <a class="post-action-btn" href="${CONFIG.social.github}" target="_blank" rel="noopener noreferrer" title="GitHub profile">GitHub</a>
+            <a class="post-action-btn" href="${CONFIG.social.huggingface}" target="_blank" rel="noopener noreferrer" title="Hugging Face profile">Hugging Face</a>
             ${editPath ? `<a class="post-action-btn" href="${editPath}" target="_blank" rel="noopener noreferrer" title="Edit this page on GitHub">Edit on GitHub</a>` : ''}
         </div>`;
 
