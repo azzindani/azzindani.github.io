@@ -3,7 +3,7 @@
     {
       "slug": "mcp-data-analyst",
       "title": "MCP Data Analyst",
-      "description": "MCP server exposing data-analytics tooling — pandas, SQL, profiling — to any MCP-compatible LLM client.",
+      "description": "MCP server exposing data-analytics tooling \u2014 pandas, SQL, profiling \u2014 to any MCP-compatible LLM client.",
       "date": "2026-04-20",
       "category": "mcp",
       "tags": [
@@ -45,7 +45,7 @@
     {
       "slug": "mcp-web-browser",
       "title": "MCP Web Browser",
-      "description": "Headless browser as an MCP tool — page fetch, DOM query, screenshot — usable from inside any LLM session.",
+      "description": "Headless browser as an MCP tool \u2014 page fetch, DOM query, screenshot \u2014 usable from inside any LLM session.",
       "date": "2026-04-10",
       "category": "mcp",
       "tags": [
@@ -105,7 +105,7 @@
     {
       "slug": "mcp-file-system",
       "title": "MCP File System",
-      "description": "Sandboxed file-system operations exposed as MCP tools — list, read, write, search.",
+      "description": "Sandboxed file-system operations exposed as MCP tools \u2014 list, read, write, search.",
       "date": "2026-03-20",
       "category": "mcp",
       "tags": [
@@ -120,349 +120,6 @@
       "kind": "project",
       "collection": "mcp-tools",
       "order": 6,
-      "draft": false
-    },
-    {
-      "slug": "kaggle-biomed-dataset",
-      "title": "Kaggle Biomed Dataset",
-      "description": "Curating Kaggle biomedical datasets — exploration notes and quick-start scripts.",
-      "date": "2022-02-10",
-      "category": "data-science",
-      "tags": [
-        "kaggle",
-        "biomed",
-        "dataset"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://github.com/azzindani/00_Kaggle_Biomed_Dataset",
-      "kind": "project",
-      "collection": "learning-journey",
-      "draft": false
-    },
-    {
-      "slug": "data-source",
-      "title": "Data Source",
-      "description": "A scratch notebook of data-source links and ingestion patterns.",
-      "date": "2022-02-15",
-      "category": "data-engineering",
-      "tags": [
-        "data-sources",
-        "ingestion"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://github.com/azzindani/00_Data_Source",
-      "kind": "project",
-      "collection": "learning-journey",
-      "draft": false
-    },
-    {
-      "slug": "data-analytic",
-      "title": "Data Analytic",
-      "description": "Early hands-on data-analytics practice — cleaning, aggregating, summarising tabular data.",
-      "date": "2022-03-12",
-      "category": "data-analytics",
-      "tags": [
-        "data-analytics",
-        "pandas"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://github.com/azzindani/01_Data_Analytic",
-      "kind": "project",
-      "collection": "learning-journey",
-      "draft": false
-    },
-    {
-      "slug": "depth-eda",
-      "title": "Depth EDA",
-      "description": "In-depth EDA studies: distributions, correlations, missingness, outliers.",
-      "date": "2022-04-20",
-      "category": "data-analytics",
-      "tags": [
-        "eda",
-        "pandas",
-        "visualization"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://github.com/azzindani/01_Depth_EDA",
-      "kind": "project",
-      "collection": "learning-journey",
-      "draft": false
-    },
-    {
-      "slug": "streamlit",
-      "title": "Streamlit",
-      "description": "Streamlit dashboards built while learning interactive Python apps.",
-      "date": "2022-05-15",
-      "category": "data-analytics",
-      "tags": [
-        "streamlit",
-        "dashboard",
-        "python"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://github.com/azzindani/01_Streamlit",
-      "kind": "project",
-      "collection": "learning-journey",
-      "draft": false
-    },
-    {
-      "slug": "data-science",
-      "title": "Data Science",
-      "description": "Data-science notebooks covering the modelling pipeline end-to-end.",
-      "date": "2022-07-01",
-      "category": "data-science",
-      "tags": [
-        "data-science",
-        "modeling"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://github.com/azzindani/02_Data_Science",
-      "kind": "project",
-      "collection": "learning-journey",
-      "draft": false
-    },
-    {
-      "slug": "deep-learning-nlp",
-      "title": "Deep Learning NLP",
-      "description": "Early deep-learning NLP experiments — embeddings, RNNs, attention.",
-      "date": "2022-08-10",
-      "category": "machine-learning",
-      "tags": [
-        "deep-learning",
-        "nlp"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://github.com/azzindani/02_Deep_Learning_NLP",
-      "kind": "project",
-      "collection": "learning-journey",
-      "draft": false
-    },
-    {
-      "slug": "deep-learning-ann",
-      "title": "Deep Learning ANN",
-      "description": "Building artificial neural networks from first principles in Python.",
-      "date": "2022-09-05",
-      "category": "machine-learning",
-      "tags": [
-        "deep-learning",
-        "ann",
-        "python"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://github.com/azzindani/02_Deep_Learning_ANN",
-      "kind": "project",
-      "collection": "learning-journey",
-      "draft": false
-    },
-    {
-      "slug": "machine-learning",
-      "title": "Machine Learning",
-      "description": "Classical machine-learning practice — linear, tree, ensemble, kernel methods.",
-      "date": "2022-10-15",
-      "category": "machine-learning",
-      "tags": [
-        "machine-learning",
-        "scikit-learn"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://github.com/azzindani/02_Machine_Learning",
-      "kind": "project",
-      "collection": "learning-journey",
-      "draft": false
-    },
-    {
-      "slug": "llm-preview",
-      "title": "LLM Preview",
-      "description": "Hands-on preview of running and prompting large language models locally.",
-      "date": "2023-02-15",
-      "category": "nlp",
-      "tags": [
-        "llm",
-        "inference"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://github.com/azzindani/03_LLM_Preview",
-      "kind": "project",
-      "collection": "learning-journey",
-      "draft": false
-    },
-    {
-      "slug": "prompt-engineering",
-      "title": "Prompt Engineering",
-      "description": "Practical prompt-engineering experiments and reusable patterns.",
-      "date": "2023-03-20",
-      "category": "nlp",
-      "tags": [
-        "llm",
-        "prompt-engineering"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://github.com/azzindani/03_Prompt_Engineering",
-      "kind": "project",
-      "collection": "learning-journey",
-      "draft": false
-    },
-    {
-      "slug": "llm-data-preprocess",
-      "title": "LLM Data Preprocess",
-      "description": "Pre-processing tricks for preparing text data for LLM training and fine-tuning.",
-      "date": "2023-04-25",
-      "category": "nlp",
-      "tags": [
-        "llm",
-        "preprocessing",
-        "data-prep"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://github.com/azzindani/03_LLM_Data_Preprocess",
-      "kind": "project",
-      "collection": "learning-journey",
-      "draft": false
-    },
-    {
-      "slug": "bio-medical",
-      "title": "Bio Medical",
-      "description": "Biomedical ML/AI explorations spanning imaging and tabular health data.",
-      "date": "2023-06-15",
-      "category": "healthcare-ai",
-      "tags": [
-        "biomedical",
-        "healthcare-ai"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://github.com/azzindani/04_Bio_Medical",
-      "kind": "project",
-      "collection": "learning-journey",
-      "draft": false
-    },
-    {
-      "slug": "qwen3-0-6b-c2c-checkpoint",
-      "title": "Qwen3 0.6B C2C Checkpoint",
-      "description": "Qwen3 0.6B character-to-character checkpoint.",
-      "date": "2025-10-05",
-      "category": "models",
-      "tags": [
-        "huggingface",
-        "qwen",
-        "checkpoint",
-        "sft"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/Azzindani/Qwen3_0.6B_C2C_Checkpoint",
-      "kind": "project",
-      "collection": "models",
-      "draft": false
-    },
-    {
-      "slug": "qwen3-0-6b-l2c-checkpoint",
-      "title": "Qwen3 0.6B L2C Checkpoint",
-      "description": "Qwen3 0.6B label-to-character checkpoint.",
-      "date": "2025-10-12",
-      "category": "models",
-      "tags": [
-        "huggingface",
-        "qwen",
-        "checkpoint",
-        "sft"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/Azzindani/Qwen3_0.6B_L2C_Checkpoint",
-      "kind": "project",
-      "collection": "models",
-      "draft": false
-    },
-    {
-      "slug": "qwen2-5-1-5b-it-id-legal",
-      "title": "Qwen2.5 1.5B IT ID Legal",
-      "description": "Qwen2.5 1.5B instruction-tuned for Indonesian legal text.",
-      "date": "2025-10-25",
-      "category": "models",
-      "tags": [
-        "huggingface",
-        "qwen",
-        "fine-tuning",
-        "legal",
-        "indonesia"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/Azzindani/Qwen2.5_1.5B_IT_ID_Legal",
-      "kind": "project",
-      "collection": "models",
-      "draft": false
-    },
-    {
-      "slug": "qwen3-0-6b-legal-checkpoint",
-      "title": "Qwen3 0.6B Legal Checkpoint",
-      "description": "Qwen3 0.6B fine-tune checkpoint on Indonesian legal corpus.",
-      "date": "2025-11-05",
-      "category": "models",
-      "tags": [
-        "huggingface",
-        "qwen",
-        "legal",
-        "indonesia",
-        "checkpoint"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/Azzindani/Qwen3_0.6B_Legal_Checkpoint",
-      "kind": "project",
-      "collection": "models",
-      "draft": false
-    },
-    {
-      "slug": "deepseek-id-legal-preview",
-      "title": "Deepseek ID Legal Preview",
-      "description": "DeepSeek-derived preview model adapted for Indonesian legal Q&A.",
-      "date": "2025-11-20",
-      "category": "models",
-      "tags": [
-        "huggingface",
-        "deepseek",
-        "legal",
-        "indonesia"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/Azzindani/Deepseek_ID_Legal_Preview",
-      "kind": "project",
-      "collection": "models",
-      "draft": false
-    },
-    {
-      "slug": "deepseek-0528-8b-legal-ckpt",
-      "title": "DeepSeek 0528 8B Legal Ckpt",
-      "description": "DeepSeek 8B (May-28 base) checkpoint fine-tuned on the Indonesian legal corpus.",
-      "date": "2025-12-08",
-      "category": "models",
-      "tags": [
-        "huggingface",
-        "deepseek",
-        "legal",
-        "indonesia",
-        "8b"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/Azzindani/DeepSeek_0528_8B_Legal_Ckpt",
-      "kind": "project",
-      "collection": "models",
       "draft": false
     },
     {
@@ -486,476 +143,39 @@
       "draft": false
     },
     {
-      "slug": "id-reg-parsed",
-      "title": "ID REG Parsed",
-      "description": "Parsed Indonesian regulations — structured text extraction.",
-      "date": "2025-06-01",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "indonesia",
-        "legal",
-        "parsing"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_Parsed",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "id-reg-qa-large",
-      "title": "ID REG QA Large",
-      "description": "Large Q&A dataset built from Indonesian regulations.",
-      "date": "2025-06-09",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "qa",
-        "indonesia",
-        "legal"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_QA_Large",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "indonesian-legal-qa",
-      "title": "Indonesian Legal Q&A",
-      "description": "Curated Indonesian legal Q&A pairs.",
-      "date": "2025-06-17",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "qa",
-        "legal",
-        "indonesia"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/Indonesian_Legal_QA",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "id-reg",
-      "title": "ID REG",
-      "description": "Raw Indonesian regulation corpus.",
-      "date": "2025-06-25",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "corpus",
-        "indonesia",
-        "legal"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "id-reg-qa-small",
-      "title": "ID REG QA Small",
-      "description": "Small Q&A dataset built from Indonesian regulations.",
-      "date": "2025-07-03",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "qa",
-        "indonesia",
-        "legal"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_QA_Small",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "indonesian-regulation-qa",
-      "title": "Indonesian Regulation Q&A",
-      "description": "Indonesian regulation Q&A pairs.",
-      "date": "2025-07-11",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "qa",
-        "indonesia",
-        "regulation"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/Indonesian_Regulation_QA",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "id-reg-md-kg",
-      "title": "ID REG MD KG",
-      "description": "Indonesian regulation knowledge graph in markdown form.",
-      "date": "2025-07-19",
+      "slug": "id-reg-kg-2511",
+      "title": "ID REG KG 2511",
+      "description": "Indonesian regulation KG snapshot (2025-11).",
+      "date": "2025-12-26",
       "category": "datasets",
       "tags": [
         "huggingface",
         "dataset",
         "knowledge-graph",
-        "indonesia",
-        "legal"
+        "indonesia"
       ],
       "image": "",
       "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_MD_KG",
+      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_KG_2511",
       "kind": "project",
       "collection": "datasets",
       "draft": false
     },
     {
-      "slug": "id-reg-md-embed",
-      "title": "ID REG MD Embed",
-      "description": "Markdown-formatted regulation chunks ready for embedding.",
-      "date": "2025-07-27",
+      "slug": "id-reg-embed-2510",
+      "title": "ID REG Embed 2510",
+      "description": "Indonesian regulation embeddings (2025-10).",
+      "date": "2025-12-18",
       "category": "datasets",
       "tags": [
         "huggingface",
         "dataset",
         "embeddings",
-        "indonesia",
-        "legal"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_MD_Embed",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "id-reg-kg-2510",
-      "title": "ID REG KG 2510",
-      "description": "Indonesian regulation KG snapshot (2025-10).",
-      "date": "2025-08-04",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "knowledge-graph",
         "indonesia"
       ],
       "image": "",
       "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_KG_2510",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "id-reg-db-2510",
-      "title": "ID REG DB 2510",
-      "description": "Indonesian regulation DB snapshot (2025-10).",
-      "date": "2025-08-12",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "database",
-        "indonesia"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_DB_2510",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "id-reg-db-2511",
-      "title": "ID REG DB 2511",
-      "description": "Indonesian regulation DB snapshot (2025-11).",
-      "date": "2025-08-20",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "database",
-        "indonesia"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_DB_2511",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "invoices-data",
-      "title": "Invoices Data",
-      "description": "Invoice extraction / OCR training dataset.",
-      "date": "2025-08-28",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "invoices",
-        "ocr"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/Invoices_Data",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "open-reaction-data",
-      "title": "Open Reaction Data",
-      "description": "Open chemical-reaction dataset.",
-      "date": "2025-09-05",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "chemistry",
-        "reactions"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/Open_Reaction_Data",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "us-regulation-cfr-20260101",
-      "title": "US Regulation CFR 20260101",
-      "description": "US Code of Federal Regulations snapshot (2026-01-01).",
-      "date": "2025-09-13",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "regulation",
-        "usa",
-        "cfr"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/US_Regulation_CFR_20260101",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "us-regulation-ecfr-20260101",
-      "title": "US Regulation ECFR 20260101",
-      "description": "US electronic CFR snapshot (2026-01-01).",
-      "date": "2025-09-21",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "regulation",
-        "usa",
-        "ecfr"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/US_Regulation_ECFR_20260101",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "deepseek-0528-8b-legal-distill",
-      "title": "DeepSeek 0528 8B Legal Distill",
-      "description": "Distillation traces from DeepSeek 8B over Indonesian legal Q&A.",
-      "date": "2025-09-29",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "distillation",
-        "deepseek",
-        "legal"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/DeepSeek_0528_8B_Legal_Distill",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "qwen3-1-7b-legal-distill",
-      "title": "Qwen3 1.7B Legal Distill",
-      "description": "Distillation traces from Qwen3-1.7B on legal Q&A.",
-      "date": "2025-10-07",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "distillation",
-        "qwen",
-        "legal"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/Qwen3-1.7B_Legal_Distill",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "id-supreme-court-html",
-      "title": "ID Supreme Court HTML",
-      "description": "Indonesian Supreme Court decisions — raw HTML.",
-      "date": "2025-10-15",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "supreme-court",
-        "indonesia",
-        "html"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/ID_Supreme_Court_HTML",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "id-supreme-court-parquet",
-      "title": "ID Supreme Court Parquet",
-      "description": "Indonesian Supreme Court decisions — parquet.",
-      "date": "2025-10-23",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "supreme-court",
-        "indonesia",
-        "parquet"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/ID_Supreme_Court_Parquet",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "id-legal-qa-syn",
-      "title": "ID Legal QA Syn",
-      "description": "Synthetic Indonesian legal Q&A.",
-      "date": "2025-10-31",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "synthetic",
-        "qa",
-        "legal"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/ID_Legal_QA_Syn",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "id-reg-md-rag",
-      "title": "ID REG MD RAG",
-      "description": "Markdown-form regulation chunks for RAG.",
-      "date": "2025-11-08",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "rag",
-        "indonesia",
-        "legal"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_MD_RAG",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "id-legal-qa-synthink",
-      "title": "ID Legal QA SynThink",
-      "description": "Synthetic legal Q&A with chain-of-thought traces.",
-      "date": "2025-11-16",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "synthetic",
-        "cot",
-        "legal"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/ID_Legal_QA_SynThink",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "id-legal-qa-syndeepthink",
-      "title": "ID Legal QA SynDeepThink",
-      "description": "Synthetic legal Q&A with deep-reasoning traces.",
-      "date": "2025-11-24",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "synthetic",
-        "reasoning",
-        "legal"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/ID_Legal_QA_SynDeepThink",
-      "kind": "project",
-      "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "id-legal-bench",
-      "title": "ID Legal Bench",
-      "description": "Benchmark suite for Indonesian legal LLMs.",
-      "date": "2025-12-02",
-      "category": "datasets",
-      "tags": [
-        "huggingface",
-        "dataset",
-        "benchmark",
-        "legal",
-        "indonesia"
-      ],
-      "image": "",
-      "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/ID_Legal_Bench",
+      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_Embed_2510",
       "kind": "project",
       "collection": "datasets",
       "draft": false
@@ -981,29 +201,423 @@
       "draft": false
     },
     {
-      "slug": "id-reg-embed-2510",
-      "title": "ID REG Embed 2510",
-      "description": "Indonesian regulation embeddings (2025-10).",
-      "date": "2025-12-18",
+      "slug": "deepseek-0528-8b-legal-ckpt",
+      "title": "DeepSeek 0528 8B Legal Ckpt",
+      "description": "DeepSeek 8B (May-28 base) checkpoint fine-tuned on the Indonesian legal corpus.",
+      "date": "2025-12-08",
+      "category": "models",
+      "tags": [
+        "huggingface",
+        "deepseek",
+        "legal",
+        "indonesia",
+        "8b"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/Azzindani/DeepSeek_0528_8B_Legal_Ckpt",
+      "kind": "project",
+      "collection": "models",
+      "draft": false
+    },
+    {
+      "slug": "id-legal-bench",
+      "title": "ID Legal Bench",
+      "description": "Benchmark suite for Indonesian legal LLMs.",
+      "date": "2025-12-02",
       "category": "datasets",
       "tags": [
         "huggingface",
         "dataset",
-        "embeddings",
+        "benchmark",
+        "legal",
         "indonesia"
       ],
       "image": "",
       "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_Embed_2510",
+      "repo": "https://huggingface.co/datasets/Azzindani/ID_Legal_Bench",
       "kind": "project",
       "collection": "datasets",
       "draft": false
     },
     {
-      "slug": "id-reg-kg-2511",
-      "title": "ID REG KG 2511",
-      "description": "Indonesian regulation KG snapshot (2025-11).",
-      "date": "2025-12-26",
+      "slug": "id-legal-qa-syndeepthink",
+      "title": "ID Legal QA SynDeepThink",
+      "description": "Synthetic legal Q&A with deep-reasoning traces.",
+      "date": "2025-11-24",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "synthetic",
+        "reasoning",
+        "legal"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/ID_Legal_QA_SynDeepThink",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "deepseek-id-legal-preview",
+      "title": "Deepseek ID Legal Preview",
+      "description": "DeepSeek-derived preview model adapted for Indonesian legal Q&A.",
+      "date": "2025-11-20",
+      "category": "models",
+      "tags": [
+        "huggingface",
+        "deepseek",
+        "legal",
+        "indonesia"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/Azzindani/Deepseek_ID_Legal_Preview",
+      "kind": "project",
+      "collection": "models",
+      "draft": false
+    },
+    {
+      "slug": "id-legal-qa-synthink",
+      "title": "ID Legal QA SynThink",
+      "description": "Synthetic legal Q&A with chain-of-thought traces.",
+      "date": "2025-11-16",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "synthetic",
+        "cot",
+        "legal"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/ID_Legal_QA_SynThink",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "id-reg-md-rag",
+      "title": "ID REG MD RAG",
+      "description": "Markdown-form regulation chunks for RAG.",
+      "date": "2025-11-08",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "rag",
+        "indonesia",
+        "legal"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_MD_RAG",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "qwen3-0-6b-legal-checkpoint",
+      "title": "Qwen3 0.6B Legal Checkpoint",
+      "description": "Qwen3 0.6B fine-tune checkpoint on Indonesian legal corpus.",
+      "date": "2025-11-05",
+      "category": "models",
+      "tags": [
+        "huggingface",
+        "qwen",
+        "legal",
+        "indonesia",
+        "checkpoint"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/Azzindani/Qwen3_0.6B_Legal_Checkpoint",
+      "kind": "project",
+      "collection": "models",
+      "draft": false
+    },
+    {
+      "slug": "id-legal-qa-syn",
+      "title": "ID Legal QA Syn",
+      "description": "Synthetic Indonesian legal Q&A.",
+      "date": "2025-10-31",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "synthetic",
+        "qa",
+        "legal"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/ID_Legal_QA_Syn",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "qwen2-5-1-5b-it-id-legal",
+      "title": "Qwen2.5 1.5B IT ID Legal",
+      "description": "Qwen2.5 1.5B instruction-tuned for Indonesian legal text.",
+      "date": "2025-10-25",
+      "category": "models",
+      "tags": [
+        "huggingface",
+        "qwen",
+        "fine-tuning",
+        "legal",
+        "indonesia"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/Azzindani/Qwen2.5_1.5B_IT_ID_Legal",
+      "kind": "project",
+      "collection": "models",
+      "draft": false
+    },
+    {
+      "slug": "id-supreme-court-parquet",
+      "title": "ID Supreme Court Parquet",
+      "description": "Indonesian Supreme Court decisions \u2014 parquet.",
+      "date": "2025-10-23",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "supreme-court",
+        "indonesia",
+        "parquet"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/ID_Supreme_Court_Parquet",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "id-supreme-court-html",
+      "title": "ID Supreme Court HTML",
+      "description": "Indonesian Supreme Court decisions \u2014 raw HTML.",
+      "date": "2025-10-15",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "supreme-court",
+        "indonesia",
+        "html"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/ID_Supreme_Court_HTML",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "qwen3-0-6b-l2c-checkpoint",
+      "title": "Qwen3 0.6B L2C Checkpoint",
+      "description": "Qwen3 0.6B label-to-character checkpoint.",
+      "date": "2025-10-12",
+      "category": "models",
+      "tags": [
+        "huggingface",
+        "qwen",
+        "checkpoint",
+        "sft"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/Azzindani/Qwen3_0.6B_L2C_Checkpoint",
+      "kind": "project",
+      "collection": "models",
+      "draft": false
+    },
+    {
+      "slug": "qwen3-1-7b-legal-distill",
+      "title": "Qwen3 1.7B Legal Distill",
+      "description": "Distillation traces from Qwen3-1.7B on legal Q&A.",
+      "date": "2025-10-07",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "distillation",
+        "qwen",
+        "legal"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/Qwen3-1.7B_Legal_Distill",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "qwen3-0-6b-c2c-checkpoint",
+      "title": "Qwen3 0.6B C2C Checkpoint",
+      "description": "Qwen3 0.6B character-to-character checkpoint.",
+      "date": "2025-10-05",
+      "category": "models",
+      "tags": [
+        "huggingface",
+        "qwen",
+        "checkpoint",
+        "sft"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/Azzindani/Qwen3_0.6B_C2C_Checkpoint",
+      "kind": "project",
+      "collection": "models",
+      "draft": false
+    },
+    {
+      "slug": "deepseek-0528-8b-legal-distill",
+      "title": "DeepSeek 0528 8B Legal Distill",
+      "description": "Distillation traces from DeepSeek 8B over Indonesian legal Q&A.",
+      "date": "2025-09-29",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "distillation",
+        "deepseek",
+        "legal"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/DeepSeek_0528_8B_Legal_Distill",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "us-regulation-ecfr-20260101",
+      "title": "US Regulation ECFR 20260101",
+      "description": "US electronic CFR snapshot (2026-01-01).",
+      "date": "2025-09-21",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "regulation",
+        "usa",
+        "ecfr"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/US_Regulation_ECFR_20260101",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "us-regulation-cfr-20260101",
+      "title": "US Regulation CFR 20260101",
+      "description": "US Code of Federal Regulations snapshot (2026-01-01).",
+      "date": "2025-09-13",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "regulation",
+        "usa",
+        "cfr"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/US_Regulation_CFR_20260101",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "open-reaction-data",
+      "title": "Open Reaction Data",
+      "description": "Open chemical-reaction dataset.",
+      "date": "2025-09-05",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "chemistry",
+        "reactions"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/Open_Reaction_Data",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "invoices-data",
+      "title": "Invoices Data",
+      "description": "Invoice extraction / OCR training dataset.",
+      "date": "2025-08-28",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "invoices",
+        "ocr"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/Invoices_Data",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "id-reg-db-2511",
+      "title": "ID REG DB 2511",
+      "description": "Indonesian regulation DB snapshot (2025-11).",
+      "date": "2025-08-20",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "database",
+        "indonesia"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_DB_2511",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "id-reg-db-2510",
+      "title": "ID REG DB 2510",
+      "description": "Indonesian regulation DB snapshot (2025-10).",
+      "date": "2025-08-12",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "database",
+        "indonesia"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_DB_2510",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "id-reg-kg-2510",
+      "title": "ID REG KG 2510",
+      "description": "Indonesian regulation KG snapshot (2025-10).",
+      "date": "2025-08-04",
       "category": "datasets",
       "tags": [
         "huggingface",
@@ -1013,9 +627,295 @@
       ],
       "image": "",
       "type": "repo",
-      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_KG_2511",
+      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_KG_2510",
       "kind": "project",
       "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "id-reg-md-embed",
+      "title": "ID REG MD Embed",
+      "description": "Markdown-formatted regulation chunks ready for embedding.",
+      "date": "2025-07-27",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "embeddings",
+        "indonesia",
+        "legal"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_MD_Embed",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "id-reg-md-kg",
+      "title": "ID REG MD KG",
+      "description": "Indonesian regulation knowledge graph in markdown form.",
+      "date": "2025-07-19",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "knowledge-graph",
+        "indonesia",
+        "legal"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_MD_KG",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "indonesian-regulation-qa",
+      "title": "Indonesian Regulation Q&A",
+      "description": "Indonesian regulation Q&A pairs.",
+      "date": "2025-07-11",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "qa",
+        "indonesia",
+        "regulation"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/Indonesian_Regulation_QA",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "id-reg-qa-small",
+      "title": "ID REG QA Small",
+      "description": "Small Q&A dataset built from Indonesian regulations.",
+      "date": "2025-07-03",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "qa",
+        "indonesia",
+        "legal"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_QA_Small",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "id-reg",
+      "title": "ID REG",
+      "description": "Raw Indonesian regulation corpus.",
+      "date": "2025-06-25",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "corpus",
+        "indonesia",
+        "legal"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "indonesian-legal-qa",
+      "title": "Indonesian Legal Q&A",
+      "description": "Curated Indonesian legal Q&A pairs.",
+      "date": "2025-06-17",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "qa",
+        "legal",
+        "indonesia"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/Indonesian_Legal_QA",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "id-reg-qa-large",
+      "title": "ID REG QA Large",
+      "description": "Large Q&A dataset built from Indonesian regulations.",
+      "date": "2025-06-09",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "qa",
+        "indonesia",
+        "legal"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_QA_Large",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "id-reg-parsed",
+      "title": "ID REG Parsed",
+      "description": "Parsed Indonesian regulations \u2014 structured text extraction.",
+      "date": "2025-06-01",
+      "category": "datasets",
+      "tags": [
+        "huggingface",
+        "dataset",
+        "indonesia",
+        "legal",
+        "parsing"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_Parsed",
+      "kind": "project",
+      "collection": "datasets",
+      "draft": false
+    },
+    {
+      "slug": "grpo-fine-tuning",
+      "title": "GRPO Fine-Tuning \u2014 Reinforcement Learning for LLMs",
+      "description": "Notes on fine-tuning a language model with Group Relative Policy Optimization (GRPO): rewards, rollouts, and stability tricks.",
+      "date": "2024-12-01",
+      "category": "machine-learning",
+      "tags": [
+        "rlhf",
+        "grpo",
+        "fine-tuning",
+        "llm"
+      ],
+      "image": "",
+      "type": "pdf",
+      "pdf": "uploads/pdfs/grpo-fine-tuning.pdf",
+      "kind": "project",
+      "featured": true,
+      "draft": false
+    },
+    {
+      "slug": "id-legal-preview-gguf",
+      "title": "ID Legal Preview \u2014 GGUF Quantized Model",
+      "description": "Step 5: distilling the Q&A pipeline into a GGUF-quantized model for local, offline preview.",
+      "date": "2024-11-10",
+      "category": "nlp",
+      "tags": [
+        "gguf",
+        "quantization",
+        "llama-cpp",
+        "legal",
+        "indonesia"
+      ],
+      "image": "",
+      "type": "pdf",
+      "pdf": "uploads/pdfs/id-legal-preview-gguf.pdf",
+      "kind": "project",
+      "collection": "id-legal-rag",
+      "order": 5,
+      "draft": false
+    },
+    {
+      "slug": "id-regulation-question-answer",
+      "title": "ID Regulation Q&A \u2014 RAG over Indonesian Law",
+      "description": "Step 4: a retrieval-augmented question-answering system grounded in the embedded Indonesian regulation corpus.",
+      "date": "2024-10-20",
+      "category": "nlp",
+      "tags": [
+        "rag",
+        "qa",
+        "llm",
+        "indonesia",
+        "legal"
+      ],
+      "image": "",
+      "type": "pdf",
+      "pdf": "uploads/pdfs/id-regulation-question-answer.pdf",
+      "kind": "project",
+      "collection": "id-legal-rag",
+      "order": 4,
+      "featured": true,
+      "draft": false
+    },
+    {
+      "slug": "id-regulation-embed",
+      "title": "ID Regulation Embed \u2014 Vector Index",
+      "description": "Step 3: chunking the parsed corpus and embedding it into a vector store for semantic retrieval.",
+      "date": "2024-10-02",
+      "category": "nlp",
+      "tags": [
+        "rag",
+        "embeddings",
+        "vector-search",
+        "indonesia",
+        "legal"
+      ],
+      "image": "",
+      "type": "pdf",
+      "pdf": "uploads/pdfs/id-regulation-embed.pdf",
+      "kind": "project",
+      "collection": "id-legal-rag",
+      "order": 3,
+      "draft": false
+    },
+    {
+      "slug": "id-regulation-parsed",
+      "title": "ID Regulation Parsed \u2014 Structured Extraction",
+      "description": "Step 2: parsing Indonesian regulation PDFs into clean, hierarchical text suitable for downstream NLP.",
+      "date": "2024-09-15",
+      "category": "nlp",
+      "tags": [
+        "rag",
+        "legal",
+        "indonesia",
+        "parsing",
+        "extraction"
+      ],
+      "image": "",
+      "type": "pdf",
+      "pdf": "uploads/pdfs/id-regulation-parsed.pdf",
+      "kind": "project",
+      "collection": "id-legal-rag",
+      "order": 2,
+      "draft": false
+    },
+    {
+      "slug": "id-regulation-pdf",
+      "title": "ID Regulation PDF \u2014 Source Corpus",
+      "description": "Step 1 of an Indonesian-regulation RAG pipeline: collecting and normalising the raw legal PDF corpus.",
+      "date": "2024-09-05",
+      "category": "nlp",
+      "tags": [
+        "rag",
+        "legal",
+        "indonesia",
+        "pdf",
+        "corpus"
+      ],
+      "image": "",
+      "type": "pdf",
+      "pdf": "uploads/pdfs/id-regulation-pdf.pdf",
+      "kind": "project",
+      "collection": "id-legal-rag",
+      "order": 1,
+      "featured": true,
       "draft": false
     },
     {
@@ -1051,332 +951,6 @@
       "draft": false
     },
     {
-      "slug": "id-regulation-pdf",
-      "title": "ID Regulation PDF — Source Corpus",
-      "description": "Step 1 of an Indonesian-regulation RAG pipeline: collecting and normalising the raw legal PDF corpus.",
-      "date": "2024-09-05",
-      "category": "nlp",
-      "tags": [
-        "rag",
-        "legal",
-        "indonesia",
-        "pdf",
-        "corpus"
-      ],
-      "image": "",
-      "type": "pdf",
-      "pdf": "uploads/pdfs/id-regulation-pdf.pdf",
-      "kind": "project",
-      "collection": "id-legal-rag",
-      "order": 1,
-      "featured": true,
-      "draft": false
-    },
-    {
-      "slug": "id-regulation-parsed",
-      "title": "ID Regulation Parsed — Structured Extraction",
-      "description": "Step 2: parsing Indonesian regulation PDFs into clean, hierarchical text suitable for downstream NLP.",
-      "date": "2024-09-15",
-      "category": "nlp",
-      "tags": [
-        "rag",
-        "legal",
-        "indonesia",
-        "parsing",
-        "extraction"
-      ],
-      "image": "",
-      "type": "pdf",
-      "pdf": "uploads/pdfs/id-regulation-parsed.pdf",
-      "kind": "project",
-      "collection": "id-legal-rag",
-      "order": 2,
-      "draft": false
-    },
-    {
-      "slug": "id-regulation-embed",
-      "title": "ID Regulation Embed — Vector Index",
-      "description": "Step 3: chunking the parsed corpus and embedding it into a vector store for semantic retrieval.",
-      "date": "2024-10-02",
-      "category": "nlp",
-      "tags": [
-        "rag",
-        "embeddings",
-        "vector-search",
-        "indonesia",
-        "legal"
-      ],
-      "image": "",
-      "type": "pdf",
-      "pdf": "uploads/pdfs/id-regulation-embed.pdf",
-      "kind": "project",
-      "collection": "id-legal-rag",
-      "order": 3,
-      "draft": false
-    },
-    {
-      "slug": "id-regulation-question-answer",
-      "title": "ID Regulation Q&A — RAG over Indonesian Law",
-      "description": "Step 4: a retrieval-augmented question-answering system grounded in the embedded Indonesian regulation corpus.",
-      "date": "2024-10-20",
-      "category": "nlp",
-      "tags": [
-        "rag",
-        "qa",
-        "llm",
-        "indonesia",
-        "legal"
-      ],
-      "image": "",
-      "type": "pdf",
-      "pdf": "uploads/pdfs/id-regulation-question-answer.pdf",
-      "kind": "project",
-      "collection": "id-legal-rag",
-      "order": 4,
-      "featured": true,
-      "draft": false
-    },
-    {
-      "slug": "id-legal-preview-gguf",
-      "title": "ID Legal Preview — GGUF Quantized Model",
-      "description": "Step 5: distilling the Q&A pipeline into a GGUF-quantized model for local, offline preview.",
-      "date": "2024-11-10",
-      "category": "nlp",
-      "tags": [
-        "gguf",
-        "quantization",
-        "llama-cpp",
-        "legal",
-        "indonesia"
-      ],
-      "image": "",
-      "type": "pdf",
-      "pdf": "uploads/pdfs/id-legal-preview-gguf.pdf",
-      "kind": "project",
-      "collection": "id-legal-rag",
-      "order": 5,
-      "draft": false
-    },
-    {
-      "slug": "grpo-fine-tuning",
-      "title": "GRPO Fine-Tuning — Reinforcement Learning for LLMs",
-      "description": "Notes on fine-tuning a language model with Group Relative Policy Optimization (GRPO): rewards, rollouts, and stability tricks.",
-      "date": "2024-12-01",
-      "category": "machine-learning",
-      "tags": [
-        "rlhf",
-        "grpo",
-        "fine-tuning",
-        "llm"
-      ],
-      "image": "",
-      "type": "pdf",
-      "pdf": "uploads/pdfs/grpo-fine-tuning.pdf",
-      "kind": "project",
-      "featured": true,
-      "draft": false
-    },
-    {
-      "slug": "lungs-detection",
-      "title": "Lungs Detection",
-      "description": "A computer vision system that detects and localizes lungs in chest X-ray (CXR) images — the foundation step for downstream disease detection.",
-      "date": "2021-06-01",
-      "category": "healthcare-ai",
-      "tags": [
-        "computer-vision",
-        "medical-imaging",
-        "tensorflow",
-        "object-detection"
-      ],
-      "image": "uploads/images/projects/lungs-detection.jpg",
-      "type": "article",
-      "file": "lungs-detection.md",
-      "kind": "project",
-      "collection": "cv-medical-imaging",
-      "order": 1,
-      "featured": true,
-      "draft": false
-    },
-    {
-      "slug": "covid-19-detection",
-      "title": "Covid-19 Detection from Chest X-Rays",
-      "description": "Deep-learning classifier that identifies Covid-19 from chest X-ray images, building on the lungs-detection foundation.",
-      "date": "2021-09-01",
-      "category": "healthcare-ai",
-      "tags": [
-        "deep-learning",
-        "computer-vision",
-        "covid-19",
-        "medical-imaging"
-      ],
-      "image": "uploads/images/projects/covid-19-detection.png",
-      "type": "article",
-      "file": "covid-19-detection.md",
-      "kind": "project",
-      "collection": "cv-medical-imaging",
-      "order": 2,
-      "featured": true,
-      "draft": false
-    },
-    {
-      "slug": "lung-abnormalities-detection",
-      "title": "Lung Abnormalities Detection (8-Class)",
-      "description": "Multi-class CXR analyzer that recognizes eight distinct lung abnormalities, extending the medical-imaging pipeline.",
-      "date": "2022-02-01",
-      "category": "healthcare-ai",
-      "tags": [
-        "computer-vision",
-        "medical-imaging",
-        "deep-learning",
-        "multi-class"
-      ],
-      "image": "uploads/images/projects/lung-abnormalities-detection.png",
-      "type": "article",
-      "file": "lung-abnormalities-detection.md",
-      "kind": "project",
-      "collection": "cv-medical-imaging",
-      "order": 3,
-      "draft": false
-    },
-    {
-      "slug": "facial-recognition-small",
-      "title": "Facial Recognition — Pilot",
-      "description": "A foundational facial-recognition model used to validate the data, training, and inference pipeline before scaling.",
-      "date": "2022-06-01",
-      "category": "machine-learning",
-      "tags": [
-        "facial-recognition",
-        "computer-vision",
-        "pilot"
-      ],
-      "image": "uploads/images/projects/facial-recognition-small.png",
-      "type": "article",
-      "file": "facial-recognition-small.md",
-      "kind": "project",
-      "collection": "facial-recognition",
-      "order": 1,
-      "draft": false
-    },
-    {
-      "slug": "facial-recognition-large",
-      "title": "Facial Recognition — 1000+ Identities, 97% Accuracy",
-      "description": "Production-scale facial recognition trained on 500K+ multi-threaded-scraped images, recognizing 1000+ unique faces at 97% accuracy.",
-      "date": "2022-11-01",
-      "category": "machine-learning",
-      "tags": [
-        "facial-recognition",
-        "computer-vision",
-        "scale",
-        "multi-threading"
-      ],
-      "image": "uploads/images/projects/facial-recognition-large.png",
-      "type": "article",
-      "file": "facial-recognition-large.md",
-      "kind": "project",
-      "collection": "facial-recognition",
-      "order": 2,
-      "featured": true,
-      "draft": false
-    },
-    {
-      "slug": "financial-statement-scraping",
-      "title": "Financial Statement Web Scraping",
-      "description": "A scraper that extracts diverse financial statement data straight from a stock-exchange database.",
-      "date": "2023-02-01",
-      "category": "data-engineering",
-      "tags": [
-        "web-scraping",
-        "finance",
-        "data-extraction"
-      ],
-      "image": "uploads/images/projects/financial-statement-scraping.png",
-      "type": "article",
-      "file": "financial-statement-scraping.md",
-      "kind": "project",
-      "collection": "stock-exchange-pipeline",
-      "order": 1,
-      "draft": false
-    },
-    {
-      "slug": "financial-statement-excel-scraping",
-      "title": "Financial Statement Excel Scraping",
-      "description": "Multi-threaded scraper specialised in pulling Excel-format financial reports from stock-exchange disclosures.",
-      "date": "2023-04-01",
-      "category": "data-engineering",
-      "tags": [
-        "web-scraping",
-        "finance",
-        "excel",
-        "multi-threading"
-      ],
-      "image": "uploads/images/projects/financial-statement-excel-scraping.png",
-      "type": "article",
-      "file": "financial-statement-excel-scraping.md",
-      "kind": "project",
-      "collection": "stock-exchange-pipeline",
-      "order": 2,
-      "draft": false
-    },
-    {
-      "slug": "broker-transaction-scraping",
-      "title": "Broker Transaction Data Scraping",
-      "description": "Robust multi-threaded scraper that automates broker-transaction data extraction from the stock exchange.",
-      "date": "2023-07-01",
-      "category": "data-engineering",
-      "tags": [
-        "web-scraping",
-        "automation",
-        "stock-market"
-      ],
-      "image": "uploads/images/projects/broker-transaction-scraping.png",
-      "type": "article",
-      "file": "broker-transaction-scraping.md",
-      "kind": "project",
-      "collection": "stock-exchange-pipeline",
-      "order": 3,
-      "draft": false
-    },
-    {
-      "slug": "broker-transaction-analysis",
-      "title": "Broker Transaction Data Analysis",
-      "description": "Cleaning, managing and visualising broker-transaction data into actionable interactive dashboards.",
-      "date": "2023-10-01",
-      "category": "data-science",
-      "tags": [
-        "data-analysis",
-        "visualization",
-        "broker-data"
-      ],
-      "image": "uploads/images/projects/broker-transaction-analysis.png",
-      "type": "article",
-      "file": "broker-transaction-analysis.md",
-      "kind": "project",
-      "collection": "stock-exchange-pipeline",
-      "order": 4,
-      "draft": false
-    },
-    {
-      "slug": "broker-transaction-automation",
-      "title": "Broker Transaction Automation — End-to-End",
-      "description": "Capstone integrating multi-threaded scraping, data management and interactive visualisation into a semi-automated end-to-end stock-exchange analysis system.",
-      "date": "2024-01-15",
-      "category": "data-science",
-      "tags": [
-        "automation",
-        "data-analysis",
-        "web-scraping",
-        "end-to-end"
-      ],
-      "image": "uploads/images/projects/broker-transaction-automation.png",
-      "type": "article",
-      "file": "broker-transaction-automation.md",
-      "kind": "project",
-      "collection": "stock-exchange-pipeline",
-      "order": 5,
-      "featured": true,
-      "draft": false
-    },
-    {
       "slug": "math-and-mermaid-showcase",
       "title": "Markdown Showcase: Math, Mermaid, Code",
       "description": "LaTeX math, Mermaid diagrams, code highlighting, and tables in one post.",
@@ -1396,7 +970,7 @@
     {
       "slug": "sample-repo-readme",
       "title": "Portfolio Source Code",
-      "description": "The source for this site itself — pulled live from the GitHub README.",
+      "description": "The source for this site itself \u2014 pulled live from the GitHub README.",
       "date": "2024-04-01",
       "category": "meta",
       "tags": [
@@ -1449,6 +1023,27 @@
       "draft": false
     },
     {
+      "slug": "broker-transaction-automation",
+      "title": "Broker Transaction Automation \u2014 End-to-End",
+      "description": "Capstone integrating multi-threaded scraping, data management and interactive visualisation into a semi-automated end-to-end stock-exchange analysis system.",
+      "date": "2024-01-15",
+      "category": "data-science",
+      "tags": [
+        "automation",
+        "data-analysis",
+        "web-scraping",
+        "end-to-end"
+      ],
+      "image": "uploads/images/projects/broker-transaction-automation.png",
+      "type": "article",
+      "file": "broker-transaction-automation.md",
+      "kind": "project",
+      "collection": "stock-exchange-pipeline",
+      "order": 5,
+      "featured": true,
+      "draft": false
+    },
+    {
       "slug": "welcome-to-my-portfolio",
       "title": "Welcome to My Portfolio",
       "description": "An introduction to this portfolio site and what you'll find here.",
@@ -1462,6 +1057,411 @@
       "type": "article",
       "file": "welcome-to-my-portfolio.md",
       "kind": "blog",
+      "draft": false
+    },
+    {
+      "slug": "broker-transaction-analysis",
+      "title": "Broker Transaction Data Analysis",
+      "description": "Cleaning, managing and visualising broker-transaction data into actionable interactive dashboards.",
+      "date": "2023-10-01",
+      "category": "data-science",
+      "tags": [
+        "data-analysis",
+        "visualization",
+        "broker-data"
+      ],
+      "image": "uploads/images/projects/broker-transaction-analysis.png",
+      "type": "article",
+      "file": "broker-transaction-analysis.md",
+      "kind": "project",
+      "collection": "stock-exchange-pipeline",
+      "order": 4,
+      "draft": false
+    },
+    {
+      "slug": "broker-transaction-scraping",
+      "title": "Broker Transaction Data Scraping",
+      "description": "Robust multi-threaded scraper that automates broker-transaction data extraction from the stock exchange.",
+      "date": "2023-07-01",
+      "category": "data-engineering",
+      "tags": [
+        "web-scraping",
+        "automation",
+        "stock-market"
+      ],
+      "image": "uploads/images/projects/broker-transaction-scraping.png",
+      "type": "article",
+      "file": "broker-transaction-scraping.md",
+      "kind": "project",
+      "collection": "stock-exchange-pipeline",
+      "order": 3,
+      "draft": false
+    },
+    {
+      "slug": "bio-medical",
+      "title": "Bio Medical",
+      "description": "Biomedical ML/AI explorations spanning imaging and tabular health data.",
+      "date": "2023-06-15",
+      "category": "healthcare-ai",
+      "tags": [
+        "biomedical",
+        "healthcare-ai"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://github.com/azzindani/04_Bio_Medical",
+      "kind": "project",
+      "collection": "learning-journey",
+      "draft": false
+    },
+    {
+      "slug": "llm-data-preprocess",
+      "title": "LLM Data Preprocess",
+      "description": "Pre-processing tricks for preparing text data for LLM training and fine-tuning.",
+      "date": "2023-04-25",
+      "category": "nlp",
+      "tags": [
+        "llm",
+        "preprocessing",
+        "data-prep"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://github.com/azzindani/03_LLM_Data_Preprocess",
+      "kind": "project",
+      "collection": "learning-journey",
+      "draft": false
+    },
+    {
+      "slug": "financial-statement-excel-scraping",
+      "title": "Financial Statement Excel Scraping",
+      "description": "Multi-threaded scraper specialised in pulling Excel-format financial reports from stock-exchange disclosures.",
+      "date": "2023-04-01",
+      "category": "data-engineering",
+      "tags": [
+        "web-scraping",
+        "finance",
+        "excel",
+        "multi-threading"
+      ],
+      "image": "uploads/images/projects/financial-statement-excel-scraping.png",
+      "type": "article",
+      "file": "financial-statement-excel-scraping.md",
+      "kind": "project",
+      "collection": "stock-exchange-pipeline",
+      "order": 2,
+      "draft": false
+    },
+    {
+      "slug": "prompt-engineering",
+      "title": "Prompt Engineering",
+      "description": "Practical prompt-engineering experiments and reusable patterns.",
+      "date": "2023-03-20",
+      "category": "nlp",
+      "tags": [
+        "llm",
+        "prompt-engineering"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://github.com/azzindani/03_Prompt_Engineering",
+      "kind": "project",
+      "collection": "learning-journey",
+      "draft": false
+    },
+    {
+      "slug": "llm-preview",
+      "title": "LLM Preview",
+      "description": "Hands-on preview of running and prompting large language models locally.",
+      "date": "2023-02-15",
+      "category": "nlp",
+      "tags": [
+        "llm",
+        "inference"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://github.com/azzindani/03_LLM_Preview",
+      "kind": "project",
+      "collection": "learning-journey",
+      "draft": false
+    },
+    {
+      "slug": "financial-statement-scraping",
+      "title": "Financial Statement Web Scraping",
+      "description": "A scraper that extracts diverse financial statement data straight from a stock-exchange database.",
+      "date": "2023-02-01",
+      "category": "data-engineering",
+      "tags": [
+        "web-scraping",
+        "finance",
+        "data-extraction"
+      ],
+      "image": "uploads/images/projects/financial-statement-scraping.png",
+      "type": "article",
+      "file": "financial-statement-scraping.md",
+      "kind": "project",
+      "collection": "stock-exchange-pipeline",
+      "order": 1,
+      "draft": false
+    },
+    {
+      "slug": "facial-recognition-large",
+      "title": "Facial Recognition \u2014 1000+ Identities, 97% Accuracy",
+      "description": "Production-scale facial recognition trained on 500K+ multi-threaded-scraped images, recognizing 1000+ unique faces at 97% accuracy.",
+      "date": "2022-11-01",
+      "category": "machine-learning",
+      "tags": [
+        "facial-recognition",
+        "computer-vision",
+        "scale",
+        "multi-threading"
+      ],
+      "image": "uploads/images/projects/facial-recognition-large.png",
+      "type": "article",
+      "file": "facial-recognition-large.md",
+      "kind": "project",
+      "collection": "facial-recognition",
+      "order": 2,
+      "featured": true,
+      "draft": false
+    },
+    {
+      "slug": "machine-learning",
+      "title": "Machine Learning",
+      "description": "Classical machine-learning practice \u2014 linear, tree, ensemble, kernel methods.",
+      "date": "2022-10-15",
+      "category": "machine-learning",
+      "tags": [
+        "machine-learning",
+        "scikit-learn"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://github.com/azzindani/02_Machine_Learning",
+      "kind": "project",
+      "collection": "learning-journey",
+      "draft": false
+    },
+    {
+      "slug": "deep-learning-ann",
+      "title": "Deep Learning ANN",
+      "description": "Building artificial neural networks from first principles in Python.",
+      "date": "2022-09-05",
+      "category": "machine-learning",
+      "tags": [
+        "deep-learning",
+        "ann",
+        "python"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://github.com/azzindani/02_Deep_Learning_ANN",
+      "kind": "project",
+      "collection": "learning-journey",
+      "draft": false
+    },
+    {
+      "slug": "deep-learning-nlp",
+      "title": "Deep Learning NLP",
+      "description": "Early deep-learning NLP experiments \u2014 embeddings, RNNs, attention.",
+      "date": "2022-08-10",
+      "category": "machine-learning",
+      "tags": [
+        "deep-learning",
+        "nlp"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://github.com/azzindani/02_Deep_Learning_NLP",
+      "kind": "project",
+      "collection": "learning-journey",
+      "draft": false
+    },
+    {
+      "slug": "data-science",
+      "title": "Data Science",
+      "description": "Data-science notebooks covering the modelling pipeline end-to-end.",
+      "date": "2022-07-01",
+      "category": "data-science",
+      "tags": [
+        "data-science",
+        "modeling"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://github.com/azzindani/02_Data_Science",
+      "kind": "project",
+      "collection": "learning-journey",
+      "draft": false
+    },
+    {
+      "slug": "facial-recognition-small",
+      "title": "Facial Recognition \u2014 Pilot",
+      "description": "A foundational facial-recognition model used to validate the data, training, and inference pipeline before scaling.",
+      "date": "2022-06-01",
+      "category": "machine-learning",
+      "tags": [
+        "facial-recognition",
+        "computer-vision",
+        "pilot"
+      ],
+      "image": "uploads/images/projects/facial-recognition-small.png",
+      "type": "article",
+      "file": "facial-recognition-small.md",
+      "kind": "project",
+      "collection": "facial-recognition",
+      "order": 1,
+      "draft": false
+    },
+    {
+      "slug": "streamlit",
+      "title": "Streamlit",
+      "description": "Streamlit dashboards built while learning interactive Python apps.",
+      "date": "2022-05-15",
+      "category": "data-analytics",
+      "tags": [
+        "streamlit",
+        "dashboard",
+        "python"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://github.com/azzindani/01_Streamlit",
+      "kind": "project",
+      "collection": "learning-journey",
+      "draft": false
+    },
+    {
+      "slug": "depth-eda",
+      "title": "Depth EDA",
+      "description": "In-depth EDA studies: distributions, correlations, missingness, outliers.",
+      "date": "2022-04-20",
+      "category": "data-analytics",
+      "tags": [
+        "eda",
+        "pandas",
+        "visualization"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://github.com/azzindani/01_Depth_EDA",
+      "kind": "project",
+      "collection": "learning-journey",
+      "draft": false
+    },
+    {
+      "slug": "data-analytic",
+      "title": "Data Analytic",
+      "description": "Early hands-on data-analytics practice \u2014 cleaning, aggregating, summarising tabular data.",
+      "date": "2022-03-12",
+      "category": "data-analytics",
+      "tags": [
+        "data-analytics",
+        "pandas"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://github.com/azzindani/01_Data_Analytic",
+      "kind": "project",
+      "collection": "learning-journey",
+      "draft": false
+    },
+    {
+      "slug": "data-source",
+      "title": "Data Source",
+      "description": "A scratch notebook of data-source links and ingestion patterns.",
+      "date": "2022-02-15",
+      "category": "data-engineering",
+      "tags": [
+        "data-sources",
+        "ingestion"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://github.com/azzindani/00_Data_Source",
+      "kind": "project",
+      "collection": "learning-journey",
+      "draft": false
+    },
+    {
+      "slug": "kaggle-biomed-dataset",
+      "title": "Kaggle Biomed Dataset",
+      "description": "Curating Kaggle biomedical datasets \u2014 exploration notes and quick-start scripts.",
+      "date": "2022-02-10",
+      "category": "data-science",
+      "tags": [
+        "kaggle",
+        "biomed",
+        "dataset"
+      ],
+      "image": "",
+      "type": "repo",
+      "repo": "https://github.com/azzindani/00_Kaggle_Biomed_Dataset",
+      "kind": "project",
+      "collection": "learning-journey",
+      "draft": false
+    },
+    {
+      "slug": "lung-abnormalities-detection",
+      "title": "Lung Abnormalities Detection (8-Class)",
+      "description": "Multi-class CXR analyzer that recognizes eight distinct lung abnormalities, extending the medical-imaging pipeline.",
+      "date": "2022-02-01",
+      "category": "healthcare-ai",
+      "tags": [
+        "computer-vision",
+        "medical-imaging",
+        "deep-learning",
+        "multi-class"
+      ],
+      "image": "uploads/images/projects/lung-abnormalities-detection.png",
+      "type": "article",
+      "file": "lung-abnormalities-detection.md",
+      "kind": "project",
+      "collection": "cv-medical-imaging",
+      "order": 3,
+      "draft": false
+    },
+    {
+      "slug": "covid-19-detection",
+      "title": "Covid-19 Detection from Chest X-Rays",
+      "description": "Deep-learning classifier that identifies Covid-19 from chest X-ray images, building on the lungs-detection foundation.",
+      "date": "2021-09-01",
+      "category": "healthcare-ai",
+      "tags": [
+        "deep-learning",
+        "computer-vision",
+        "covid-19",
+        "medical-imaging"
+      ],
+      "image": "uploads/images/projects/covid-19-detection.png",
+      "type": "article",
+      "file": "covid-19-detection.md",
+      "kind": "project",
+      "collection": "cv-medical-imaging",
+      "order": 2,
+      "featured": true,
+      "draft": false
+    },
+    {
+      "slug": "lungs-detection",
+      "title": "Lungs Detection",
+      "description": "A computer vision system that detects and localizes lungs in chest X-ray (CXR) images \u2014 the foundation step for downstream disease detection.",
+      "date": "2021-06-01",
+      "category": "healthcare-ai",
+      "tags": [
+        "computer-vision",
+        "medical-imaging",
+        "tensorflow",
+        "object-detection"
+      ],
+      "image": "uploads/images/projects/lungs-detection.jpg",
+      "type": "article",
+      "file": "lungs-detection.md",
+      "kind": "project",
+      "collection": "cv-medical-imaging",
+      "order": 1,
+      "featured": true,
       "draft": false
     }
   ]

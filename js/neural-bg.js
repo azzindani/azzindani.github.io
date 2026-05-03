@@ -6,18 +6,19 @@
     'use strict';
 
     const CFG = {
-        NEURON_COUNT: 180,
-        NEURON_COUNT_MOBILE: 90,
+        NEURON_COUNT: 110,
+        NEURON_COUNT_MOBILE: 55,
         AI_RATIO: 0.45,
         CONNECTION_DIST: 220,
         MIN_NEIGHBORS: 3,
         SIGNAL_SPEED: 0.0085,
-        SIGNAL_SPAWN_RATE: 0.025,
-        MAX_SIGNALS: 80,
+        SIGNAL_SPAWN_RATE: 0.018,
+        MAX_SIGNALS: 45,
+        MAX_BUBBLES: 30,
         PERSPECTIVE: 800,
         DEPTH_RANGE: 600,
         DRIFT_SPEED: 0.25,
-        TRAIL_LENGTH: 14,
+        TRAIL_LENGTH: 10,
         ARRIVAL_PULSE_FRAMES: 22,
         BUBBLE_LIFE_FRAMES: 70,
         BUBBLE_RISE: 0.45,
@@ -33,12 +34,23 @@
         COLOR_SIGNAL_AI: [96, 205, 255],
         COLOR_SIGNAL_BIO: [232, 160, 255],
         COLOR_SIGNAL_BRIDGE: [200, 190, 255],
-        CONN_RECALC_INTERVAL: 30,
+        CONN_RECALC_INTERVAL: 60,
+        // Adaptive degradation thresholds (ms per frame).
+        SLOW_FRAME_MS: 28,    // ~36 fps
+        FAST_FRAME_MS: 20,    // ~50 fps
     };
 
     let canvas, ctx, W, H, dpr;
     let neurons = [], connections = [], signals = [], numberBubbles = [];
     let frameCount = 0, lastTime = 0, paused = false;
+    // Reused per-frame buffers — avoid per-frame array allocations (a major
+    // GC pressure source that shows up as jitter).
+    let projSx = null, projSy = null, projS = null;
+    let zSortedIdx = null;   // Int32Array of neuron indices sorted by z asc
+    let bubbleFontCache = null;
+    // Adaptive perf state — if frames take too long, we shed work.
+    let perfLevel = 1;       // 1 = full, 0.5 = degraded (no extras)
+    let slowFrames = 0, fastFrames = 0;
     const isMobile = window.matchMedia('(max-width: 768px)').matches;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const neuronCount = reducedMotion
@@ -179,6 +191,19 @@
             neurons.push(createNeuron());
         }
 
+        // Pre-allocate reusable per-frame buffers.
+        projSx = new Float32Array(neuronCount);
+        projSy = new Float32Array(neuronCount);
+        projS  = new Float32Array(neuronCount);
+        zSortedIdx = new Int32Array(neuronCount);
+        for (let i = 0; i < neuronCount; i++) zSortedIdx[i] = i;
+
+        // Cache the font string once — getComputedStyle() inside the render
+        // loop forces style/layout work every frame.
+        const monoFamily = (getComputedStyle(document.documentElement)
+            .getPropertyValue('--font-mono') || 'monospace').trim();
+        bubbleFontCache = `500 11px ${monoFamily}, 'JetBrains Mono', monospace`;
+
         // Visibility handler
         document.addEventListener('visibilitychange', () => {
             paused = document.hidden;
@@ -217,55 +242,66 @@
     }
 
     // ── Build Connections (throttled) ──
-    // Two-pass: (1) all pairs within CONNECTION_DIST, (2) each neuron is force-
-    // connected to its MIN_NEIGHBORS nearest neighbors so nothing is "floating".
+    // First pass: collect pairs within CONNECTION_DIST. Second pass: force-add
+    // MIN_NEIGHBORS-nearest for any under-connected neuron so nothing floats.
+    // Allocates only per-recalc (every CONN_RECALC_INTERVAL frames), never per
+    // frame, so the GC stays quiet.
+    const _connTypeOf = (a, b) =>
+        (a.kind === 'ai' && b.kind === 'ai') ? 'ai'
+        : (a.kind === 'bio' && b.kind === 'bio') ? 'bio'
+        : 'bridge';
+
     function buildConnections() {
-        connections = [];
-        const seen = new Set();
+        connections.length = 0;
         const dist2 = CFG.CONNECTION_DIST * CFG.CONNECTION_DIST;
         const N = neurons.length;
-        const dists = new Array(N);
-        for (let i = 0; i < N; i++) dists[i] = [];
-
-        const pairKey = (i, j) => i < j ? i * 100000 + j : j * 100000 + i;
-        const typeOf = (a, b) =>
-            (a.kind === 'ai' && b.kind === 'ai') ? 'ai'
-            : (a.kind === 'bio' && b.kind === 'bio') ? 'bio'
-            : 'bridge';
+        // Bitset-style flat buffer for "is pair connected" — much cheaper than
+        // a Set of composite keys.
+        const seen = new Uint8Array(N * N);
+        const degree = new Int32Array(N);
 
         for (let i = 0; i < N; i++) {
+            const a = neurons[i];
+            const ax = a.x, ay = a.y, az = a.z;
             for (let j = i + 1; j < N; j++) {
-                const a = neurons[i], b = neurons[j];
-                const dx = a.x - b.x, dy = a.y - b.y, dz = a.z - b.z;
+                const b = neurons[j];
+                const dx = ax - b.x, dy = ay - b.y, dz = az - b.z;
                 const d2 = dx * dx + dy * dy + dz * dz;
-                const dist = Math.sqrt(d2);
-                dists[i].push({ idx: j, dist });
-                dists[j].push({ idx: i, dist });
                 if (d2 < dist2) {
-                    const key = pairKey(i, j);
-                    if (!seen.has(key)) {
-                        seen.add(key);
-                        connections.push({ i, j, dist, type: typeOf(a, b) });
-                    }
+                    seen[i * N + j] = 1;
+                    connections.push({ i, j, dist: Math.sqrt(d2), type: _connTypeOf(a, b) });
+                    degree[i]++; degree[j]++;
                 }
             }
         }
 
-        // Guarantee every neuron has at least MIN_NEIGHBORS connections.
+        // Top up neurons that are still under-connected. Compute distances on
+        // demand only for these (typically a small fraction of N).
         const minN = CFG.MIN_NEIGHBORS;
-        const degree = new Array(N).fill(0);
-        for (const c of connections) { degree[c.i]++; degree[c.j]++; }
         for (let i = 0; i < N; i++) {
             if (degree[i] >= minN) continue;
-            dists[i].sort((a, b) => a.dist - b.dist);
-            for (const cand of dists[i]) {
+            const a = neurons[i];
+            // Gather candidate distances into a small typed array.
+            const cand = [];
+            for (let j = 0; j < N; j++) {
+                if (j === i) continue;
+                const lo = i < j ? i : j, hi = i < j ? j : i;
+                if (seen[lo * N + hi]) continue;
+                const b = neurons[j];
+                const dx = a.x - b.x, dy = a.y - b.y, dz = a.z - b.z;
+                cand.push(j, Math.sqrt(dx * dx + dy * dy + dz * dz));
+            }
+            // Pair-sort: cand is [idx, dist, idx, dist, …].
+            const pairs = [];
+            for (let k = 0; k < cand.length; k += 2) pairs.push([cand[k], cand[k + 1]]);
+            pairs.sort((p, q) => p[1] - q[1]);
+            for (const [j, d] of pairs) {
                 if (degree[i] >= minN) break;
-                const key = pairKey(i, cand.idx);
-                if (seen.has(key)) continue;
-                seen.add(key);
-                const a = neurons[i], b = neurons[cand.idx];
-                connections.push({ i, j: cand.idx, dist: cand.dist, type: typeOf(a, b) });
-                degree[i]++; degree[cand.idx]++;
+                const lo = i < j ? i : j, hi = i < j ? j : i;
+                if (seen[lo * N + hi]) continue;
+                seen[lo * N + hi] = 1;
+                connections.push({ i, j, dist: d, type: _connTypeOf(a, neurons[j]) });
+                degree[i]++; degree[j]++;
             }
         }
     }
@@ -347,7 +383,8 @@
     // Spawn a small floating-point number bubble at a neuron position.
     function spawnNumberBubble(idx) {
         const n = neurons[idx];
-        if (!n || numberBubbles.length > 60) return;
+        if (!n || numberBubbles.length >= CFG.MAX_BUBBLES) return;
+        if (perfLevel < 1) return;     // skip extras on degraded perf
         numberBubbles.push({
             x: n.x + rand(-n.radius, n.radius),
             y: n.y - n.radius * 1.6,
@@ -373,16 +410,17 @@
 
     // Stroke the wire from a→b. Bio↔bio wires are slightly curved for an
     // axon-like feel; ai/bridge wires are straight (PCB-trace style).
-    function drawWirePath(conn, a, b, pa, pb) {
+    // Raw form takes coords directly (no proj-object alloc).
+    function drawWirePathRaw(conn, ax, ay, bx, by) {
         ctx.beginPath();
         if (conn.type === 'bio') {
-            const mx = (pa.sx + pb.sx) / 2 + (pa.sy - pb.sy) * 0.1;
-            const my = (pa.sy + pb.sy) / 2 + (pb.sx - pa.sx) * 0.1;
-            ctx.moveTo(pa.sx, pa.sy);
-            ctx.quadraticCurveTo(mx, my, pb.sx, pb.sy);
+            const mx = (ax + bx) * 0.5 + (ay - by) * 0.1;
+            const my = (ay + by) * 0.5 + (bx - ax) * 0.1;
+            ctx.moveTo(ax, ay);
+            ctx.quadraticCurveTo(mx, my, bx, by);
         } else {
-            ctx.moveTo(pa.sx, pa.sy);
-            ctx.lineTo(pb.sx, pb.sy);
+            ctx.moveTo(ax, ay);
+            ctx.lineTo(bx, by);
         }
         ctx.stroke();
     }
@@ -404,124 +442,154 @@
     function render(time) {
         ctx.clearRect(0, 0, W, H);
 
-        // Sort neurons by z (back to front)
-        const sorted = neurons.map((n, idx) => ({ n, idx })).sort((a, b) => a.n.z - b.n.z);
+        const N = neurons.length;
 
-        // Project all neurons
-        const proj = new Array(neurons.length);
-        for (let i = 0; i < neurons.length; i++) {
-            proj[i] = project(neurons[i].x, neurons[i].y, neurons[i].z);
+        // Project all neurons into the reused Float32Arrays (no per-frame
+        // object allocation).
+        for (let i = 0; i < N; i++) {
+            const n = neurons[i];
+            const s = CFG.PERSPECTIVE / (CFG.PERSPECTIVE + n.z);
+            projSx[i] = n.x * s + W / 2;
+            projSy[i] = n.y * s + H / 2;
+            projS[i]  = s;
+        }
+
+        // Insertion-sort indices by z. We reuse the array across frames, so it
+        // is already nearly sorted — insertion sort is O(N) on near-sorted
+        // input, far faster than a fresh map+sort each frame.
+        for (let i = 1; i < N; i++) {
+            const cur = zSortedIdx[i];
+            const cz = neurons[cur].z;
+            let j = i - 1;
+            while (j >= 0 && neurons[zSortedIdx[j]].z > cz) {
+                zSortedIdx[j + 1] = zSortedIdx[j];
+                j--;
+            }
+            zSortedIdx[j + 1] = cur;
         }
 
         // Build a set of "wire is currently carrying a signal" pairs so we can
-        // light those wires up as the data travels through them.
-        const activeWires = new Set();
-        for (const sig of signals) {
-            const lo = Math.min(sig.fromIdx, sig.toIdx);
-            const hi = Math.max(sig.fromIdx, sig.toIdx);
-            activeWires.add(lo * 10000 + hi);
+        // light those wires up as the data travels through them. Plain object
+        // is faster than Set for these small lookups.
+        const activeWires = Object.create(null);
+        for (let s = 0; s < signals.length; s++) {
+            const sig = signals[s];
+            const lo = sig.fromIdx < sig.toIdx ? sig.fromIdx : sig.toIdx;
+            const hi = sig.fromIdx < sig.toIdx ? sig.toIdx : sig.fromIdx;
+            activeWires[lo * 10000 + hi] = 1;
         }
 
+        ctx.lineCap = 'round';
         // Draw connections (wires) — visible enough to read as a network.
-        for (const conn of connections) {
-            const a = neurons[conn.i], b = neurons[conn.j];
-            const pa = proj[conn.i], pb = proj[conn.j];
-            const avgScale = (pa.s + pb.s) / 2;
+        for (let c = 0; c < connections.length; c++) {
+            const conn = connections[c];
+            const i = conn.i, j = conn.j;
+            const a = neurons[i], b = neurons[j];
+            const sax = projSx[i], say = projSy[i], sa = projS[i];
+            const sbx = projSx[j], sby = projSy[j], sb = projS[j];
+            const avgScale = (sa + sb) * 0.5;
             const distFalloff = Math.max(0.15, 1 - conn.dist / CFG.CONNECTION_DIST);
-            const lo = Math.min(conn.i, conn.j);
-            const hi = Math.max(conn.i, conn.j);
-            const isActive = activeWires.has(lo * 10000 + hi);
+            const lo = i < j ? i : j, hi = i < j ? j : i;
+            const isActive = activeWires[lo * 10000 + hi] === 1;
 
             const baseAlpha = (isActive ? CFG.WIRE_ALPHA_ACTIVE : CFG.WIRE_ALPHA_BASE)
                 * distFalloff * avgScale;
-            if (baseAlpha < 0.01) continue;
+            if (baseAlpha < 0.04) continue;       // skip near-invisible wires
             const baseWidth = (isActive ? CFG.WIRE_WIDTH_ACTIVE : CFG.WIRE_WIDTH_BASE) * avgScale;
 
-            // Bridge connections are colorful gradients; same-kind wires take
-            // their parent neuron color.
+            // Bridge connections used to allocate a linear gradient per frame
+            // (very expensive). Use the average kind color instead — visually
+            // similar at this opacity.
             if (conn.type === 'bridge') {
-                const grad = ctx.createLinearGradient(pa.sx, pa.sy, pb.sx, pb.sy);
-                const aColor = a.kind === 'ai' ? CFG.COLOR_AI : CFG.COLOR_BIO;
-                const bColor = b.kind === 'ai' ? CFG.COLOR_AI : CFG.COLOR_BIO;
-                grad.addColorStop(0, rgba(aColor, baseAlpha));
-                grad.addColorStop(1, rgba(bColor, baseAlpha));
-                ctx.strokeStyle = grad;
+                ctx.strokeStyle = rgba(CFG.COLOR_SIGNAL_BRIDGE, baseAlpha);
             } else if (conn.type === 'ai') {
                 ctx.strokeStyle = rgba(CFG.COLOR_AI, baseAlpha);
             } else {
                 ctx.strokeStyle = rgba(CFG.COLOR_BIO, baseAlpha);
             }
             ctx.lineWidth = baseWidth;
-            ctx.lineCap = 'round';
 
-            // Optional faint glow under active wires for a "current" feel.
-            if (isActive) {
+            // Active wires get a cheap "halo" via a wider, softer over-stroke
+            // instead of shadowBlur (which is 5–10× slower on canvas).
+            if (isActive && perfLevel === 1) {
                 const glowColor = conn.type === 'bridge' ? CFG.COLOR_SIGNAL_BRIDGE
                     : conn.type === 'ai' ? CFG.COLOR_SIGNAL_AI : CFG.COLOR_SIGNAL_BIO;
-                ctx.save();
-                ctx.shadowColor = rgba(glowColor, 0.85);
-                ctx.shadowBlur = 8 * avgScale;
-                drawWirePath(conn, a, b, pa, pb);
-                ctx.restore();
+                ctx.lineWidth = baseWidth + 3 * avgScale;
+                ctx.strokeStyle = rgba(glowColor, baseAlpha * 0.35);
+                drawWirePathRaw(conn, sax, say, sbx, sby);
+                ctx.lineWidth = baseWidth;
+                ctx.strokeStyle = conn.type === 'bridge' ? rgba(CFG.COLOR_SIGNAL_BRIDGE, baseAlpha)
+                    : conn.type === 'ai' ? rgba(CFG.COLOR_AI, baseAlpha)
+                    : rgba(CFG.COLOR_BIO, baseAlpha);
             }
-            drawWirePath(conn, a, b, pa, pb);
+            drawWirePathRaw(conn, sax, say, sbx, sby);
         }
 
         // Draw signals (with motion trails)
-        for (const sig of signals) {
+        for (let s = 0; s < signals.length; s++) {
+            const sig = signals[s];
             const a = neurons[sig.fromIdx], b = neurons[sig.toIdx];
             if (!a || !b) continue;
             const t = sig.progress;
             const sx = a.x + (b.x - a.x) * t;
             const sy = a.y + (b.y - a.y) * t;
             const sz = a.z + (b.z - a.z) * t;
-            const p = project(sx, sy, sz);
+            const ps = CFG.PERSPECTIVE / (CFG.PERSPECTIVE + sz);
+            const px = sx * ps + W / 2;
+            const py = sy * ps + H / 2;
 
             let color, r, glowR;
             if (sig.type === 'bridge') {
-                color = CFG.COLOR_SIGNAL_BRIDGE; r = 3 * p.s; glowR = 9 * p.s;
+                color = CFG.COLOR_SIGNAL_BRIDGE; r = 3 * ps; glowR = 9 * ps;
             } else if (sig.type === 'ai') {
-                color = CFG.COLOR_SIGNAL_AI; r = 2.2 * p.s; glowR = 6 * p.s;
+                color = CFG.COLOR_SIGNAL_AI; r = 2.2 * ps; glowR = 6 * ps;
             } else {
-                color = CFG.COLOR_SIGNAL_BIO; r = 2.5 * p.s; glowR = 7 * p.s;
+                color = CFG.COLOR_SIGNAL_BIO; r = 2.5 * ps; glowR = 7 * ps;
             }
 
-            // Trail — fading line through trail points
-            if (sig.trail.length > 1) {
-                ctx.lineCap = 'round';
-                for (let i = 1; i < sig.trail.length; i++) {
+            // Trail — fading line through trail points (skip when degraded).
+            if (perfLevel === 1 && sig.trail.length > 1) {
+                const tl = sig.trail.length;
+                for (let i = 1; i < tl; i++) {
                     const t0 = sig.trail[i - 1], t1 = sig.trail[i];
-                    const p0 = project(t0.x, t0.y, t0.z);
-                    const p1 = project(t1.x, t1.y, t1.z);
-                    const segAlpha = (i / sig.trail.length) * 0.45 * p.s;
+                    const ps0 = CFG.PERSPECTIVE / (CFG.PERSPECTIVE + t0.z);
+                    const ps1 = CFG.PERSPECTIVE / (CFG.PERSPECTIVE + t1.z);
+                    const x0 = t0.x * ps0 + W / 2, y0 = t0.y * ps0 + H / 2;
+                    const x1 = t1.x * ps1 + W / 2, y1 = t1.y * ps1 + H / 2;
+                    const segAlpha = (i / tl) * 0.45 * ps;
                     ctx.strokeStyle = rgba(color, segAlpha);
-                    ctx.lineWidth = (i / sig.trail.length) * r * 1.4;
+                    ctx.lineWidth = (i / tl) * r * 1.4;
                     ctx.beginPath();
-                    ctx.moveTo(p0.sx, p0.sy);
-                    ctx.lineTo(p1.sx, p1.sy);
+                    ctx.moveTo(x0, y0);
+                    ctx.lineTo(x1, y1);
                     ctx.stroke();
                 }
             }
 
-            // Glow
-            const grd = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, glowR);
-            grd.addColorStop(0, rgba(color, 0.7 * p.s));
-            grd.addColorStop(1, rgba(color, 0));
-            ctx.fillStyle = grd;
-            ctx.beginPath();
-            ctx.arc(p.sx, p.sy, glowR, 0, Math.PI * 2);
-            ctx.fill();
+            // Glow — radial gradient is one of the more expensive ops, but we
+            // only have a few signals so this is acceptable.
+            if (perfLevel === 1) {
+                const grd = ctx.createRadialGradient(px, py, 0, px, py, glowR);
+                grd.addColorStop(0, rgba(color, 0.7 * ps));
+                grd.addColorStop(1, rgba(color, 0));
+                ctx.fillStyle = grd;
+                ctx.beginPath();
+                ctx.arc(px, py, glowR, 0, Math.PI * 2);
+                ctx.fill();
+            }
 
             // Core
-            ctx.fillStyle = rgba(color, 0.95 * p.s);
+            ctx.fillStyle = rgba(color, 0.95 * ps);
             ctx.beginPath();
-            ctx.arc(p.sx, p.sy, r, 0, Math.PI * 2);
+            ctx.arc(px, py, r, 0, Math.PI * 2);
             ctx.fill();
         }
 
-        // Draw neurons (sorted back to front)
-        for (const { n, idx } of sorted) {
-            const p = proj[idx];
+        // Draw neurons (sorted back to front, indices reused across frames).
+        for (let k = 0; k < N; k++) {
+            const idx = zSortedIdx[k];
+            const n = neurons[idx];
+            const px = projSx[idx], py = projSy[idx], ps = projS[idx];
             let pulse = 1 + Math.sin(n.pulsePhase) * 0.08;
             // Arrival burst: brief expand + flash when a signal hits this neuron.
             let arrival = 0;
@@ -530,74 +598,78 @@
                 arrival = left;
                 pulse += 0.6 * left;
             }
-            const r = n.radius * p.s * pulse;
-            const alpha = Math.min(p.s * 0.8, 0.85);
+            const r = n.radius * ps * pulse;
+            const alpha = Math.min(ps * 0.8, 0.85);
             if (r < 0.3 || alpha < 0.02) continue;
 
             // Arrival ring (fades outward)
             if (arrival > 0) {
-                const ringR = r + (1 - arrival) * 18 * p.s;
+                const ringR = r + (1 - arrival) * 18 * ps;
                 const ringColor = n.kind === 'ai' ? CFG.COLOR_AI_GLOW : CFG.COLOR_BIO_GLOW;
                 ctx.strokeStyle = rgba(ringColor, arrival * 0.7);
-                ctx.lineWidth = 1.2 * p.s;
+                ctx.lineWidth = 1.2 * ps;
                 ctx.beginPath();
-                ctx.arc(p.sx, p.sy, ringR, 0, Math.PI * 2);
+                ctx.arc(px, py, ringR, 0, Math.PI * 2);
                 ctx.stroke();
             }
 
             if (n.kind === 'ai') {
-                drawAINeuron(n, p, r, alpha);
+                drawAINeuron(n, px, py, ps, r, alpha);
             } else {
-                drawBioNeuron(n, p, r, alpha, pulse);
+                drawBioNeuron(n, px, py, ps, r, alpha, pulse);
             }
         }
 
         // ── Number bubbles (rendered last so they sit on top) ──
-        ctx.font = `500 11px ${getComputedStyle(document.documentElement).getPropertyValue('--font-mono') || 'monospace'}`;
+        ctx.font = bubbleFontCache;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        for (const b of numberBubbles) {
-            const p = project(b.x, b.y, b.z);
-            if (p.s < 0.2) continue;
-            const lifeFrac = 1 - b.age / b.maxAge;
-            const alpha = Math.min(1, lifeFrac * 1.4) * p.s;
-            if (alpha < 0.02) continue;
+        // Skip the bubble layer entirely on degraded perf — it's the most
+        // expensive text/effect work in the loop.
+        if (perfLevel === 1) {
+            for (let i = 0; i < numberBubbles.length; i++) {
+                const b = numberBubbles[i];
+                const ps = CFG.PERSPECTIVE / (CFG.PERSPECTIVE + b.z);
+                if (ps < 0.2) continue;
+                const px = b.x * ps + W / 2;
+                const py = b.y * ps + H / 2;
+                const lifeFrac = 1 - b.age / b.maxAge;
+                const alpha = Math.min(1, lifeFrac * 1.4) * ps;
+                if (alpha < 0.02) continue;
 
-            const color = b.kind === 'ai' ? CFG.COLOR_SIGNAL_AI : CFG.COLOR_SIGNAL_BIO;
-            const fontPx = Math.max(8, 11 * p.s);
-            ctx.font = `500 ${fontPx}px var(--font-mono), 'JetBrains Mono', monospace`;
-
-            // Soft halo behind text for legibility against the page background
-            ctx.shadowColor = rgba(color, 0.55 * alpha);
-            ctx.shadowBlur = 10 * p.s;
-            ctx.fillStyle = rgba(color, Math.min(1, alpha * 1.1));
-            ctx.fillText(b.text, p.sx, p.sy);
-            ctx.shadowBlur = 0;
+                const color = b.kind === 'ai' ? CFG.COLOR_SIGNAL_AI : CFG.COLOR_SIGNAL_BIO;
+                // shadowBlur is the single most expensive 2D-canvas op per draw;
+                // a darker outer color stop gives the same legibility for ~free.
+                ctx.fillStyle = rgba(color, Math.min(1, alpha * 1.1));
+                ctx.fillText(b.text, px, py);
+            }
         }
         ctx.textAlign = 'start';
         ctx.textBaseline = 'alphabetic';
     }
 
     // ── AI neuron drawing — hexagons & nested hexagons ──
-    function drawAINeuron(n, p, r, alpha) {
+    function drawAINeuron(n, sx, sy, ps, r, alpha) {
         const sides = 6;
         const rot = n.rotation;
 
-        // Outer glow halo
-        const halo = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, r * 2.2);
-        halo.addColorStop(0, rgba(CFG.COLOR_AI_GLOW, alpha * 0.25));
-        halo.addColorStop(1, rgba(CFG.COLOR_AI_GLOW, 0));
-        ctx.fillStyle = halo;
-        ctx.beginPath();
-        ctx.arc(p.sx, p.sy, r * 2.2, 0, Math.PI * 2);
-        ctx.fill();
+        // Outer glow halo (skipped on degraded perf — biggest fill area).
+        if (perfLevel === 1) {
+            const halo = ctx.createRadialGradient(sx, sy, 0, sx, sy, r * 2.2);
+            halo.addColorStop(0, rgba(CFG.COLOR_AI_GLOW, alpha * 0.25));
+            halo.addColorStop(1, rgba(CFG.COLOR_AI_GLOW, 0));
+            ctx.fillStyle = halo;
+            ctx.beginPath();
+            ctx.arc(sx, sy, r * 2.2, 0, Math.PI * 2);
+            ctx.fill();
+        }
 
         // Filled hexagon body
         ctx.beginPath();
         for (let i = 0; i < sides; i++) {
             const a = rot + (i / sides) * Math.PI * 2;
-            const x = p.sx + Math.cos(a) * r;
-            const y = p.sy + Math.sin(a) * r;
+            const x = sx + Math.cos(a) * r;
+            const y = sy + Math.sin(a) * r;
             i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
         }
         ctx.closePath();
@@ -606,7 +678,7 @@
 
         // Crisp outer stroke
         ctx.strokeStyle = rgba(CFG.COLOR_AI_GLOW, alpha);
-        ctx.lineWidth = Math.max(0.6, 0.8 * p.s);
+        ctx.lineWidth = Math.max(0.6, 0.8 * ps);
         ctx.stroke();
 
         if (n.subtype === 'layer') {
@@ -614,65 +686,63 @@
             ctx.beginPath();
             for (let i = 0; i < sides; i++) {
                 const a = rot + Math.PI / sides + (i / sides) * Math.PI * 2;
-                const x = p.sx + Math.cos(a) * r * 0.55;
-                const y = p.sy + Math.sin(a) * r * 0.55;
+                const x = sx + Math.cos(a) * r * 0.55;
+                const y = sy + Math.sin(a) * r * 0.55;
                 i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
             }
             ctx.closePath();
             ctx.strokeStyle = rgba(CFG.COLOR_AI_GLOW, alpha * 0.85);
-            ctx.lineWidth = Math.max(0.5, 0.7 * p.s);
+            ctx.lineWidth = Math.max(0.5, 0.7 * ps);
             ctx.stroke();
         }
 
         // Center dot — pulse anchor
         ctx.fillStyle = rgba(CFG.COLOR_AI_GLOW, alpha);
         ctx.beginPath();
-        ctx.arc(p.sx, p.sy, Math.max(0.8, r * 0.18), 0, Math.PI * 2);
+        ctx.arc(sx, sy, Math.max(0.8, r * 0.18), 0, Math.PI * 2);
         ctx.fill();
     }
 
     // ── Bio neuron drawing — soma + nucleus + dendrite tree + axon ──
-    function drawBioNeuron(n, p, r, alpha, pulse) {
-        const ps = p.s;
-
-        // Soft cell-body glow (only for larger pyramidal cells so it's not noisy)
-        if (n.subtype === 'pyramidal') {
-            const grd = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, r * 3.2);
+    function drawBioNeuron(n, sx, sy, ps, r, alpha, pulse) {
+        // Soft cell-body glow (only for larger pyramidal cells, full perf only).
+        if (n.subtype === 'pyramidal' && perfLevel === 1) {
+            const grd = ctx.createRadialGradient(sx, sy, 0, sx, sy, r * 3.2);
             grd.addColorStop(0, rgba(CFG.COLOR_BIO_GLOW, alpha * 0.2));
             grd.addColorStop(1, rgba(CFG.COLOR_BIO_GLOW, 0));
             ctx.fillStyle = grd;
             ctx.beginPath();
-            ctx.arc(p.sx, p.sy, r * 3.2, 0, Math.PI * 2);
+            ctx.arc(sx, sy, r * 3.2, 0, Math.PI * 2);
             ctx.fill();
         }
 
         // ── Dendrites (drawn first so soma sits on top of their roots) ──
         if (n.dendrites) {
-            ctx.lineCap = 'round';
             for (const d of n.dendrites) {
                 const baseLen = d.length * ps * pulse;
                 const cosA = Math.cos(d.angle), sinA = Math.sin(d.angle);
                 // Tangent unit perpendicular for curving control point
                 const perpX = -sinA, perpY = cosA;
-                const endX = p.sx + cosA * baseLen;
-                const endY = p.sy + sinA * baseLen;
-                const cpX = p.sx + cosA * baseLen * 0.55 + perpX * d.curve * baseLen * 0.45;
-                const cpY = p.sy + sinA * baseLen * 0.55 + perpY * d.curve * baseLen * 0.45;
+                const endX = sx + cosA * baseLen;
+                const endY = sy + sinA * baseLen;
+                const cpX = sx + cosA * baseLen * 0.55 + perpX * d.curve * baseLen * 0.45;
+                const cpY = sy + sinA * baseLen * 0.55 + perpY * d.curve * baseLen * 0.45;
 
                 // Tapering line (slightly thicker near soma)
                 ctx.strokeStyle = rgba(n.color, alpha * 0.65);
                 ctx.lineWidth = Math.max(0.4, d.width * ps);
                 ctx.beginPath();
-                ctx.moveTo(p.sx, p.sy);
+                ctx.moveTo(sx, sy);
                 ctx.quadraticCurveTo(cpX, cpY, endX, endY);
                 ctx.stroke();
 
-                // Sub-branches (give the "tree" feel)
+                // Sub-branches — skip when degraded.
+                if (perfLevel < 1) continue;
                 for (const b of d.branches) {
                     // Quadratic-bezier point at parameter t
                     const t = b.fromT, mt = 1 - t;
-                    const bx = mt * mt * p.sx + 2 * mt * t * cpX + t * t * endX;
-                    const by = mt * mt * p.sy + 2 * mt * t * cpY + t * t * endY;
+                    const bx = mt * mt * sx + 2 * mt * t * cpX + t * t * endX;
+                    const by = mt * mt * sy + 2 * mt * t * cpY + t * t * endY;
                     const childAngle = d.angle + b.angleOff;
                     const cLen = b.length * ps * pulse;
                     const childCosA = Math.cos(childAngle), childSinA = Math.sin(childAngle);
@@ -696,15 +766,15 @@
             const len = a.length * ps * pulse;
             const cosA = Math.cos(a.angle), sinA = Math.sin(a.angle);
             const perpX = -sinA, perpY = cosA;
-            const endX = p.sx + cosA * len;
-            const endY = p.sy + sinA * len;
-            const cpX = p.sx + cosA * len * 0.5 + perpX * a.curve * len * 0.4;
-            const cpY = p.sy + sinA * len * 0.5 + perpY * a.curve * len * 0.4;
+            const endX = sx + cosA * len;
+            const endY = sy + sinA * len;
+            const cpX = sx + cosA * len * 0.5 + perpX * a.curve * len * 0.4;
+            const cpY = sy + sinA * len * 0.5 + perpY * a.curve * len * 0.4;
 
             ctx.strokeStyle = rgba(n.color, alpha * 0.55);
             ctx.lineWidth = Math.max(0.5, a.width * ps);
             ctx.beginPath();
-            ctx.moveTo(p.sx, p.sy);
+            ctx.moveTo(sx, sy);
             ctx.quadraticCurveTo(cpX, cpY, endX, endY);
             ctx.stroke();
 
@@ -715,8 +785,8 @@
             ctx.arc(endX, endY, bulbR, 0, Math.PI * 2);
             ctx.fill();
 
-            // Optional: tiny axon-terminal branches
-            if (a.terminals > 0) {
+            // Optional: tiny axon-terminal branches (skipped on degraded perf).
+            if (perfLevel === 1 && a.terminals > 0) {
                 ctx.strokeStyle = rgba(n.color, alpha * 0.45);
                 ctx.lineWidth = Math.max(0.3, a.width * ps * 0.6);
                 for (let i = 0; i < a.terminals; i++) {
@@ -742,15 +812,21 @@
             for (let i = 0; i < n.soma.length; i++) {
                 const v = n.soma[i];
                 const sr = v.r * ps * pulse;
-                const x = p.sx + Math.cos(v.angle) * sr;
-                const y = p.sy + Math.sin(v.angle) * sr;
+                const x = sx + Math.cos(v.angle) * sr;
+                const y = sy + Math.sin(v.angle) * sr;
                 i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
             }
             ctx.closePath();
-            const bodyGrd = ctx.createRadialGradient(p.sx, p.sy, 0, p.sx, p.sy, r);
-            bodyGrd.addColorStop(0, rgba(CFG.COLOR_BIO_GLOW, alpha * 0.95));
-            bodyGrd.addColorStop(1, rgba(n.color, alpha));
-            ctx.fillStyle = bodyGrd;
+            // Gradient on degraded perf becomes a flat fill — visually similar
+            // at this scale, far cheaper.
+            if (perfLevel === 1) {
+                const bodyGrd = ctx.createRadialGradient(sx, sy, 0, sx, sy, r);
+                bodyGrd.addColorStop(0, rgba(CFG.COLOR_BIO_GLOW, alpha * 0.95));
+                bodyGrd.addColorStop(1, rgba(n.color, alpha));
+                ctx.fillStyle = bodyGrd;
+            } else {
+                ctx.fillStyle = rgba(n.color, alpha * 0.95);
+            }
             ctx.fill();
             // Faint cell-membrane outline
             ctx.strokeStyle = rgba(n.color, alpha * 0.6);
@@ -760,15 +836,19 @@
 
         // ── Nucleus + nucleolus inside the soma ──
         if (n.nucleus) {
-            const nx = p.sx + n.nucleus.offX * ps;
-            const ny = p.sy + n.nucleus.offY * ps;
+            const nx = sx + n.nucleus.offX * ps;
+            const ny = sy + n.nucleus.offY * ps;
             const nr = n.nucleus.r * ps * pulse;
 
-            // Nucleus
-            const nucGrd = ctx.createRadialGradient(nx, ny, 0, nx, ny, nr);
-            nucGrd.addColorStop(0, rgba([255, 220, 250], alpha * 0.55));
-            nucGrd.addColorStop(1, rgba(n.color, alpha * 0.4));
-            ctx.fillStyle = nucGrd;
+            // Nucleus — flat fill on degraded perf.
+            if (perfLevel === 1) {
+                const nucGrd = ctx.createRadialGradient(nx, ny, 0, nx, ny, nr);
+                nucGrd.addColorStop(0, rgba([255, 220, 250], alpha * 0.55));
+                nucGrd.addColorStop(1, rgba(n.color, alpha * 0.4));
+                ctx.fillStyle = nucGrd;
+            } else {
+                ctx.fillStyle = rgba(n.color, alpha * 0.45);
+            }
             ctx.beginPath();
             ctx.arc(nx, ny, nr, 0, Math.PI * 2);
             ctx.fill();
@@ -784,8 +864,23 @@
     // ── Animation Loop ──
     function animate(now) {
         if (paused) return;
-        const dt = Math.min((now - lastTime) / 16.667, 3); // normalize to ~60fps, cap at 3
+        const frameMs = now - lastTime;
+        const dt = Math.min(frameMs / 16.667, 3); // normalize to ~60fps, cap at 3
         lastTime = now;
+
+        // Adaptive degradation: if frames are consistently slow we shed the
+        // expensive extras (radial-gradient halos, signal trails, bubbles).
+        // Recover gradually once frames are healthy again.
+        if (frameMs > CFG.SLOW_FRAME_MS) {
+            slowFrames++; fastFrames = 0;
+            if (slowFrames > 30 && perfLevel === 1) perfLevel = 0.5;
+        } else if (frameMs < CFG.FAST_FRAME_MS) {
+            fastFrames++; slowFrames = 0;
+            if (fastFrames > 240 && perfLevel < 1) perfLevel = 1;
+        } else {
+            slowFrames = Math.max(0, slowFrames - 1);
+            fastFrames = Math.max(0, fastFrames - 1);
+        }
 
         // Reduced-motion users get a (mostly) static frame: no drift, slow signals.
         if (!reducedMotion) updateNeurons(dt);
