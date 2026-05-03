@@ -4,98 +4,413 @@
   <subtitle>Personal portfolio and blog — Data Science, ML &amp; AI projects</subtitle>
   <link href="https://azzindani.github.io/feed.xml" rel="self"/>
   <link href="https://azzindani.github.io/"/>
-  <updated>2024-04-25T00:00:00.000Z</updated>
+  <updated>2026-04-20T00:00:00.000Z</updated>
   <id>https://azzindani.github.io/</id>
   <author><name>Azzindani</name></author>
   <entry>
-    <title>Getting Started</title>
-    <link href="https://azzindani.github.io/#/post/docs-getting-started"/>
-    <id>https://azzindani.github.io/#/post/docs-getting-started</id>
-    <updated>2024-04-25T00:00:00.000Z</updated>
-    <published>2024-04-25T00:00:00.000Z</published>
+    <title>MCP Data Analyst</title>
+    <link href="https://azzindani.github.io/#/post/mcp-data-analyst"/>
+    <id>https://azzindani.github.io/#/post/mcp-data-analyst</id>
+    <updated>2026-04-20T00:00:00.000Z</updated>
+    <published>2026-04-20T00:00:00.000Z</published>
     <author><name>Azzindani</name></author>
-    <summary>Welcome to the documentation site.</summary>
-    <category term="docs"/>
+    <summary>MCP server exposing data-analytics tooling — pandas, SQL, profiling — to any MCP-compatible LLM client.</summary>
+    <category term="mcp"/>
+    <category term="data-analysis"/>
+    <category term="pandas"/>
+    <category term="tools"/>
   </entry>
   <entry>
-    <title>Writing Posts</title>
-    <link href="https://azzindani.github.io/#/post/docs-writing-posts"/>
-    <id>https://azzindani.github.io/#/post/docs-writing-posts</id>
-    <updated>2024-04-25T00:00:00.000Z</updated>
-    <published>2024-04-25T00:00:00.000Z</published>
+    <title>MCP Machine Learning</title>
+    <link href="https://azzindani.github.io/#/post/mcp-machine-learning"/>
+    <id>https://azzindani.github.io/#/post/mcp-machine-learning</id>
+    <updated>2026-04-18T00:00:00.000Z</updated>
+    <published>2026-04-18T00:00:00.000Z</published>
     <author><name>Azzindani</name></author>
-    <summary>How to publish articles, PDFs, and repo READMEs.</summary>
-    <category term="docs"/>
+    <summary>MCP server giving an LLM hands-on access to scikit-learn / training pipelines for in-chat experimentation.</summary>
+    <category term="mcp"/>
+    <category term="machine-learning"/>
+    <category term="scikit-learn"/>
+    <category term="tools"/>
   </entry>
   <entry>
-    <title>Markdown Showcase: Math, Mermaid, Code</title>
-    <link href="https://azzindani.github.io/#/post/math-and-mermaid-showcase"/>
-    <id>https://azzindani.github.io/#/post/math-and-mermaid-showcase</id>
-    <updated>2024-04-20T00:00:00.000Z</updated>
-    <published>2024-04-20T00:00:00.000Z</published>
+    <title>MCP Web Browser</title>
+    <link href="https://azzindani.github.io/#/post/mcp-web-browser"/>
+    <id>https://azzindani.github.io/#/post/mcp-web-browser</id>
+    <updated>2026-04-10T00:00:00.000Z</updated>
+    <published>2026-04-10T00:00:00.000Z</published>
     <author><name>Azzindani</name></author>
-    <summary>LaTeX math, Mermaid diagrams, code highlighting, and tables in one post.</summary>
-    <category term="latex"/>
-    <category term="mermaid"/>
-    <category term="showcase"/>
+    <summary>Headless browser as an MCP tool — page fetch, DOM query, screenshot — usable from inside any LLM session.</summary>
+    <category term="mcp"/>
+    <category term="browser"/>
+    <category term="scraping"/>
+    <category term="tools"/>
   </entry>
   <entry>
-    <title>External Repo README Demo</title>
-    <link href="https://azzindani.github.io/#/post/sample-repo-readme"/>
-    <id>https://azzindani.github.io/#/post/sample-repo-readme</id>
-    <updated>2024-04-01T00:00:00.000Z</updated>
-    <published>2024-04-01T00:00:00.000Z</published>
+    <title>MCP Microsoft Office</title>
+    <link href="https://azzindani.github.io/#/post/mcp-microsoft-office"/>
+    <id>https://azzindani.github.io/#/post/mcp-microsoft-office</id>
+    <updated>2026-04-05T00:00:00.000Z</updated>
+    <published>2026-04-05T00:00:00.000Z</published>
     <author><name>Azzindani</name></author>
-    <summary>This post pulls its content directly from a GitHub repository README file.</summary>
-    <category term="github"/>
-    <category term="repo"/>
-    <category term="demo"/>
+    <summary>Read / edit / generate Word, Excel, PowerPoint files through the Model Context Protocol.</summary>
+    <category term="mcp"/>
+    <category term="office"/>
+    <category term="automation"/>
+    <category term="tools"/>
   </entry>
   <entry>
-    <title>Media Embeds Demo</title>
-    <link href="https://azzindani.github.io/#/post/demo-media-embeds"/>
-    <id>https://azzindani.github.io/#/post/demo-media-embeds</id>
-    <updated>2024-03-15T00:00:00.000Z</updated>
-    <published>2024-03-15T00:00:00.000Z</published>
+    <title>MCP Math</title>
+    <link href="https://azzindani.github.io/#/post/mcp-math"/>
+    <id>https://azzindani.github.io/#/post/mcp-math</id>
+    <updated>2026-03-28T00:00:00.000Z</updated>
+    <published>2026-03-28T00:00:00.000Z</published>
     <author><name>Azzindani</name></author>
-    <summary>Showcasing YouTube videos, audio players, and GIF support built into the feed.</summary>
-    <category term="media"/>
-    <category term="youtube"/>
-    <category term="demo"/>
+    <summary>Symbolic + numeric mathematics tools served over MCP for reliable LLM math reasoning.</summary>
+    <category term="mcp"/>
+    <category term="math"/>
+    <category term="symbolic"/>
+    <category term="tools"/>
   </entry>
   <entry>
-    <title>Sample PDF Presentation</title>
-    <link href="https://azzindani.github.io/#/pdf/sample-pdf-presentation"/>
-    <id>https://azzindani.github.io/#/pdf/sample-pdf-presentation</id>
-    <updated>2024-03-01T00:00:00.000Z</updated>
-    <published>2024-03-01T00:00:00.000Z</published>
+    <title>MCP File System</title>
+    <link href="https://azzindani.github.io/#/post/mcp-file-system"/>
+    <id>https://azzindani.github.io/#/post/mcp-file-system</id>
+    <updated>2026-03-20T00:00:00.000Z</updated>
+    <published>2026-03-20T00:00:00.000Z</published>
     <author><name>Azzindani</name></author>
-    <summary>A demo showing the PDF carousel viewer. Upload your own PDF to see it in action.</summary>
-    <category term="pdf"/>
-    <category term="demo"/>
-    <category term="presentation"/>
+    <summary>Sandboxed file-system operations exposed as MCP tools — list, read, write, search.</summary>
+    <category term="mcp"/>
+    <category term="file-system"/>
+    <category term="sandbox"/>
+    <category term="tools"/>
   </entry>
   <entry>
-    <title>Getting Started with Data Science</title>
-    <link href="https://azzindani.github.io/#/post/getting-started-with-data-science"/>
-    <id>https://azzindani.github.io/#/post/getting-started-with-data-science</id>
-    <updated>2024-02-10T00:00:00.000Z</updated>
-    <published>2024-02-10T00:00:00.000Z</published>
+    <title>Deepseek ID Legal Preview GGUF</title>
+    <link href="https://azzindani.github.io/#/post/deepseek-id-legal-preview-gguf"/>
+    <id>https://azzindani.github.io/#/post/deepseek-id-legal-preview-gguf</id>
+    <updated>2026-01-05T00:00:00.000Z</updated>
+    <published>2026-01-05T00:00:00.000Z</published>
     <author><name>Azzindani</name></author>
-    <summary>A beginner-friendly guide covering the fundamentals of data science, tools, and workflows.</summary>
-    <category term="python"/>
-    <category term="data-science"/>
-    <category term="tutorial"/>
+    <summary>GGUF-quantized DeepSeek Indonesian legal preview for local llama.cpp inference.</summary>
+    <category term="huggingface"/>
+    <category term="deepseek"/>
+    <category term="gguf"/>
+    <category term="quantization"/>
+    <category term="legal"/>
   </entry>
   <entry>
-    <title>Welcome to My Portfolio</title>
-    <link href="https://azzindani.github.io/#/post/welcome-to-my-portfolio"/>
-    <id>https://azzindani.github.io/#/post/welcome-to-my-portfolio</id>
-    <updated>2024-01-15T00:00:00.000Z</updated>
-    <published>2024-01-15T00:00:00.000Z</published>
+    <title>ID REG KG 2511</title>
+    <link href="https://azzindani.github.io/#/post/id-reg-kg-2511"/>
+    <id>https://azzindani.github.io/#/post/id-reg-kg-2511</id>
+    <updated>2025-12-26T00:00:00.000Z</updated>
+    <published>2025-12-26T00:00:00.000Z</published>
     <author><name>Azzindani</name></author>
-    <summary>An introduction to this portfolio site and what you&apos;ll find here.</summary>
-    <category term="introduction"/>
-    <category term="portfolio"/>
+    <summary>Indonesian regulation KG snapshot (2025-11).</summary>
+    <category term="huggingface"/>
+    <category term="dataset"/>
+    <category term="knowledge-graph"/>
+    <category term="indonesia"/>
+  </entry>
+  <entry>
+    <title>ID REG Embed 2510</title>
+    <link href="https://azzindani.github.io/#/post/id-reg-embed-2510"/>
+    <id>https://azzindani.github.io/#/post/id-reg-embed-2510</id>
+    <updated>2025-12-18T00:00:00.000Z</updated>
+    <published>2025-12-18T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Indonesian regulation embeddings (2025-10).</summary>
+    <category term="huggingface"/>
+    <category term="dataset"/>
+    <category term="embeddings"/>
+    <category term="indonesia"/>
+  </entry>
+  <entry>
+    <title>Legal Corpus QA SynDeepThink</title>
+    <link href="https://azzindani.github.io/#/post/legal-corpus-qa-syndeepthink"/>
+    <id>https://azzindani.github.io/#/post/legal-corpus-qa-syndeepthink</id>
+    <updated>2025-12-10T00:00:00.000Z</updated>
+    <published>2025-12-10T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Legal-corpus Q&amp;A with deep-reasoning chains.</summary>
+    <category term="huggingface"/>
+    <category term="dataset"/>
+    <category term="synthetic"/>
+    <category term="reasoning"/>
+    <category term="legal"/>
+  </entry>
+  <entry>
+    <title>DeepSeek 0528 8B Legal Ckpt</title>
+    <link href="https://azzindani.github.io/#/post/deepseek-0528-8b-legal-ckpt"/>
+    <id>https://azzindani.github.io/#/post/deepseek-0528-8b-legal-ckpt</id>
+    <updated>2025-12-08T00:00:00.000Z</updated>
+    <published>2025-12-08T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>DeepSeek 8B (May-28 base) checkpoint fine-tuned on the Indonesian legal corpus.</summary>
+    <category term="huggingface"/>
+    <category term="deepseek"/>
+    <category term="legal"/>
+    <category term="indonesia"/>
+    <category term="8b"/>
+  </entry>
+  <entry>
+    <title>ID Legal Bench</title>
+    <link href="https://azzindani.github.io/#/post/id-legal-bench"/>
+    <id>https://azzindani.github.io/#/post/id-legal-bench</id>
+    <updated>2025-12-02T00:00:00.000Z</updated>
+    <published>2025-12-02T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Benchmark suite for Indonesian legal LLMs.</summary>
+    <category term="huggingface"/>
+    <category term="dataset"/>
+    <category term="benchmark"/>
+    <category term="legal"/>
+    <category term="indonesia"/>
+  </entry>
+  <entry>
+    <title>ID Legal QA SynDeepThink</title>
+    <link href="https://azzindani.github.io/#/post/id-legal-qa-syndeepthink"/>
+    <id>https://azzindani.github.io/#/post/id-legal-qa-syndeepthink</id>
+    <updated>2025-11-24T00:00:00.000Z</updated>
+    <published>2025-11-24T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Synthetic legal Q&amp;A with deep-reasoning traces.</summary>
+    <category term="huggingface"/>
+    <category term="dataset"/>
+    <category term="synthetic"/>
+    <category term="reasoning"/>
+    <category term="legal"/>
+  </entry>
+  <entry>
+    <title>Deepseek ID Legal Preview</title>
+    <link href="https://azzindani.github.io/#/post/deepseek-id-legal-preview"/>
+    <id>https://azzindani.github.io/#/post/deepseek-id-legal-preview</id>
+    <updated>2025-11-20T00:00:00.000Z</updated>
+    <published>2025-11-20T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>DeepSeek-derived preview model adapted for Indonesian legal Q&amp;A.</summary>
+    <category term="huggingface"/>
+    <category term="deepseek"/>
+    <category term="legal"/>
+    <category term="indonesia"/>
+  </entry>
+  <entry>
+    <title>ID Legal QA SynThink</title>
+    <link href="https://azzindani.github.io/#/post/id-legal-qa-synthink"/>
+    <id>https://azzindani.github.io/#/post/id-legal-qa-synthink</id>
+    <updated>2025-11-16T00:00:00.000Z</updated>
+    <published>2025-11-16T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Synthetic legal Q&amp;A with chain-of-thought traces.</summary>
+    <category term="huggingface"/>
+    <category term="dataset"/>
+    <category term="synthetic"/>
+    <category term="cot"/>
+    <category term="legal"/>
+  </entry>
+  <entry>
+    <title>ID REG MD RAG</title>
+    <link href="https://azzindani.github.io/#/post/id-reg-md-rag"/>
+    <id>https://azzindani.github.io/#/post/id-reg-md-rag</id>
+    <updated>2025-11-08T00:00:00.000Z</updated>
+    <published>2025-11-08T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Markdown-form regulation chunks for RAG.</summary>
+    <category term="huggingface"/>
+    <category term="dataset"/>
+    <category term="rag"/>
+    <category term="indonesia"/>
+    <category term="legal"/>
+  </entry>
+  <entry>
+    <title>Qwen3 0.6B Legal Checkpoint</title>
+    <link href="https://azzindani.github.io/#/post/qwen3-0-6b-legal-checkpoint"/>
+    <id>https://azzindani.github.io/#/post/qwen3-0-6b-legal-checkpoint</id>
+    <updated>2025-11-05T00:00:00.000Z</updated>
+    <published>2025-11-05T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Qwen3 0.6B fine-tune checkpoint on Indonesian legal corpus.</summary>
+    <category term="huggingface"/>
+    <category term="qwen"/>
+    <category term="legal"/>
+    <category term="indonesia"/>
+    <category term="checkpoint"/>
+  </entry>
+  <entry>
+    <title>ID Legal QA Syn</title>
+    <link href="https://azzindani.github.io/#/post/id-legal-qa-syn"/>
+    <id>https://azzindani.github.io/#/post/id-legal-qa-syn</id>
+    <updated>2025-10-31T00:00:00.000Z</updated>
+    <published>2025-10-31T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Synthetic Indonesian legal Q&amp;A.</summary>
+    <category term="huggingface"/>
+    <category term="dataset"/>
+    <category term="synthetic"/>
+    <category term="qa"/>
+    <category term="legal"/>
+  </entry>
+  <entry>
+    <title>Qwen2.5 1.5B IT ID Legal</title>
+    <link href="https://azzindani.github.io/#/post/qwen2-5-1-5b-it-id-legal"/>
+    <id>https://azzindani.github.io/#/post/qwen2-5-1-5b-it-id-legal</id>
+    <updated>2025-10-25T00:00:00.000Z</updated>
+    <published>2025-10-25T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Qwen2.5 1.5B instruction-tuned for Indonesian legal text.</summary>
+    <category term="huggingface"/>
+    <category term="qwen"/>
+    <category term="fine-tuning"/>
+    <category term="legal"/>
+    <category term="indonesia"/>
+  </entry>
+  <entry>
+    <title>ID Supreme Court Parquet</title>
+    <link href="https://azzindani.github.io/#/post/id-supreme-court-parquet"/>
+    <id>https://azzindani.github.io/#/post/id-supreme-court-parquet</id>
+    <updated>2025-10-23T00:00:00.000Z</updated>
+    <published>2025-10-23T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Indonesian Supreme Court decisions — parquet.</summary>
+    <category term="huggingface"/>
+    <category term="dataset"/>
+    <category term="supreme-court"/>
+    <category term="indonesia"/>
+    <category term="parquet"/>
+  </entry>
+  <entry>
+    <title>ID Supreme Court HTML</title>
+    <link href="https://azzindani.github.io/#/post/id-supreme-court-html"/>
+    <id>https://azzindani.github.io/#/post/id-supreme-court-html</id>
+    <updated>2025-10-15T00:00:00.000Z</updated>
+    <published>2025-10-15T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Indonesian Supreme Court decisions — raw HTML.</summary>
+    <category term="huggingface"/>
+    <category term="dataset"/>
+    <category term="supreme-court"/>
+    <category term="indonesia"/>
+    <category term="html"/>
+  </entry>
+  <entry>
+    <title>Qwen3 0.6B L2C Checkpoint</title>
+    <link href="https://azzindani.github.io/#/post/qwen3-0-6b-l2c-checkpoint"/>
+    <id>https://azzindani.github.io/#/post/qwen3-0-6b-l2c-checkpoint</id>
+    <updated>2025-10-12T00:00:00.000Z</updated>
+    <published>2025-10-12T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Qwen3 0.6B label-to-character checkpoint.</summary>
+    <category term="huggingface"/>
+    <category term="qwen"/>
+    <category term="checkpoint"/>
+    <category term="sft"/>
+  </entry>
+  <entry>
+    <title>Qwen3 1.7B Legal Distill</title>
+    <link href="https://azzindani.github.io/#/post/qwen3-1-7b-legal-distill"/>
+    <id>https://azzindani.github.io/#/post/qwen3-1-7b-legal-distill</id>
+    <updated>2025-10-07T00:00:00.000Z</updated>
+    <published>2025-10-07T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Distillation traces from Qwen3-1.7B on legal Q&amp;A.</summary>
+    <category term="huggingface"/>
+    <category term="dataset"/>
+    <category term="distillation"/>
+    <category term="qwen"/>
+    <category term="legal"/>
+  </entry>
+  <entry>
+    <title>Qwen3 0.6B C2C Checkpoint</title>
+    <link href="https://azzindani.github.io/#/post/qwen3-0-6b-c2c-checkpoint"/>
+    <id>https://azzindani.github.io/#/post/qwen3-0-6b-c2c-checkpoint</id>
+    <updated>2025-10-05T00:00:00.000Z</updated>
+    <published>2025-10-05T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Qwen3 0.6B character-to-character checkpoint.</summary>
+    <category term="huggingface"/>
+    <category term="qwen"/>
+    <category term="checkpoint"/>
+    <category term="sft"/>
+  </entry>
+  <entry>
+    <title>DeepSeek 0528 8B Legal Distill</title>
+    <link href="https://azzindani.github.io/#/post/deepseek-0528-8b-legal-distill"/>
+    <id>https://azzindani.github.io/#/post/deepseek-0528-8b-legal-distill</id>
+    <updated>2025-09-29T00:00:00.000Z</updated>
+    <published>2025-09-29T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Distillation traces from DeepSeek 8B over Indonesian legal Q&amp;A.</summary>
+    <category term="huggingface"/>
+    <category term="dataset"/>
+    <category term="distillation"/>
+    <category term="deepseek"/>
+    <category term="legal"/>
+  </entry>
+  <entry>
+    <title>US Regulation ECFR 20260101</title>
+    <link href="https://azzindani.github.io/#/post/us-regulation-ecfr-20260101"/>
+    <id>https://azzindani.github.io/#/post/us-regulation-ecfr-20260101</id>
+    <updated>2025-09-21T00:00:00.000Z</updated>
+    <published>2025-09-21T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>US electronic CFR snapshot (2026-01-01).</summary>
+    <category term="huggingface"/>
+    <category term="dataset"/>
+    <category term="regulation"/>
+    <category term="usa"/>
+    <category term="ecfr"/>
+  </entry>
+  <entry>
+    <title>US Regulation CFR 20260101</title>
+    <link href="https://azzindani.github.io/#/post/us-regulation-cfr-20260101"/>
+    <id>https://azzindani.github.io/#/post/us-regulation-cfr-20260101</id>
+    <updated>2025-09-13T00:00:00.000Z</updated>
+    <published>2025-09-13T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>US Code of Federal Regulations snapshot (2026-01-01).</summary>
+    <category term="huggingface"/>
+    <category term="dataset"/>
+    <category term="regulation"/>
+    <category term="usa"/>
+    <category term="cfr"/>
+  </entry>
+  <entry>
+    <title>Open Reaction Data</title>
+    <link href="https://azzindani.github.io/#/post/open-reaction-data"/>
+    <id>https://azzindani.github.io/#/post/open-reaction-data</id>
+    <updated>2025-09-05T00:00:00.000Z</updated>
+    <published>2025-09-05T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Open chemical-reaction dataset.</summary>
+    <category term="huggingface"/>
+    <category term="dataset"/>
+    <category term="chemistry"/>
+    <category term="reactions"/>
+  </entry>
+  <entry>
+    <title>Invoices Data</title>
+    <link href="https://azzindani.github.io/#/post/invoices-data"/>
+    <id>https://azzindani.github.io/#/post/invoices-data</id>
+    <updated>2025-08-28T00:00:00.000Z</updated>
+    <published>2025-08-28T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Invoice extraction / OCR training dataset.</summary>
+    <category term="huggingface"/>
+    <category term="dataset"/>
+    <category term="invoices"/>
+    <category term="ocr"/>
+  </entry>
+  <entry>
+    <title>ID REG DB 2511</title>
+    <link href="https://azzindani.github.io/#/post/id-reg-db-2511"/>
+    <id>https://azzindani.github.io/#/post/id-reg-db-2511</id>
+    <updated>2025-08-20T00:00:00.000Z</updated>
+    <published>2025-08-20T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Indonesian regulation DB snapshot (2025-11).</summary>
+    <category term="huggingface"/>
+    <category term="dataset"/>
+    <category term="database"/>
+    <category term="indonesia"/>
   </entry>
 </feed>

@@ -4,3 +4,13 @@ test-results/
 .playwright/
 .vitest/
 .DS_Store
+
+# Local debug screenshots & one-shot inspection scripts (not part of the site)
+tools/*.png
+tools/audit.js
+tools/console.js
+tools/inspect.js
+tools/inspect-post.js
+tools/inspect-dark.js
+tools/screenshot.js
+tools/shot-*.js

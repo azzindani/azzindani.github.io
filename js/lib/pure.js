@@ -51,7 +51,10 @@
 
     function rewriteRelativeAssetPaths(md, info, branch) {
         if (!md || !info) return md;
-        const isAbs = (s) => /^(https?:|data:|mailto:|#|\/)/i.test(s);
+        // Truly absolute: protocol URLs, data: blobs, mailto:, page anchors.
+        // Note: a leading "/" in a README means *repo-root relative*, NOT
+        // domain-absolute, so it is rewritten too.
+        const isAbs = (s) => /^(https?:|data:|mailto:|#)/i.test(s);
         let rawBase, htmlBase;
         if (info.host === 'github') {
             rawBase  = `https://raw.githubusercontent.com/${info.owner}/${info.name}/${branch || 'main'}/`;
@@ -67,25 +70,38 @@
             return md;
         }
 
+        // Strip "./" or leading "/" before joining onto the base — both forms
+        // mean "the path inside the repo".
+        const normalize = (p) => p.replace(/^\.\//, '').replace(/^\//, '');
+
         let out = md.replace(/(!?)\[([^\]]*)\]\(([^)\s]+)(\s+"[^"]*")?\)/g,
             (match, bang, label, target, title) => {
                 if (isAbs(target)) return match;
                 const base = bang === '!' ? rawBase : htmlBase;
-                return `${bang}[${label}](${base}${target.replace(/^\.\//, '')}${title || ''})`;
+                return `${bang}[${label}](${base}${normalize(target)}${title || ''})`;
             });
 
         out = out.replace(/<img\s+([^>]*?)src=(["'])([^"']+)\2/gi,
             (match, attrs, q, src) => {
                 if (isAbs(src)) return match;
-                return `<img ${attrs}src=${q}${rawBase}${src.replace(/^\.\//, '')}${q}`;
+                return `<img ${attrs}src=${q}${rawBase}${normalize(src)}${q}`;
+            });
+
+        // <a href="..."> too — repo-root relative anchors should resolve to the
+        // repo's html base so they don't 404 against the SPA router.
+        out = out.replace(/<a\s+([^>]*?)href=(["'])([^"']+)\2/gi,
+            (match, attrs, q, href) => {
+                if (isAbs(href)) return match;
+                return `<a ${attrs}href=${q}${htmlBase}${normalize(href)}${q}`;
             });
 
         return out;
     }
 
     function parseFrontmatter(content) {
-        const m = String(content || '').match(/^---\n([\s\S]*?)\n---/);
-        if (!m) return { meta: {}, body: content || '' };
+        const text = String(content || '').replace(/\r\n/g, '\n');
+        const m = text.match(/^---\n([\s\S]*?)\n---/);
+        if (!m) return { meta: {}, body: text };
         const meta = {};
         m[1].split('\n').forEach(line => {
             const i = line.indexOf(':');
@@ -99,7 +115,7 @@
             if (val === 'false') val = false;
             meta[key] = val;
         });
-        return { meta, body: content.slice(m[0].length).trim() };
+        return { meta, body: text.slice(m[0].length).trim() };
     }
 
     // Returns { html, store } where html has placeholder spans for each math
