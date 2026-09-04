@@ -95,6 +95,8 @@
     let projSx = null, projSy = null, projS = null;
     let zSortedIdx = null;   // Int32Array of neuron indices sorted by z asc
     let bubbleFontCache = null;
+    // Reused point pool for soma outlines — grown once, mutated per draw.
+    const somaScratch = [];
     // Adaptive perf state — if frames take too long, we shed work.
     let perfLevel = 1;       // 1 = full, 0.5 = degraded (no extras)
     let slowFrames = 0, fastFrames = 0;
@@ -113,6 +115,44 @@
     function rgba(c, a) { return `rgba(${c[0]},${c[1]},${c[2]},${a})`; }
 
     function rand(min, max) { return min + Math.random() * (max - min); }
+
+    // ── Organic path helpers ──
+    //
+    // Cell bodies, dendrites and axons in real tissue have no straight edges
+    // or hard corners, so nothing bio-side is drawn with lineTo.
+
+    // Trace a closed, smooth curve through `pts` ([{x,y}, …]).
+    // Each input point becomes a quadratic control point and the midpoint of
+    // every edge becomes an on-curve anchor, which turns a wobbly polygon into
+    // a continuous lobed blob for the same number of path operations.
+    function traceSmoothClosed(pts, len) {
+        if (len < 3) return;
+        let prev = pts[len - 1];
+        let cur = pts[0];
+        ctx.moveTo((prev.x + cur.x) * 0.5, (prev.y + cur.y) * 0.5);
+        for (let i = 0; i < len; i++) {
+            cur = pts[i];
+            const next = pts[(i + 1) % len];
+            ctx.quadraticCurveTo(cur.x, cur.y, (cur.x + next.x) * 0.5, (cur.y + next.y) * 0.5);
+        }
+        ctx.closePath();
+    }
+
+    // Trace a neurite (dendrite / axon) as a closed ribbon that tapers from
+    // `halfW` at the base to a point at the tip, following the same quadratic
+    // the stroked version used. Filling this gives a continuous taper, which a
+    // constant-width stroke cannot express.
+    function traceTaperedNeurite(bx, by, cpx, cpy, tipX, tipY, perpX, perpY, halfW) {
+        const ox = perpX * halfW, oy = perpY * halfW;
+        // Control offset is halved so the ribbon narrows smoothly toward the tip.
+        const cox = perpX * halfW * 0.5, coy = perpY * halfW * 0.5;
+        ctx.moveTo(bx + ox, by + oy);
+        ctx.quadraticCurveTo(cpx + cox, cpy + coy, tipX, tipY);
+        ctx.quadraticCurveTo(cpx - cox, cpy - coy, bx - ox, by - oy);
+        // Round the base off across the soma side rather than closing flat.
+        ctx.quadraticCurveTo(bx - ox * 0.4, by - oy * 0.4, bx + ox, by + oy);
+        ctx.closePath();
+    }
 
     // ── Neuron Creation ──
     //
@@ -167,14 +207,33 @@
 
         // ── Build bio anatomy ──
 
-        // Soma (cell body) — slightly irregular polygon for organic look.
-        // Pre-compute relative-to-center vertices once.
-        const somaPoints = subtype === 'pyramidal' ? 7 : 6;
+        // Fixed first: the soma is shaped around this axis and the dendrites
+        // are distributed away from it.
+        const axonAngle = rand(0, Math.PI * 2);
+
+        // Soma outline, precomputed as offsets in radius units.
+        //
+        // Three things keep it from looking machined:
+        //  - spline control points, not polygon corners (see traceSmoothClosed)
+        //  - jittered angles, so lobes don't sit at regular intervals
+        //  - a wide wobble range, because midpoint smoothing halves the
+        //    amplitude of whatever variation it is given
+        // The body is then elongated along the axon axis: real somata are
+        // ovoid or pear-shaped, tapering toward the axon hillock, never round.
+        const somaPoints = subtype === 'pyramidal' ? 9 : 7;
+        const elong = subtype === 'pyramidal' ? rand(1.2, 1.5) : rand(1.05, 1.25);
+        const axCos = Math.cos(axonAngle), axSin = Math.sin(axonAngle);
         n.soma = [];
         for (let i = 0; i < somaPoints; i++) {
-            const a = (i / somaPoints) * Math.PI * 2;
-            const wobble = rand(0.85, 1.15);
-            n.soma.push({ angle: a, r: radius * wobble });
+            const a = (i / somaPoints) * Math.PI * 2 + rand(-0.2, 0.2);
+            const rr = radius * rand(0.72, 1.3);
+            // Local point, then stretched along the axon axis and rotated back.
+            const lx = Math.cos(a) * rr * elong;
+            const ly = Math.sin(a) * rr;
+            n.soma.push({
+                dx: lx * axCos - ly * axSin,
+                dy: lx * axSin + ly * axCos,
+            });
         }
 
         // Nucleus inside soma, slightly off-center.
@@ -190,8 +249,7 @@
             ? Math.floor(rand(5, 8))
             : Math.floor(rand(3, 5));
 
-        // Bias dendrites away from where the axon will go (so they don't overlap).
-        const axonAngle = rand(0, Math.PI * 2);
+        // Dendrites are biased away from the axon (so they don't overlap).
         n.dendrites = [];
         for (let i = 0; i < dendCount; i++) {
             // Distribute dendrites in the half-plane opposite the axon.
@@ -933,13 +991,24 @@
                 const cpX = sx + cosA * baseLen * 0.55 + perpX * d.curve * baseLen * 0.45;
                 const cpY = sy + sinA * baseLen * 0.55 + perpY * d.curve * baseLen * 0.45;
 
-                // Tapering line (slightly thicker near soma)
-                ctx.strokeStyle = rgba(n.color, alpha * 0.65);
-                ctx.lineWidth = Math.max(0.4, d.width * ps);
-                ctx.beginPath();
-                ctx.moveTo(sx, sy);
-                ctx.quadraticCurveTo(cpX, cpY, endX, endY);
-                ctx.stroke();
+                // Real dendrites are thick at the soma and taper to a fine
+                // tip. A stroke has one width for its whole length, so at full
+                // perf the neurite is a filled ribbon instead; degraded perf
+                // falls back to the cheaper constant-width stroke.
+                if (perfLevel === 1) {
+                    const halfW = Math.max(0.35, d.width * ps * 1.5);
+                    ctx.fillStyle = rgba(n.color, alpha * 0.65);
+                    ctx.beginPath();
+                    traceTaperedNeurite(sx, sy, cpX, cpY, endX, endY, perpX, perpY, halfW);
+                    ctx.fill();
+                } else {
+                    ctx.strokeStyle = rgba(n.color, alpha * 0.65);
+                    ctx.lineWidth = Math.max(0.4, d.width * ps);
+                    ctx.beginPath();
+                    ctx.moveTo(sx, sy);
+                    ctx.quadraticCurveTo(cpX, cpY, endX, endY);
+                    ctx.stroke();
+                }
 
                 // Sub-branches — skip when degraded.
                 if (perfLevel < 1) continue;
@@ -956,11 +1025,13 @@
                     const cEndY = by + childSinA * cLen;
                     const cCpX = bx + childCosA * cLen * 0.55 + childPerpX * b.curve * cLen * 0.5;
                     const cCpY = by + childSinA * cLen * 0.55 + childPerpY * b.curve * cLen * 0.5;
-                    ctx.lineWidth = Math.max(0.3, d.width * ps * 0.7);
+                    // Branches taper too, and start narrower than their parent
+                    // so the fork reads as a smooth split rather than a joint.
+                    const cHalfW = Math.max(0.25, d.width * ps * 0.95);
+                    ctx.fillStyle = rgba(n.color, alpha * 0.55);
                     ctx.beginPath();
-                    ctx.moveTo(bx, by);
-                    ctx.quadraticCurveTo(cCpX, cCpY, cEndX, cEndY);
-                    ctx.stroke();
+                    traceTaperedNeurite(bx, by, cCpX, cCpY, cEndX, cEndY, childPerpX, childPerpY, cHalfW);
+                    ctx.fill();
                 }
             }
         }
@@ -976,12 +1047,25 @@
             const cpX = sx + cosA * len * 0.5 + perpX * a.curve * len * 0.4;
             const cpY = sy + sinA * len * 0.5 + perpY * a.curve * len * 0.4;
 
-            ctx.strokeStyle = rgba(n.color, alpha * 0.55);
-            ctx.lineWidth = Math.max(0.5, a.width * ps);
-            ctx.beginPath();
-            ctx.moveTo(sx, sy);
-            ctx.quadraticCurveTo(cpX, cpY, endX, endY);
-            ctx.stroke();
+            // The axon keeps a near-constant calibre for most of its length,
+            // so it tapers far less than a dendrite — hence the tip is pulled
+            // back to a stub width rather than a point.
+            if (perfLevel === 1) {
+                const halfW = Math.max(0.4, a.width * ps * 0.9);
+                const stubX = endX - cosA * len * 0.06;
+                const stubY = endY - sinA * len * 0.06;
+                ctx.fillStyle = rgba(n.color, alpha * 0.55);
+                ctx.beginPath();
+                traceTaperedNeurite(sx, sy, cpX, cpY, stubX, stubY, perpX, perpY, halfW);
+                ctx.fill();
+            } else {
+                ctx.strokeStyle = rgba(n.color, alpha * 0.55);
+                ctx.lineWidth = Math.max(0.5, a.width * ps);
+                ctx.beginPath();
+                ctx.moveTo(sx, sy);
+                ctx.quadraticCurveTo(cpX, cpY, endX, endY);
+                ctx.stroke();
+            }
 
             // Terminal bulb (synaptic bouton)
             const bulbR = Math.max(0.6, a.terminalR * ps);
@@ -995,13 +1079,18 @@
                 ctx.strokeStyle = rgba(n.color, alpha * 0.45);
                 ctx.lineWidth = Math.max(0.3, a.width * ps * 0.6);
                 for (let i = 0; i < a.terminals; i++) {
-                    const ta = a.angle + ((i - (a.terminals - 1) / 2) * 0.6);
+                    const spread = (i - (a.terminals - 1) / 2) * 0.6;
+                    const ta = a.angle + spread;
                     const tlen = len * 0.18;
                     const tx = endX + Math.cos(ta) * tlen;
                     const ty = endY + Math.sin(ta) * tlen;
+                    // Curved, not straight: the terminal arborises away from
+                    // the axon's own heading rather than kinking off it.
+                    const tCpX = endX + cosA * tlen * 0.5;
+                    const tCpY = endY + sinA * tlen * 0.5;
                     ctx.beginPath();
                     ctx.moveTo(endX, endY);
-                    ctx.lineTo(tx, ty);
+                    ctx.quadraticCurveTo(tCpX, tCpY, tx, ty);
                     ctx.stroke();
                     ctx.beginPath();
                     ctx.arc(tx, ty, bulbR * 0.6, 0, Math.PI * 2);
@@ -1013,15 +1102,21 @@
 
         // ── Soma (cell body) — irregular polygon, gradient-filled ──
         if (n.soma && n.soma.length) {
-            ctx.beginPath();
-            for (let i = 0; i < n.soma.length; i++) {
+            // Reused scratch array — this runs for every bio neuron every
+            // frame, so it must not allocate.
+            const count = n.soma.length;
+            while (somaScratch.length < count) somaScratch.push({ x: 0, y: 0 });
+            // Offsets are baked at creation, so this is a scale — no
+            // trigonometry in the per-frame path.
+            const k = ps * pulse;
+            for (let i = 0; i < count; i++) {
                 const v = n.soma[i];
-                const sr = v.r * ps * pulse;
-                const x = sx + Math.cos(v.angle) * sr;
-                const y = sy + Math.sin(v.angle) * sr;
-                i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+                const p = somaScratch[i];
+                p.x = sx + v.dx * k;
+                p.y = sy + v.dy * k;
             }
-            ctx.closePath();
+            ctx.beginPath();
+            traceSmoothClosed(somaScratch, count);
             // Gradient on degraded perf becomes a flat fill — visually similar
             // at this scale, far cheaper.
             if (perfLevel === 1) {
