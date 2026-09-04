@@ -88,7 +88,7 @@ route should appear in the navbar, also add a `<a class="nav-tab">` to
 
 ## Landing page & the neural phase system
 
-`#/` renders `renderLandingPage` (in `js/app.js`). It is five full-height
+`#/` renders `renderLandingPage` (in `js/app.js`). It is seven full-height
 stages, and **scroll position drives the shared background canvas** through a
 matching sequence of phases:
 
@@ -137,7 +137,7 @@ tears apart.
 The contract between the two files is one function:
 
 ```js
-window.NeuralBG.setPhase(p)   // p = 0..4, continuous
+window.NeuralBG.setPhase(p)   // p = 0..6, continuous (PHASE_STOPS.length-1)
 window.NeuralBG.reset()       // back to phase 0 (called on route change)
 ```
 
