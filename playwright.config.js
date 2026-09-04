@@ -16,7 +16,18 @@ module.exports = defineConfig({
         trace: 'on-first-retry',
     },
     projects: [
-        { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+        {
+            name: 'chromium',
+            use: {
+                ...devices['Desktop Chrome'],
+                // Escape hatch for sandboxes that ship their own Chromium build
+                // instead of the one `playwright install` would fetch. Unset in
+                // CI, where the bundled browser is installed normally.
+                ...(process.env.PLAYWRIGHT_CHROMIUM_PATH
+                    ? { launchOptions: { executablePath: process.env.PLAYWRIGHT_CHROMIUM_PATH } }
+                    : {}),
+            },
+        },
     ],
     webServer: {
         command: `node tests/serve.js`,

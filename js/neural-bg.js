@@ -38,11 +38,58 @@
         // Adaptive degradation thresholds (ms per frame).
         SLOW_FRAME_MS: 28,    // ~36 fps
         FAST_FRAME_MS: 20,    // ~50 fps
+
+        // ── Phase / split system (driven by landing-page scroll) ──
+        // The mesh splits into its bio and ai halves and recombines as the
+        // visitor scrolls. Each phase pushes one kind into a "lane" so the
+        // opposite side of the viewport is left clear for page content.
+        LANE_FRACTION: 0.26,      // lane offset as a fraction of viewport width
+        EXIT_FRACTION: 0.78,      // how far the departing kind is pushed off
+        PHASE_EASE: 0.055,        // per-frame easing toward phase targets
+        // Fraction of a stage that HOLDS its state before morphing to the next.
+        // Without this the mesh is permanently mid-transition, which reads as
+        // aimless drifting; holding then breaking late is what makes each
+        // split feel like a deliberate event.
+        PHASE_HOLD: 0.55,
+        RUPTURE_DECAY: 0.045,     // per-frame decay of the rupture flash
+        RUPTURE_IMPULSE: 2.6,     // velocity kick applied when the mesh snaps
+        SEVER_FRAMES: 26,         // life of a cut wire's recoiling stub
+        MAX_SEVERED: 70,
+        PRESENCE_CONNECT_MIN: 0.25,   // below this a neuron makes no wires
+        PRESENCE_CROSS_MIN: 0.55,     // both kinds must exceed this to bridge
     };
+
+    // Phase stops. Index = integer phase; the renderer interpolates between
+    // neighbouring stops using the fractional part of the current phase.
+    //   0 hero        — full mesh, centered
+    //   1 section 1   — human/bio neurons only, pulled into the left lane
+    //   2 section 2   — recombined, centered
+    //   3 section 3   — artificial neurons only, pulled into the right lane
+    //   4 section 4   — recombined, centered
+    const PHASE_STOPS = [
+        { bio: 1, ai: 1, bioX:  0,    aiX:  0    },
+        { bio: 1, ai: 0, bioX: -1,    aiX: -1.6  },
+        { bio: 1, ai: 1, bioX:  0,    aiX:  0    },
+        { bio: 0, ai: 1, bioX:  1.6,  aiX:  1    },
+        { bio: 1, ai: 1, bioX:  0,    aiX:  0    },
+    ];
+
+    // Scroll positions (in phase units) at which the mesh visibly snaps apart.
+    // These sit just past PHASE_HOLD, so the tear fires exactly when the stage
+    // stops holding and starts morphing into the next one.
+    const RUPTURE_POINTS = [0.58, 1.58, 2.58, 3.58];
 
     let canvas, ctx, W, H, dpr;
     let neurons = [], connections = [], signals = [], numberBubbles = [];
     let frameCount = 0, lastTime = 0, paused = false;
+    // ── Phase state ──
+    // `phase` is the scroll-driven target (0..PHASE_STOPS.length-1). Presence
+    // and lane offsets ease toward the interpolated stop every frame, so the
+    // mesh never teleports even if the visitor scroll-jumps.
+    let phase = 0, lastPhase = 0;
+    let bioPresence = 1, aiPresence = 1;
+    let rupture = 0;
+    let severed = [];
     // Reused per-frame buffers — avoid per-frame array allocations (a major
     // GC pressure source that shows up as jitter).
     let projSx = null, projSy = null, projS = null;
@@ -89,14 +136,22 @@
         }
 
         const halfD = CFG.DEPTH_RANGE / 2;
+        const bvx = rand(-CFG.DRIFT_SPEED, CFG.DRIFT_SPEED);
+        const bvy = rand(-CFG.DRIFT_SPEED, CFG.DRIFT_SPEED);
+        const bvz = rand(-CFG.DRIFT_SPEED * 0.3, CFG.DRIFT_SPEED * 0.3);
         const n = {
             x: rand(-W / 2, W / 2),
             y: rand(-H / 2, H / 2),
             z: rand(-halfD, halfD),
-            vx: rand(-CFG.DRIFT_SPEED, CFG.DRIFT_SPEED),
-            vy: rand(-CFG.DRIFT_SPEED, CFG.DRIFT_SPEED),
-            vz: rand(-CFG.DRIFT_SPEED * 0.3, CFG.DRIFT_SPEED * 0.3),
+            vx: bvx, vy: bvy, vz: bvz,
+            // Baseline drift, restored after a rupture impulse decays.
+            bvx, bvy, bvz,
             radius, kind, subtype, color,
+            // Phase-driven display state. `presence` fades the neuron in/out,
+            // `laneX` slides it sideways without disturbing drift/wrap logic
+            // (which still operates on the untouched x).
+            presence: 1,
+            laneX: 0,
             pulsePhase: rand(0, Math.PI * 2),
             rotation: rand(0, Math.PI * 2),    // for AI hex orientation
             soma: null,
@@ -224,12 +279,108 @@
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
+    // ── Phase system ──
+
+    function smoothstep(t) { return t * t * (3 - 2 * t); }
+
+    // Resolve the interpolated stop for the current phase value.
+    function phaseTargets() {
+        const maxI = PHASE_STOPS.length - 1;
+        const p = Math.max(0, Math.min(maxI, phase));
+        const i = Math.min(maxI - 1, Math.floor(p));
+        // Hold this stage's state for the first PHASE_HOLD of its scroll range,
+        // then morph to the next stop over the remainder.
+        const raw = Math.max(0, Math.min(1, p - i));
+        const hold = CFG.PHASE_HOLD;
+        const f = smoothstep(Math.max(0, Math.min(1, (raw - hold) / (1 - hold))));
+        const a = PHASE_STOPS[i], b = PHASE_STOPS[i + 1] || PHASE_STOPS[maxI];
+        const lane = W * CFG.LANE_FRACTION, exit = W * CFG.EXIT_FRACTION;
+        // bioX/aiX are authored as multiples of the lane width; values beyond
+        // ±1 push the departing kind off toward the exit distance instead.
+        const toPx = (v) => (Math.abs(v) <= 1 ? v * lane : Math.sign(v) * exit);
+        return {
+            bio:  a.bio + (b.bio - a.bio) * f,
+            ai:   a.ai  + (b.ai  - a.ai)  * f,
+            bioX: toPx(a.bioX) + (toPx(b.bioX) - toPx(a.bioX)) * f,
+            aiX:  toPx(a.aiX)  + (toPx(b.aiX)  - toPx(a.aiX))  * f,
+        };
+    }
+
+    // The mesh "breaks": cut every cross-kind wire into recoiling stubs, kick
+    // every neuron outward toward the lane it is heading for, and drop signals
+    // that were mid-flight along wires which no longer exist.
+    function triggerRupture(targets) {
+        if (reducedMotion) return;
+        rupture = 1;
+
+        severed.length = 0;
+        for (let c = 0; c < connections.length && severed.length < CFG.MAX_SEVERED; c++) {
+            const conn = connections[c];
+            if (conn.type !== 'bridge') continue;
+            severed.push({ i: conn.i, j: conn.j, life: CFG.SEVER_FRAMES });
+        }
+
+        const kick = CFG.RUPTURE_IMPULSE;
+        for (const n of neurons) {
+            const dir = Math.sign((n.kind === 'ai' ? targets.aiX : targets.bioX) || 0) || (Math.random() < 0.5 ? -1 : 1);
+            n.vx += dir * kick * rand(0.5, 1.4);
+            n.vy += rand(-kick, kick) * 0.7;
+            n.vz += rand(-kick, kick) * 0.5;
+        }
+
+        signals.length = 0;
+        buildConnections();
+    }
+
+    // Called by the landing page with a continuous scroll-derived value.
+    function setPhase(p) {
+        if (typeof p !== 'number' || !isFinite(p)) return;
+        const maxI = PHASE_STOPS.length - 1;
+        phase = Math.max(0, Math.min(maxI, p));
+
+        // Fire a rupture whenever the scroll crosses a break point, in either
+        // direction, so scrolling back up breaks the mesh again.
+        const targets = phaseTargets();
+        for (const t of RUPTURE_POINTS) {
+            const crossedDown = lastPhase < t && phase >= t;
+            const crossedUp   = lastPhase > t && phase <= t;
+            if (crossedDown || crossedUp) { triggerRupture(targets); break; }
+        }
+        lastPhase = phase;
+    }
+
+    // Ease per-neuron presence / lane offset toward the current phase targets.
+    function updatePhase() {
+        const t = phaseTargets();
+        const e = reducedMotion ? 1 : CFG.PHASE_EASE;
+        bioPresence += (t.bio - bioPresence) * e;
+        aiPresence  += (t.ai  - aiPresence)  * e;
+
+        for (const n of neurons) {
+            const tp = n.kind === 'ai' ? t.ai  : t.bio;
+            const tx = n.kind === 'ai' ? t.aiX : t.bioX;
+            n.presence += (tp - n.presence) * e;
+            n.laneX    += (tx - n.laneX)    * e;
+        }
+
+        if (rupture > 0) rupture = Math.max(0, rupture - CFG.RUPTURE_DECAY);
+        for (let k = severed.length - 1; k >= 0; k--) {
+            if (--severed[k].life <= 0) severed.splice(k, 1);
+        }
+    }
+
     // ── Update Neurons ──
     function updateNeurons(dt) {
         const halfW = W / 2 + 100, halfH = H / 2 + 100, halfD = CFG.DEPTH_RANGE / 2;
         for (const n of neurons) {
             n.x += n.vx * dt; n.y += n.vy * dt; n.z += n.vz * dt;
             n.pulsePhase += 0.02 * dt;
+
+            // Bleed any rupture impulse back off toward the baseline drift, so
+            // the mesh settles instead of scattering permanently.
+            n.vx += (n.bvx - n.vx) * 0.035 * dt;
+            n.vy += (n.bvy - n.vy) * 0.035 * dt;
+            n.vz += (n.bvz - n.vz) * 0.035 * dt;
 
             // Wrap around bounds
             if (n.x < -halfW) n.x = halfW;
@@ -259,12 +410,21 @@
         // a Set of composite keys.
         const seen = new Uint8Array(N * N);
         const degree = new Int32Array(N);
+        // Phase gating: faded-out neurons make no wires, and the bio↔ai bridge
+        // wires only exist while both halves of the mesh are actually present.
+        const minP = CFG.PRESENCE_CONNECT_MIN;
+        const crossOk = Math.min(bioPresence, aiPresence) >= CFG.PRESENCE_CROSS_MIN;
+        const allowed = (a, b) =>
+            a.presence >= minP && b.presence >= minP &&
+            (crossOk || a.kind === b.kind);
 
         for (let i = 0; i < N; i++) {
             const a = neurons[i];
+            if (a.presence < minP) continue;
             const ax = a.x, ay = a.y, az = a.z;
             for (let j = i + 1; j < N; j++) {
                 const b = neurons[j];
+                if (!allowed(a, b)) continue;
                 const dx = ax - b.x, dy = ay - b.y, dz = az - b.z;
                 const d2 = dx * dx + dy * dy + dz * dz;
                 if (d2 < dist2) {
@@ -281,6 +441,7 @@
         for (let i = 0; i < N; i++) {
             if (degree[i] >= minN) continue;
             const a = neurons[i];
+            if (a.presence < minP) continue;
             // Gather candidate distances into a small typed array.
             const cand = [];
             for (let j = 0; j < N; j++) {
@@ -288,6 +449,7 @@
                 const lo = i < j ? i : j, hi = i < j ? j : i;
                 if (seen[lo * N + hi]) continue;
                 const b = neurons[j];
+                if (!allowed(a, b)) continue;
                 const dx = a.x - b.x, dy = a.y - b.y, dz = a.z - b.z;
                 cand.push(j, Math.sqrt(dx * dx + dy * dy + dz * dz));
             }
@@ -317,8 +479,9 @@
             const a = neurons[sig.fromIdx], b = neurons[sig.toIdx];
             if (a && b) {
                 const t = sig.progress;
+                const alx = a.x + a.laneX, blx = b.x + b.laneX;
                 sig.trail.push({
-                    x: a.x + (b.x - a.x) * t,
+                    x: alx + (blx - alx) * t,
                     y: a.y + (b.y - a.y) * t,
                     z: a.z + (b.z - a.z) * t,
                 });
@@ -356,6 +519,10 @@
         if (connections.length > 0 && signals.length < CFG.MAX_SIGNALS) {
             for (const conn of connections) {
                 if (Math.random() < CFG.SIGNAL_SPAWN_RATE / 60) {
+                    // Don't fire down a wire whose endpoints are fading out.
+                    const na = neurons[conn.i], nb = neurons[conn.j];
+                    if (!na || !nb) continue;
+                    if (Math.min(na.presence, nb.presence) < 0.5) continue;
                     const dir = Math.random() < 0.5;
                     signals.push({
                         fromIdx: dir ? conn.i : conn.j,
@@ -449,7 +616,9 @@
         for (let i = 0; i < N; i++) {
             const n = neurons[i];
             const s = CFG.PERSPECTIVE / (CFG.PERSPECTIVE + n.z);
-            projSx[i] = n.x * s + W / 2;
+            // laneX slides the neuron sideways for the current phase without
+            // touching n.x, so drift and edge-wrapping stay untouched.
+            projSx[i] = (n.x + n.laneX) * s + W / 2;
             projSy[i] = n.y * s + H / 2;
             projS[i]  = s;
         }
@@ -493,7 +662,7 @@
             const isActive = activeWires[lo * 10000 + hi] === 1;
 
             const baseAlpha = (isActive ? CFG.WIRE_ALPHA_ACTIVE : CFG.WIRE_ALPHA_BASE)
-                * distFalloff * avgScale;
+                * distFalloff * avgScale * Math.min(a.presence, b.presence);
             if (baseAlpha < 0.04) continue;       // skip near-invisible wires
             const baseWidth = (isActive ? CFG.WIRE_WIDTH_ACTIVE : CFG.WIRE_WIDTH_BASE) * avgScale;
 
@@ -525,13 +694,49 @@
             drawWirePathRaw(conn, sax, say, sbx, sby);
         }
 
+        // ── Severed wires ──
+        // On a phase rupture every bio↔ai wire is cut. Each stub retracts from
+        // the break point back toward its own neuron and fades, so the split
+        // reads as the mesh tearing rather than the halves drifting apart.
+        for (let s = 0; s < severed.length; s++) {
+            const cut = severed[s];
+            const i = cut.i, j = cut.j;
+            if (i >= N || j >= N) continue;
+            const t = cut.life / CFG.SEVER_FRAMES;        // 1 → 0 over its life
+            const ax = projSx[i], ay = projSy[i];
+            const bx = projSx[j], by = projSy[j];
+            const scale = (projS[i] + projS[j]) * 0.5;
+            // Stub length collapses toward each endpoint as it retracts.
+            const reach = 0.5 * t;
+            ctx.strokeStyle = rgba(CFG.COLOR_SIGNAL_BRIDGE, t * 0.9);
+            ctx.lineWidth = (CFG.WIRE_WIDTH_ACTIVE + 0.6) * scale * t;
+            ctx.beginPath();
+            ctx.moveTo(ax, ay);
+            ctx.lineTo(ax + (bx - ax) * reach, ay + (by - ay) * reach);
+            ctx.moveTo(bx, by);
+            ctx.lineTo(bx + (ax - bx) * reach, by + (ay - by) * reach);
+            ctx.stroke();
+
+            // Spark at each retracting tip while the cut is fresh.
+            if (perfLevel === 1 && t > 0.45) {
+                const spark = (t - 0.45) / 0.55;
+                ctx.fillStyle = rgba(CFG.COLOR_SIGNAL_BRIDGE, spark);
+                const tipR = 1.8 * scale * spark;
+                ctx.beginPath();
+                ctx.arc(ax + (bx - ax) * reach, ay + (by - ay) * reach, tipR, 0, Math.PI * 2);
+                ctx.arc(bx + (ax - bx) * reach, by + (ay - by) * reach, tipR, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
         // Draw signals (with motion trails)
         for (let s = 0; s < signals.length; s++) {
             const sig = signals[s];
             const a = neurons[sig.fromIdx], b = neurons[sig.toIdx];
             if (!a || !b) continue;
             const t = sig.progress;
-            const sx = a.x + (b.x - a.x) * t;
+            const alx = a.x + a.laneX, blx = b.x + b.laneX;
+            const sx = alx + (blx - alx) * t;
             const sy = a.y + (b.y - a.y) * t;
             const sz = a.z + (b.z - a.z) * t;
             const ps = CFG.PERSPECTIVE / (CFG.PERSPECTIVE + sz);
@@ -599,7 +804,7 @@
                 pulse += 0.6 * left;
             }
             const r = n.radius * ps * pulse;
-            const alpha = Math.min(ps * 0.8, 0.85);
+            const alpha = Math.min(ps * 0.8, 0.85) * n.presence;
             if (r < 0.3 || alpha < 0.02) continue;
 
             // Arrival ring (fades outward)
@@ -882,6 +1087,10 @@
             fastFrames = Math.max(0, fastFrames - 1);
         }
 
+        // Phase easing runs even under reduced motion (it snaps instantly
+        // there), so the landing page still shows the correct split state.
+        updatePhase();
+
         // Reduced-motion users get a (mostly) static frame: no drift, slow signals.
         if (!reducedMotion) updateNeurons(dt);
 
@@ -903,6 +1112,16 @@
             requestAnimationFrame(animate);
         }
     }
+
+    // ── Public API ──
+    // The landing page drives `setPhase` from scroll position; every other
+    // route resets to phase 0 so the mesh returns to its normal full state.
+    window.NeuralBG = {
+        setPhase,
+        reset() { setPhase(0); },
+        phaseCount: PHASE_STOPS.length,
+        reducedMotion,
+    };
 
     // ── Start ──
     if (document.readyState === 'loading') {

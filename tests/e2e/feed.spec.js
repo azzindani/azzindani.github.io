@@ -2,14 +2,14 @@
 const { test, expect } = require('@playwright/test');
 
 test('feed loads and shows posts', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/#/projects');
     await expect(page).toHaveTitle(/Portfolio/);
     // Wait for at least one feed item.
     await expect(page.locator('.feed-item').first()).toBeVisible({ timeout: 10000 });
 });
 
 test('featured row appears for featured posts', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/#/projects');
     await expect(page.locator('.featured-row')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('.featured-card').first()).toBeVisible();
 });
@@ -139,8 +139,9 @@ test('robots.txt and sitemap.xml exist and are valid', async ({ request }) => {
     expect(await r3.text()).toContain('<feed');
 });
 
-test('navbar has Projects, Blog, Docs tabs', async ({ page }) => {
+test('navbar has Home, Projects, Blog, Docs tabs', async ({ page }) => {
     await page.goto('/');
+    await expect(page.locator('.nav-tabs .nav-tab[data-tab="home"]')).toBeVisible();
     // Scope to .nav-tabs so each locator resolves to exactly one element
     // (duplicate tab elements exist in the mobile drawer).
     await expect(page.locator('.nav-tabs .nav-tab[data-tab="projects"]')).toBeVisible();
@@ -148,16 +149,16 @@ test('navbar has Projects, Blog, Docs tabs', async ({ page }) => {
     await expect(page.locator('.nav-tabs .nav-tab[data-tab="docs"]')).toBeVisible();
 });
 
-test('Projects tab is active on home; Blog tab activates on /blog', async ({ page }) => {
+test('Home tab is active on /; Blog tab activates on /blog', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('.nav-tabs .nav-tab[data-tab="projects"]')).toHaveClass(/active/);
+    await expect(page.locator('.nav-tabs .nav-tab[data-tab="home"]')).toHaveClass(/active/);
     await page.locator('.nav-tabs .nav-tab[data-tab="blog"]').click();
     await expect(page).toHaveURL(/#\/blog/);
     await expect(page.locator('.nav-tabs .nav-tab[data-tab="blog"]')).toHaveClass(/active/);
 });
 
 test('Projects feed only shows project-kind posts', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/#/projects');
     await page.locator('.feed-item').first().waitFor();
     const titles = await page.locator('.feed-item-title').allTextContents();
     // At least one project-kind post must render. Match generously across the
@@ -181,4 +182,76 @@ test('pagination renders when there are enough posts', async ({ page }) => {
     await page.goto('/#/blog');
     await page.waitForLoadState('networkidle');
     await expect(page.locator('#pagination')).toBeAttached();
+});
+
+// ── Landing page ──
+
+test('landing page renders all five stages', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('.lp-hero')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.lp-stage')).toHaveCount(5);
+    await expect(page.locator('.lp-hero-title')).toBeVisible();
+});
+
+test('landing hero reveals its content', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('.lp-hero-title.in-view')).toBeVisible({ timeout: 10000 });
+});
+
+test('landing stats fill in from the post manifest', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+    const values = await page.locator('.lp-stat-value').allTextContents();
+    expect(values.length).toBe(3);
+    // Placeholder em-dashes must have been replaced by real counts.
+    expect(values.every(v => /^\d+$/.test(v.trim()))).toBe(true);
+});
+
+test('topic ticker duplicates its track for a seamless loop', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('.lp-ticker-row')).toHaveCount(2);
+    // Each row holds the chip list twice; the clone is hidden from a11y tree.
+    const firstRow = page.locator('.lp-ticker-row').first();
+    await expect(firstRow.locator('.lp-ticker-group')).toHaveCount(2);
+    await expect(firstRow.locator('.lp-ticker-group[aria-hidden="true"]')).toHaveCount(1);
+});
+
+test('scrolling drives the neural background phase', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('.lp-hero')).toBeVisible({ timeout: 10000 });
+
+    const readPhase = () => page.evaluate(() => {
+        // setPhase clamps and stores; expose progress via a probe scroll read.
+        return window.__lpPhase;
+    });
+
+    // Wrap setPhase so the test can observe what scroll feeds the canvas.
+    await page.evaluate(() => {
+        const orig = window.NeuralBG.setPhase;
+        window.__lpPhase = 0;
+        window.NeuralBG.setPhase = (p) => { window.__lpPhase = p; return orig(p); };
+    });
+
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(200);
+    const atTop = await readPhase();
+
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForTimeout(400);
+    const atBottom = await readPhase();
+
+    expect(atBottom).toBeGreaterThan(atTop);
+    expect(atBottom).toBeLessThanOrEqual(4);
+});
+
+test('leaving the landing page resets the background phase', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('.lp-hero')).toBeVisible({ timeout: 10000 });
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForTimeout(300);
+
+    await page.goto('/#/projects');
+    await page.locator('.feed-item').first().waitFor({ timeout: 10000 });
+    // Landing DOM is gone, so no stage elements remain to drive the canvas.
+    await expect(page.locator('.lp-stage')).toHaveCount(0);
 });

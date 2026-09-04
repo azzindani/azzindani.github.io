@@ -64,9 +64,10 @@ is `#/path?key=value` — `Router.query` exposes the parsed query string.
 
 | Hash                       | Page                                              |
 | -------------------------- | ------------------------------------------------- |
-| `#/`                       | Projects feed (`kind: "project"`).                |
+| `#/`                       | Landing page (scroll-driven neural split).        |
+| `#/projects`               | Projects feed (`kind: "project"`).                |
 | `#/blog`                   | Blog feed (`kind: "blog"`).                       |
-| `#/?p=2`, `#/blog?p=2`     | Pagination (page param, persists via `history.replaceState`). |
+| `#/projects?p=2`, `#/blog?p=2` | Pagination (page param, persists via `history.replaceState`). |
 | `#/post/:slug`             | Single post view (markdown rendered).             |
 | `#/pdf/:slug`              | Full-page PDF viewer.                             |
 | `#/collection/:slug`       | Posts grouped by `collection` field.              |
@@ -84,6 +85,48 @@ Adding a new route: register it in the `Router.add` block at the bottom of
 `app.js` and write a `renderXxxPage` function next to its peers. If the
 route should appear in the navbar, also add a `<a class="nav-tab">` to
 `index.html` and a corresponding entry in `Router.resolve()`'s tabKey map.
+
+## Landing page & the neural phase system
+
+`#/` renders `renderLandingPage` (in `js/app.js`). It is five full-height
+stages, and **scroll position drives the shared background canvas** through a
+matching sequence of phases:
+
+| Stage | Mesh state                     | Content        |
+| ----- | ------------------------------ | -------------- |
+| 0     | full mesh, centered            | hero, title    |
+| 1     | bio only, pulled to left lane  | panel right    |
+| 2     | recombined, centered           | full width     |
+| 3     | ai only, pulled to right lane  | panel left     |
+| 4     | recombined, centered           | full width     |
+
+The contract between the two files is one function:
+
+```js
+window.NeuralBG.setPhase(p)   // p = 0..4, continuous
+window.NeuralBG.reset()       // back to phase 0 (called on route change)
+```
+
+`setupLandingScroll()` maps scroll offset to `p` using a mid-viewport
+reference line, coalesced into a single `requestAnimationFrame`. **Don't add a
+second rAF loop** — the canvas already runs one with adaptive degradation, and
+a competing loop trips it on mobile. Everything else (reveals, the topic
+ticker) is CSS-only for the same reason.
+
+Two details in `neural-bg.js` that are easy to break:
+
+- **`PHASE_HOLD`** keeps each stage in its own state for the first 55% of its
+  scroll range, then morphs over the rest. Without it the mesh is permanently
+  mid-transition and reads as aimless floating rather than deliberate splits.
+- **Rupture.** Crossing a `RUPTURE_POINTS` value cuts every bio↔ai wire into
+  recoiling stubs (`severed[]`), kicks each neuron toward its target lane, and
+  clears in-flight signals. The impulse decays back to each neuron's stored
+  `bvx/bvy/bvz` baseline drift — remove that restoration and neurons scatter
+  permanently.
+
+Lane offsets are applied as a render-time `n.laneX`, never by mutating `n.x`,
+so drift and edge-wrapping stay untouched. Anything projecting a neuron's x
+must use `n.x + n.laneX` (signals and their trails included).
 
 ## Pagination
 

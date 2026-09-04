@@ -360,7 +360,8 @@ const Router = {
 
         // Highlight current navbar tab
         document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
-        const tabKey = hash === '/' ? 'projects'
+        const tabKey = hash === '/' ? 'home'
+            : hash.startsWith('/projects') ? 'projects'
             : hash.startsWith('/blog') ? 'blog'
             : hash.startsWith('/docs') ? 'docs'
             : hash.startsWith('/admin') ? 'admin'
@@ -1047,6 +1048,261 @@ function postKind(p) {
 // Convenience routes that delegate to renderFeedPage with a kind filter.
 function renderProjectsPage() { return renderFeedPage({ kindFilter: 'project' }); }
 function renderBlogPage()     { return renderFeedPage({ kindFilter: 'blog' }); }
+
+// ── Landing page ──
+//
+// The site's front door. Scroll position drives the shared neural background
+// through a sequence of phases (see NeuralBG.setPhase in js/neural-bg.js):
+//
+//   stage 0  hero        full mesh, centered      — title only
+//   stage 1  section 1   bio neurons, left lane   — content on the right
+//   stage 2  section 2   recombined, centered     — full-width content
+//   stage 3  section 3   ai neurons, right lane   — content on the left
+//   stage 4  section 4   recombined, centered     — full-width content
+//
+// The mesh visibly tears at each transition rather than drifting, so the
+// split reads as a deliberate break. All copy here is placeholder.
+const LANDING_STAGES = 5;
+
+function renderLandingPage() {
+    Head.set({ title: '', description: CONFIG.siteDescription });
+
+    const app = document.getElementById('app');
+    app.innerHTML = `
+    <div class="landing" id="landing">
+
+        <section class="lp-stage lp-hero" data-stage="0">
+            <div class="lp-hero-inner">
+                <p class="lp-eyebrow reveal">Placeholder eyebrow</p>
+                <h1 class="lp-hero-title reveal">Where biological<br>and artificial<br>networks meet</h1>
+                <p class="lp-hero-sub reveal">Placeholder subtitle — one or two lines describing what this
+                    site is about. Replace this copy later.</p>
+                <div class="lp-hero-actions reveal">
+                    <a href="#/projects" class="lp-btn lp-btn-primary">View projects</a>
+                    <a href="#/blog" class="lp-btn">Read the blog</a>
+                </div>
+            </div>
+            <div class="lp-scroll-cue" aria-hidden="true"><span></span></div>
+        </section>
+
+        <section class="lp-stage lp-split lp-split-right" data-stage="1">
+            <div class="lp-panel">
+                <p class="lp-kicker reveal">01 — Human</p>
+                <h2 class="reveal">The biological side</h2>
+                <p class="lp-lead reveal">Placeholder paragraph for the first section. The bio neurons have
+                    pulled to the left, leaving this side clear.</p>
+                <div class="lp-cards">
+                    <article class="lp-card reveal">
+                        <h3>Placeholder card one</h3>
+                        <p>Short dummy description of the first idea. Replace with real copy.</p>
+                    </article>
+                    <article class="lp-card reveal">
+                        <h3>Placeholder card two</h3>
+                        <p>Short dummy description of the second idea. Replace with real copy.</p>
+                    </article>
+                    <article class="lp-card reveal">
+                        <h3>Placeholder card three</h3>
+                        <p>Short dummy description of the third idea. Replace with real copy.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="lp-stage lp-full" data-stage="2">
+            <div class="lp-panel lp-panel-wide">
+                <p class="lp-kicker reveal">02 — Combined</p>
+                <h2 class="reveal">Both halves, reconnected</h2>
+                <p class="lp-lead reveal">Placeholder paragraph. The mesh has snapped back together for this
+                    full-width section.</p>
+                <div class="lp-stats" id="lp-stats"></div>
+            </div>
+        </section>
+
+        <section class="lp-stage lp-split lp-split-left" data-stage="3">
+            <div class="lp-panel">
+                <p class="lp-kicker reveal">03 — Artificial</p>
+                <h2 class="reveal">The machine side</h2>
+                <p class="lp-lead reveal">Placeholder paragraph for the third section. The artificial neurons
+                    have pulled to the right, so this side is clear.</p>
+                <div class="lp-chart reveal" id="lp-chart"></div>
+            </div>
+        </section>
+
+        <section class="lp-stage lp-full" data-stage="4">
+            <div class="lp-panel lp-panel-wide">
+                <p class="lp-kicker reveal">04 — Together</p>
+                <h2 class="reveal">Recombined</h2>
+                <p class="lp-lead reveal">Placeholder closing paragraph. Topics below loop continuously.</p>
+                <div class="lp-ticker" id="lp-ticker"></div>
+                <div class="lp-cta reveal">
+                    <a href="#/projects" class="lp-btn lp-btn-primary">Browse projects</a>
+                    <a href="#/docs" class="lp-btn">Read the docs</a>
+                </div>
+            </div>
+        </section>
+
+    </div>`;
+
+    renderLandingStats();
+    renderLandingChart();
+    renderLandingTicker();
+    setupLandingSections(app);
+    return setupLandingScroll();
+}
+
+// Stage 2 — counts derived from the real post manifest (the numbers are free;
+// only the surrounding copy is placeholder). Fills in asynchronously so the
+// landing page paints immediately.
+function renderLandingStats() {
+    const host = document.getElementById('lp-stats');
+    if (!host) return;
+    const cell = (label, value) =>
+        `<div class="lp-stat reveal"><span class="lp-stat-value">${value}</span>
+         <span class="lp-stat-label">${label}</span></div>`;
+    host.innerHTML = cell('Projects', '—') + cell('Posts', '—') + cell('Topics', '—');
+
+    ContentService.getPosts().then(posts => {
+        const live = posts.filter(p => p.type !== 'doc');
+        const projects = live.filter(p => postKind(p) === 'project').length;
+        const blog = live.filter(p => postKind(p) === 'blog').length;
+        const topics = ContentService.getCategories(live).length;
+        if (!document.getElementById('lp-stats')) return;   // route changed
+        host.innerHTML = cell('Projects', projects) + cell('Posts', blog) + cell('Topics', topics);
+        host.querySelectorAll('.reveal').forEach(el => el.classList.add('in-view'));
+    }).catch(() => { /* leave the em-dashes in place */ });
+}
+
+// Stage 3 — a small inline SVG bar chart. Hand-rolled: the site ships no
+// charting library and shouldn't start now (see CLAUDE.md).
+function renderLandingChart() {
+    const host = document.getElementById('lp-chart');
+    if (!host) return;
+    const bars = [
+        { label: 'Alpha',   value: 72 },
+        { label: 'Beta',    value: 45 },
+        { label: 'Gamma',   value: 88 },
+        { label: 'Delta',   value: 61 },
+        { label: 'Epsilon', value: 34 },
+    ];
+    const W = 460, H = 200, pad = 28, gap = 14;
+    const bw = (W - pad * 2 - gap * (bars.length - 1)) / bars.length;
+    const max = 100;
+
+    const rects = bars.map((b, i) => {
+        const h = (b.value / max) * (H - pad * 2);
+        const x = pad + i * (bw + gap);
+        const y = H - pad - h;
+        return `<rect class="lp-bar" x="${x}" y="${y}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}"
+                    rx="3" style="--bar-h:${h.toFixed(1)}px; --bar-i:${i}"></rect>
+                <text class="lp-bar-label" x="${(x + bw / 2).toFixed(1)}" y="${H - pad + 14}"
+                    text-anchor="middle">${b.label}</text>`;
+    }).join('');
+
+    host.innerHTML =
+        `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Placeholder chart with five sample values">
+            <line class="lp-axis" x1="${pad}" y1="${H - pad}" x2="${W - pad}" y2="${H - pad}"></line>
+            ${rects}
+         </svg>`;
+}
+
+// Stage 4 — the looping topic ticker. Two rows drifting in opposite
+// directions; the track is duplicated so the wrap point is invisible, and the
+// duplicate is hidden from assistive tech so topics aren't announced twice.
+// Motion is pure CSS (no rAF) so it never competes with the canvas.
+function renderLandingTicker() {
+    const host = document.getElementById('lp-ticker');
+    if (!host) return;
+    const topics = [
+        'Machine learning', 'Data engineering', 'Neural networks', 'Visualization',
+        'Python', 'Statistics', 'NLP', 'Computer vision', 'MLOps', 'Time series',
+    ];
+    const chip = (t) => `<span class="lp-chip">${Utils.escapeHtml(t)}</span>`;
+    const row = (items, dir) => `
+        <div class="lp-ticker-row lp-ticker-${dir}">
+            <div class="lp-ticker-track">
+                <div class="lp-ticker-group">${items.map(chip).join('')}</div>
+                <div class="lp-ticker-group" aria-hidden="true">${items.map(chip).join('')}</div>
+            </div>
+        </div>`;
+    const half = Math.ceil(topics.length / 2);
+    host.innerHTML = row(topics.slice(0, half), 'ltr') + row(topics.slice(half), 'rtl');
+}
+
+// Staggered entrance for anything marked .reveal.
+function setupLandingSections(app) {
+    const targets = app.querySelectorAll('.reveal');
+    targets.forEach((el, i) => el.style.setProperty('--reveal-i', i % 6));
+
+    if (!('IntersectionObserver' in window)) {
+        targets.forEach(el => el.classList.add('in-view'));
+        return;
+    }
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                e.target.classList.add('in-view');
+                io.unobserve(e.target);
+            }
+        });
+    }, { rootMargin: '0px 0px -12% 0px', threshold: 0.15 });
+
+    targets.forEach(el => io.observe(el));
+    Cleanup.add(() => io.disconnect());
+}
+
+// Maps scroll position onto the background's phase timeline. One passive
+// listener, coalesced into a single rAF — the canvas keeps its own loop and
+// we never write layout-triggering styles here.
+function setupLandingScroll() {
+    const stages = Array.from(document.querySelectorAll('.lp-stage'));
+    const bg = window.NeuralBG;
+    if (!stages.length || !bg || typeof bg.setPhase !== 'function') return;
+
+    let bounds = [];
+    const measure = () => {
+        const top = window.scrollY || window.pageYOffset;
+        bounds = stages.map(el => {
+            const r = el.getBoundingClientRect();
+            return { top: r.top + top, height: Math.max(1, r.height) };
+        });
+    };
+
+    const phaseFromScroll = () => {
+        if (!bounds.length) return 0;
+        // Reference line sits mid-viewport: a stage "owns" the phase while it
+        // covers the middle of the screen.
+        const ref = (window.scrollY || window.pageYOffset) + window.innerHeight * 0.5;
+        if (ref <= bounds[0].top) return 0;
+        for (let i = 0; i < bounds.length; i++) {
+            const b = bounds[i];
+            if (ref >= b.top && ref < b.top + b.height) {
+                return i + (ref - b.top) / b.height;
+            }
+        }
+        return LANDING_STAGES - 1;
+    };
+
+    let ticking = false;
+    const onScroll = () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+            ticking = false;
+            bg.setPhase(phaseFromScroll());
+        });
+    };
+
+    measure();
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', measure);
+
+    Cleanup.add(() => {
+        window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('resize', measure);
+        bg.reset();
+    });
+}
 
 // ── Sidebar ──
 
@@ -2725,7 +2981,8 @@ async function renderDocsPage({ slug } = {}) {
    Phase 7: Route Registration & Init
    ============================================ */
 
-Router.add('/', renderProjectsPage);
+Router.add('/', renderLandingPage);
+Router.add('/projects', renderProjectsPage);
 Router.add('/blog', renderBlogPage);
 Router.add('/post/:slug', renderPostPage);
 Router.add('/pdf/:slug', renderPdfPage);
