@@ -186,10 +186,10 @@ test('pagination renders when there are enough posts', async ({ page }) => {
 
 // ── Landing page ──
 
-test('landing page renders all five stages', async ({ page }) => {
+test('landing page renders all seven stages', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.lp-hero')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('.lp-stage')).toHaveCount(5);
+    await expect(page.locator('.lp-stage')).toHaveCount(7);
     await expect(page.locator('.lp-hero-title')).toBeVisible();
 });
 
@@ -241,7 +241,7 @@ test('scrolling drives the neural background phase', async ({ page }) => {
     const atBottom = await readPhase();
 
     expect(atBottom).toBeGreaterThan(atTop);
-    expect(atBottom).toBeLessThanOrEqual(4);
+    expect(atBottom).toBeLessThanOrEqual(6);
 });
 
 test('leaving the landing page resets the background phase', async ({ page }) => {

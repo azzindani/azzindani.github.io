@@ -1054,15 +1054,19 @@ function renderBlogPage()     { return renderFeedPage({ kindFilter: 'blog' }); }
 // The site's front door. Scroll position drives the shared neural background
 // through a sequence of phases (see NeuralBG.setPhase in js/neural-bg.js):
 //
-//   stage 0  hero        full mesh, centered      — title only
-//   stage 1  section 1   bio neurons, left lane   — content on the right
-//   stage 2  section 2   recombined, centered     — full-width content
-//   stage 3  section 3   ai neurons, right lane   — content on the left
-//   stage 4  section 4   recombined, centered     — full-width content
+//   stage 0  hero        full mesh, drifting        — title only
+//   stage 1  section 1   bio only, forms a BRAIN    — content on the right
+//   stage 2  section 2   recombined, drifting       — full-width content
+//   stage 3  section 3   ai only, forms a NETWORK   — content on the left
+//   stage 4  section 4   recombined, drifting       — full-width content
+//   stage 5  section 5   bio only, forms a FACE     — content on the right
+//   stage 6  section 6   recombined, drifting       — full-width content
 //
-// The mesh visibly tears at each transition rather than drifting, so the
-// split reads as a deliberate break. All copy here is placeholder.
-const LANDING_STAGES = 5;
+// On the forming stages the figure is centered and the copy sits to one side
+// of it; on the free stages the mesh is ambient behind full-width content.
+// The mesh tears apart at each transition rather than morphing one figure
+// into the next. All copy here is placeholder.
+const LANDING_STAGES = 7;
 
 function renderLandingPage() {
     Head.set({ title: '', description: CONFIG.siteDescription });
@@ -1130,10 +1134,37 @@ function renderLandingPage() {
 
         <section class="lp-stage lp-full" data-stage="4">
             <div class="lp-panel lp-panel-wide">
-                <p class="lp-kicker reveal">04 — Together</p>
-                <h2 class="reveal">Recombined</h2>
-                <p class="lp-lead reveal">Placeholder closing paragraph. Topics below loop continuously.</p>
+                <p class="lp-kicker reveal">04 — Combined</p>
+                <h2 class="reveal">Back in one piece</h2>
+                <p class="lp-lead reveal">Placeholder paragraph. Topics below loop continuously.</p>
                 <div class="lp-ticker" id="lp-ticker"></div>
+            </div>
+        </section>
+
+        <section class="lp-stage lp-split lp-split-right" data-stage="5">
+            <div class="lp-panel">
+                <p class="lp-kicker reveal">05 — Human</p>
+                <h2 class="reveal">A face, not a dataset</h2>
+                <p class="lp-lead reveal">Placeholder paragraph for the fifth section. The biological neurons
+                    gather into a profile on the left.</p>
+                <div class="lp-cards">
+                    <article class="lp-card reveal">
+                        <h3>Placeholder card four</h3>
+                        <p>Short dummy description. Replace with real copy.</p>
+                    </article>
+                    <article class="lp-card reveal">
+                        <h3>Placeholder card five</h3>
+                        <p>Short dummy description. Replace with real copy.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="lp-stage lp-full" data-stage="6">
+            <div class="lp-panel lp-panel-wide">
+                <p class="lp-kicker reveal">06 — Together</p>
+                <h2 class="reveal">Recombined</h2>
+                <p class="lp-lead reveal">Placeholder closing paragraph. Both halves of the mesh are back.</p>
                 <div class="lp-cta reveal">
                     <a href="#/projects" class="lp-btn lp-btn-primary">Browse projects</a>
                     <a href="#/docs" class="lp-btn">Read the docs</a>

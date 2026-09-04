@@ -92,13 +92,43 @@ route should appear in the navbar, also add a `<a class="nav-tab">` to
 stages, and **scroll position drives the shared background canvas** through a
 matching sequence of phases:
 
-| Stage | Mesh state                     | Content        |
-| ----- | ------------------------------ | -------------- |
-| 0     | full mesh, centered            | hero, title    |
-| 1     | bio only, pulled to left lane  | panel right    |
-| 2     | recombined, centered           | full width     |
-| 3     | ai only, pulled to right lane  | panel left     |
-| 4     | recombined, centered           | full width     |
+| Stage | Mesh state                          | Content     |
+| ----- | ----------------------------------- | ----------- |
+| 0     | full mesh, drifting                 | hero, title |
+| 1     | bio only, forms a **brain**         | panel right |
+| 2     | recombined, drifting                | full width  |
+| 3     | ai only, forms a **network**        | panel left  |
+| 4     | recombined, drifting                | full width  |
+| 5     | bio only, forms a **face profile**  | panel right |
+| 6     | recombined, drifting                | full width  |
+
+### Formations
+
+`PHASE_STOPS` entries carry a `shape` name. Organic shapes (`SHAPES`) are SVG
+paths authored in a 0–100 box and sampled at runtime via
+`SVGPathElement.getPointAtLength` — no build step, no data files. The
+structured network is generated from `NETWORK_LAYERS`.
+
+Adding a formation = add a `SHAPES` entry (or a generator) plus a
+`PHASE_STOPS` row and a matching `.lp-stage` section. Four things are load-
+bearing:
+
+- **Sample count must equal the member count.** Contour edges join
+  *consecutive sample points*, so an unoccupied point breaks the outline into
+  fragments. `getShapePoints(name, count)` caches per shape *and* count.
+- **Formations supply their own edges.** Without them the gathered neurons sit
+  inside each other's `CONNECTION_DIST` and proximity wiring fills the figure
+  with a web that hides the very outline being drawn. `formEdges` replaces
+  distance-based wiring entirely while a shape is held.
+- **`weights` allocates the point budget**, not path length alone. A long
+  smooth cranium arc needs far fewer points than a short stretch carrying
+  brow, nose and chin.
+- **Neurons with no slot fade out** (`formIdx < 0`), otherwise they drift
+  across the figure and blur it.
+
+Formation does not morph one figure into the next: it falls to zero
+mid-transition so the mesh scatters and re-gathers, which is what the rupture
+tears apart.
 
 The contract between the two files is one function:
 

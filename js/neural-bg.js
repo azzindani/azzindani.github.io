@@ -6,8 +6,8 @@
     'use strict';
 
     const CFG = {
-        NEURON_COUNT: 110,
-        NEURON_COUNT_MOBILE: 55,
+        NEURON_COUNT: 150,
+        NEURON_COUNT_MOBILE: 70,
         AI_RATIO: 0.45,
         CONNECTION_DIST: 220,
         MIN_NEIGHBORS: 3,
@@ -24,6 +24,7 @@
         BUBBLE_RISE: 0.45,
         // Wire (connection) visibility
         WIRE_ALPHA_BASE: 0.28,
+        WIRE_ALPHA_FORM: 0.72,    // wiring that draws a formation, not texture
         WIRE_ALPHA_ACTIVE: 0.85,
         WIRE_WIDTH_BASE: 0.7,
         WIRE_WIDTH_ACTIVE: 1.6,
@@ -51,6 +52,9 @@
         // aimless drifting; holding then breaking late is what makes each
         // split feel like a deliberate event.
         PHASE_HOLD: 0.55,
+        // Neurons shrink as they gather into a figure — at full size the
+        // somata and dendrites blur the silhouette into a smudge.
+        FORM_SCALE: 0.42,
         RUPTURE_DECAY: 0.045,     // per-frame decay of the rupture flash
         RUPTURE_IMPULSE: 2.6,     // velocity kick applied when the mesh snaps
         SEVER_FRAMES: 26,         // life of a cut wire's recoiling stub
@@ -66,18 +70,150 @@
     //   2 section 2   — recombined, centered
     //   3 section 3   — artificial neurons only, pulled into the right lane
     //   4 section 4   — recombined, centered
+    // `shape` pulls the visible neurons into a formation for that stage;
+    // null lets them drift freely. A stage that forms a shape centres it,
+    // so it carries no lane offset — the figure *is* the composition.
     const PHASE_STOPS = [
-        { bio: 1, ai: 1, bioX:  0,    aiX:  0    },
-        { bio: 1, ai: 0, bioX: -1,    aiX: -1.6  },
-        { bio: 1, ai: 1, bioX:  0,    aiX:  0    },
-        { bio: 0, ai: 1, bioX:  1.6,  aiX:  1    },
-        { bio: 1, ai: 1, bioX:  0,    aiX:  0    },
+        { bio: 1, ai: 1, bioX:  0,   aiX:  0,   shape: null },
+        { bio: 1, ai: 0, bioX: -1,   aiX: -1.6, shape: 'brain' },
+        { bio: 1, ai: 1, bioX:  0,   aiX:  0,   shape: null },
+        { bio: 0, ai: 1, bioX:  1.6, aiX:  1,   shape: 'network' },
+        { bio: 1, ai: 1, bioX:  0,   aiX:  0,   shape: null },
+        { bio: 1, ai: 0, bioX: -1,   aiX: -1.6, shape: 'face' },
+        { bio: 1, ai: 1, bioX:  0,   aiX:  0,   shape: null },
     ];
+
+    // ── Formation shapes ──
+    //
+    // Stages can pull their neurons into a recognisable figure instead of
+    // letting them drift. With ~50 neurons per kind on screen a filled shape
+    // is hopeless, but an *outline* reads instantly, so the organic shapes are
+    // authored as SVG paths sampled at runtime (no build step, no data files)
+    // and the structured ones are generated.
+    //
+    // All paths are authored in a 0–100 box and normalised to centred
+    // -1..1 units; `scale` then maps that onto the viewport.
+    const SHAPES = {
+        // Side profile of a brain, facing left. The two interior strokes are
+        // the sulcus folds — without them the silhouette reads as a bean.
+        brain: {
+            scale: 0.36,
+            paths: [
+                // Cerebrum: high domed top, blunt frontal lobe at the left,
+                // occipital taper at the right, flat underside.
+                'M 30 20 C 16 22, 8 32, 10 42 C 4 48, 6 58, 14 62 ' +
+                'C 16 70, 24 74, 32 72 C 38 78, 48 78, 54 74 ' +
+                'C 66 76, 76 70, 78 60 C 88 56, 90 42, 82 34 ' +
+                'C 84 20, 72 10, 58 12 C 46 6, 34 10, 30 20 Z',
+                // Cerebellum, tucked under the occipital end.
+                'M 62 72 C 74 78, 84 72, 84 64 C 84 58, 78 56, 74 58',
+                // Brain stem dropping from the underside.
+                'M 56 74 C 56 82, 54 88, 50 94',
+                // Sulci — the folds are what stop the silhouette reading as a
+                // bean. Two long ones following the cortical curve.
+                'M 34 24 C 46 28, 44 42, 30 46 C 40 52, 40 62, 30 66',
+                'M 60 18 C 70 26, 68 40, 58 44 C 66 50, 66 60, 58 64',
+            ],
+            weights: [1.5, 1, 0.8, 1, 1],
+        },
+        // Human head in profile, facing left: forehead, nose, lips, chin, jaw.
+        face: {
+            scale: 0.42,
+            paths: [
+                // The front profile, crown to jaw. Every landmark needs a hard
+                // excursion or the smoothing turns the whole thing into an egg:
+                // brow, a nose that juts well past the forehead line, the
+                // philtrum dip, both lips, then the chin.
+                'M 60 8 C 40 8, 28 22, 27 38 C 27 43, 25 45, 22 48 ' +   // forehead, brow
+                'C 18 52, 12 57, 12 60 C 12 63, 18 63, 21 64 ' +          // nose out and back
+                'C 19 66, 20 68, 22 69 C 26 70, 26 73, 22 75 ' +          // philtrum, upper lip
+                'C 26 77, 26 80, 23 82 ' +                                // lower lip
+                'C 27 86, 30 90, 36 92 C 42 94, 50 94, 56 92',            // chin and jaw
+                // Cranium and the back of the neck.
+                'M 60 8 C 80 10, 90 26, 89 46 C 88 68, 74 86, 56 92',
+            ],
+            // The profile carries every landmark; the cranium is one arc.
+            weights: [2.6, 1],
+        },
+    };
+
+    // A structured feed-forward network: evenly spaced columns of nodes with
+    // explicit layer-to-layer edges, so in this formation the mesh is wired
+    // like the diagram rather than by proximity.
+    const NETWORK_LAYERS = [5, 8, 8, 4];
+
+    function buildNetworkShape(spanX, spanY) {
+        const pts = [], edges = [];
+        const cols = NETWORK_LAYERS.length;
+        const layerIdx = [];
+        for (let c = 0; c < cols; c++) {
+            const count = NETWORK_LAYERS[c];
+            const x = (c / (cols - 1) - 0.5) * spanX;
+            const idxs = [];
+            for (let r = 0; r < count; r++) {
+                const y = count === 1 ? 0 : (r / (count - 1) - 0.5) * spanY;
+                idxs.push(pts.length);
+                pts.push({ x, y, z: 0 });
+            }
+            layerIdx.push(idxs);
+        }
+        for (let c = 0; c < cols - 1; c++) {
+            for (const a of layerIdx[c]) {
+                for (const b of layerIdx[c + 1]) edges.push([a, b]);
+            }
+        }
+        return { pts, edges };
+    }
+
+    // Sample points evenly along a shape's paths, allocating each path a share
+    // of the budget proportional to its length so long strokes aren't
+    // under-sampled. Uses SVGPathElement measurement on a detached node.
+    function sampleShape(def, count) {
+        const NS = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(NS, 'svg');
+        const els = def.paths.map(d => {
+            const el = document.createElementNS(NS, 'path');
+            el.setAttribute('d', d);
+            svg.appendChild(el);
+            return el;
+        });
+        let lengths, weighted, total;
+        try {
+            lengths = els.map(el => el.getTotalLength());
+        } catch (e) {
+            return null;      // no SVG geometry support — stage stays free-form
+        }
+        // Budget is shared by length × weight: a long smooth cranium arc needs
+        // far fewer points than a short stretch carrying brow, nose and chin.
+        const w = def.weights || [];
+        weighted = lengths.map((len, i) => len * (w[i] === undefined ? 1 : w[i]));
+        total = weighted.reduce((a, b) => a + b, 0);
+        if (!total) return null;
+
+        // Points are emitted per path, and consecutive points of the same
+        // path are wired together. Without these edges the formed neurons sit
+        // inside each other's connection radius and the proximity wiring fills
+        // the figure with a web that hides the very outline being drawn.
+        const pts = [], edges = [];
+        for (let i = 0; i < els.length; i++) {
+            const share = Math.max(2, Math.round(count * (weighted[i] / total)));
+            const start = pts.length;
+            for (let s = 0; s < share; s++) {
+                const p = els[i].getPointAtLength(lengths[i] * (s / share));
+                // 0–100 box → centred -1..1.
+                pts.push({ x: (p.x - 50) / 50, y: (p.y - 50) / 50, z: 0 });
+                if (s > 0) edges.push([pts.length - 2, pts.length - 1]);
+            }
+            // Closed subpaths join back to their first point.
+            if (/[zZ]\s*$/.test(def.paths[i].trim())) edges.push([pts.length - 1, start]);
+        }
+        return { pts, edges };
+    }
 
     // Scroll positions (in phase units) at which the mesh visibly snaps apart.
     // These sit just past PHASE_HOLD, so the tear fires exactly when the stage
     // stops holding and starts morphing into the next one.
-    const RUPTURE_POINTS = [0.58, 1.58, 2.58, 3.58];
+    const RUPTURE_POINTS = [0.58, 1.58, 2.58, 3.58, 4.58, 5.58];
 
     let canvas, ctx, W, H, dpr;
     let neurons = [], connections = [], signals = [], numberBubbles = [];
@@ -90,6 +226,12 @@
     let bioPresence = 1, aiPresence = 1;
     let rupture = 0;
     let severed = [];
+    // Formation state: which figure the visible neurons are gathering into,
+    // how strongly, and the sampled target points per shape (keyed by name,
+    // cleared on resize).
+    let shapeCache = {};
+    let formAmount = 0, formShapeName = null, formEdges = null, formMemberCount = 0;
+    let formShrink = 1;      // radius/neurite multiplier, 1 = free, FORM_SCALE = formed
     // Reused per-frame buffers — avoid per-frame array allocations (a major
     // GC pressure source that shows up as jitter).
     let projSx = null, projSy = null, projS = null;
@@ -192,6 +334,11 @@
             // (which still operates on the untouched x).
             presence: 1,
             laneX: 0,
+            // Display position (drift + lane + formation), refreshed each
+            // frame in updatePhase. Seeded here so the first connection build
+            // has real coordinates to work with.
+            wx: 0, wy: 0, wz: 0,
+            formIdx: -1,      // slot in the active formation, -1 = not taking part
             pulsePhase: rand(0, Math.PI * 2),
             rotation: rand(0, Math.PI * 2),    // for AI hex orientation
             soma: null,
@@ -340,7 +487,9 @@
 
         // Spawn neurons
         for (let i = 0; i < neuronCount; i++) {
-            neurons.push(createNeuron());
+            const n = createNeuron();
+            n.wx = n.x; n.wy = n.y; n.wz = n.z;
+            neurons.push(n);
         }
 
         // Pre-allocate reusable per-frame buffers.
@@ -369,6 +518,10 @@
     function resize() {
         W = window.innerWidth;
         H = window.innerHeight;
+        // Shapes are sampled in viewport units, so they must be rebuilt and
+        // re-assigned when the viewport changes.
+        shapeCache = {};
+        if (formShapeName) assignFormationTargets(formShapeName);
         canvas.width = W * dpr;
         canvas.height = H * dpr;
         canvas.style.width = W + 'px';
@@ -395,12 +548,54 @@
         // bioX/aiX are authored as multiples of the lane width; values beyond
         // ±1 push the departing kind off toward the exit distance instead.
         const toPx = (v) => (Math.abs(v) <= 1 ? v * lane : Math.sign(v) * exit);
+        // Formation does not morph one figure directly into the next — it
+        // falls to zero mid-transition so the mesh scatters and re-gathers.
+        // That gives the rupture something to tear apart and keeps two
+        // unrelated silhouettes from sliding through each other.
+        const formShape = f < 0.5 ? a.shape : b.shape;
+        const formAmt = f < 0.5
+            ? (a.shape ? 1 - f * 2 : 0)
+            : (b.shape ? f * 2 - 1 : 0);
+
         return {
             bio:  a.bio + (b.bio - a.bio) * f,
             ai:   a.ai  + (b.ai  - a.ai)  * f,
             bioX: toPx(a.bioX) + (toPx(b.bioX) - toPx(a.bioX)) * f,
             aiX:  toPx(a.aiX)  + (toPx(b.aiX)  - toPx(a.aiX))  * f,
+            shape: formShape,
+            form: Math.max(0, Math.min(1, formAmt)),
         };
+    }
+
+    // Resolve (and memoise) a shape's target points at the current viewport
+    // size, sampled to exactly `count` points so that every point receives a
+    // neuron. That matters: the contour edges join consecutive sample points,
+    // so an unoccupied point would break the outline into fragments.
+    // Sampled once per shape per member-count per resize, never per frame.
+    function getShapePoints(name, count) {
+        if (!name) return null;
+        const key = name + ':' + (count || 0);
+        if (shapeCache[key]) return shapeCache[key];
+
+        const span = Math.min(W, H);
+        let entry = null;
+        if (name === 'network') {
+            // Must fit the half of the viewport the copy is not using.
+            const net = buildNetworkShape(Math.min(W * 0.32, 440), Math.min(H * 0.5, 460));
+            entry = { pts: net.pts, edges: net.edges };
+        } else {
+            const def = SHAPES[name];
+            if (!def) return null;
+            const raw = sampleShape(def, Math.max(24, count || neuronCount));
+            if (!raw) return null;
+            const k = span * def.scale;
+            entry = {
+                pts: raw.pts.map(p => ({ x: p.x * k, y: p.y * k, z: 0 })),
+                edges: raw.edges,
+            };
+        }
+        shapeCache[key] = entry;
+        return entry;
     }
 
     // The mesh "breaks": cut every cross-kind wire into recoiling stubs, kick
@@ -454,15 +649,79 @@
         aiPresence  += (t.ai  - aiPresence)  * e;
 
         for (const n of neurons) {
-            const tp = n.kind === 'ai' ? t.ai  : t.bio;
+            let tp = n.kind === 'ai' ? t.ai  : t.bio;
             const tx = n.kind === 'ai' ? t.aiX : t.bioX;
+            // A visible neuron with no slot in the active figure would drift
+            // across it and blur the silhouette, so it fades for the duration.
+            if (t.form > 0 && n.formIdx < 0) tp *= 1 - t.form;
             n.presence += (tp - n.presence) * e;
             n.laneX    += (tx - n.laneX)    * e;
         }
 
+        // Formation strength eases; the shape identity switches only while the
+        // mesh is scattered (form ≈ 0), so a figure never snaps into another.
+        formAmount += (t.form - formAmount) * e;
+        if (t.shape !== formShapeName && (formAmount < 0.02 || t.form > formAmount)) {
+            formShapeName = t.shape;
+            assignFormationTargets(formShapeName);
+        }
+
+        // World-space display positions: free drift, slid by the lane offset,
+        // then pulled toward the formation. Everything downstream (projection,
+        // connections, signals) reads these rather than the raw x/y/z, so the
+        // wiring follows what is actually on screen.
+        const shape = formAmount > 0.001 ? getShapePoints(formShapeName, formMemberCount) : null;
+        formEdges = (shape && shape.edges && formAmount > 0.35) ? shape.edges : null;
+        const k = formAmount;
+        for (const n of neurons) {
+            const fx = n.x + n.laneX, fy = n.y, fz = n.z;
+            if (shape && n.formIdx >= 0) {
+                const tgt = shape.pts[n.formIdx % shape.pts.length];
+                const tx = tgt.x + n.laneX;   // figure assembles inside the lane
+                n.wx = fx + (tx - fx) * k;
+                n.wy = fy + (tgt.y - fy) * k;
+                n.wz = fz + (tgt.z - fz) * k;
+            } else {
+                n.wx = fx; n.wy = fy; n.wz = fz;
+            }
+        }
+
+        formShrink = 1 - (1 - CFG.FORM_SCALE) * formAmount;
+
         if (rupture > 0) rupture = Math.max(0, rupture - CFG.RUPTURE_DECAY);
-        for (let k = severed.length - 1; k >= 0; k--) {
-            if (--severed[k].life <= 0) severed.splice(k, 1);
+        for (let k2 = severed.length - 1; k2 >= 0; k2--) {
+            if (--severed[k2].life <= 0) severed.splice(k2, 1);
+        }
+    }
+
+    // Hand out formation slots. Only the neurons that are actually visible in
+    // this stage take part, and they are matched to targets in angular order
+    // around the centre so the swarm converges without threading through
+    // itself. Runs once per shape change, never per frame.
+    function assignFormationTargets(name) {
+        for (const n of neurons) n.formIdx = -1;
+
+        const stop = PHASE_STOPS[Math.round(phase)] || PHASE_STOPS[0];
+        const members = neurons.filter(n =>
+            (n.kind === 'ai' ? stop.ai : stop.bio) > 0.5);
+        if (!members.length) return;
+
+        formMemberCount = members.length;
+        const shape = getShapePoints(name, formMemberCount);
+        if (!shape) return;
+
+        // Neurons take slots in the shape's own point order. Sorting them by
+        // angle first keeps the swarm from threading through itself on the way
+        // in, without disturbing the order of the targets themselves.
+        members.sort((p, q) => Math.atan2(p.y, p.x) - Math.atan2(q.y, q.x));
+
+        const total = shape.pts.length;
+        for (let m = 0; m < members.length; m++) {
+            // One neuron per point while points last; any surplus (the
+            // structured network has far fewer nodes than neurons) sits out —
+            // stacking neurons on a node only thickens it, and leaving them
+            // adrift smears the figure. They fade instead, see updatePhase.
+            members[m].formIdx = m < total ? m : -1;
         }
     }
 
@@ -501,6 +760,29 @@
 
     function buildConnections() {
         connections.length = 0;
+
+        // In a structured formation the wiring is the diagram's, not
+        // proximity's: every node of one layer joins every node of the next.
+        if (formEdges) {
+            const slot = new Map();
+            for (let i = 0; i < neurons.length; i++) {
+                if (neurons[i].formIdx >= 0) slot.set(neurons[i].formIdx, i);
+            }
+            for (const [from, to] of formEdges) {
+                const i = slot.get(from), j = slot.get(to);
+                if (i === undefined || j === undefined) continue;
+                const a = neurons[i], b = neurons[j];
+                const dx = a.wx - b.wx, dy = a.wy - b.wy, dz = a.wz - b.wz;
+                connections.push({
+                    i, j,
+                    dist: Math.sqrt(dx * dx + dy * dy + dz * dz),
+                    type: _connTypeOf(a, b),
+                    structured: true,
+                });
+            }
+            return;
+        }
+
         const dist2 = CFG.CONNECTION_DIST * CFG.CONNECTION_DIST;
         const N = neurons.length;
         // Bitset-style flat buffer for "is pair connected" — much cheaper than
@@ -518,11 +800,11 @@
         for (let i = 0; i < N; i++) {
             const a = neurons[i];
             if (a.presence < minP) continue;
-            const ax = a.x, ay = a.y, az = a.z;
+            const ax = a.wx, ay = a.wy, az = a.wz;
             for (let j = i + 1; j < N; j++) {
                 const b = neurons[j];
                 if (!allowed(a, b)) continue;
-                const dx = ax - b.x, dy = ay - b.y, dz = az - b.z;
+                const dx = ax - b.wx, dy = ay - b.wy, dz = az - b.wz;
                 const d2 = dx * dx + dy * dy + dz * dz;
                 if (d2 < dist2) {
                     seen[i * N + j] = 1;
@@ -547,7 +829,7 @@
                 if (seen[lo * N + hi]) continue;
                 const b = neurons[j];
                 if (!allowed(a, b)) continue;
-                const dx = a.x - b.x, dy = a.y - b.y, dz = a.z - b.z;
+                const dx = a.wx - b.wx, dy = a.wy - b.wy, dz = a.wz - b.wz;
                 cand.push(j, Math.sqrt(dx * dx + dy * dy + dz * dz));
             }
             // Pair-sort: cand is [idx, dist, idx, dist, …].
@@ -576,11 +858,10 @@
             const a = neurons[sig.fromIdx], b = neurons[sig.toIdx];
             if (a && b) {
                 const t = sig.progress;
-                const alx = a.x + a.laneX, blx = b.x + b.laneX;
                 sig.trail.push({
-                    x: alx + (blx - alx) * t,
-                    y: a.y + (b.y - a.y) * t,
-                    z: a.z + (b.z - a.z) * t,
+                    x: a.wx + (b.wx - a.wx) * t,
+                    y: a.wy + (b.wy - a.wy) * t,
+                    z: a.wz + (b.wz - a.wz) * t,
                 });
                 if (sig.trail.length > CFG.TRAIL_LENGTH) sig.trail.shift();
             }
@@ -712,11 +993,12 @@
         // object allocation).
         for (let i = 0; i < N; i++) {
             const n = neurons[i];
-            const s = CFG.PERSPECTIVE / (CFG.PERSPECTIVE + n.z);
-            // laneX slides the neuron sideways for the current phase without
-            // touching n.x, so drift and edge-wrapping stay untouched.
-            projSx[i] = (n.x + n.laneX) * s + W / 2;
-            projSy[i] = n.y * s + H / 2;
+            const s = CFG.PERSPECTIVE / (CFG.PERSPECTIVE + n.wz);
+            // wx/wy/wz are the display positions computed in updatePhase:
+            // drift + lane offset + formation pull. n.x/y/z stay untouched so
+            // drift and edge-wrapping keep working underneath.
+            projSx[i] = n.wx * s + W / 2;
+            projSy[i] = n.wy * s + H / 2;
             projS[i]  = s;
         }
 
@@ -725,9 +1007,9 @@
         // input, far faster than a fresh map+sort each frame.
         for (let i = 1; i < N; i++) {
             const cur = zSortedIdx[i];
-            const cz = neurons[cur].z;
+            const cz = neurons[cur].wz;
             let j = i - 1;
-            while (j >= 0 && neurons[zSortedIdx[j]].z > cz) {
+            while (j >= 0 && neurons[zSortedIdx[j]].wz > cz) {
                 zSortedIdx[j + 1] = zSortedIdx[j];
                 j--;
             }
@@ -754,12 +1036,19 @@
             const sax = projSx[i], say = projSy[i], sa = projS[i];
             const sbx = projSx[j], sby = projSy[j], sb = projS[j];
             const avgScale = (sa + sb) * 0.5;
-            const distFalloff = Math.max(0.15, 1 - conn.dist / CFG.CONNECTION_DIST);
+            const distFalloff = conn.structured
+                ? 1                                  // diagram wiring, not proximity
+                : Math.max(0.15, 1 - conn.dist / CFG.CONNECTION_DIST);
             const lo = i < j ? i : j, hi = i < j ? j : i;
             const isActive = activeWires[lo * 10000 + hi] === 1;
 
-            const baseAlpha = (isActive ? CFG.WIRE_ALPHA_ACTIVE : CFG.WIRE_ALPHA_BASE)
-                * distFalloff * avgScale * Math.min(a.presence, b.presence);
+            // A formation's own wiring *is* the picture, so it is drawn far
+            // stronger than ambient proximity wiring, which is only texture.
+            const wireBase = conn.structured
+                ? (isActive ? CFG.WIRE_ALPHA_ACTIVE : CFG.WIRE_ALPHA_FORM)
+                : (isActive ? CFG.WIRE_ALPHA_ACTIVE : CFG.WIRE_ALPHA_BASE);
+            const baseAlpha = wireBase * distFalloff * avgScale
+                * Math.min(a.presence, b.presence);
             if (baseAlpha < 0.04) continue;       // skip near-invisible wires
             const baseWidth = (isActive ? CFG.WIRE_WIDTH_ACTIVE : CFG.WIRE_WIDTH_BASE) * avgScale;
 
@@ -832,10 +1121,9 @@
             const a = neurons[sig.fromIdx], b = neurons[sig.toIdx];
             if (!a || !b) continue;
             const t = sig.progress;
-            const alx = a.x + a.laneX, blx = b.x + b.laneX;
-            const sx = alx + (blx - alx) * t;
-            const sy = a.y + (b.y - a.y) * t;
-            const sz = a.z + (b.z - a.z) * t;
+            const sx = a.wx + (b.wx - a.wx) * t;
+            const sy = a.wy + (b.wy - a.wy) * t;
+            const sz = a.wz + (b.wz - a.wz) * t;
             const ps = CFG.PERSPECTIVE / (CFG.PERSPECTIVE + sz);
             const px = sx * ps + W / 2;
             const py = sy * ps + H / 2;
@@ -900,7 +1188,7 @@
                 arrival = left;
                 pulse += 0.6 * left;
             }
-            const r = n.radius * ps * pulse;
+            const r = n.radius * ps * pulse * formShrink;
             const alpha = Math.min(ps * 0.8, 0.85) * n.presence;
             if (r < 0.3 || alpha < 0.02) continue;
 
@@ -1021,7 +1309,7 @@
         // ── Dendrites (drawn first so soma sits on top of their roots) ──
         if (n.dendrites) {
             for (const d of n.dendrites) {
-                const baseLen = d.length * ps * pulse;
+                const baseLen = d.length * ps * pulse * formShrink;
                 const cosA = Math.cos(d.angle), sinA = Math.sin(d.angle);
                 // Tangent unit perpendicular for curving control point
                 const perpX = -sinA, perpY = cosA;
@@ -1057,7 +1345,7 @@
                     const bx = mt * mt * sx + 2 * mt * t * cpX + t * t * endX;
                     const by = mt * mt * sy + 2 * mt * t * cpY + t * t * endY;
                     const childAngle = d.angle + b.angleOff;
-                    const cLen = b.length * ps * pulse;
+                    const cLen = b.length * ps * pulse * formShrink;
                     const childCosA = Math.cos(childAngle), childSinA = Math.sin(childAngle);
                     const childPerpX = -childSinA, childPerpY = childCosA;
                     const cEndX = bx + childCosA * cLen;
@@ -1078,7 +1366,7 @@
         // ── Axon (single long curved line + terminal bulb) ──
         if (n.axon) {
             const a = n.axon;
-            const len = a.length * ps * pulse;
+            const len = a.length * ps * pulse * formShrink;
             const cosA = Math.cos(a.angle), sinA = Math.sin(a.angle);
             const perpX = -sinA, perpY = cosA;
             const endX = sx + cosA * len;
