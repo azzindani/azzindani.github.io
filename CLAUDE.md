@@ -95,11 +95,11 @@ matching sequence of phases:
 | Stage | Mesh state                          | Content     |
 | ----- | ----------------------------------- | ----------- |
 | 0     | full mesh, drifting                 | hero, title |
-| 1     | bio only, forms a **brain**         | panel right |
+| 1     | bio only, forms **head + brain, profile** | panel right |
 | 2     | recombined, drifting                | full width  |
 | 3     | ai only, forms a **network**        | panel left  |
 | 4     | recombined, drifting                | full width  |
-| 5     | bio only, forms a **face profile**  | panel right |
+| 5     | bio only, forms **head + brain, front**   | panel right |
 | 6     | recombined, drifting                | full width  |
 
 ### Formations
@@ -125,6 +125,10 @@ bearing:
   brow, nose and chin.
 - **Neurons with no slot fade out** (`formIdx < 0`), otherwise they drift
   across the figure and blur it.
+- **`glow` holds the head dim and the brain bright.** The head composites are
+  a mask over live tissue, and that contrast is the whole read — a uniformly
+  lit outline just looks like a wire head. Values are per-path multipliers on
+  neuron and wire alpha, applied only in proportion to `formAmount`.
 
 Formation does not morph one figure into the next: it falls to zero
 mid-transition so the mesh scatters and re-gathers, which is what the rupture

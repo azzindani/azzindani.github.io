@@ -75,11 +75,11 @@
     // so it carries no lane offset — the figure *is* the composition.
     const PHASE_STOPS = [
         { bio: 1, ai: 1, bioX:  0,   aiX:  0,   shape: null },
-        { bio: 1, ai: 0, bioX: -1,   aiX: -1.6, shape: 'brain' },
+        { bio: 1, ai: 0, bioX: -1,   aiX: -1.6, shape: 'headSide' },
         { bio: 1, ai: 1, bioX:  0,   aiX:  0,   shape: null },
         { bio: 0, ai: 1, bioX:  1.6, aiX:  1,   shape: 'network' },
         { bio: 1, ai: 1, bioX:  0,   aiX:  0,   shape: null },
-        { bio: 1, ai: 0, bioX: -1,   aiX: -1.6, shape: 'face' },
+        { bio: 1, ai: 0, bioX: -1,   aiX: -1.6, shape: 'headFront' },
         { bio: 1, ai: 1, bioX:  0,   aiX:  0,   shape: null },
     ];
 
@@ -96,6 +96,64 @@
     const SHAPES = {
         // Side profile of a brain, facing left. The two interior strokes are
         // the sulcus folds — without them the silhouette reads as a bean.
+        // ── Head composites ──
+        // The head is a container, not a separate figure: its silhouette is
+        // held dim while the brain inside it burns bright (see `glow`), which
+        // is what makes the skull read as a mask over the live tissue.
+
+        // Profile, facing left. Head outline + brain seated in the cranium.
+        headSide: {
+            scale: 0.46,
+            paths: [
+                // Front profile: brow, a nose that juts past the forehead
+                // line, philtrum, both lips, chin, jaw.
+                'M 60 8 C 40 8, 28 22, 27 38 C 27 43, 25 45, 22 48 ' +
+                'C 18 52, 12 57, 12 60 C 12 63, 18 63, 21 64 ' +
+                'C 19 66, 20 68, 22 69 C 26 70, 26 73, 22 75 ' +
+                'C 26 77, 26 80, 23 82 ' +
+                'C 27 86, 30 90, 36 92 C 42 94, 50 94, 56 92',
+                // Cranium and back of neck.
+                'M 60 8 C 80 10, 90 26, 89 46 C 88 68, 74 86, 56 92',
+                // Cerebrum, filling the skull vault down to about ear level.
+                'M 48 23 C 41 24, 37 29, 38 34 C 35 38, 36 43, 40 45 ' +
+                'C 41 49, 45 50, 48 49 C 51 53, 56 53, 60 50 ' +
+                'C 66 52, 71 48, 72 43 C 77 40, 78 34, 75 30 ' +
+                'C 76 23, 70 18, 62 19 C 56 15, 51 18, 48 23 Z',
+                // Sulci.
+                'M 51 25 C 58 28, 57 35, 48 38 C 55 42, 55 48, 48 50',
+                'M 66 24 C 72 29, 71 37, 65 39 C 70 43, 70 49, 65 52',
+            ],
+            weights: [2.2, 1, 1.6, 1.1, 1.1],
+            glow:    [0.5, 0.4, 1.9, 1.7, 1.7],
+        },
+
+        // Facing the viewer. Head, ears and shoulders as the mask; both
+        // hemispheres and the longitudinal fissure inside.
+        headFront: {
+            scale: 0.46,
+            paths: [
+                // Skull and jaw, tapering to the chin.
+                'M 50 6 C 31 6, 21 20, 21 38 C 21 50, 25 60, 32 68 ' +
+                'C 38 75, 44 79, 50 80 C 56 79, 62 75, 68 68 ' +
+                'C 75 60, 79 50, 79 38 C 79 20, 69 6, 50 6 Z',
+                'M 21 36 C 16 34, 14 40, 17 45 C 18 48, 20 48, 21 47',   // left ear
+                'M 79 36 C 84 34, 86 40, 83 45 C 82 48, 80 48, 79 47',   // right ear
+                'M 41 78 C 41 85, 40 89, 34 91 C 24 94, 16 96, 12 100',  // neck / shoulder
+                'M 59 78 C 59 85, 60 89, 66 91 C 76 94, 84 96, 88 100',
+                // Hemispheres, closed along the bottom by the temporal arc —
+                // without it the two lobes hang open and the brain reads as
+                // a pair of brackets rather than a mass.
+                'M 50 13 C 37 12, 29 20, 29 29 C 29 38, 35 45, 44 47 C 47 48, 49 48, 50 48',
+                'M 50 13 C 63 12, 71 20, 71 29 C 71 38, 65 45, 56 47 C 53 48, 51 48, 50 48',
+                'M 34 41 C 40 47, 46 49, 50 49 C 54 49, 60 47, 66 41',
+                'M 50 13 C 50 24, 50 36, 50 48',                          // longitudinal fissure
+                'M 36 22 C 43 26, 43 34, 36 39',                          // gyri
+                'M 64 22 C 57 26, 57 34, 64 39',
+            ],
+            weights: [1.9, 0.7, 0.7, 0.8, 0.8, 1.5, 1.5, 1.1, 1.0, 0.9, 0.9],
+            glow:    [0.5, 0.4, 0.4, 0.35, 0.35, 1.9, 1.9, 1.8, 1.7, 1.6, 1.6],
+        },
+
         brain: {
             scale: 0.36,
             paths: [
@@ -186,6 +244,7 @@
         // Budget is shared by length × weight: a long smooth cranium arc needs
         // far fewer points than a short stretch carrying brow, nose and chin.
         const w = def.weights || [];
+        const g = def.glow || [];
         weighted = lengths.map((len, i) => len * (w[i] === undefined ? 1 : w[i]));
         total = weighted.reduce((a, b) => a + b, 0);
         if (!total) return null;
@@ -201,7 +260,10 @@
             for (let s = 0; s < share; s++) {
                 const p = els[i].getPointAtLength(lengths[i] * (s / share));
                 // 0–100 box → centred -1..1.
-                pts.push({ x: (p.x - 50) / 50, y: (p.y - 50) / 50, z: 0 });
+                pts.push({
+                    x: (p.x - 50) / 50, y: (p.y - 50) / 50, z: 0,
+                    g: g[i] === undefined ? 1 : g[i],
+                });
                 if (s > 0) edges.push([pts.length - 2, pts.length - 1]);
             }
             // Closed subpaths join back to their first point.
@@ -339,6 +401,7 @@
             // has real coordinates to work with.
             wx: 0, wy: 0, wz: 0,
             formIdx: -1,      // slot in the active formation, -1 = not taking part
+            formGlow: 1,      // per-path brightness within a formation
             pulsePhase: rand(0, Math.PI * 2),
             rotation: rand(0, Math.PI * 2),    // for AI hex orientation
             soma: null,
@@ -590,7 +653,7 @@
             if (!raw) return null;
             const k = span * def.scale;
             entry = {
-                pts: raw.pts.map(p => ({ x: p.x * k, y: p.y * k, z: 0 })),
+                pts: raw.pts.map(p => ({ x: p.x * k, y: p.y * k, z: 0, g: p.g })),
                 edges: raw.edges,
             };
         }
@@ -722,6 +785,7 @@
             // stacking neurons on a node only thickens it, and leaving them
             // adrift smears the figure. They fade instead, see updatePhase.
             members[m].formIdx = m < total ? m : -1;
+            members[m].formGlow = m < total ? (shape.pts[m].g || 1) : 1;
         }
     }
 
@@ -1047,8 +1111,9 @@
             const wireBase = conn.structured
                 ? (isActive ? CFG.WIRE_ALPHA_ACTIVE : CFG.WIRE_ALPHA_FORM)
                 : (isActive ? CFG.WIRE_ALPHA_ACTIVE : CFG.WIRE_ALPHA_BASE);
+            const wireGlow = 1 + (Math.min(a.formGlow, b.formGlow) - 1) * formAmount;
             const baseAlpha = wireBase * distFalloff * avgScale
-                * Math.min(a.presence, b.presence);
+                * Math.min(a.presence, b.presence) * wireGlow;
             if (baseAlpha < 0.04) continue;       // skip near-invisible wires
             const baseWidth = (isActive ? CFG.WIRE_WIDTH_ACTIVE : CFG.WIRE_WIDTH_BASE) * avgScale;
 
@@ -1169,7 +1234,7 @@
             }
 
             // Core
-            ctx.fillStyle = rgba(color, 0.95 * ps);
+            ctx.fillStyle = rgba(color, Math.min(1, 0.95 * ps));
             ctx.beginPath();
             ctx.arc(px, py, r, 0, Math.PI * 2);
             ctx.fill();
@@ -1189,7 +1254,8 @@
                 pulse += 0.6 * left;
             }
             const r = n.radius * ps * pulse * formShrink;
-            const alpha = Math.min(ps * 0.8, 0.85) * n.presence;
+            const glow = 1 + (n.formGlow - 1) * formAmount;
+            const alpha = Math.min(ps * 0.8, 0.85) * n.presence * glow;
             if (r < 0.3 || alpha < 0.02) continue;
 
             // Arrival ring (fades outward)
