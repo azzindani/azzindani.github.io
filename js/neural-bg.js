@@ -211,31 +211,6 @@
         // are distributed away from it.
         const axonAngle = rand(0, Math.PI * 2);
 
-        // Soma outline, precomputed as offsets in radius units.
-        //
-        // Three things keep it from looking machined:
-        //  - spline control points, not polygon corners (see traceSmoothClosed)
-        //  - jittered angles, so lobes don't sit at regular intervals
-        //  - a wide wobble range, because midpoint smoothing halves the
-        //    amplitude of whatever variation it is given
-        // The body is then elongated along the axon axis: real somata are
-        // ovoid or pear-shaped, tapering toward the axon hillock, never round.
-        const somaPoints = subtype === 'pyramidal' ? 9 : 7;
-        const elong = subtype === 'pyramidal' ? rand(1.2, 1.5) : rand(1.05, 1.25);
-        const axCos = Math.cos(axonAngle), axSin = Math.sin(axonAngle);
-        n.soma = [];
-        for (let i = 0; i < somaPoints; i++) {
-            const a = (i / somaPoints) * Math.PI * 2 + rand(-0.2, 0.2);
-            const rr = radius * rand(0.72, 1.3);
-            // Local point, then stretched along the axon axis and rotated back.
-            const lx = Math.cos(a) * rr * elong;
-            const ly = Math.sin(a) * rr;
-            n.soma.push({
-                dx: lx * axCos - ly * axSin,
-                dy: lx * axSin + ly * axCos,
-            });
-        }
-
         // Nucleus inside soma, slightly off-center.
         n.nucleus = {
             offX: rand(-0.15, 0.15) * radius,
@@ -286,7 +261,71 @@
             terminals: Math.random() < 0.5 ? Math.floor(rand(1, 3)) : 0,
         };
 
+        n.soma = buildSoma(n, radius, subtype, axonAngle);
         return n;
+    }
+
+    // ── Soma outline ──
+    //
+    // Built last, because its shape is a consequence of where the neurites
+    // leave the cell. A real multipolar soma is not an oval: the membrane
+    // flares outward into each dendrite root and falls away *inward* between
+    // adjacent roots, so the outline is a scalloped rounded star. Deriving it
+    // from the neurite angles is what makes dendrites look grown out of the
+    // body rather than pasted onto it.
+    //
+    // Vertices are placed where they matter instead of at uniform angles: a
+    // peak on every neurite, a valley in every gap between neighbours. Wide
+    // gaps get extra valley points so the spline doesn't sag across them.
+    // Returns offsets in pixels, ready to scale — no trigonometry per frame.
+    function buildSoma(n, radius, subtype, axonAngle) {
+        const PEAK = subtype === 'pyramidal' ? 1.16 : 1.1;   // bulge at a root
+        const VALLEY = subtype === 'pyramidal' ? 0.66 : 0.72; // dip between roots
+        const MAX_GAP = 1.15;                                 // rad before subdividing
+
+        // Collect neurite directions, axon included — the axon hillock is a
+        // flare too, usually a slightly narrower one.
+        const roots = [{ angle: axonAngle, weight: 0.9 }];
+        for (const d of n.dendrites) roots.push({ angle: d.angle, weight: 1 });
+
+        // Normalise to [0, 2π) and order around the cell.
+        for (const r of roots) {
+            r.angle = ((r.angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+        }
+        roots.sort((a, b) => a.angle - b.angle);
+
+        const verts = [];
+        const push = (angle, rr) => {
+            verts.push({ dx: Math.cos(angle) * rr, dy: Math.sin(angle) * rr });
+        };
+
+        for (let i = 0; i < roots.length; i++) {
+            const cur = roots[i];
+            const next = roots[(i + 1) % roots.length];
+
+            // Peak at this root. Two dendrites leaving close together share one
+            // broad flare rather than each getting a spike, so the bulge is
+            // damped when a neighbour is very near.
+            let gapPrev = cur.angle - roots[(i - 1 + roots.length) % roots.length].angle;
+            if (gapPrev < 0) gapPrev += Math.PI * 2;
+            const crowd = Math.min(1, gapPrev / 0.5);
+            push(cur.angle, radius * (1 + (PEAK - 1) * cur.weight * crowd) * rand(0.94, 1.06));
+
+            // Valley(s) spanning the gap to the next root.
+            let gap = next.angle - cur.angle;
+            if (gap <= 0) gap += Math.PI * 2;
+            const steps = Math.max(1, Math.ceil(gap / MAX_GAP));
+            for (let s = 1; s <= steps; s++) {
+                const t = s / (steps + 1);
+                // Dip hardest mid-gap; a wide gap stays fuller so the cell
+                // doesn't collapse into a thin sliver on its axon side.
+                const depth = Math.sin(t * Math.PI);
+                const fullness = Math.min(1, 1.6 / gap);
+                const rr = radius * (1 - (1 - VALLEY) * depth * fullness) * rand(0.95, 1.05);
+                push(cur.angle + gap * t, rr);
+            }
+        }
+        return verts;
     }
 
     // ── Init ──
