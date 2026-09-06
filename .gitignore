@@ -14,3 +14,16 @@ tools/inspect-post.js
 tools/inspect-dark.js
 tools/screenshot.js
 tools/shot-*.js
+
+# Design references for the head figures in js/neural-bg.js. They are INPUTS —
+# the shapes were measured off them offline and the result is static path data
+# in SHAPES. Kept locally, never published: the site is served straight from
+# the repo, and these are third-party stock images.
+Low-Poly-Female-Head-Wireframe.svg
+image-*.png
+
+# Third-party stock artwork — reference only, never served. The site is
+# published straight from this repo, so committing these would redistribute
+# them. Extracted coordinates live in js/neural-bg.js; the sources stay local.
+vecteezy_*.svg
+Wireframe-Head.svg

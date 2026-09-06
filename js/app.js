@@ -805,7 +805,11 @@ function renderFeedItem(post) {
 
     // Type badge
     let typeBadge = '';
-    if (post.type === 'pdf') typeBadge = '<span class="feed-type-badge feed-type-pdf">PDF</span>';
+    if (post.type === 'pdf') {
+        typeBadge = isImageMedia(post.pdf)
+            ? '<span class="feed-type-badge feed-type-pdf">IMAGE</span>'
+            : '<span class="feed-type-badge feed-type-pdf">PDF</span>';
+    }
     else if (post.type === 'repo') typeBadge = '<span class="feed-type-badge feed-type-repo">Repo</span>';
 
     // Repo link
@@ -865,8 +869,13 @@ async function renderFeedPage(opts = {}) {
     const app = document.getElementById('app');
     const allPosts = await ContentService.getPosts();
     // Apply kind filter at the top so featured / counts / categories all reflect the page.
+    // Docs are excluded from every feed, not just the unfiltered one. postKind
+    // has no case for them — a doc carries no `kind` and is not a repo, so it
+    // falls through to 'blog' — and they were showing up on /blog as untyped,
+    // unbadged rows that link nowhere useful.
     const kindMatch = (p) => {
-        if (!kindFilter) return p.type !== 'doc';        // home/blog/projects all hide docs
+        if (p.type === 'doc') return false;              // docs live under /docs
+        if (!kindFilter) return true;
         if (kindFilter === 'project') return postKind(p) === 'project';
         if (kindFilter === 'blog')    return postKind(p) === 'blog';
         return true;
@@ -1122,12 +1131,18 @@ function renderLandingPage() {
             </div>
         </section>
 
-        <section class="lp-stage lp-split lp-split-left" data-stage="3">
-            <div class="lp-panel">
-                <p class="lp-kicker reveal">03 — Artificial</p>
-                <h2 class="reveal">The machine side</h2>
-                <p class="lp-lead reveal">Placeholder paragraph for the third section. The artificial neurons
-                    have pulled to the right, so this side is clear.</p>
+        <!-- Stage 3 is the one stage that is not a split. The network spans
+             the full viewport width as a band (NET_FIT_W in js/neural-bg.js)
+             and the copy sits underneath it, so nothing covers the input
+             layers and the left-to-right flow reads end to end. -->
+        <section class="lp-stage lp-band" data-stage="3">
+            <div class="lp-panel lp-panel-band">
+                <div class="lp-band-copy">
+                    <p class="lp-kicker reveal">03 — Artificial</p>
+                    <h2 class="reveal">The machine side</h2>
+                    <p class="lp-lead reveal">Placeholder paragraph for the third section. The artificial
+                        neurons have spread into a feed-forward network across the screen above.</p>
+                </div>
                 <div class="lp-chart reveal" id="lp-chart"></div>
             </div>
         </section>
@@ -1173,6 +1188,11 @@ function renderLandingPage() {
         </section>
 
     </div>`;
+
+    // The background wash is landing-only, so it rides the route the same way
+    // .has-toc does — added here, removed by Cleanup on the way out.
+    document.body.classList.add('on-landing');
+    Cleanup.add(() => document.body.classList.remove('on-landing'));
 
     renderLandingStats();
     renderLandingChart();
@@ -1328,9 +1348,121 @@ function setupLandingScroll() {
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', measure);
 
+    // ── Settling ──
+    // Align the nearest stage to the middle of the screen once scrolling has
+    // STOPPED. CSS `scroll-snap-type` does this natively and was tried first,
+    // but it re-snaps on every discrete wheel event, and a mouse wheel sends
+    // exactly that: measured here, 1800px of wheel input travelled 1649px
+    // BACKWARD and never left the first stage, where the same input with
+    // snapping off scrolled a clean 1856px. Acting after the gesture ends
+    // instead leaves the scroll alone while it is moving.
+    //
+    // Centre, not top: phaseFromScroll reads the stage under the mid-viewport
+    // line, so a centred stage rests at phase i + 0.5 — inside PHASE_HOLD,
+    // where the formation is fully held rather than half-morphed.
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    // How far the settle is willing to reach, as a fraction of the gap between
+    // two stage centres. Past that the stop was deliberate and is left alone.
+    // The two are not equal: carrying someone the rest of the way they were
+    // already going reads as the gesture completing, while pulling them back
+    // reads as the page taking the scroll away from them, so the backward
+    // reach is half the forward one.
+    const SETTLE_REACH_FWD = 0.4;
+    const SETTLE_REACH_BACK = 0.2;
+    const SETTLE_MIN_MS = 260;
+    const SETTLE_MAX_MS = 600;
+    let settleTimer = 0, settleRaf = 0, settling = false;
+
+    const stopPositions = () => {
+        const half = window.innerHeight / 2;
+        const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        // Each stage centred, plus the end of the document. The end has to be
+        // one of them — without it the last stage pulls back from the bottom
+        // and the footer can never be reached.
+        const stops = bounds.map(b => Math.max(0, Math.min(max, b.top + b.height / 2 - half)));
+        stops.push(max);
+        return stops;
+    };
+
+    // Ease the page to `target` ourselves rather than with `behavior: 'smooth'`.
+    // Smooth scrolling picks its own duration, so the peak speed rises with the
+    // distance — a 240px correction measured 105px per frame, which is what
+    // read as the page being yanked.
+    //
+    // The curve is a quintic smoothstep, not the obvious cosine. Both start and
+    // end at zero velocity, but the cosine's *acceleration* jumps from 0 to
+    // pi^2*d/2T^2 the instant it starts and drops to nothing the instant it
+    // stops; you feel that as a tick at each end of an otherwise smooth move.
+    // 6t^5 - 15t^4 + 10t^3 has zero first and second derivative at both ends,
+    // so the motion is picked up and set down rather than switched on. It peaks
+    // 19% higher than the cosine for the same duration, which is what the
+    // longer SETTLE_MIN_MS/SETTLE_MAX_MS pay for.
+    //
+    // This rAF is transient and ends itself; it is not a second render loop.
+    const glideTo = (from, target) => {
+        const dist = target - from;
+        const ms = Math.min(SETTLE_MAX_MS, Math.max(SETTLE_MIN_MS, SETTLE_MIN_MS + Math.abs(dist) * 0.8));
+        const t0 = performance.now();
+        settling = true;
+        const step = () => {
+            if (!settling) return;
+            const t = Math.min(1, (performance.now() - t0) / ms);
+            const e = t * t * t * (t * (t * 6 - 15) + 10);
+            // 'instant' is not optional: html carries scroll-behavior: smooth,
+            // so a bare scrollTo would hand each of our frames back to the
+            // browser's own easing and the two would compound.
+            window.scrollTo({ top: from + dist * e, behavior: 'instant' });
+            // Drive the phase from here too. Left to the scroll listener it
+            // costs a frame to schedule and another for the canvas to draw it,
+            // so through the whole glide the mesh trails the page it belongs to.
+            bg.setPhase(phaseFromScroll());
+            if (t < 1) settleRaf = requestAnimationFrame(step);
+            else { settleRaf = 0; settling = false; }
+        };
+        settleRaf = requestAnimationFrame(step);
+    };
+
+    const settle = () => {
+        if (reduceMotion.matches || bounds.length < 2) return;
+        const y = window.scrollY || window.pageYOffset;
+        const stops = stopPositions();
+        let target = y, best = Infinity;
+        for (const s of stops) {
+            const d = Math.abs(s - y);
+            if (d < best) { best = d; target = s; }
+        }
+        // A stop the user chose, well away from any stage centre, stays put.
+        const spacing = Math.abs(stops[1] - stops[0]) || window.innerHeight;
+        const reach = spacing * (target >= y ? SETTLE_REACH_FWD : SETTLE_REACH_BACK);
+        if (best < 4 || best > reach) return;
+        glideTo(y, target);
+    };
+
+    const scheduleSettle = () => {
+        if (settling) return;              // our own glide fires scroll events
+        clearTimeout(settleTimer);
+        settleTimer = setTimeout(settle, 180);
+    };
+    // Any fresh input cancels a settle in flight, so it can never fight a user
+    // who has started scrolling again.
+    const cancelSettle = () => {
+        settling = false;
+        if (settleRaf) { cancelAnimationFrame(settleRaf); settleRaf = 0; }
+        clearTimeout(settleTimer);
+    };
+    window.addEventListener('wheel', cancelSettle, { passive: true });
+    window.addEventListener('touchstart', cancelSettle, { passive: true });
+    window.addEventListener('keydown', cancelSettle, { passive: true });
+    window.addEventListener('scroll', scheduleSettle, { passive: true });
+
     Cleanup.add(() => {
         window.removeEventListener('scroll', onScroll);
         window.removeEventListener('resize', measure);
+        window.removeEventListener('scroll', scheduleSettle);
+        window.removeEventListener('wheel', cancelSettle);
+        window.removeEventListener('touchstart', cancelSettle);
+        window.removeEventListener('keydown', cancelSettle);
+        cancelSettle();
         bg.reset();
     });
 }
@@ -1619,6 +1751,16 @@ async function mountCarousel(pdfDoc, stage, opts = {}) {
 
 // ── Inline PDF Carousel ──
 
+// A "pdf" post may point at a single image instead. It takes the same slot in
+// the feed and the same #/pdf/:slug route, it is just one page rather than
+// many — pdf.js would reject the file outright, so both render sites branch
+// before they load the library.
+const MEDIA_IMAGE_EXT = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif', '.svg'];
+function isImageMedia(src) {
+    const clean = String(src || '').split('?')[0].split('#')[0].toLowerCase();
+    return MEDIA_IMAGE_EXT.some(ext => clean.endsWith(ext));
+}
+
 function initInlinePdfs() {
     document.querySelectorAll('.inline-pdf:not([data-init])').forEach(container => {
         container.setAttribute('data-init', '1');
@@ -1629,6 +1771,17 @@ function initInlinePdfs() {
         const observer = new IntersectionObserver(async (entries) => {
             if (!entries[0].isIntersecting) return;
             observer.disconnect();
+
+            // One page, no carousel, no library.
+            if (isImageMedia(pdfPath)) {
+                container.innerHTML = `
+                    <div class="inline-pdf-stage inline-pdf-single">
+                        <img src="${Utils.escapeHtml(pdfPath)}" alt="" loading="lazy">
+                    </div>
+                    <a href="#/pdf/${slug}" class="inline-pdf-fullscreen" title="Fullscreen">&#x26F6;</a>`;
+                container.style.position = 'relative';
+                return;
+            }
 
             try {
                 const pdfjsLib = await LibLoader.loadPdfJs();
@@ -1954,6 +2107,22 @@ async function renderPdfPage({ slug }) {
     if (!post || !post.pdf) {
         app.innerHTML = `<div class="pdf-viewer"><a href="#/" class="post-back">${ICON.chevronLeft} Back</a>
             <div class="pdf-error"><h3>PDF not found</h3></div></div>`;
+        return;
+    }
+
+    // Single-image media: same header and download, no pager and no thumbnails.
+    if (isImageMedia(post.pdf)) {
+        app.innerHTML = `
+        <div class="pdf-viewer">
+            <div class="pdf-viewer-header">
+                <a href="#/" class="post-back">${ICON.chevronLeft} Back</a>
+                <h2 class="pdf-viewer-title">${Utils.escapeHtml(post.title)}</h2>
+                <a href="${post.pdf}" download class="btn btn-sm btn-secondary">${ICON.arrowDown} Download</a>
+            </div>
+            <div class="pdf-stage pdf-stage-image">
+                <img src="${Utils.escapeHtml(post.pdf)}" alt="${Utils.escapeHtml(post.title)}">
+            </div>
+        </div>`;
         return;
     }
 

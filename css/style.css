@@ -48,6 +48,13 @@ a .icon, button .icon { stroke-width: 2.2; }
     --color-bg: #ffffff;
     --color-bg-secondary: #f6f8fa;
     --color-bg-tertiary: #f0f2f5;
+    /* Landing wash (see #bg-wash). Light vignettes — the ground sinks toward
+       the edges; dark does the opposite and lifts toward the middle, so the
+       roles swap between the themes rather than the geometry changing. The
+       literals live here with every other theme colour; aliasing
+       --color-bg-tertiary instead only spanned 1.1% and did nothing. */
+    --wash-core: #fdfeff;
+    --wash-rim: #e2e8f1;
     --color-surface: #ffffff;
     --color-surface-rgb: 255, 255, 255;
     --color-border: #e1e4e8;
@@ -72,6 +79,8 @@ a .icon, button .icon { stroke-width: 2.2; }
     --color-bg: #0b1020;
     --color-bg-secondary: #0f172a;
     --color-bg-tertiary: #1e293b;
+    --wash-core: #1b2740;
+    --wash-rim: #080c18;
     --color-surface: #131a30;
     --color-surface-rgb: 19, 26, 48;
     --color-border: #2a3552;
@@ -97,6 +106,8 @@ a .icon, button .icon { stroke-width: 2.2; }
         --color-bg: #0b1020;
         --color-bg-secondary: #0f172a;
         --color-bg-tertiary: #1e293b;
+        --wash-core: #1b2740;
+        --wash-rim: #080c18;
         --color-surface: #131a30;
         --color-surface-rgb: 19, 26, 48;
         --color-border: #2a3552;
@@ -164,6 +175,40 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
 /* ============================================
    Neural Network Background Canvas
    ============================================ */
+/* ── Landing background wash ──
+   Fixed to the VIEWPORT, not the document: the landing page is ~6300px tall,
+   so a gradient on <body> is a 6300px ramp — invisible within any one screen
+   while quietly making the top and bottom of the page different colours, which
+   is precisely the premise ("each stage is one screen") the scroll system is
+   built on. Fixed, every stage gets the same field.
+
+   It sits behind the canvas (which clears with clearRect and is therefore
+   fully transparent) at z-index -1. body is static and makes no stacking
+   context, so -1 lands it behind #neural-bg's 0 and .landing's 1 but still in
+   front of the root background.
+
+   The range is the whole design. The mesh measures 27-33 mean contrast out of
+   255 — 11-13% — and the ghost field is far fainter than that, wire alpha
+   0.05-0.08. Past about 4% the wash stops reading as depth and starts
+   competing with the graphic it is supposed to seat. The opacity is what holds
+   it there: at 1 the dark pair alone spans 15/255 (6%). */
+#bg-wash {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    /* The ending shape has to land NEAR the corners. At 125% 95% the ellipse's
+       horizontal radius was 1800px against the 720px to the edge, so the
+       viewport only ever saw the first 40% of the ramp and the whole thing
+       measured 1.1%. */
+    background: radial-gradient(78% 68% at 50% 38%,
+        var(--wash-core) 0%, var(--wash-core) 28%, var(--wash-rim) 100%);
+    /* Only the landing page. The feed, post and docs routes are reading
+       surfaces, and a gradient behind body text is noise. */
+    display: none;
+}
+body.on-landing #bg-wash { display: block; }
+
 #neural-bg {
     position: fixed;
     top: 0; left: 0;
@@ -771,6 +816,12 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
     user-select: none;
 }
 .inline-pdf-stage.dragging { cursor: grabbing; }
+.inline-pdf-single {
+    cursor: default;
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border-light);
+}
+.inline-pdf-single img { width: 100%; height: auto; display: block; }
 .pdf-track {
     display: flex;
     align-items: stretch;
@@ -1318,6 +1369,21 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
     user-select: none;
 }
 .pdf-stage.dragging { cursor: grabbing; }
+/* A media post whose file is a single image rather than a PDF: no track, no
+   pager, nothing to drag. See isImageMedia() in js/app.js. */
+.pdf-stage-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    cursor: default;
+}
+.pdf-stage-image img {
+    max-width: 100%;
+    width: auto; height: auto;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+}
 .pdf-stage .pdf-track { gap: 20px; }
 .pdf-stage .pdf-slide { box-shadow: var(--shadow-lg); }
 
@@ -2129,7 +2195,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; }
    ============================================ */
 @media print {
     body { background: #fff !important; color: #000 !important; }
-    #neural-bg, .navbar, .footer, .back-to-top, .reading-progress,
+    #bg-wash, #neural-bg, .navbar, .footer, .back-to-top, .reading-progress,
     .feed-sidebar, .toc, .post-actions, .post-prev-next, .related-posts,
     .post-back, .skip-link, .toast-container, .featured-row,
     .feed-filter-bar, .docs-sidebar { display: none !important; }
@@ -2909,21 +2975,66 @@ body.cmd-open { overflow: hidden; }
     z-index: 1;
 }
 
+/* A full screen each, because the stages settle to the centre of the viewport:
+   at 82vh a settled stage still showed 80px of both neighbours and the stop did
+   not read as a stop at all. `min-height`, so content taller than the viewport still grows
+   the stage — the scroll→phase mapping is proportional to each stage's own
+   height, so an oversized stage simply owns a longer scroll range. */
 .lp-stage {
     min-height: 100vh;
     display: flex;
     align-items: center;
-    padding: 80px 24px;
+    padding: 76px 32px;
     box-sizing: border-box;
 }
 
-/* Split stages: content takes one half, the neurons take the other. */
+/* Split stages: content takes one half, the neurons take the other.
+   The panel is held inside a centred measure rather than pinned to the
+   viewport edge — flush against the edge it reads as flung to one side, and
+   on a wide screen it drifts further out while the figure (offset by a
+   fraction of W) drifts the other way, pulling the composition apart. */
+/* The container is 1440 rather than 1280 and the floor 3.2vw rather than 4vw,
+   which grows the panel OUTWARD only. The panel's inner edge lands on 50% of
+   the viewport whatever this value is — the padding is symmetric, so
+   (100% - pad) - 0.5 * (100% - 2*pad) collapses to exactly 50% — so widening
+   the container never moves the centre line or eats the figure's gutter. */
+.lp-split, .lp-split-left, .lp-full, .lp-band {
+    padding-left: max(3.2vw, calc((100% - 1440px) / 2));
+    padding-right: max(3.2vw, calc((100% - 1440px) / 2));
+}
 .lp-split { justify-content: flex-end; }          /* content right, mesh left */
 .lp-split-left { justify-content: flex-start; }   /* content left, mesh right */
 .lp-full { justify-content: center; }
 
+/* ── Stage 3: the network band ──
+   The only stage that is not a split. The network spans the full viewport
+   width and the copy sits under it, so the panel never covers the input
+   layers and the left-to-right flow reads end to end. The panel is anchored
+   to the bottom and NET_CENTER_Y (js/neural-bg.js) is set to centre the band
+   in what is left above it. */
+.lp-band { justify-content: center; align-items: flex-end; }
+.lp-panel-band {
+    width: min(96%, 1040px);
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 34px;
+    align-items: center;
+}
+/* The copy is its own query container: the panel is 1040 wide but the column
+   the type sits in is half that, and sizing off the panel would put a 42px
+   heading in a 500px column. */
+.lp-band-copy { container-type: inline-size; }
+.lp-panel-band .lp-lead { margin-bottom: 0; }
+.lp-panel-band .lp-chart { min-width: 0; }
+
 .lp-panel {
-    width: min(46%, 560px);
+    /* Exactly half the content box, which lands the panel's inner edge on the
+       viewport centre at every width — the outer padding is symmetric, so half
+       of what is left inside it is half the screen. Don't cap this in px: a cap
+       that bites stops the edge reaching the centre and the alignment goes with
+       it. The container's own max-width is what keeps the panel from growing
+       without limit. */
+    width: 50%;
     /* The mesh is still visible behind the panel — a translucent surface keeps
        type legible without hiding the animation entirely. */
     background: rgba(var(--color-surface-rgb), 0.72);
@@ -2931,42 +3042,70 @@ body.cmd-open { overflow: hidden; }
     -webkit-backdrop-filter: blur(14px);
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-lg);
-    padding: 40px;
-}
-.lp-panel-wide { width: min(92%, 900px); text-align: center; }
+    padding: 52px 56px;
 
+    /* Panel type is sized off the PANEL, not the window. The split panel is
+       frozen at 640px on every viewport past 1280 (the container's max-width
+       is what bounds it) while .lp-panel-wide is 820, so a vw-based heading
+       gave the same words 22 characters per line in one and 31 in the other;
+       and below 1280 the panel shrank to 506 while the heading barely moved,
+       down to 18 cpl. cqi tracks the column the type actually lives in. */
+    container-type: inline-size;
+}
+.lp-panel-wide { width: min(92%, 960px); text-align: center; }
+
+/* A floor, not a height. Panel fill ran from 76% of the viewport on stage 1 to
+   28% on stage 6, so the page lurched between crowded and empty; the boxes
+   whose copy is short grow to meet the rest instead. vh rather than px so the
+   short-viewport tiers below do not have to restate it. */
+.lp-split .lp-panel, .lp-split-left .lp-panel { min-height: min(62vh, 620px); }
+.lp-full .lp-panel-wide { min-height: min(46vh, 460px); }
+.lp-panel { display: flex; flex-direction: column; justify-content: center; }
+/* Two classes deep on purpose: .lp-panel's own `width: 50%` and `display`
+   are declared after the band block and would otherwise win on source order. */
+.lp-band .lp-panel-band { display: grid; width: min(96%, 1040px); }
+
+/* Every size below is clamp(rem, cqi, rem): rem at both ends so a reader's
+   browser font-size setting still scales the page, cqi in between so the type
+   follows its column. A bare rem does neither — .lp-lead was pinned at
+   1.14rem from 1920 down to 390, where it was the largest body text on the
+   page; px would additionally ignore the reader. */
 .lp-panel h2 {
-    font-size: clamp(1.7rem, 3.4vw, 2.5rem);
-    line-height: 1.15;
-    margin: 0 0 16px;
+    font-size: clamp(1.9rem, 0.5rem + 5.4cqi, 2.6rem);
+    line-height: 1.12;
+    margin: 0 0 18px;
     letter-spacing: -0.02em;
 }
-.lp-kicker {
+/* One mono label, one size. These were 0.84rem/0.14em and 0.8rem/0.18em
+   doing the same job two stages apart. */
+.lp-kicker, .lp-eyebrow {
     font-family: var(--font-mono);
-    font-size: 0.78rem;
-    letter-spacing: 0.14em;
+    font-size: 0.82rem;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--color-primary);
-    margin: 0 0 12px;
+    margin: 0 0 14px;
 }
+.lp-kicker { color: var(--color-primary); }
 .lp-lead {
     color: var(--color-text-secondary);
-    font-size: 1.02rem;
-    line-height: 1.65;
-    margin: 0 0 28px;
+    font-size: clamp(1rem, 0.96rem + 0.34cqi, 1.14rem);
+    line-height: 1.62;
+    margin: 0 0 22px;
+    /* The measure, in ch so it tracks the font size rather than a guess about
+       the column. It bites in exactly the two places the column outgrows the
+       type: the centred wide panels, which ran to 82 characters — the worst
+       case for a long measure, since the eye loses the start of the next line
+       and there is no ragged edge to find it by — and the tablet range below
+       900px, where the split panel goes full width. The desktop split panel
+       already sits just inside it and is untouched. */
+    max-width: 50ch;
 }
+.lp-panel-wide .lp-lead { margin-left: auto; margin-right: auto; }
 
 /* ── Hero ── */
-.lp-hero { justify-content: center; text-align: center; position: relative; }
+.lp-hero { min-height: 100vh; justify-content: center; text-align: center; position: relative; }
 .lp-hero-inner { max-width: 780px; }
-.lp-eyebrow {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-    margin: 0 0 20px;
-}
+.lp-eyebrow { color: var(--color-text-muted); margin-bottom: 20px; }
 .lp-hero-title {
     font-size: clamp(2.4rem, 7vw, 4.6rem);
     line-height: 1.05;
@@ -2978,7 +3117,10 @@ body.cmd-open { overflow: hidden; }
     font-size: clamp(1rem, 1.6vw, 1.18rem);
     line-height: 1.6;
     color: var(--color-text-secondary);
-    max-width: 560px;
+    /* 560px was set against the largest size this clamps to. Once the font
+       floors at 1rem the same box is 77 characters, so the ch term takes
+       over on the way down and the px cap holds the top. */
+    max-width: min(560px, 48ch);
     margin: 0 auto 36px;
 }
 .lp-hero-actions, .lp-cta {
@@ -3035,15 +3177,21 @@ body.cmd-open { overflow: hidden; }
 /* ── Stage components ── */
 .lp-cards { display: grid; gap: 14px; }
 .lp-card {
-    padding: 20px 22px;
+    padding: 20px 24px;
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-md);
     background: rgba(var(--color-surface-rgb), 0.6);
     transition: transform var(--transition), border-color var(--transition);
 }
 .lp-card:hover { transform: translateY(-3px); border-color: var(--color-primary); }
-.lp-card h3 { margin: 0 0 6px; font-size: 1.03rem; }
-.lp-card p { margin: 0; color: var(--color-text-secondary); font-size: 0.92rem; line-height: 1.55; }
+/* The card title and the section lead were 1.16rem and 1.14rem — the same
+   size in the same panel, so the title carried no step. */
+.lp-card h3 { margin: 0 0 6px; font-size: clamp(1.08rem, 1.02rem + 0.32cqi, 1.24rem); }
+.lp-card p {
+    margin: 0; color: var(--color-text-secondary); line-height: 1.55;
+    font-size: clamp(0.95rem, 0.92rem + 0.16cqi, 1.05rem);
+    max-width: 60ch;   /* same reason as .lp-lead; bites once the panel is 720+ */
+}
 
 .lp-stats {
     display: grid;
@@ -3052,14 +3200,16 @@ body.cmd-open { overflow: hidden; }
     margin-top: 12px;
 }
 .lp-stat {
-    padding: 24px 12px;
+    padding: 28px 14px;
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-md);
     background: rgba(var(--color-surface-rgb), 0.6);
 }
 .lp-stat-value {
     display: block;
-    font-size: clamp(1.9rem, 4vw, 2.8rem);
+    /* Capped at 2.8rem this tied with the heading above it (44.8 against 46.4)
+       and stage 2 had nothing leading it. */
+    font-size: clamp(1.7rem, 3vw, 2.3rem);
     font-weight: 800;
     letter-spacing: -0.03em;
     color: var(--color-primary);
@@ -3125,6 +3275,19 @@ body.cmd-open { overflow: hidden; }
     color: var(--color-text-secondary);
 }
 
+/* ── Section settling ──
+   There is deliberately no `scroll-snap-type` here. It was implemented, felt
+   right on a trackpad, and had to be removed: CSS scroll snap re-snaps on every
+   discrete wheel event, and a mouse wheel sends exactly that — unphased,
+   one-off events. Measured on this page, 1800px of wheel input produced 1649px
+   of BACKWARD travel and never left the first stage, against 1856px of clean
+   progress with snapping off. `scroll-behavior: auto` made no difference; the
+   pull is the snap itself.
+
+   setupLandingScroll() in js/app.js does it instead, by animating to the
+   nearest stage once scrolling has actually stopped. Same alignment, no fight
+   during the gesture. */
+
 /* ── Reveal-on-scroll ── */
 .reveal {
     opacity: 0;
@@ -3137,10 +3300,43 @@ body.cmd-open { overflow: hidden; }
 /* ── Responsive ──
    Below the split breakpoint the mesh has nowhere to evacuate to, so panels
    go full width and sit on a more opaque surface instead. */
+/* Short viewports — the height axis, which the width breakpoint never sees.
+   A 1366x768 or 1152x720 laptop is wide enough to keep the split layout but
+   has 130-180px less height than the desktop the panels were sized on, and a
+   split stage that outgrows 100vh stops being centreable: the settle lands it
+   in the middle and cuts the kicker off the top and the last card off the
+   bottom at once. Measured at 1152x720 the stage 1 panel alone was 106% of
+   the viewport. Padding is the cheapest 40px to give back. */
+@media (max-height: 820px) {
+    .lp-stage { padding-top: 56px; padding-bottom: 56px; }
+    .lp-panel { padding: 34px 40px; }
+    .lp-panel h2 { margin-bottom: 14px; }
+    .lp-lead { margin-bottom: 18px; }
+    .lp-card { padding: 16px 22px; }
+}
+
+/* Second tier: 720-high laptops, where stage 1 still ran 18px past the
+   viewport on the tier above. Padding again, not type — the cards are the
+   61% of that panel and shrinking their copy to fit is the wrong trade when
+   there is 28px of box to give back. 56px stays as the top padding
+   throughout: it is exactly --nav-height, and below it a full panel would
+   run under the navbar. */
+@media (max-height: 760px) {
+    .lp-panel { padding: 28px 34px; }
+    .lp-cards { gap: 12px; }
+    .lp-card { padding: 14px 20px; }
+}
+
 @media (max-width: 900px) {
     .lp-stage { min-height: auto; padding: 72px 18px; }
-    .lp-split, .lp-split-left, .lp-full { justify-content: center; }
+    .lp-split, .lp-split-left, .lp-full, .lp-band { justify-content: center; }
+    .lp-band { align-items: center; }
     .lp-panel, .lp-panel-wide { width: 100%; max-width: 640px; padding: 28px 22px; }
+    .lp-panel-band { grid-template-columns: 1fr; gap: 20px; }
+    .lp-panel-band .lp-lead { margin-bottom: 4px; }
+    /* The min-heights are a desktop balance device; stacked full-width panels
+       set their own rhythm and a floor here only adds dead space. */
+    .lp-split .lp-panel, .lp-split-left .lp-panel, .lp-full .lp-panel-wide { min-height: 0; }
     .lp-panel { background: rgba(var(--color-surface-rgb), 0.88); }
     .lp-hero { min-height: 88vh; }
     .lp-stats { grid-template-columns: 1fr; gap: 12px; }

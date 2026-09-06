@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Portfolio">
+  <title>Portfolio</title>
+  <!--
+    A fragment of the site's own subject: a hub cell and its links.
+    Drawn for 16px first, which is the only size that really matters — four
+    circles and four links, one line weight, nothing that needs 64px to read.
+    An earlier version had five nodes and thinner links and turned to mush at
+    tab size. Node sizes differ so it reads as a mesh, not a share icon.
+    SVG favicons follow the browser's colour scheme, so the ink flips.
+  -->
+  <style>
+    .link { stroke: #2563eb; stroke-width: 2.9; stroke-linecap: round; fill: none; }
+    .node { fill: #2563eb; }
+    .hub  { fill: #1d4ed8; }
+    @media (prefers-color-scheme: dark) {
+      .link { stroke: #8ab0ff; }
+      .node { fill: #8ab0ff; }
+      .hub  { fill: #cfdEff; }
+    }
+  </style>
+  <g class="link">
+    <path d="M12.4 19.4 L6.6 6.6"/>
+    <path d="M12.4 19.4 L25.4 8"/>
+    <path d="M12.4 19.4 L25.4 25.6"/>
+    <path d="M25.4 8 L25.4 25.6"/>
+  </g>
+  <circle class="node" cx="6.6" cy="6.6" r="3.3"/>
+  <circle class="node" cx="25.4" cy="8" r="3.3"/>
+  <circle class="node" cx="25.4" cy="25.6" r="3.3"/>
+  <circle class="hub" cx="12.4" cy="19.4" r="5.2"/>
+</svg>

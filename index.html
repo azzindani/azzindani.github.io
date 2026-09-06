@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Personal portfolio and blog - Data Science, ML & AI projects">
     <meta name="author" content="Azzindani">
+    <!-- Icons. The SVG is the real one and follows the browser's colour scheme;
+         the PNG is for Safari, which ignores SVG favicons. Paths are relative so
+         they resolve the same on a project page as at the domain root, and the
+         hash router never touches them. -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
     <meta name="theme-color" content="#2563eb" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0b1020" media="(prefers-color-scheme: dark)">
     <meta property="og:type" content="website">
@@ -36,6 +43,10 @@
 <body>
     <!-- Skip link for keyboard / screen-reader users -->
     <a href="#app" class="skip-link">Skip to content</a>
+
+    <!-- Landing background wash. Sits behind the canvas; shown only while the
+         landing route is mounted (body.on-landing). See css/style.css. -->
+    <div id="bg-wash" aria-hidden="true"></div>
 
     <!-- Neural network background canvas -->
     <canvas id="neural-bg" aria-hidden="true"></canvas>
