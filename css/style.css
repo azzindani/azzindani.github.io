@@ -252,7 +252,7 @@ body.on-landing #bg-wash { display: block; }
     white-space: nowrap;
 }
 .nav-logo:hover { color: var(--color-text); }
-.logo-icon { color: var(--color-primary); font-size: 1.2rem; }
+.logo-icon { color: var(--color-primary); width: 1.15em; height: 1.15em; flex: none; }
 .logo-text { }
 
 .nav-search {

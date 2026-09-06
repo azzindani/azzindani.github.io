@@ -1,12 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>Portfolio</title>
-  <subtitle>Personal portfolio and blog — Data Science, ML &amp; AI projects</subtitle>
+  <title>Azzindani</title>
+  <subtitle>Data science and AI — Indonesian legal AI datasets and models, office automation, and computer vision projects.</subtitle>
   <link href="https://azzindani.github.io/feed.xml" rel="self"/>
   <link href="https://azzindani.github.io/"/>
-  <updated>2026-08-14T00:00:00.000Z</updated>
+  <updated>2026-09-06T00:00:00.000Z</updated>
   <id>https://azzindani.github.io/</id>
   <author><name>Azzindani</name></author>
+  <entry>
+    <title>How This Site Works</title>
+    <link href="https://azzindani.github.io/#/post/docs-getting-started"/>
+    <id>https://azzindani.github.io/#/post/docs-getting-started</id>
+    <updated>2026-09-06T00:00:00.000Z</updated>
+    <published>2026-09-06T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>The moving parts: a static SPA, one manifest, and no build step.</summary>
+    <category term="docs"/>
+  </entry>
+  <entry>
+    <title>Publishing a Post</title>
+    <link href="https://azzindani.github.io/#/post/docs-writing-posts"/>
+    <id>https://azzindani.github.io/#/post/docs-writing-posts</id>
+    <updated>2026-09-06T00:00:00.000Z</updated>
+    <published>2026-09-06T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>The manifest schema, the four post types, and what the editor does for you.</summary>
+    <category term="docs"/>
+  </entry>
   <entry>
     <title>Six Connectors Carry Everything</title>
     <link href="https://azzindani.github.io/#/pdf/six-connectors-carry-everything"/>
@@ -348,33 +368,5 @@
     <category term="dataset"/>
     <category term="embeddings"/>
     <category term="indonesia"/>
-  </entry>
-  <entry>
-    <title>Legal Corpus QA SynDeepThink</title>
-    <link href="https://azzindani.github.io/#/post/legal-corpus-qa-syndeepthink"/>
-    <id>https://azzindani.github.io/#/post/legal-corpus-qa-syndeepthink</id>
-    <updated>2025-12-10T00:00:00.000Z</updated>
-    <published>2025-12-10T00:00:00.000Z</published>
-    <author><name>Azzindani</name></author>
-    <summary>Legal-corpus Q&amp;A with deep-reasoning chains.</summary>
-    <category term="huggingface"/>
-    <category term="dataset"/>
-    <category term="synthetic"/>
-    <category term="reasoning"/>
-    <category term="legal"/>
-  </entry>
-  <entry>
-    <title>DeepSeek 0528 8B Legal Ckpt</title>
-    <link href="https://azzindani.github.io/#/post/deepseek-0528-8b-legal-ckpt"/>
-    <id>https://azzindani.github.io/#/post/deepseek-0528-8b-legal-ckpt</id>
-    <updated>2025-12-08T00:00:00.000Z</updated>
-    <published>2025-12-08T00:00:00.000Z</published>
-    <author><name>Azzindani</name></author>
-    <summary>DeepSeek 8B (May-28 base) checkpoint fine-tuned on the Indonesian legal corpus.</summary>
-    <category term="huggingface"/>
-    <category term="deepseek"/>
-    <category term="legal"/>
-    <category term="indonesia"/>
-    <category term="8b"/>
   </entry>
 </feed>

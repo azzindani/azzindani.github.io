@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Personal portfolio and blog - Data Science, ML & AI projects">
+    <meta name="description" content="Data science and AI — Indonesian legal AI datasets and models, office automation, and computer vision projects.">
     <meta name="author" content="Azzindani">
     <!-- Icons. The SVG is the real one and follows the browser's colour scheme;
          the PNG is for Safari, which ignores SVG favicons. Paths are relative so
@@ -15,15 +15,15 @@
     <meta name="theme-color" content="#2563eb" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0b1020" media="(prefers-color-scheme: dark)">
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Portfolio">
-    <meta property="og:title" content="Portfolio">
-    <meta property="og:description" content="Personal portfolio and blog - Data Science, ML & AI projects">
+    <meta property="og:site_name" content="Azzindani">
+    <meta property="og:title" content="Azzindani">
+    <meta property="og:description" content="Data science and AI — Indonesian legal AI datasets and models, office automation, and computer vision projects.">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Portfolio">
-    <meta name="twitter:description" content="Personal portfolio and blog - Data Science, ML & AI projects">
+    <meta name="twitter:title" content="Azzindani">
+    <meta name="twitter:description" content="Data science and AI — Indonesian legal AI datasets and models, office automation, and computer vision projects.">
     <link rel="canonical" href="https://azzindani.github.io/">
-    <link rel="alternate" type="application/rss+xml" title="Portfolio — RSS" href="/feed.xml">
-    <title>Portfolio</title>
+    <link rel="alternate" type="application/rss+xml" title="Azzindani — RSS" href="/feed.xml">
+    <title>Azzindani</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -41,6 +41,24 @@
     </script>
 </head>
 <body>
+    <!-- Brand mark, defined once and referenced by the navbar and the footer.
+         Same node-and-edge geometry as favicon.svg. -->
+    <svg width="0" height="0" aria-hidden="true" style="position:absolute">
+        <symbol id="brand-mark" viewBox="0 0 32 32">
+            <g fill="none" stroke="currentColor" stroke-width="2.9" stroke-linecap="round">
+                <path d="M12.4 19.4 L6.6 6.6"/>
+                <path d="M12.4 19.4 L25.4 8"/>
+                <path d="M12.4 19.4 L25.4 25.6"/>
+                <path d="M25.4 8 L25.4 25.6"/>
+            </g>
+            <g fill="currentColor">
+                <circle cx="6.6" cy="6.6" r="3.3"/>
+                <circle cx="25.4" cy="8" r="3.3"/>
+                <circle cx="25.4" cy="25.6" r="3.3"/>
+                <circle cx="12.4" cy="19.4" r="5.2"/>
+            </g>
+        </symbol>
+    </svg>
     <!-- Skip link for keyboard / screen-reader users -->
     <a href="#app" class="skip-link">Skip to content</a>
 
@@ -58,8 +76,8 @@
     <nav class="navbar" id="navbar">
         <div class="nav-container">
             <a href="#/" class="nav-logo" aria-label="Home">
-                <span class="logo-icon">&#9670;</span>
-                <span class="logo-text">Portfolio</span>
+                <svg class="logo-icon" aria-hidden="true" focusable="false"><use href="#brand-mark"/></svg>
+                <span class="logo-text">Azzindani</span>
             </a>
             <div class="nav-tabs" id="nav-tabs">
                 <a href="#/" class="nav-tab" data-tab="home">Home</a>
@@ -106,9 +124,9 @@
             <div class="footer-content">
                 <div class="footer-left">
                     <a href="#/" class="footer-logo">
-                        <span class="logo-icon">&#9670;</span> Portfolio
+                        <svg class="logo-icon" aria-hidden="true" focusable="false"><use href="#brand-mark"/></svg> Azzindani
                     </a>
-                    <p class="footer-text">A personal space for sharing projects, ideas, and explorations in data science and AI.</p>
+                    <p class="footer-text">Indonesian legal AI datasets and models, office automation, and computer vision — with the notes that went with them.</p>
                 </div>
                 <div class="footer-links">
                     <a href="https://www.linkedin.com/in/azzindan1" target="_blank" rel="noopener noreferrer">LinkedIn</a>
@@ -118,7 +136,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 Portfolio. Built with care.</p>
+                <p>&copy; <span id="footer-year">2026</span> Azzindani</p>
             </div>
         </div>
     </footer>

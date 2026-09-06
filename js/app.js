@@ -3,8 +3,8 @@
    ============================================ */
 
 const CONFIG = {
-    siteName: 'Portfolio',
-    siteDescription: 'A personal space for sharing projects, ideas, and explorations.',
+    siteName: 'Azzindani',
+    siteDescription: 'Data science and AI — Indonesian legal AI datasets and models, office automation, and computer vision projects.',
     author: 'Azzindani',
     authorInitial: 'A',
     github: { username: 'azzindani', repo: 'azzindani.github.io', branch: 'main' },
@@ -3360,6 +3360,12 @@ const CommandPalette = (() => {
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
+    // ── Footer year ──
+    // Static markup carries the year the file was last touched, which goes
+    // stale silently. One line here keeps it right without a build step.
+    const yearEl = document.getElementById('footer-year');
+    if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+
     // ── Mobile nav drawer ──
     const navMenu = document.getElementById('nav-mobile-menu');
     const navDrawer = document.getElementById('nav-mobile-drawer');

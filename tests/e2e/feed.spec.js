@@ -1,9 +1,10 @@
 // Playwright e2e smoke tests against the static site served from the repo.
 const { test, expect } = require('@playwright/test');
+const { installFixtures, FIXTURE_SLUG } = require('../fixtures/install');
 
 test('feed loads and shows posts', async ({ page }) => {
     await page.goto('/#/projects');
-    await expect(page).toHaveTitle(/Portfolio/);
+    await expect(page).toHaveTitle(/Azzindani/);
     // Wait for at least one feed item.
     await expect(page.locator('.feed-item').first()).toBeVisible({ timeout: 10000 });
 });
@@ -15,21 +16,24 @@ test('featured row appears for featured posts', async ({ page }) => {
 });
 
 test('navigating to a post renders its body', async ({ page }) => {
-    await page.goto('/#/post/math-and-mermaid-showcase');
+    await installFixtures(page);
+    await page.goto(`/#/post/${FIXTURE_SLUG}`);
     // h1 with that title should appear.
-    await expect(page.getByRole('heading', { name: /Markdown Showcase/i })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: /Markdown Pipeline Fixture/i })).toBeVisible({ timeout: 10000 });
     // Code block should be present.
     await expect(page.locator('.post-content pre').first()).toBeVisible();
 });
 
-test('LaTeX math renders as KaTeX HTML on the showcase post', async ({ page }) => {
-    await page.goto('/#/post/math-and-mermaid-showcase');
+test('LaTeX math renders as KaTeX HTML', async ({ page }) => {
+    await installFixtures(page);
+    await page.goto(`/#/post/${FIXTURE_SLUG}`);
     // KaTeX wraps formulas in a `.katex` span.
     await expect(page.locator('.post-content .katex').first()).toBeVisible({ timeout: 15000 });
 });
 
 test('Mermaid diagram renders as SVG', async ({ page }) => {
-    await page.goto('/#/post/math-and-mermaid-showcase');
+    await installFixtures(page);
+    await page.goto(`/#/post/${FIXTURE_SLUG}`);
     // Mermaid replaces our placeholder with an SVG.
     await expect(page.locator('.post-content .mermaid-block svg').first()).toBeVisible({ timeout: 15000 });
 });
@@ -72,15 +76,17 @@ test('search filters the feed', async ({ page }) => {
 });
 
 test('document title updates on navigation', async ({ page }) => {
+    await installFixtures(page);
     await page.goto('/');
-    await expect(page).toHaveTitle(/Portfolio/);
-    await page.goto('/#/post/math-and-mermaid-showcase');
+    await expect(page).toHaveTitle(/Azzindani/);
+    await page.goto(`/#/post/${FIXTURE_SLUG}`);
     await page.waitForLoadState('networkidle');
-    await expect(page).toHaveTitle(/Markdown Showcase/);
+    await expect(page).toHaveTitle(/Markdown Pipeline Fixture/);
 });
 
 test('JSON-LD structured data is injected on post pages', async ({ page }) => {
-    await page.goto('/#/post/math-and-mermaid-showcase');
+    await installFixtures(page);
+    await page.goto(`/#/post/${FIXTURE_SLUG}`);
     await expect(page.locator('script[data-jsonld]')).toBeAttached({ timeout: 10000 });
     const json = await page.locator('script[data-jsonld]').textContent();
     const data = JSON.parse(json);
@@ -102,25 +108,30 @@ test('tag page lists posts with that tag', async ({ page }) => {
 });
 
 test('category page lists posts in that category', async ({ page }) => {
-    await page.goto('/#/category/demo');
-    await expect(page.getByRole('heading', { name: /Category: demo/i })).toBeVisible({ timeout: 10000 });
+    // A category that real content actually uses — 'demo' existed only on
+    // the placeholder post this suite used to depend on.
+    await page.goto('/#/category/automation');
+    await expect(page.getByRole('heading', { name: /Category: automation/i })).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.feed-item').first()).toBeVisible();
 });
 
 test('post page shows action bar and prev/next', async ({ page }) => {
-    await page.goto('/#/post/math-and-mermaid-showcase');
+    await installFixtures(page);
+    await page.goto(`/#/post/${FIXTURE_SLUG}`);
     await expect(page.locator('.post-actions')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('#post-share-copy')).toBeVisible();
 });
 
 test('code blocks have language label and copy button', async ({ page }) => {
-    await page.goto('/#/post/math-and-mermaid-showcase');
+    await installFixtures(page);
+    await page.goto(`/#/post/${FIXTURE_SLUG}`);
     await expect(page.locator('.post-content .code-block').first()).toBeVisible({ timeout: 10000 });
     await expect(page.locator('.post-content .code-lang-label').first()).toBeVisible();
 });
 
 test('clicking a content image opens lightbox', async ({ page }) => {
-    // Use the welcome post which has an image embedded? Otherwise fall back to checking handler exists.
-    await page.goto('/#/post/getting-started-with-data-science');
+    // Any real article body will do: the lightbox binds to .post-content.
+    await page.goto('/#/post/broker-transaction-analysis');
     await page.waitForLoadState('networkidle');
     // Lightbox is created lazily on first click; just confirm the handler is wired
     // by ensuring `.post-content` exists.
@@ -171,7 +182,7 @@ test('Projects feed only shows project-kind posts', async ({ page }) => {
     // models/datasets, GRPO, the legacy CV/data projects.
     expect(titles.some(t => /MCP|GRPO|Regulation|Detection|Recognition|Broker|Statement|Qwen|Deepseek|Dataset/i.test(t))).toBe(true);
     // Blog-kind posts must NOT appear on the Projects feed.
-    expect(titles.some(t => /Welcome to My Portfolio/.test(t))).toBe(false);
+    expect(titles.some(t => /Six Connectors Carry Everything/.test(t))).toBe(false);
 });
 
 test('Blog feed only shows blog-kind posts', async ({ page }) => {
@@ -183,7 +194,7 @@ test('Blog feed only shows blog-kind posts', async ({ page }) => {
     // resolve to 'blog' through postKind, so they leaked here until the feed
     // started excluding type === 'doc' outright.
     expect(titles.some(t => /MCP Data Analyst/i.test(t))).toBe(false);
-    expect(titles.some(t => /^(Getting Started|Writing Posts)$/.test(t))).toBe(false);
+    expect(titles.some(t => /^(How This Site Works|Publishing a Post)$/.test(t))).toBe(false);
 });
 
 test('pagination renders when there are enough posts', async ({ page }) => {

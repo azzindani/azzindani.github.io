@@ -12,8 +12,8 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
 const ORIGIN = process.env.SITE_ORIGIN || 'https://azzindani.github.io';
-const SITE_TITLE = 'Portfolio';
-const SITE_DESC = 'Personal portfolio and blog — Data Science, ML & AI projects';
+const SITE_TITLE = 'Azzindani';
+const SITE_DESC = 'Data science and AI — Indonesian legal AI datasets and models, office automation, and computer vision projects.';
 const AUTHOR = 'Azzindani';
 
 const manifestPath = path.join(ROOT, 'content/posts.json');

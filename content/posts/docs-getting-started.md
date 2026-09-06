@@ -1,7 +1,7 @@
 ---
-title: "Getting Started"
-description: "Welcome to the documentation site."
-date: "2024-04-25"
+title: "How This Site Works"
+description: "The moving parts: a static SPA, one manifest, and no build step."
+date: "2026-09-06"
 category: "docs"
 tags: ["docs"]
 type: "doc"
@@ -9,20 +9,40 @@ collection: "site-guide"
 order: 1
 ---
 
-# Getting Started
+# How This Site Works
 
-This is the first page of the documentation. The docs section works like a
-mini GitHub-Pages site — each doc lives as a markdown file and is grouped
-in the sidebar by its `collection`.
+This site is a single HTML page served straight from a GitHub repository.
+There is no build step, no framework and no bundler — the browser fetches
+`index.html`, one stylesheet and two scripts, and everything else is data.
 
-## Adding a doc
+## The moving parts
 
-1. Create a new markdown file in `content/posts/`.
-2. Add `type: "doc"` to its frontmatter.
-3. Set `collection` to group it with related docs.
-4. Set `order` to control its position within the collection.
+| File | What it does |
+| ---- | ------------ |
+| `index.html` | The shell. Every route renders into `#app`. |
+| `js/app.js` | Router, content service, page renderers, admin editor. |
+| `js/neural-bg.js` | The animated neural mesh behind the page. |
+| `content/posts.json` | The manifest — the single source of truth for what exists. |
+| `content/posts/` | Markdown bodies, referenced by the manifest. |
 
-## Markdown features
+## Routing
 
-All the markdown features supported elsewhere on the site work here too:
-LaTeX math, Mermaid diagrams, code blocks, tables, etc.
+Routes are hash-based, so GitHub Pages needs no rewrite rules: `#/projects`,
+`#/blog`, `#/post/<slug>`, `#/pdf/<slug>`, `#/collection/<slug>`, `#/tag/<slug>`,
+`#/category/<slug>`, `#/docs` and `#/docs/<slug>`.
+
+Anything after a second `#` is a heading anchor, so `#/post/a-post#results`
+deep-links into a section.
+
+## Where the content comes from
+
+Nothing is generated at publish time. A post is one entry in the manifest;
+its body is either a markdown file in the repo, a PDF or image in `uploads/`,
+or a README fetched live from GitHub, Hugging Face or GitLab when the page
+opens. Adding a post means adding a manifest entry — see the next page.
+
+## The background
+
+The mesh is decorative and drawn on a canvas. It follows scroll position on
+the home page, splitting into figures and recombining between them, and it
+respects `prefers-reduced-motion`. Every other page gets it as ambient drift.
