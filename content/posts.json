@@ -1,9 +1,364 @@
 {
   "posts": [
     {
+      "slug": "six-connectors-carry-everything",
+      "title": "Six Connectors Carry Everything",
+      "description": "Power Automate ships with 1,000+ connectors and 12,000+ actions. Almost everything an office week actually needs runs on six of them.",
+      "date": "2026-08-14",
+      "category": "automation",
+      "tags": [
+        "power-automate",
+        "office",
+        "automation"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/six-connectors-carry-everything.pdf",
+      "draft": false,
+      "collection": "power-automate",
+      "order": 10
+    },
+    {
+      "slug": "nobody-memorises-power-automate",
+      "title": "Nobody Memorises Power Automate",
+      "description": "An expression language of its own, and more connectors than anyone can hold in their head. I stopped trying, and started asking ChatGPT instead.",
+      "date": "2026-08-12",
+      "category": "automation",
+      "tags": [
+        "power-automate",
+        "automation",
+        "llm"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/nobody-memorises-power-automate.pdf",
+      "draft": false,
+      "collection": "power-automate",
+      "order": 9
+    },
+    {
+      "slug": "honestly-chatgpt-wrote-this",
+      "title": "Honestly? ChatGPT Wrote This Macro",
+      "description": "It renames 200 files in about four seconds — and what using AI honestly looks like when the macro is not really yours.",
+      "date": "2026-08-10",
+      "category": "automation",
+      "tags": [
+        "excel",
+        "automation",
+        "llm"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/honestly-chatgpt-wrote-this.pdf",
+      "draft": false,
+      "collection": "power-automate",
+      "order": 8
+    },
+    {
+      "slug": "automation-is-a-skill-you-already-have",
+      "title": "Your First Automation Is Two Steps Long",
+      "description": "If you can write an Excel formula you can build a Power Automate flow, and it is already sitting in your Microsoft 365. The whole thing, start to finish.",
+      "date": "2026-08-07",
+      "category": "automation",
+      "tags": [
+        "power-automate",
+        "office",
+        "automation"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/automation-is-a-skill-you-already-have.pdf",
+      "draft": false,
+      "collection": "power-automate",
+      "order": 7
+    },
+    {
+      "slug": "what-i-learned-implementing-power-automate",
+      "title": "Automation Is Not Magic. It Is Consistency.",
+      "description": "What actually happened after the flows went live, including the part nobody warns you about. The hard part was never the tool.",
+      "date": "2026-08-04",
+      "category": "automation",
+      "tags": [
+        "power-automate",
+        "automation"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/what-i-learned-implementing-power-automate.pdf",
+      "draft": false,
+      "collection": "power-automate",
+      "order": 6
+    },
+    {
+      "slug": "what-power-automate-can-do",
+      "title": "What Power Automate Actually Does",
+      "description": "It can automate your tasks, but only if you define everything. Not a magic wand: a set of steps a human had to notice, decide and describe first.",
+      "date": "2026-08-02",
+      "category": "automation",
+      "tags": [
+        "power-automate",
+        "automation"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/what-power-automate-can-do.pdf",
+      "draft": false,
+      "collection": "power-automate",
+      "order": 5
+    },
+    {
+      "slug": "building-a-document-parser",
+      "title": "Stop Hunting Data in PDFs",
+      "description": "A working document parser, built in Excel. What it took, and where it broke.",
+      "date": "2026-07-30",
+      "category": "automation",
+      "tags": [
+        "excel",
+        "parsing",
+        "automation"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/building-a-document-parser.pdf",
+      "draft": false,
+      "collection": "power-automate",
+      "order": 4
+    },
+    {
+      "slug": "excel-vba-in-practice",
+      "title": "Stop Doing Repetitive Work by Hand",
+      "description": "Three things I automated in Excel that I used to do manually, and what each one actually cost me before.",
+      "date": "2026-07-28",
+      "category": "automation",
+      "tags": [
+        "excel",
+        "vba",
+        "automation"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/excel-vba-in-practice.pdf",
+      "draft": false,
+      "collection": "power-automate",
+      "order": 3
+    },
+    {
+      "slug": "underrated-office-tools",
+      "title": "You Are Ignoring These Office Superpowers",
+      "description": "The Microsoft Office tool stack most people never open, and what each one replaces.",
+      "date": "2026-07-26",
+      "category": "automation",
+      "tags": [
+        "office",
+        "tools",
+        "automation"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/underrated-office-tools.pdf",
+      "draft": false,
+      "collection": "power-automate",
+      "order": 2
+    },
+    {
+      "slug": "mcp-vs-connectors",
+      "title": "MCP vs Connectors",
+      "description": "Same job, opposite philosophy. What each one is, who fills in the values, who builds it, and when to use which.",
+      "date": "2026-07-24",
+      "category": "mcp",
+      "tags": [
+        "mcp",
+        "automation",
+        "tools"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/mcp-vs-connectors.pdf",
+      "draft": false,
+      "collection": "mcp-explained",
+      "order": 2
+    },
+    {
+      "slug": "can-this-be-automated",
+      "title": "Can This Be Automated?",
+      "description": "Five questions, no code, ten minutes. Run them on one task: yes five times and build it, yes twice and leave it alone.",
+      "date": "2026-07-20",
+      "category": "automation",
+      "tags": [
+        "automation",
+        "tools"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/can-this-be-automated.pdf",
+      "draft": false,
+      "collection": "power-automate",
+      "order": 1
+    },
+    {
+      "slug": "automation-to-agentic-ai",
+      "title": "Automation or Agentic AI?",
+      "description": "You do not have to choose. What I learned building with both, and a simple way to start today.",
+      "date": "2026-07-16",
+      "category": "automation",
+      "tags": [
+        "automation",
+        "agents",
+        "llm"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/automation-to-agentic-ai.pdf",
+      "draft": false
+    },
+    {
+      "slug": "what-is-mcp-red-accent",
+      "title": "What Is MCP?",
+      "description": "A common plug between an AI model and the tools it can reach: one standard port, like USB-C but for software the model picks up and uses.",
+      "date": "2026-07-12",
+      "category": "mcp",
+      "tags": [
+        "mcp",
+        "tools"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/what-is-mcp-red-accent.png",
+      "draft": false,
+      "collection": "mcp-explained",
+      "order": 1
+    },
+    {
+      "slug": "folio-architecture-decisions",
+      "title": "Folio — Architecture Decisions",
+      "description": "The engineering decisions behind a local-first, model-native design engine.",
+      "date": "2026-07-09",
+      "category": "design",
+      "tags": [
+        "folio",
+        "design",
+        "open-source"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/folio-architecture-decisions.pdf",
+      "draft": false,
+      "collection": "folio",
+      "order": 5
+    },
+    {
+      "slug": "finally-i-just-ask",
+      "title": "Finally. I Just Ask.",
+      "description": "No fonts to pick, no colour theory, no hunting for the right asset. I write what I mean and the design shows up.",
+      "date": "2026-07-07",
+      "category": "design",
+      "tags": [
+        "folio",
+        "design"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/finally-i-just-ask.png",
+      "draft": false,
+      "collection": "folio",
+      "order": 4
+    },
+    {
+      "slug": "folio-an-introduction",
+      "title": "Folio — An Introduction",
+      "description": "A local-first design studio. Describe it in plain words and watch it become a finished design.",
+      "date": "2026-07-02",
+      "category": "design",
+      "tags": [
+        "folio",
+        "design",
+        "open-source"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/folio-an-introduction.pdf",
+      "draft": false,
+      "collection": "folio",
+      "order": 3
+    },
+    {
+      "slug": "folio-project-poster1",
+      "title": "Folio — Redefining Creative Velocity",
+      "description": "A local, small model running entirely on your machine: minutes instead of hours, engine plus editor, no cloud APIs.",
+      "date": "2026-06-30",
+      "category": "design",
+      "tags": [
+        "folio",
+        "design"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/folio-project-poster1.png",
+      "draft": false,
+      "collection": "folio",
+      "order": 1
+    },
+    {
+      "slug": "folio-the-pitch",
+      "title": "Folio — Design by Asking",
+      "description": "An open-source design engine you drive from the model you already use. No platform fee stacked on top, no lock-in, your files stay yours.",
+      "date": "2026-06-30",
+      "category": "design",
+      "tags": [
+        "folio",
+        "design",
+        "open-source"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/folio-the-pitch.pdf",
+      "draft": false,
+      "collection": "folio",
+      "order": 2
+    },
+    {
+      "slug": "id-regulation-knowledge-graph",
+      "title": "Smarter Search: Giving AI a Map of Indonesian Law",
+      "description": "Beyond simple vectors — a knowledge graph defining the relationships between laws, so the model understands how one regulation connects to another.",
+      "date": "2026-05-04",
+      "category": "datasets",
+      "tags": [
+        "knowledge-graph",
+        "legal",
+        "indonesia",
+        "rag",
+        "huggingface"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/id-regulation-knowledge-graph.pdf",
+      "draft": false,
+      "collection": "id-legal-rag",
+      "order": 7
+    },
+    {
       "slug": "mcp-data-analyst",
       "title": "MCP Data Analyst",
-      "description": "MCP server exposing data-analytics tooling \u2014 pandas, SQL, profiling \u2014 to any MCP-compatible LLM client.",
+      "description": "MCP server exposing data-analytics tooling — pandas, SQL, profiling — to any MCP-compatible LLM client.",
       "date": "2026-04-20",
       "category": "mcp",
       "tags": [
@@ -45,7 +400,7 @@
     {
       "slug": "mcp-web-browser",
       "title": "MCP Web Browser",
-      "description": "Headless browser as an MCP tool \u2014 page fetch, DOM query, screenshot \u2014 usable from inside any LLM session.",
+      "description": "Headless browser as an MCP tool — page fetch, DOM query, screenshot — usable from inside any LLM session.",
       "date": "2026-04-10",
       "category": "mcp",
       "tags": [
@@ -105,7 +460,7 @@
     {
       "slug": "mcp-file-system",
       "title": "MCP File System",
-      "description": "Sandboxed file-system operations exposed as MCP tools \u2014 list, read, write, search.",
+      "description": "Sandboxed file-system operations exposed as MCP tools — list, read, write, search.",
       "date": "2026-03-20",
       "category": "mcp",
       "tags": [
@@ -261,6 +616,28 @@
       "draft": false
     },
     {
+      "slug": "id-regulation-embed",
+      "title": "Embedding Legal Data: Measuring Context and Meaning",
+      "description": "The Indonesian Legal RAG dataset — the first corpus to ship pre-computed vectors, for AI that understands the spirit of the law rather than the keywords.",
+      "date": "2025-11-24",
+      "category": "datasets",
+      "tags": [
+        "embeddings",
+        "vector-search",
+        "legal",
+        "indonesia",
+        "rag",
+        "huggingface"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/id-regulation-embed.pdf",
+      "draft": false,
+      "collection": "id-legal-rag",
+      "order": 6
+    },
+    {
       "slug": "deepseek-id-legal-preview",
       "title": "Deepseek ID Legal Preview",
       "description": "DeepSeek-derived preview model adapted for Indonesian legal Q&A.",
@@ -278,6 +655,28 @@
       "kind": "project",
       "collection": "models",
       "draft": false
+    },
+    {
+      "slug": "id-regulation-question-answer",
+      "title": "Article-Level Quoting: 182 Million Q&A Pairs",
+      "description": "A question-answer resource generated from parsed regulations, engineered for reliable, citation-aware LLMs in Bahasa Indonesia.",
+      "date": "2025-11-17",
+      "category": "datasets",
+      "tags": [
+        "qa",
+        "synthetic",
+        "legal",
+        "indonesia",
+        "huggingface"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/id-regulation-question-answer.pdf",
+      "draft": false,
+      "collection": "id-legal-rag",
+      "featured": true,
+      "order": 5
     },
     {
       "slug": "id-legal-qa-synthink",
@@ -298,6 +697,27 @@
       "kind": "project",
       "collection": "datasets",
       "draft": false
+    },
+    {
+      "slug": "id-regulation-parsed",
+      "title": "From PDFs to Power: 3.5 Million Legal Articles Parsed",
+      "description": "The Indonesian Regulation Parsed dataset — roughly 250,000 regulations restructured down to the atomic article level.",
+      "date": "2025-11-10",
+      "category": "datasets",
+      "tags": [
+        "parsing",
+        "legal",
+        "indonesia",
+        "dataset",
+        "huggingface"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/id-regulation-parsed.pdf",
+      "draft": false,
+      "collection": "id-legal-rag",
+      "order": 4
     },
     {
       "slug": "id-reg-md-rag",
@@ -338,6 +758,28 @@
       "kind": "project",
       "collection": "models",
       "draft": false
+    },
+    {
+      "slug": "id-regulation-pdf",
+      "title": "Unlocking Indonesian Law: 250,000 Regulation PDFs",
+      "description": "A massive source corpus for legal AI research in Bahasa Indonesia.",
+      "date": "2025-11-03",
+      "category": "datasets",
+      "tags": [
+        "corpus",
+        "legal",
+        "indonesia",
+        "pdf",
+        "huggingface"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/id-regulation-pdf.pdf",
+      "draft": false,
+      "collection": "id-legal-rag",
+      "featured": true,
+      "order": 3
     },
     {
       "slug": "id-legal-qa-syn",
@@ -382,7 +824,7 @@
     {
       "slug": "id-supreme-court-parquet",
       "title": "ID Supreme Court Parquet",
-      "description": "Indonesian Supreme Court decisions \u2014 parquet.",
+      "description": "Indonesian Supreme Court decisions — parquet.",
       "date": "2025-10-23",
       "category": "datasets",
       "tags": [
@@ -402,7 +844,7 @@
     {
       "slug": "id-supreme-court-html",
       "title": "ID Supreme Court HTML",
-      "description": "Indonesian Supreme Court decisions \u2014 raw HTML.",
+      "description": "Indonesian Supreme Court decisions — raw HTML.",
       "date": "2025-10-15",
       "category": "datasets",
       "tags": [
@@ -418,6 +860,27 @@
       "kind": "project",
       "collection": "datasets",
       "draft": false
+    },
+    {
+      "slug": "id-legal-preview-gguf",
+      "title": "Fast, Free, Local, No Code: Your Specialised Legal LLM",
+      "description": "Bypass cloud fees and Python entirely — load the model file straight into LM Studio or Ollama and start chatting.",
+      "date": "2025-10-13",
+      "category": "models",
+      "tags": [
+        "gguf",
+        "quantization",
+        "llama-cpp",
+        "legal",
+        "indonesia"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/id-legal-preview-gguf.pdf",
+      "draft": false,
+      "collection": "id-legal-rag",
+      "order": 2
     },
     {
       "slug": "qwen3-0-6b-l2c-checkpoint",
@@ -476,6 +939,29 @@
       "kind": "project",
       "collection": "models",
       "draft": false
+    },
+    {
+      "slug": "grpo-id-legal-fine-tuning",
+      "title": "Fine-Tuning AI into a Specified Domain (Indonesian Legal)",
+      "description": "An in-depth look at leveraging DeepSeek-R1-0528-Qwen3-8B with Group Relative Policy Optimization for structured legal reasoning.",
+      "date": "2025-10-01",
+      "category": "models",
+      "tags": [
+        "grpo",
+        "rlhf",
+        "fine-tuning",
+        "deepseek",
+        "legal",
+        "indonesia"
+      ],
+      "image": "",
+      "type": "pdf",
+      "kind": "blog",
+      "pdf": "uploads/pdfs/grpo-id-legal-fine-tuning.pdf",
+      "draft": false,
+      "collection": "id-legal-rag",
+      "featured": true,
+      "order": 1
     },
     {
       "slug": "deepseek-0528-8b-legal-distill",
@@ -775,7 +1261,7 @@
     {
       "slug": "id-reg-parsed",
       "title": "ID REG Parsed",
-      "description": "Parsed Indonesian regulations \u2014 structured text extraction.",
+      "description": "Parsed Indonesian regulations — structured text extraction.",
       "date": "2025-06-01",
       "category": "datasets",
       "tags": [
@@ -790,132 +1276,6 @@
       "repo": "https://huggingface.co/datasets/Azzindani/ID_REG_Parsed",
       "kind": "project",
       "collection": "datasets",
-      "draft": false
-    },
-    {
-      "slug": "grpo-fine-tuning",
-      "title": "GRPO Fine-Tuning \u2014 Reinforcement Learning for LLMs",
-      "description": "Notes on fine-tuning a language model with Group Relative Policy Optimization (GRPO): rewards, rollouts, and stability tricks.",
-      "date": "2024-12-01",
-      "category": "machine-learning",
-      "tags": [
-        "rlhf",
-        "grpo",
-        "fine-tuning",
-        "llm"
-      ],
-      "image": "",
-      "type": "pdf",
-      "pdf": "uploads/pdfs/grpo-fine-tuning.pdf",
-      "kind": "project",
-      "featured": true,
-      "draft": false
-    },
-    {
-      "slug": "id-legal-preview-gguf",
-      "title": "ID Legal Preview \u2014 GGUF Quantized Model",
-      "description": "Step 5: distilling the Q&A pipeline into a GGUF-quantized model for local, offline preview.",
-      "date": "2024-11-10",
-      "category": "nlp",
-      "tags": [
-        "gguf",
-        "quantization",
-        "llama-cpp",
-        "legal",
-        "indonesia"
-      ],
-      "image": "",
-      "type": "pdf",
-      "pdf": "uploads/pdfs/id-legal-preview-gguf.pdf",
-      "kind": "project",
-      "collection": "id-legal-rag",
-      "order": 5,
-      "draft": false
-    },
-    {
-      "slug": "id-regulation-question-answer",
-      "title": "ID Regulation Q&A \u2014 RAG over Indonesian Law",
-      "description": "Step 4: a retrieval-augmented question-answering system grounded in the embedded Indonesian regulation corpus.",
-      "date": "2024-10-20",
-      "category": "nlp",
-      "tags": [
-        "rag",
-        "qa",
-        "llm",
-        "indonesia",
-        "legal"
-      ],
-      "image": "",
-      "type": "pdf",
-      "pdf": "uploads/pdfs/id-regulation-question-answer.pdf",
-      "kind": "project",
-      "collection": "id-legal-rag",
-      "order": 4,
-      "featured": true,
-      "draft": false
-    },
-    {
-      "slug": "id-regulation-embed",
-      "title": "ID Regulation Embed \u2014 Vector Index",
-      "description": "Step 3: chunking the parsed corpus and embedding it into a vector store for semantic retrieval.",
-      "date": "2024-10-02",
-      "category": "nlp",
-      "tags": [
-        "rag",
-        "embeddings",
-        "vector-search",
-        "indonesia",
-        "legal"
-      ],
-      "image": "",
-      "type": "pdf",
-      "pdf": "uploads/pdfs/id-regulation-embed.pdf",
-      "kind": "project",
-      "collection": "id-legal-rag",
-      "order": 3,
-      "draft": false
-    },
-    {
-      "slug": "id-regulation-parsed",
-      "title": "ID Regulation Parsed \u2014 Structured Extraction",
-      "description": "Step 2: parsing Indonesian regulation PDFs into clean, hierarchical text suitable for downstream NLP.",
-      "date": "2024-09-15",
-      "category": "nlp",
-      "tags": [
-        "rag",
-        "legal",
-        "indonesia",
-        "parsing",
-        "extraction"
-      ],
-      "image": "",
-      "type": "pdf",
-      "pdf": "uploads/pdfs/id-regulation-parsed.pdf",
-      "kind": "project",
-      "collection": "id-legal-rag",
-      "order": 2,
-      "draft": false
-    },
-    {
-      "slug": "id-regulation-pdf",
-      "title": "ID Regulation PDF \u2014 Source Corpus",
-      "description": "Step 1 of an Indonesian-regulation RAG pipeline: collecting and normalising the raw legal PDF corpus.",
-      "date": "2024-09-05",
-      "category": "nlp",
-      "tags": [
-        "rag",
-        "legal",
-        "indonesia",
-        "pdf",
-        "corpus"
-      ],
-      "image": "",
-      "type": "pdf",
-      "pdf": "uploads/pdfs/id-regulation-pdf.pdf",
-      "kind": "project",
-      "collection": "id-legal-rag",
-      "order": 1,
-      "featured": true,
       "draft": false
     },
     {
@@ -965,12 +1325,12 @@
       "type": "article",
       "file": "math-and-mermaid-showcase.md",
       "kind": "blog",
-      "draft": false
+      "draft": true
     },
     {
       "slug": "sample-repo-readme",
       "title": "Portfolio Source Code",
-      "description": "The source for this site itself \u2014 pulled live from the GitHub README.",
+      "description": "The source for this site itself — pulled live from the GitHub README.",
       "date": "2024-04-01",
       "category": "meta",
       "tags": [
@@ -982,27 +1342,6 @@
       "type": "repo",
       "repo": "https://github.com/azzindani/azzindani.github.io",
       "kind": "project",
-      "draft": false
-    },
-    {
-      "slug": "demo-media-embeds",
-      "title": "Media Embeds Demo",
-      "description": "Showcasing YouTube videos, audio players, and GIF support built into the feed.",
-      "date": "2024-03-15",
-      "category": "demo",
-      "tags": [
-        "media",
-        "youtube",
-        "demo"
-      ],
-      "image": "",
-      "type": "article",
-      "file": "demo-media-embeds.md",
-      "kind": "blog",
-      "media": {
-        "type": "youtube",
-        "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-      },
       "draft": false
     },
     {
@@ -1020,11 +1359,11 @@
       "type": "article",
       "file": "getting-started-with-data-science.md",
       "kind": "blog",
-      "draft": false
+      "draft": true
     },
     {
       "slug": "broker-transaction-automation",
-      "title": "Broker Transaction Automation \u2014 End-to-End",
+      "title": "Broker Transaction Automation — End-to-End",
       "description": "Capstone integrating multi-threaded scraping, data management and interactive visualisation into a semi-automated end-to-end stock-exchange analysis system.",
       "date": "2024-01-15",
       "category": "data-science",
@@ -1041,22 +1380,6 @@
       "collection": "stock-exchange-pipeline",
       "order": 5,
       "featured": true,
-      "draft": false
-    },
-    {
-      "slug": "welcome-to-my-portfolio",
-      "title": "Welcome to My Portfolio",
-      "description": "An introduction to this portfolio site and what you'll find here.",
-      "date": "2024-01-15",
-      "category": "general",
-      "tags": [
-        "introduction",
-        "portfolio"
-      ],
-      "image": "",
-      "type": "article",
-      "file": "welcome-to-my-portfolio.md",
-      "kind": "blog",
       "draft": false
     },
     {
@@ -1207,7 +1530,7 @@
     },
     {
       "slug": "facial-recognition-large",
-      "title": "Facial Recognition \u2014 1000+ Identities, 97% Accuracy",
+      "title": "Facial Recognition — 1000+ Identities, 97% Accuracy",
       "description": "Production-scale facial recognition trained on 500K+ multi-threaded-scraped images, recognizing 1000+ unique faces at 97% accuracy.",
       "date": "2022-11-01",
       "category": "machine-learning",
@@ -1229,7 +1552,7 @@
     {
       "slug": "machine-learning",
       "title": "Machine Learning",
-      "description": "Classical machine-learning practice \u2014 linear, tree, ensemble, kernel methods.",
+      "description": "Classical machine-learning practice — linear, tree, ensemble, kernel methods.",
       "date": "2022-10-15",
       "category": "machine-learning",
       "tags": [
@@ -1264,7 +1587,7 @@
     {
       "slug": "deep-learning-nlp",
       "title": "Deep Learning NLP",
-      "description": "Early deep-learning NLP experiments \u2014 embeddings, RNNs, attention.",
+      "description": "Early deep-learning NLP experiments — embeddings, RNNs, attention.",
       "date": "2022-08-10",
       "category": "machine-learning",
       "tags": [
@@ -1297,7 +1620,7 @@
     },
     {
       "slug": "facial-recognition-small",
-      "title": "Facial Recognition \u2014 Pilot",
+      "title": "Facial Recognition — Pilot",
       "description": "A foundational facial-recognition model used to validate the data, training, and inference pipeline before scaling.",
       "date": "2022-06-01",
       "category": "machine-learning",
@@ -1353,7 +1676,7 @@
     {
       "slug": "data-analytic",
       "title": "Data Analytic",
-      "description": "Early hands-on data-analytics practice \u2014 cleaning, aggregating, summarising tabular data.",
+      "description": "Early hands-on data-analytics practice — cleaning, aggregating, summarising tabular data.",
       "date": "2022-03-12",
       "category": "data-analytics",
       "tags": [
@@ -1387,7 +1710,7 @@
     {
       "slug": "kaggle-biomed-dataset",
       "title": "Kaggle Biomed Dataset",
-      "description": "Curating Kaggle biomedical datasets \u2014 exploration notes and quick-start scripts.",
+      "description": "Curating Kaggle biomedical datasets — exploration notes and quick-start scripts.",
       "date": "2022-02-10",
       "category": "data-science",
       "tags": [
@@ -1446,7 +1769,7 @@
     {
       "slug": "lungs-detection",
       "title": "Lungs Detection",
-      "description": "A computer vision system that detects and localizes lungs in chest X-ray (CXR) images \u2014 the foundation step for downstream disease detection.",
+      "description": "A computer vision system that detects and localizes lungs in chest X-ray (CXR) images — the foundation step for downstream disease detection.",
       "date": "2021-06-01",
       "category": "healthcare-ai",
       "tags": [

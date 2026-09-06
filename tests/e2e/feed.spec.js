@@ -56,14 +56,19 @@ test('neural network canvas is mounted', async ({ page }) => {
 });
 
 test('search filters the feed', async ({ page }) => {
-    // Navigate to blog feed where the mermaid showcase post lives (kind: blog).
     await page.goto('/#/blog');
     await page.locator('.feed-item').first().waitFor();
-    await page.locator('#global-search').fill('mermaid');
+    const before = await page.locator('.feed-item').count();
+    await page.locator('#global-search').fill('folio');
     // Wait for debounce.
     await page.waitForTimeout(500);
     const titles = await page.locator('.feed-item-title').allTextContents();
-    expect(titles.some(t => /mermaid|showcase/i.test(t))).toBe(true);
+    // Search covers title, description and tags — "Finally. I Just Ask." comes
+    // back on its tags alone — so assert that the feed narrowed and that the
+    // matches are the ones expected, not that every title contains the term.
+    expect(titles.length).toBeGreaterThan(0);
+    expect(titles.length).toBeLessThan(before);
+    expect(titles.some(t => /Folio/.test(t))).toBe(true);
 });
 
 test('document title updates on navigation', async ({ page }) => {
@@ -173,7 +178,12 @@ test('Blog feed only shows blog-kind posts', async ({ page }) => {
     await page.goto('/#/blog');
     await page.locator('.feed-item').first().waitFor();
     const titles = await page.locator('.feed-item-title').allTextContents();
-    expect(titles.some(t => /Welcome to My Portfolio/.test(t))).toBe(true);
+    expect(titles.some(t => /Six Connectors Carry Everything/.test(t))).toBe(true);
+    // Nothing from the projects side, and no docs — those live under /docs and
+    // resolve to 'blog' through postKind, so they leaked here until the feed
+    // started excluding type === 'doc' outright.
+    expect(titles.some(t => /MCP Data Analyst/i.test(t))).toBe(false);
+    expect(titles.some(t => /^(Getting Started|Writing Posts)$/.test(t))).toBe(false);
 });
 
 test('pagination renders when there are enough posts', async ({ page }) => {

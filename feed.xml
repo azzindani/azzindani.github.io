@@ -4,9 +4,233 @@
   <subtitle>Personal portfolio and blog — Data Science, ML &amp; AI projects</subtitle>
   <link href="https://azzindani.github.io/feed.xml" rel="self"/>
   <link href="https://azzindani.github.io/"/>
-  <updated>2026-04-20T00:00:00.000Z</updated>
+  <updated>2026-08-14T00:00:00.000Z</updated>
   <id>https://azzindani.github.io/</id>
   <author><name>Azzindani</name></author>
+  <entry>
+    <title>Six Connectors Carry Everything</title>
+    <link href="https://azzindani.github.io/#/pdf/six-connectors-carry-everything"/>
+    <id>https://azzindani.github.io/#/pdf/six-connectors-carry-everything</id>
+    <updated>2026-08-14T00:00:00.000Z</updated>
+    <published>2026-08-14T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Power Automate ships with 1,000+ connectors and 12,000+ actions. Almost everything an office week actually needs runs on six of them.</summary>
+    <category term="power-automate"/>
+    <category term="office"/>
+    <category term="automation"/>
+  </entry>
+  <entry>
+    <title>Nobody Memorises Power Automate</title>
+    <link href="https://azzindani.github.io/#/pdf/nobody-memorises-power-automate"/>
+    <id>https://azzindani.github.io/#/pdf/nobody-memorises-power-automate</id>
+    <updated>2026-08-12T00:00:00.000Z</updated>
+    <published>2026-08-12T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>An expression language of its own, and more connectors than anyone can hold in their head. I stopped trying, and started asking ChatGPT instead.</summary>
+    <category term="power-automate"/>
+    <category term="automation"/>
+    <category term="llm"/>
+  </entry>
+  <entry>
+    <title>Honestly? ChatGPT Wrote This Macro</title>
+    <link href="https://azzindani.github.io/#/pdf/honestly-chatgpt-wrote-this"/>
+    <id>https://azzindani.github.io/#/pdf/honestly-chatgpt-wrote-this</id>
+    <updated>2026-08-10T00:00:00.000Z</updated>
+    <published>2026-08-10T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>It renames 200 files in about four seconds — and what using AI honestly looks like when the macro is not really yours.</summary>
+    <category term="excel"/>
+    <category term="automation"/>
+    <category term="llm"/>
+  </entry>
+  <entry>
+    <title>Your First Automation Is Two Steps Long</title>
+    <link href="https://azzindani.github.io/#/pdf/automation-is-a-skill-you-already-have"/>
+    <id>https://azzindani.github.io/#/pdf/automation-is-a-skill-you-already-have</id>
+    <updated>2026-08-07T00:00:00.000Z</updated>
+    <published>2026-08-07T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>If you can write an Excel formula you can build a Power Automate flow, and it is already sitting in your Microsoft 365. The whole thing, start to finish.</summary>
+    <category term="power-automate"/>
+    <category term="office"/>
+    <category term="automation"/>
+  </entry>
+  <entry>
+    <title>Automation Is Not Magic. It Is Consistency.</title>
+    <link href="https://azzindani.github.io/#/pdf/what-i-learned-implementing-power-automate"/>
+    <id>https://azzindani.github.io/#/pdf/what-i-learned-implementing-power-automate</id>
+    <updated>2026-08-04T00:00:00.000Z</updated>
+    <published>2026-08-04T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>What actually happened after the flows went live, including the part nobody warns you about. The hard part was never the tool.</summary>
+    <category term="power-automate"/>
+    <category term="automation"/>
+  </entry>
+  <entry>
+    <title>What Power Automate Actually Does</title>
+    <link href="https://azzindani.github.io/#/pdf/what-power-automate-can-do"/>
+    <id>https://azzindani.github.io/#/pdf/what-power-automate-can-do</id>
+    <updated>2026-08-02T00:00:00.000Z</updated>
+    <published>2026-08-02T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>It can automate your tasks, but only if you define everything. Not a magic wand: a set of steps a human had to notice, decide and describe first.</summary>
+    <category term="power-automate"/>
+    <category term="automation"/>
+  </entry>
+  <entry>
+    <title>Stop Hunting Data in PDFs</title>
+    <link href="https://azzindani.github.io/#/pdf/building-a-document-parser"/>
+    <id>https://azzindani.github.io/#/pdf/building-a-document-parser</id>
+    <updated>2026-07-30T00:00:00.000Z</updated>
+    <published>2026-07-30T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>A working document parser, built in Excel. What it took, and where it broke.</summary>
+    <category term="excel"/>
+    <category term="parsing"/>
+    <category term="automation"/>
+  </entry>
+  <entry>
+    <title>Stop Doing Repetitive Work by Hand</title>
+    <link href="https://azzindani.github.io/#/pdf/excel-vba-in-practice"/>
+    <id>https://azzindani.github.io/#/pdf/excel-vba-in-practice</id>
+    <updated>2026-07-28T00:00:00.000Z</updated>
+    <published>2026-07-28T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Three things I automated in Excel that I used to do manually, and what each one actually cost me before.</summary>
+    <category term="excel"/>
+    <category term="vba"/>
+    <category term="automation"/>
+  </entry>
+  <entry>
+    <title>You Are Ignoring These Office Superpowers</title>
+    <link href="https://azzindani.github.io/#/pdf/underrated-office-tools"/>
+    <id>https://azzindani.github.io/#/pdf/underrated-office-tools</id>
+    <updated>2026-07-26T00:00:00.000Z</updated>
+    <published>2026-07-26T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>The Microsoft Office tool stack most people never open, and what each one replaces.</summary>
+    <category term="office"/>
+    <category term="tools"/>
+    <category term="automation"/>
+  </entry>
+  <entry>
+    <title>MCP vs Connectors</title>
+    <link href="https://azzindani.github.io/#/pdf/mcp-vs-connectors"/>
+    <id>https://azzindani.github.io/#/pdf/mcp-vs-connectors</id>
+    <updated>2026-07-24T00:00:00.000Z</updated>
+    <published>2026-07-24T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Same job, opposite philosophy. What each one is, who fills in the values, who builds it, and when to use which.</summary>
+    <category term="mcp"/>
+    <category term="automation"/>
+    <category term="tools"/>
+  </entry>
+  <entry>
+    <title>Can This Be Automated?</title>
+    <link href="https://azzindani.github.io/#/pdf/can-this-be-automated"/>
+    <id>https://azzindani.github.io/#/pdf/can-this-be-automated</id>
+    <updated>2026-07-20T00:00:00.000Z</updated>
+    <published>2026-07-20T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Five questions, no code, ten minutes. Run them on one task: yes five times and build it, yes twice and leave it alone.</summary>
+    <category term="automation"/>
+    <category term="tools"/>
+  </entry>
+  <entry>
+    <title>Automation or Agentic AI?</title>
+    <link href="https://azzindani.github.io/#/pdf/automation-to-agentic-ai"/>
+    <id>https://azzindani.github.io/#/pdf/automation-to-agentic-ai</id>
+    <updated>2026-07-16T00:00:00.000Z</updated>
+    <published>2026-07-16T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>You do not have to choose. What I learned building with both, and a simple way to start today.</summary>
+    <category term="automation"/>
+    <category term="agents"/>
+    <category term="llm"/>
+  </entry>
+  <entry>
+    <title>What Is MCP?</title>
+    <link href="https://azzindani.github.io/#/pdf/what-is-mcp-red-accent"/>
+    <id>https://azzindani.github.io/#/pdf/what-is-mcp-red-accent</id>
+    <updated>2026-07-12T00:00:00.000Z</updated>
+    <published>2026-07-12T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>A common plug between an AI model and the tools it can reach: one standard port, like USB-C but for software the model picks up and uses.</summary>
+    <category term="mcp"/>
+    <category term="tools"/>
+  </entry>
+  <entry>
+    <title>Folio — Architecture Decisions</title>
+    <link href="https://azzindani.github.io/#/pdf/folio-architecture-decisions"/>
+    <id>https://azzindani.github.io/#/pdf/folio-architecture-decisions</id>
+    <updated>2026-07-09T00:00:00.000Z</updated>
+    <published>2026-07-09T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>The engineering decisions behind a local-first, model-native design engine.</summary>
+    <category term="folio"/>
+    <category term="design"/>
+    <category term="open-source"/>
+  </entry>
+  <entry>
+    <title>Finally. I Just Ask.</title>
+    <link href="https://azzindani.github.io/#/pdf/finally-i-just-ask"/>
+    <id>https://azzindani.github.io/#/pdf/finally-i-just-ask</id>
+    <updated>2026-07-07T00:00:00.000Z</updated>
+    <published>2026-07-07T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>No fonts to pick, no colour theory, no hunting for the right asset. I write what I mean and the design shows up.</summary>
+    <category term="folio"/>
+    <category term="design"/>
+  </entry>
+  <entry>
+    <title>Folio — An Introduction</title>
+    <link href="https://azzindani.github.io/#/pdf/folio-an-introduction"/>
+    <id>https://azzindani.github.io/#/pdf/folio-an-introduction</id>
+    <updated>2026-07-02T00:00:00.000Z</updated>
+    <published>2026-07-02T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>A local-first design studio. Describe it in plain words and watch it become a finished design.</summary>
+    <category term="folio"/>
+    <category term="design"/>
+    <category term="open-source"/>
+  </entry>
+  <entry>
+    <title>Folio — Redefining Creative Velocity</title>
+    <link href="https://azzindani.github.io/#/pdf/folio-project-poster1"/>
+    <id>https://azzindani.github.io/#/pdf/folio-project-poster1</id>
+    <updated>2026-06-30T00:00:00.000Z</updated>
+    <published>2026-06-30T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>A local, small model running entirely on your machine: minutes instead of hours, engine plus editor, no cloud APIs.</summary>
+    <category term="folio"/>
+    <category term="design"/>
+  </entry>
+  <entry>
+    <title>Folio — Design by Asking</title>
+    <link href="https://azzindani.github.io/#/pdf/folio-the-pitch"/>
+    <id>https://azzindani.github.io/#/pdf/folio-the-pitch</id>
+    <updated>2026-06-30T00:00:00.000Z</updated>
+    <published>2026-06-30T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>An open-source design engine you drive from the model you already use. No platform fee stacked on top, no lock-in, your files stay yours.</summary>
+    <category term="folio"/>
+    <category term="design"/>
+    <category term="open-source"/>
+  </entry>
+  <entry>
+    <title>Smarter Search: Giving AI a Map of Indonesian Law</title>
+    <link href="https://azzindani.github.io/#/pdf/id-regulation-knowledge-graph"/>
+    <id>https://azzindani.github.io/#/pdf/id-regulation-knowledge-graph</id>
+    <updated>2026-05-04T00:00:00.000Z</updated>
+    <published>2026-05-04T00:00:00.000Z</published>
+    <author><name>Azzindani</name></author>
+    <summary>Beyond simple vectors — a knowledge graph defining the relationships between laws, so the model understands how one regulation connects to another.</summary>
+    <category term="knowledge-graph"/>
+    <category term="legal"/>
+    <category term="indonesia"/>
+    <category term="rag"/>
+    <category term="huggingface"/>
+  </entry>
   <entry>
     <title>MCP Data Analyst</title>
     <link href="https://azzindani.github.io/#/post/mcp-data-analyst"/>
@@ -152,265 +376,5 @@
     <category term="legal"/>
     <category term="indonesia"/>
     <category term="8b"/>
-  </entry>
-  <entry>
-    <title>ID Legal Bench</title>
-    <link href="https://azzindani.github.io/#/post/id-legal-bench"/>
-    <id>https://azzindani.github.io/#/post/id-legal-bench</id>
-    <updated>2025-12-02T00:00:00.000Z</updated>
-    <published>2025-12-02T00:00:00.000Z</published>
-    <author><name>Azzindani</name></author>
-    <summary>Benchmark suite for Indonesian legal LLMs.</summary>
-    <category term="huggingface"/>
-    <category term="dataset"/>
-    <category term="benchmark"/>
-    <category term="legal"/>
-    <category term="indonesia"/>
-  </entry>
-  <entry>
-    <title>ID Legal QA SynDeepThink</title>
-    <link href="https://azzindani.github.io/#/post/id-legal-qa-syndeepthink"/>
-    <id>https://azzindani.github.io/#/post/id-legal-qa-syndeepthink</id>
-    <updated>2025-11-24T00:00:00.000Z</updated>
-    <published>2025-11-24T00:00:00.000Z</published>
-    <author><name>Azzindani</name></author>
-    <summary>Synthetic legal Q&amp;A with deep-reasoning traces.</summary>
-    <category term="huggingface"/>
-    <category term="dataset"/>
-    <category term="synthetic"/>
-    <category term="reasoning"/>
-    <category term="legal"/>
-  </entry>
-  <entry>
-    <title>Deepseek ID Legal Preview</title>
-    <link href="https://azzindani.github.io/#/post/deepseek-id-legal-preview"/>
-    <id>https://azzindani.github.io/#/post/deepseek-id-legal-preview</id>
-    <updated>2025-11-20T00:00:00.000Z</updated>
-    <published>2025-11-20T00:00:00.000Z</published>
-    <author><name>Azzindani</name></author>
-    <summary>DeepSeek-derived preview model adapted for Indonesian legal Q&amp;A.</summary>
-    <category term="huggingface"/>
-    <category term="deepseek"/>
-    <category term="legal"/>
-    <category term="indonesia"/>
-  </entry>
-  <entry>
-    <title>ID Legal QA SynThink</title>
-    <link href="https://azzindani.github.io/#/post/id-legal-qa-synthink"/>
-    <id>https://azzindani.github.io/#/post/id-legal-qa-synthink</id>
-    <updated>2025-11-16T00:00:00.000Z</updated>
-    <published>2025-11-16T00:00:00.000Z</published>
-    <author><name>Azzindani</name></author>
-    <summary>Synthetic legal Q&amp;A with chain-of-thought traces.</summary>
-    <category term="huggingface"/>
-    <category term="dataset"/>
-    <category term="synthetic"/>
-    <category term="cot"/>
-    <category term="legal"/>
-  </entry>
-  <entry>
-    <title>ID REG MD RAG</title>
-    <link href="https://azzindani.github.io/#/post/id-reg-md-rag"/>
-    <id>https://azzindani.github.io/#/post/id-reg-md-rag</id>
-    <updated>2025-11-08T00:00:00.000Z</updated>
-    <published>2025-11-08T00:00:00.000Z</published>
-    <author><name>Azzindani</name></author>
-    <summary>Markdown-form regulation chunks for RAG.</summary>
-    <category term="huggingface"/>
-    <category term="dataset"/>
-    <category term="rag"/>
-    <category term="indonesia"/>
-    <category term="legal"/>
-  </entry>
-  <entry>
-    <title>Qwen3 0.6B Legal Checkpoint</title>
-    <link href="https://azzindani.github.io/#/post/qwen3-0-6b-legal-checkpoint"/>
-    <id>https://azzindani.github.io/#/post/qwen3-0-6b-legal-checkpoint</id>
-    <updated>2025-11-05T00:00:00.000Z</updated>
-    <published>2025-11-05T00:00:00.000Z</published>
-    <author><name>Azzindani</name></author>
-    <summary>Qwen3 0.6B fine-tune checkpoint on Indonesian legal corpus.</summary>
-    <category term="huggingface"/>
-    <category term="qwen"/>
-    <category term="legal"/>
-    <category term="indonesia"/>
-    <category term="checkpoint"/>
-  </entry>
-  <entry>
-    <title>ID Legal QA Syn</title>
-    <link href="https://azzindani.github.io/#/post/id-legal-qa-syn"/>
-    <id>https://azzindani.github.io/#/post/id-legal-qa-syn</id>
-    <updated>2025-10-31T00:00:00.000Z</updated>
-    <published>2025-10-31T00:00:00.000Z</published>
-    <author><name>Azzindani</name></author>
-    <summary>Synthetic Indonesian legal Q&amp;A.</summary>
-    <category term="huggingface"/>
-    <category term="dataset"/>
-    <category term="synthetic"/>
-    <category term="qa"/>
-    <category term="legal"/>
-  </entry>
-  <entry>
-    <title>Qwen2.5 1.5B IT ID Legal</title>
-    <link href="https://azzindani.github.io/#/post/qwen2-5-1-5b-it-id-legal"/>
-    <id>https://azzindani.github.io/#/post/qwen2-5-1-5b-it-id-legal</id>
-    <updated>2025-10-25T00:00:00.000Z</updated>
-    <published>2025-10-25T00:00:00.000Z</published>
-    <author><name>Azzindani</name></author>
-    <summary>Qwen2.5 1.5B instruction-tuned for Indonesian legal text.</summary>
-    <category term="huggingface"/>
-    <category term="qwen"/>
-    <category term="fine-tuning"/>
-    <category term="legal"/>
-    <category term="indonesia"/>
-  </entry>
-  <entry>
-    <title>ID Supreme Court Parquet</title>
-    <link href="https://azzindani.github.io/#/post/id-supreme-court-parquet"/>
-    <id>https://azzindani.github.io/#/post/id-supreme-court-parquet</id>
-    <updated>2025-10-23T00:00:00.000Z</updated>
-    <published>2025-10-23T00:00:00.000Z</published>
-    <author><name>Azzindani</name></author>
-    <summary>Indonesian Supreme Court decisions — parquet.</summary>
-    <category term="huggingface"/>
-    <category term="dataset"/>
-    <category term="supreme-court"/>
-    <category term="indonesia"/>
-    <category term="parquet"/>
-  </entry>
-  <entry>
-    <title>ID Supreme Court HTML</title>
-    <link href="https://azzindani.github.io/#/post/id-supreme-court-html"/>
-    <id>https://azzindani.github.io/#/post/id-supreme-court-html</id>
-    <updated>2025-10-15T00:00:00.000Z</updated>
-    <published>2025-10-15T00:00:00.000Z</published>
-    <author><name>Azzindani</name></author>
-    <summary>Indonesian Supreme Court decisions — raw HTML.</summary>
-    <category term="huggingface"/>
-    <category term="dataset"/>
-    <category term="supreme-court"/>
-    <category term="indonesia"/>
-    <category term="html"/>
-  </entry>
-  <entry>
-    <title>Qwen3 0.6B L2C Checkpoint</title>
-    <link href="https://azzindani.github.io/#/post/qwen3-0-6b-l2c-checkpoint"/>
-    <id>https://azzindani.github.io/#/post/qwen3-0-6b-l2c-checkpoint</id>
-    <updated>2025-10-12T00:00:00.000Z</updated>
-    <published>2025-10-12T00:00:00.000Z</published>
-    <author><name>Azzindani</name></author>
-    <summary>Qwen3 0.6B label-to-character checkpoint.</summary>
-    <category term="huggingface"/>
-    <category term="qwen"/>
-    <category term="checkpoint"/>
-    <category term="sft"/>
-  </entry>
-  <entry>
-    <title>Qwen3 1.7B Legal Distill</title>
-    <link href="https://azzindani.github.io/#/post/qwen3-1-7b-legal-distill"/>
-    <id>https://azzindani.github.io/#/post/qwen3-1-7b-legal-distill</id>
-    <updated>2025-10-07T00:00:00.000Z</updated>
-    <published>2025-10-07T00:00:00.000Z</published>
-    <author><name>Azzindani</name></author>
-    <summary>Distillation traces from Qwen3-1.7B on legal Q&amp;A.</summary>
-    <category term="huggingface"/>
-    <category term="dataset"/>
-    <category term="distillation"/>
-    <category term="qwen"/>
-    <category term="legal"/>
-  </entry>
-  <entry>
-    <title>Qwen3 0.6B C2C Checkpoint</title>
-    <link href="https://azzindani.github.io/#/post/qwen3-0-6b-c2c-checkpoint"/>
-    <id>https://azzindani.github.io/#/post/qwen3-0-6b-c2c-checkpoint</id>
-    <updated>2025-10-05T00:00:00.000Z</updated>
-    <published>2025-10-05T00:00:00.000Z</published>
-    <author><name>Azzindani</name></author>
-    <summary>Qwen3 0.6B character-to-character checkpoint.</summary>
-    <category term="huggingface"/>
-    <category term="qwen"/>
-    <category term="checkpoint"/>
-    <category term="sft"/>
-  </entry>
-  <entry>
-    <title>DeepSeek 0528 8B Legal Distill</title>
-    <link href="https://azzindani.github.io/#/post/deepseek-0528-8b-legal-distill"/>
-    <id>https://azzindani.github.io/#/post/deepseek-0528-8b-legal-distill</id>
-    <updated>2025-09-29T00:00:00.000Z</updated>
-    <published>2025-09-29T00:00:00.000Z</published>
-    <author><name>Azzindani</name></author>
-    <summary>Distillation traces from DeepSeek 8B over Indonesian legal Q&amp;A.</summary>
-    <category term="huggingface"/>
-    <category term="dataset"/>
-    <category term="distillation"/>
-    <category term="deepseek"/>
-    <category term="legal"/>
-  </entry>
-  <entry>
-    <title>US Regulation ECFR 20260101</title>
-    <link href="https://azzindani.github.io/#/post/us-regulation-ecfr-20260101"/>
-    <id>https://azzindani.github.io/#/post/us-regulation-ecfr-20260101</id>
-    <updated>2025-09-21T00:00:00.000Z</updated>
-    <published>2025-09-21T00:00:00.000Z</published>
-    <author><name>Azzindani</name></author>
-    <summary>US electronic CFR snapshot (2026-01-01).</summary>
-    <category term="huggingface"/>
-    <category term="dataset"/>
-    <category term="regulation"/>
-    <category term="usa"/>
-    <category term="ecfr"/>
-  </entry>
-  <entry>
-    <title>US Regulation CFR 20260101</title>
-    <link href="https://azzindani.github.io/#/post/us-regulation-cfr-20260101"/>
-    <id>https://azzindani.github.io/#/post/us-regulation-cfr-20260101</id>
-    <updated>2025-09-13T00:00:00.000Z</updated>
-    <published>2025-09-13T00:00:00.000Z</published>
-    <author><name>Azzindani</name></author>
-    <summary>US Code of Federal Regulations snapshot (2026-01-01).</summary>
-    <category term="huggingface"/>
-    <category term="dataset"/>
-    <category term="regulation"/>
-    <category term="usa"/>
-    <category term="cfr"/>
-  </entry>
-  <entry>
-    <title>Open Reaction Data</title>
-    <link href="https://azzindani.github.io/#/post/open-reaction-data"/>
-    <id>https://azzindani.github.io/#/post/open-reaction-data</id>
-    <updated>2025-09-05T00:00:00.000Z</updated>
-    <published>2025-09-05T00:00:00.000Z</published>
-    <author><name>Azzindani</name></author>
-    <summary>Open chemical-reaction dataset.</summary>
-    <category term="huggingface"/>
-    <category term="dataset"/>
-    <category term="chemistry"/>
-    <category term="reactions"/>
-  </entry>
-  <entry>
-    <title>Invoices Data</title>
-    <link href="https://azzindani.github.io/#/post/invoices-data"/>
-    <id>https://azzindani.github.io/#/post/invoices-data</id>
-    <updated>2025-08-28T00:00:00.000Z</updated>
-    <published>2025-08-28T00:00:00.000Z</published>
-    <author><name>Azzindani</name></author>
-    <summary>Invoice extraction / OCR training dataset.</summary>
-    <category term="huggingface"/>
-    <category term="dataset"/>
-    <category term="invoices"/>
-    <category term="ocr"/>
-  </entry>
-  <entry>
-    <title>ID REG DB 2511</title>
-    <link href="https://azzindani.github.io/#/post/id-reg-db-2511"/>
-    <id>https://azzindani.github.io/#/post/id-reg-db-2511</id>
-    <updated>2025-08-20T00:00:00.000Z</updated>
-    <published>2025-08-20T00:00:00.000Z</published>
-    <author><name>Azzindani</name></author>
-    <summary>Indonesian regulation DB snapshot (2025-11).</summary>
-    <category term="huggingface"/>
-    <category term="dataset"/>
-    <category term="database"/>
-    <category term="indonesia"/>
   </entry>
 </feed>
