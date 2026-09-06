@@ -21,9 +21,10 @@ before making changes — every section here is load-bearing.
    keep it dev-only (vitest, playwright are dev-only, never shipped).
 5. **Preserve the architecture.** Phases 1–7 in `js/app.js` are stable
    contract points. Add new phases at the end; don't shuffle existing ones.
-6. **Commit on the working branch only.** This repo's working branch is
-   `claude/portfolio-neural-network-Dv6SU`. `main` is what GitHub Pages
-   serves; never push directly to `main`.
+6. **Commit on a working branch, never on `main`.** Cut a `claude/<topic>`
+   branch and commit there; naming a specific branch here only leaves a dead
+   name behind once it merges. `main` is what GitHub Pages serves, so a push
+   to it is a deploy — do not push it without being asked to deploy.
 
 ## What this repo is
 
@@ -36,6 +37,32 @@ API — that's how new posts get published.
 The neural network canvas (`js/neural-bg.js`) renders an animated brain ↔
 AI neural mesh as the page background. It is decorative and must stay
 performant on mobile.
+
+### Site identity lives in five places
+
+The site is called **Azzindani**. There is no template engine, so the name and
+the description are repeated by hand and drift apart silently — it shipped as
+"Portfolio" long after everything else was real. When either changes, change
+all of:
+
+| File | What it holds |
+| ---- | ------------- |
+| `js/app.js` | `CONFIG.siteName`, `CONFIG.siteDescription` — `Head.set` builds every route's title from these. |
+| `index.html` | `<title>`, `meta description`, the four `og:`/`twitter:` tags, the RSS link title, the navbar and footer wordmarks. |
+| `404.html` | its own `<title>`. |
+| `tools/build-content-files.js` | `SITE_TITLE`, `SITE_DESC` — baked into `feed.xml`, so re-run it after a change. |
+| `favicon.svg` | `role="img"` label and `<title>`. |
+
+Two details worth keeping:
+
+- **The brand mark is one `<symbol id="brand-mark">` near the top of `<body>`**,
+  referenced by `<use>` from the navbar and the footer. It repeats favicon.svg's
+  geometry so the tab icon and the wordmark read as the same object, and it
+  paints in `currentColor`, so `.logo-icon`'s `var(--color-primary)` carries it
+  across both themes. Change the favicon and change the symbol with it.
+- **The footer year is set at runtime**, from the `DOMContentLoaded` handler in
+  `js/app.js` into `#footer-year`. A hard-coded year is wrong within twelve
+  months and nobody notices; this one cannot go stale.
 
 ## Top-level layout
 
@@ -106,13 +133,13 @@ half of what is left inside it is half the screen. Do not cap that width in
 pixels — a cap that bites stops the edge reaching the centre and the alignment
 goes with it; the container's own max-width is the limit.
 
-That makes the centre line a hard boundary the figure must stay off, and it is
-`HEAD_FIT_W` that keeps it off. Width only binds below ~1420px, where the
-figure stops being limited by height — and it has to stay under
+That makes the centre line a hard boundary the figure must stay off, and the
+figure's own fit constant is what keeps it off — `BRAIN_FIT_W` on stage 1,
+`HEAD_GRAPH_FIT_W` on stage 5. Width only binds below ~1420px, where the figure
+stops being limited by height, and it has to stay under
 `(0.5 - LANE_FRACTION) * 2`, or the figure's inner edge lands on the centre too
 and the two touch on a narrow desktop. At 0.40 against a lane of 0.21 that came
-out at 0.49 × W, an 8px gutter; 0.37 leaves 20–36px across the range and leaves
-the figure untouched at 1440 and up, where height is what binds.
+out at 0.49 × W, an 8px gutter.
 
 **The panel grows outward, never inward.** Its inner edge lands on 50% of the
 viewport whatever the container is — the stage's padding is symmetric, so
@@ -219,54 +246,47 @@ is not beside the mesh — see "The network band" below.
 
 ### Formations
 
-`PHASE_STOPS` entries carry a `shape` name. The structured network is generated
-from `NETWORK_LEVELS`. The head figures in `SHAPES` are SVG paths in a 0–100
-box, sampled and hit-tested at runtime — no build step, no data files.
+`PHASE_STOPS` entries carry a `shape` name, and there are exactly three:
+`brainGraph`, `headGraph` and `network`. The first two are node-and-edge
+graphs (below); the third is generated from `NETWORK_LEVELS`. No build step,
+no data files — the graph coordinates are static arrays in the source.
 
-**A head is not made of neurons, and it is not drawn.** Both were tried at
-length. Spending the neuron budget on a contour leaves ~80 fat cells strung
-around a loop and reads as wire. Tracing the reference photographs never
-survived contact with a face, because a threshold cannot tell a jaw from the
-shadow under it. Deriving a smooth contour from a head mesh and then setting
-the eyes, nose and mouth on top of it by hand read as a mask, not a head.
+**Nothing in the mesh is stroked line work any more.** An earlier version drew
+the head as a low-poly SVG's own edges — a silhouette pass, a wireframe pass,
+and brain regions populated with dust — carried as ~35KB of path data and
+rendered through `figureShell` into an offscreen canvas. Stages 1 and 5 moved
+to graph figures and that whole path went unreachable: `PHASE_STOPS` stopped
+naming `headSide`/`headFront`, so `SHAPES` was never read again.
 
-What is drawn now is a **low-poly head SVG's own line work**, extracted once,
-offline, and pasted in as static path data.
+It has been removed — `HEAD_SIL`, `HEAD_MESH`, `BRAIN`, `FOLDS`, `SHAPES`,
+`scatterTissue`, `linkTissue`, `pathsBBox`, `buildHeadFigure`,
+`figureAnchors`, `figureTransform`, `figurePaths`, `figureShell`,
+`drawHeadFigure`, `figureCache`, and the `HEAD_*` and `DUST_*` tunables
+that only they used. `js/neural-bg.js` went **173KB to 118KB**, on a file every
+page loads. Measured before and after at 1440x900, lit fraction per phase:
+10.1/7.0/9.0/9.8/9.0/4.2/11.8% against 11.0/6.8/9.3/9.8/10.5/4.1/8.9% — inside
+the drift the mesh shows between two samples of the same build.
 
-| Key           | What it is                                    | How it is used                    |
-| ------------- | --------------------------------------------- | --------------------------------- |
-| `silhouette`  | The mesh boundary — edges used by one polygon | **Stroked**: a wide soft pass, then a thin bright one. |
-| `mesh`        | Every other edge, chained into trails         | **Stroked** well under the rim. This is the face. |
-| `brain`       | The cranium                                   | **Populated** with dust + neurons. |
-| `folds`       | Gyri                                          | **Populated**, brighter than the area fill. |
+Two constants survived the cut and are worth knowing about:
 
-### Where the path data came from
+- **`HEAD_CENTER_Y` (0.545)** stays, because the graph figures place with it:
+  a figure centred on `H/2` at the height these fill puts its crown under the
+  navbar.
+- **`BRAIN_FIT_W/H` and `HEAD_GRAPH_FIT_W/H` are read indirectly**, as
+  `CFG[def.fitW]` from the `GRAPH_FIGURES` entry. A search for `CFG.BRAIN_FIT_W`
+  finds nothing and they look dead. They are not.
 
-Two set operations over the SVG's polygons, and nothing else:
+If a drawn figure is ever wanted again, it is in the history rather than in the
+file — `git log -- js/neural-bg.js`.
 
-- **`silhouette`** — count how many polygons use each edge. The ones used once
-  are the boundary; chain them into a loop. That is the outline, exactly. No
-  threshold, no morphology, no smoothing, nothing to tune.
-- **`mesh`** — every edge used twice, chained into **trails** (walk unused
-  edges from an odd-degree vertex until you cannot continue, repeat). 2007
-  edges become 274 polylines of 2281 points. Written as separate `M..L..`
-  segments the same edges cost twice as much source, because a trail reuses its
-  previous endpoint.
-- Both are clipped to a crop line under the chin before they are normalised.
-
-Only the **brain** is not in the SVG. It is the silhouette above the brow line,
-pulled inside the skull along the direction to the cranium's centre, closed by
-a base that dips where the temporal lobes hang. Draw it to a comfortable margin
-instead and the back of the skull is a large empty balloon.
 
 ### The graph figures (stages 1 and 5)
 
 Stages 1 and 5 are not line work. They are **node-and-edge graphs assembled out
 of the neurons themselves** — the cells sit on the nodes, `formEdges` supplies
-the wiring, and nothing is stroked for either. `buildHeadFigure` returns null
-for the names in `GRAPH_FIGURES` and `drawHeadFigure` bails; that is by design,
-not an oversight. There is no offscreen shell because there is no static line
-work. Stage 1 is a brain in lateral view, stage 5 a head in front view, and both
+the wiring, and nothing is stroked for either. There is no offscreen shell,
+because there is no static line work left in the file at all.
+Stage 1 is a brain in lateral view, stage 5 a head in front view, and both
 run through `buildGraphShape` — the entry in `GRAPH_FIGURES` carries the levels,
 the fit constants, whether to mirror, and the cell size.
 
@@ -386,15 +406,15 @@ the levels rather than one fixed graph.
 
 **Cell size is per figure, not global.** The head's median edge is 9.2 units
 against the brain's 16.8, so at the brain's 0.85 the somata overlap their own
-wires and the face turns to mush; the head uses 0.38. Likewise the head cannot
-borrow `HEAD_FIT_H` 0.9 from the drawn head figure: that one is allowed to run
-off the bottom because the rim fade dissolves the neck, and a graph has no fade,
-so a chin at the viewport edge just looks cut off. 0.78 leaves ~75px top and
-bottom at 900.
+wires and the face turns to mush; the head uses 0.38. `HEAD_GRAPH_FIT_H` is
+0.78 rather than the 0.9 the deleted drawn figure used: that one was allowed to
+run off the bottom because its rim fade dissolved the neck, and a graph has no
+fade, so a chin at the viewport edge just looks cut off. 0.78 leaves ~75px top
+and bottom at 900.
 
 **Sizing is the one place it fights the layout.** The graph is landscape
-(100 × 77) where the head figures are tall and narrow, so `BRAIN_FIT_W` binds
-where `HEAD_FIT_H` does for the head. Its ceiling is not the viewport but the
+(100 × 77) where the head graph is tall and narrow, so `BRAIN_FIT_W` binds
+where `HEAD_GRAPH_FIT_H` does for the head. Its ceiling is not the viewport but the
 centre line, where the panel's edge sits. The lane offset alone parks the figure
 at `LANE_FRACTION` from centre, which is *not* the middle of the half it has to
 fill, so `getShapePoints` adds `dx = -(0.25 - LANE_FRACTION) * W` to centre it
@@ -496,8 +516,8 @@ Two things that were not obvious:
   forming kind.** The receding half has no formation slots by definition, so
   the original `if (t.form > 0 && n.formIdx < 0) tp *= 1 - t.form` took the
   ghost field to zero and emptied the screen exactly as before. `figureKind`
-  answers which half a figure is made of (`SHAPES` carries it for the drawn
-  figures; the graph figures and the network needed it adding).
+  answers which half a figure is made of — `GRAPH_FIGURES` carries `kind`,
+  and `network` is hard-coded to `ai`.
 - **The structured branch of `buildConnections` returns early**, so the ghosts
   need a proximity pass of their own or they have no wires at all. It is
   restricted to slotless, same-kind pairs with a degree cap, which is ~4k pairs
@@ -582,59 +602,24 @@ to ~35, and all four stages still measure 60fps median.
 
 Load-bearing details:
 
-- **The shell is baked, not stroked.** Glow, rim and wireframe come to ~2300
-  line segments and are identical every frame — same geometry, same fade, only
-  the overall alpha moves. Stroking them live costs about 9fps, so
-  `figureShell` renders them once per (fitted scale, dpr) into an offscreen
-  canvas and the frame blits that under `globalAlpha`. Two things there are
-  easy to get wrong: the pad must be in **authoring units** (`lineWidth / k`),
-  or the buffer comes out k times larger than it needs to be; and the buffer is
-  sized at `k * dpr` so the blit lands 1:1 on device pixels instead of being
-  resampled.
-- **The wireframe must sit well under the rim.** At equal weight the triangles
-  win and the head stops having an edge. `HEAD_MESH_ALPHA` is a third of
-  `HEAD_LINE_ALPHA` and the mesh is stroked at just over half its width.
-- **Round joins are per-vertex geometry.** The mesh has a few thousand of them;
-  `miter`/`butt` for that pass is worth several fps and is invisible at this
-  line weight. The rim keeps round joins — there it shows.
-- **`HEAD_RIM_FADE_START` is a neck control.** The figure is cropped under the
-  chin, so the last stretch of the box *is* the neck, and the rim fade is what
-  dissolves the cut edge. Set it low — it was 0.6, left over from when the head
-  was a filled mass whose outline had to give out first — and the fade eats the
-  jaw and chin.
-- **Don't re-proportion the head to match the reference images.** Their
-  craniums are enlarged to make room for the brain graphic; in the side
-  reference the brow sits at 61% of head height against ~42% on a real skull.
 - **Formations supply their own edges.** Without them the gathered neurons sit
   inside each other's `CONNECTION_DIST` and proximity wiring throws long wires
   across the figure. `formEdges` replaces distance-based wiring entirely while
   a shape is held.
-- **Fold dust must outshine area dust.** Seeded points are tagged `fold` and
-  drawn larger and brighter. Without that contrast the region is one
-  undifferentiated cloud — the folds are what make it read as tissue.
-- **Geometry is built once, in authoring space.** `figureCache` is *not*
-  cleared on resize — only `shapeCache` is. A resize changes `figureTransform`,
-  never the point layout, so the tissue does not reshuffle mid-drag.
-- **`figureTransform` is the single source of placement**, which is what keeps
-  the drawn shell and the neurons inside it from separating. It fits the figure
-  into `HEAD_FIT_W` × `HEAD_FIT_H` and applies the vertical shift, so anything
-  positional belongs *in it* rather than in a draw call — the shell and the
-  formation targets both subtract its `cy`, and only one of them would move if
-  the shift lived anywhere else.
-- **The figure is tall and narrow** — its box is 0.65 wide per unit high — so
-  `HEAD_FIT_H` binds and `HEAD_FIT_W` never does on a desktop viewport. Filling
-  the half it is given means filling the viewport's *height*.
+- **Geometry is built once, in authoring space.** `shapeCache` is cleared on
+  resize; the graph levels behind it are not. A resize changes the fitted scale,
+  never the graph, so the figure does not reshuffle mid-drag.
 - **Centred on `H/2`, a full-height figure puts its crown under the navbar.**
-  `HEAD_CENTER_Y` centres it low instead, and `HEAD_TOP_PX` is a hard floor for
-  the crown that catches short landscape viewports, where the offset alone is
-  not enough. The neck is the end allowed to run past the bottom edge: it is
-  inside the rim fade by then, so it dissolves rather than being cut.
+  `HEAD_CENTER_Y` (0.545) centres it low instead. This is the one `HEAD_*`
+  constant that outlived the drawn figures, because the graph figures place
+  with it too.
 - **The network at stage 3 is sized separately** (`buildNetworkShape`) and has
-  to be kept in step by hand. It shares the same half-viewport slot as the head
-  figures, and left at its old caps it read as a small diagram parked beside two
-  large ones.
+  to be kept in step by hand — it is a full-width band, not a figure in a lane,
+  so `NET_FIT_W` and `NET_CENTER_Y` are its controls rather than the graph
+  figures' fit constants.
 - **Neurons with no slot fade out** (`formIdx < 0`), otherwise they drift
   across the figure and blur it.
+
 
 Formation does not morph one figure into the next: it falls to zero
 mid-transition so the mesh scatters and re-gathers, which is what the rupture
@@ -905,6 +890,8 @@ fetch raw markdown → rewrite relatives → cache → return.
 properties:
 
 - 3D positions, projected each frame (`PERSPECTIVE`, `DEPTH_RANGE`).
+- Nothing is stroked line work: every figure is neurons on graph nodes.
+  See "Formations" for what was removed and why.
 - Two neuron kinds: `ai` (sharp circles, blue) and `bio` (gradient blobs
   with dendrite stubs, purple).
 - Connections rebuilt every `CONN_RECALC_INTERVAL` frames (cheap O(n²)).
@@ -969,8 +956,24 @@ pure helpers here** so they're testable in Node without jsdom.
 - `tests/e2e/` — Playwright (Chromium only by default). Smokes: feed
   loads, navigation works, post page renders markdown, mermaid renders,
   KaTeX renders, neural canvas mounts.
-- `package.json` carries dev-only deps. `npm test` runs unit; `npm run e2e`
-  runs Playwright; `npm run check` runs both.
+- `tests/fixtures/` — **the markdown pipeline is tested against a fixture, not
+  against published content.** No real post uses LaTeX or mermaid (the content
+  is repo READMEs, PDF decks and plain articles), so the pipeline tests used to
+  lean on two demo posts committed to `content/` and hidden with `draft: true`
+  — which meant the published manifest carried placeholder entries purely for
+  the suite, and rebuilding the blog broke eight tests at once.
+  `installFixtures(page)` intercepts the `content/posts.json` fetch and splices
+  one synthetic post in. Call it **before the first `page.goto`**:
+  `ContentService` caches the manifest the moment any route asks for it.
+  It reads the real manifest per request, so the fixture rides on whatever is
+  actually published rather than a snapshot of it.
+- **Assert against content that exists.** Several tests were pinned to fixtures
+  that had been deleted — `/#/category/demo` (a category no live post has) and
+  a `toBe(false)` on a post that was already gone, which can never fail. If a
+  test names a slug, tag or category, check it is still in the manifest.
+- `package.json` carries dev-only deps — including `playwright`, which
+  `tools/*.js` use for screenshots and probes and which nothing ships.
+  `npm test` runs unit; `npm run e2e` runs Playwright; `npm run check` runs both.
 - CI: `.github/workflows/ci.yml` runs both on push & PR. Caches `~/.npm`.
 - **Do not** add runtime npm deps. The site must remain a zero-build static
   bundle.
