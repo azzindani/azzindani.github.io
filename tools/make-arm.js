@@ -42,7 +42,7 @@ const WRIST    = [72, 27, 0];
 // of one face. The head level hit the same wall at 34 nodes and made the same
 // trade: a head rather than a face.
 const LEVELS = {
-    fine:   { ring: 7, wristRing: 5, flat: false },
+    fine:   { ring: 6, wristRing: 4, flat: false },
     coarse: { ring: 4, wristRing: 3, flat: true, spare: true },
 };
 
@@ -105,20 +105,37 @@ function build(level) {
         return { near, far };
     };
 
-    // A claw: four corners tapering to a single point. The tip is one node and
-    // it is the whole difference between a gripper and a pair of blocks.
-    const claw = (root, tip, halfW, halfD) => {
-        const dx = tip[0] - root[0], dy = tip[1] - root[1];
-        const len = Math.hypot(dx, dy) || 1;
-        const nx = -dy / len * halfW, ny = dx / len * halfW;
-        const base = L.flat
-            ? [at(root[0] + nx, root[1] + ny, 0), at(root[0] - nx, root[1] - ny, 0)]
-            : [at(root[0] + nx, root[1] + ny,  halfD), at(root[0] - nx, root[1] - ny,  halfD),
-               at(root[0] - nx, root[1] - ny, -halfD), at(root[0] + nx, root[1] + ny, -halfD)];
+    // A claw of TWO segments with a knuckle between them: root ring, knuckle
+    // ring, then a taper to a single point. One straight taper reads as a
+    // spike; the bend at the knuckle is what makes it read as a finger that
+    // could close.
+    //
+    // A ring here is the cross-section perpendicular to that segment — four
+    // corners when the figure has depth, two when it is flat. The tip stays
+    // one node, which is still the whole difference between a gripper and a
+    // pair of blocks.
+    const clawRing = (p, dir, halfW, halfD) => {
+        const len = Math.hypot(dir[0], dir[1]) || 1;
+        const nx = -dir[1] / len * halfW, ny = dir[0] / len * halfW;
+        const ids = L.flat
+            ? [at(p[0] + nx, p[1] + ny, 0), at(p[0] - nx, p[1] - ny, 0)]
+            : [at(p[0] + nx, p[1] + ny,  halfD), at(p[0] - nx, p[1] - ny,  halfD),
+               at(p[0] - nx, p[1] - ny, -halfD), at(p[0] + nx, p[1] + ny, -halfD)];
+        chain(ids, ids.length > 2);
+        return ids;
+    };
+    const claw = (root, knuckle, tip, halfW, halfD) => {
+        const seg1 = [knuckle[0] - root[0], knuckle[1] - root[1]];
+        const seg2 = [tip[0] - knuckle[0], tip[1] - knuckle[1]];
+        // At the coarse level the claw has no root ring of its own — it hangs
+        // its knuckle straight off whatever it is mounted on. Two nodes a claw
+        // is the difference between 33 and 29, and 31 is the ceiling.
+        const base = L.spare ? [] : clawRing(root, seg1, halfW, halfD);
+        const mid  = clawRing(knuckle, seg2, halfW * 0.8, halfD * 0.8);
         const point = at(tip[0], tip[1], 0);
-        chain(base, true);
-        for (const b of base) link(b, point);
-        return { base, point };
+        for (let i = 0; i < base.length; i++) link(base[i], mid[i]);
+        for (const m of mid) link(m, point);
+        return { base, mid, point, mount: base.length ? base : mid };
     };
 
     return { V, E, at, link, chain, box, joint, claw, L };
@@ -171,9 +188,12 @@ function arm(level = 'fine') {
         link(jW.near[Math.floor(L.wristRing / 2)], palm.near[1]);
         link(jW.far[Math.floor(L.wristRing / 2)], palm.far[1]);
     }
-    const upperClaw = claw([87, 22, 0], [100, 12, 0], 2.4, 2.2);
-    const lowerClaw = claw([87, 32, 0], [100, 42, 0], 2.4, 2.2);
-    const cb = (c, i) => c.base[Math.min(i, c.base.length - 1)];
+    // The knuckle sits about two thirds along, and the second segment turns in
+    // toward the other claw — an open hand about to close, rather than two
+    // spikes pointing away from each other.
+    const upperClaw = claw([87, 22, 0], [97, 15, 0], [104, 19, 0], 2.4, 2.2);
+    const lowerClaw = claw([87, 32, 0], [97, 39, 0], [104, 35, 0], 2.4, 2.2);
+    const cb = (c, i) => c.mount[Math.min(i, c.mount.length - 1)];
     const pn = (i) => palm.near[Math.min(i, palm.near.length - 1)];
     const pf = (i) => palm.far[Math.min(i, palm.far.length - 1)];
     link(pn(3), cb(upperClaw, 0)); link(pf(3), cb(upperClaw, 3));
