@@ -3013,16 +3013,19 @@ body.cmd-open { overflow: hidden; }
    to the bottom and NET_CENTER_Y (js/neural-bg.js) is set to centre the band
    in what is left above it. */
 .lp-band { justify-content: center; align-items: flex-end; }
+/* Copy, then chart, then the era labels — one column, not two. The labels are
+   the chart's axis and there are five of them, so they need the panel's whole
+   width: in the old copy | chart split they had ~500px to share, which is
+   100px each and three words per line. */
 .lp-panel-band {
     width: min(96%, 1040px);
     display: grid;
-    grid-template-columns: 1.05fr 0.95fr;
-    gap: 34px;
-    align-items: center;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    align-items: start;
 }
-/* The copy is its own query container: the panel is 1040 wide but the column
-   the type sits in is half that, and sizing off the panel would put a 42px
-   heading in a 500px column. */
+/* The copy is its own query container: sizing off the panel would put a 42px
+   heading over a measure that is capped far shorter. */
 .lp-band-copy { container-type: inline-size; }
 .lp-panel-band .lp-lead { margin-bottom: 0; }
 .lp-panel-band .lp-chart { min-width: 0; }
@@ -3262,19 +3265,54 @@ body.cmd-open { overflow: hidden; }
     color: var(--color-text-muted);
 }
 
-/* Bars grow from the baseline once the chart is revealed. */
-.lp-chart svg { width: 100%; height: auto; overflow: visible; }
-.lp-axis { stroke: var(--color-border); stroke-width: 1; }
-.lp-bar { fill: var(--color-primary); transform-origin: center bottom; }
-.lp-chart.in-view .lp-bar {
-    animation: lp-bar-grow 0.7s cubic-bezier(0.22, 1, 0.36, 1) backwards;
-    animation-delay: calc(var(--bar-i) * 90ms);
+/* ── Stage 3: the five eras ──
+   The chart is the argument, not an ornament, so it gets no axes, no ticks
+   and no values — see renderLandingChart. preserveAspectRatio is none because
+   the bands are a shape, not a measurement: letting them squash to whatever
+   height the panel has left costs nothing and keeps the stage inside the
+   viewport on a short laptop. */
+.lp-chart { position: relative; }
+.lp-chart svg { display: block; width: 100%; height: clamp(90px, 15vh, 150px); }
+.lp-band-area {
+    fill: var(--color-primary);
+    transform-origin: center bottom;
 }
-@keyframes lp-bar-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
-.lp-bar-label {
-    fill: var(--color-text-muted);
-    font-size: 11px;
+.lp-chart.in-view .lp-band-area {
+    animation: lp-band-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation-delay: calc(var(--band-i) * 110ms);
+}
+@keyframes lp-band-rise { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+/* Direction without scale: the one thing a reader needs to know about the
+   vertical axis is which way is more. */
+.lp-chart-axis {
+    position: absolute;
+    top: 0; left: 0;
     font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+.lp-chart-axis::before { content: '↑ '; }
+
+.lp-eras {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+}
+.lp-era { border-top: 1px solid var(--color-border-light); padding-top: 10px; }
+.lp-era-term {
+    display: block;
+    font-weight: 700;
+    font-size: clamp(0.92rem, 0.88rem + 0.2cqi, 1.02rem);
+    color: var(--color-primary);
+}
+.lp-era-note {
+    display: block;
+    margin-top: 3px;
+    color: var(--color-text-secondary);
+    font-size: clamp(0.8rem, 0.78rem + 0.12cqi, 0.88rem);
+    line-height: 1.45;
 }
 
 /* ── Looping topic ticker ──
@@ -3370,14 +3408,25 @@ body.cmd-open { overflow: hidden; }
     .lp-split, .lp-split-left, .lp-full, .lp-band { justify-content: center; }
     .lp-band { align-items: center; }
     .lp-panel, .lp-panel-wide { width: 100%; max-width: 640px; padding: 28px 22px; }
-    .lp-panel-band { grid-template-columns: 1fr; gap: 20px; }
+    .lp-panel-band { gap: 20px; }
+    /* Five era columns won't hold below 900px — 140px each is three words a
+       line — but five ROWS is worse: at 900x700 that put the panel at 103% of
+       the viewport, the one overflow in nine sizes tested. Two columns is the
+       middle, and it halves the height. One column only once the width can no
+       longer carry a sentence beside another. */
+    .lp-eras { grid-template-columns: repeat(2, 1fr); gap: 14px 20px; }
     .lp-panel-band .lp-lead { margin-bottom: 4px; }
     /* The min-heights are a desktop balance device; stacked full-width panels
        set their own rhythm and a floor here only adds dead space. */
     .lp-split .lp-panel, .lp-split-left .lp-panel, .lp-full .lp-panel-wide { min-height: 0; }
     .lp-panel { background: rgba(var(--color-surface-rgb), 0.88); }
     .lp-hero { min-height: 88vh; }
-    .lp-stats { grid-template-columns: 1fr; gap: 12px; }
+    /* The stats stay three across at every width. Stacking them was fine when
+       they were the whole of stage 2, but on stage 6 they sit under a heading,
+       a lead and a CTA, and three tall cards pushed the panel to 113% of the
+       viewport at 820x640. A count and a one-word label fit 120px. */
+    .lp-stats { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .lp-stat { padding: 18px 8px; }
     .lp-beats { grid-template-columns: 1fr; gap: 14px; }
 }
 
@@ -3392,5 +3441,27 @@ body.cmd-open { overflow: hidden; }
     }
     .lp-scroll-cue span { animation: none; }
     .reveal { opacity: 1; transform: none; transition: none; }
-    .lp-chart.in-view .lp-bar { animation: none; }
+    .lp-chart.in-view .lp-band-area { animation: none; }
+}
+
+/* One era per row only once two sentences can no longer sit side by side.
+   Five stacked rows is the tallest stage 3 ever gets, so the chart gives back
+   the height they cost — at 360x740 the panel measured 107% of the viewport
+   before this. */
+@media (max-width: 560px) {
+    .lp-eras { grid-template-columns: 1fr; gap: 10px; }
+    .lp-panel-band { gap: 14px; }
+    .lp-chart svg { height: clamp(64px, 10vh, 100px); }
+}
+/* Short phones. Height is its own breakpoint axis here, the same way it is for
+   the laptop tiers above: a 375x667 or 320x568 screen keeps the one-column
+   layout but has 180-280px less to spend on it, and five stacked eras plus a
+   chart put stage 3 at 109% and 132% of the viewport. The chart gives back
+   most of it — it carries no values, so its height is free. */
+@media (max-width: 560px) and (max-height: 700px) {
+    .lp-panel-band { gap: 10px; }
+    .lp-chart svg { height: 44px; }
+    .lp-chart-axis { font-size: 0.62rem; }
+    .lp-eras { gap: 7px; }
+    .lp-era { padding-top: 7px; }
 }

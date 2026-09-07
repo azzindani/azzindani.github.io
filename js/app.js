@@ -1160,12 +1160,19 @@ function renderLandingPage() {
         <section class="lp-stage lp-band" data-stage="3">
             <div class="lp-panel lp-panel-band">
                 <div class="lp-band-copy">
-                    <p class="lp-kicker reveal">03 — Artificial</p>
-                    <h2 class="reveal">The machine side</h2>
-                    <p class="lp-lead reveal">Placeholder paragraph for the third section. The artificial
-                        neurons have spread into a feed-forward network across the screen above.</p>
+                    <p class="lp-kicker reveal">03 — Accumulation</p>
+                    <h2 class="reveal">Nothing was ever replaced</h2>
+                    <p class="lp-lead reveal">Every layer added capacity without retiring the one beneath
+                        it. People still type, and spreadsheets still run under the system that was meant
+                        to replace them.</p>
                 </div>
+                <!-- The chart carries no numbers on purpose. Any figure here
+                     would be invented, and the claim the stage makes is about
+                     shape, not size: five bands stacking, none of them ending.
+                     The era labels below double as the axis, so the grid and
+                     the chart share one set of columns. -->
                 <div class="lp-chart reveal" id="lp-chart"></div>
+                <div class="lp-eras" id="lp-eras"></div>
             </div>
         </section>
 
@@ -1219,6 +1226,7 @@ function renderLandingPage() {
 
     renderLandingStats();
     renderLandingChart();
+    renderLandingEras();
     renderLandingTicker();
     setupLandingSections(app);
     return setupLandingScroll();
@@ -1246,37 +1254,89 @@ function renderLandingStats() {
     }).catch(() => { /* leave the em-dashes in place */ });
 }
 
-// Stage 3 — a small inline SVG bar chart. Hand-rolled: the site ships no
-// charting library and shouldn't start now (see CLAUDE.md).
+// Stage 3 — the five eras of capacity, as stacked bands. Hand-rolled inline
+// SVG: the site ships no charting library and shouldn't start now.
+//
+// There are no values anywhere, and that is the design. Any number here would
+// be invented, and the claim is about shape: each era ADDS a band and no band
+// ever ends, so the picture says "nothing was replaced" before a word is read.
+// A rising line would have said only "it got better".
+//
+// Bands keep growing after the next one starts, rather than flattening — the
+// truer reading, since the older layers really are still spreading.
+const LANDING_ERAS = [
+    { term: 'By hand',   note: 'one person, one task at a time',      start: 0.00 },
+    { term: 'Recorded',  note: 'systems that track what was done',    start: 0.20 },
+    { term: 'Digitised', note: 'the work itself moves into software', start: 0.40 },
+    { term: 'Automated', note: 'the steps run without anyone watching', start: 0.60 },
+    { term: 'Delegated', note: 'judgment handed over, and supervised', start: 0.80 },
+];
+
 function renderLandingChart() {
     const host = document.getElementById('lp-chart');
     if (!host) return;
-    const bars = [
-        { label: 'Alpha',   value: 72 },
-        { label: 'Beta',    value: 45 },
-        { label: 'Gamma',   value: 88 },
-        { label: 'Delta',   value: 61 },
-        { label: 'Epsilon', value: 34 },
-    ];
-    const W = 460, H = 200, pad = 28, gap = 14;
-    const bw = (W - pad * 2 - gap * (bars.length - 1)) / bars.length;
-    const max = 100;
 
-    const rects = bars.map((b, i) => {
-        const h = (b.value / max) * (H - pad * 2);
-        const x = pad + i * (bw + gap);
-        const y = H - pad - h;
-        return `<rect class="lp-bar" x="${x}" y="${y}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}"
-                    rx="3" style="--bar-h:${h.toFixed(1)}px; --bar-i:${i}"></rect>
-                <text class="lp-bar-label" x="${(x + bw / 2).toFixed(1)}" y="${H - pad + 14}"
-                    text-anchor="middle">${b.label}</text>`;
+    const W = 1000, H = 260, top = 26, bottom = 2;
+    const plot = H - top - bottom;
+    const N = 120;
+    // Smoothstep: zero slope at both ends, so a band arrives and settles
+    // without a corner. Same curve the settle glide uses.
+    const ease = (t) => t <= 0 ? 0 : t >= 1 ? 1 : t * t * t * (t * (t * 6 - 15) + 10);
+
+    // Each era ramps in over the segment after it starts, then keeps climbing
+    // gently for the rest of the width.
+    const value = (era, x) => {
+        if (x <= era.start) return 0;
+        const s = (x - era.start) / (1 - era.start);
+        return ease(Math.min(1, s * 2.6)) * (1 + 0.55 * s);
+    };
+
+    // Sample once, stack, then normalise so the tallest column just fits.
+    const cols = [];
+    for (let k = 0; k <= N; k++) {
+        const x = k / N;
+        let acc = 0;
+        cols.push(LANDING_ERAS.map(e => (acc += value(e, x))));
+    }
+    const peak = cols[N][LANDING_ERAS.length - 1] || 1;
+    const px = (k) => (k / N) * W;
+    const py = (v) => top + plot - (v / peak) * plot;
+
+    // One filled band per era: forward along its own top edge, back along the
+    // top edge of the era below it.
+    const bands = LANDING_ERAS.map((e, i) => {
+        let d = '';
+        for (let k = 0; k <= N; k++) d += `${k ? 'L' : 'M'}${px(k).toFixed(1)} ${py(cols[k][i]).toFixed(1)}`;
+        for (let k = N; k >= 0; k--) {
+            const below = i === 0 ? 0 : cols[k][i - 1];
+            d += `L${px(k).toFixed(1)} ${py(below).toFixed(1)}`;
+        }
+        return `<path class="lp-band-area" d="${d}Z" style="--band-i:${i};
+                    opacity:${(0.26 + i * 0.17).toFixed(2)}"></path>`;
     }).join('');
 
     host.innerHTML =
-        `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Placeholder chart with five sample values">
-            <line class="lp-axis" x1="${pad}" y1="${H - pad}" x2="${W - pad}" y2="${H - pad}"></line>
-            ${rects}
-         </svg>`;
+        `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">${bands}</svg>
+         <span class="lp-chart-axis">capacity</span>`;
+
+    // The chart is decorative on its own — the sentence below is what a screen
+    // reader needs, and it says the same thing the bands do.
+    host.setAttribute('role', 'img');
+    host.setAttribute('aria-label',
+        'Five bands stacking left to right — ' + LANDING_ERAS.map(e => e.term).join(', ') +
+        ' — each one added on top of the last, none of them ending.');
+}
+
+// The era labels under the chart. They double as its axis, so the grid and the
+// bands share one set of five columns.
+function renderLandingEras() {
+    const host = document.getElementById('lp-eras');
+    if (!host) return;
+    host.innerHTML = LANDING_ERAS.map(e =>
+        `<div class="lp-era reveal">
+            <span class="lp-era-term">${Utils.escapeHtml(e.term)}</span>
+            <span class="lp-era-note">${Utils.escapeHtml(e.note)}</span>
+         </div>`).join('');
 }
 
 // Stage 4 — the looping topic ticker. Two rows drifting in opposite
