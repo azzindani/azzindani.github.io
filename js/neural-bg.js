@@ -43,6 +43,14 @@
         // 14.3 (network) and 6.7 / 11.5 (head) against 17-19% / 29-33 for a
         // drifting stage.
         WIRE_WIDTH_FORM: 1.3,
+        // A formation's SHORT wires are drawn finer than its long ones. Length
+        // in screen pixels: below WIRE_FINE_LEN a wire is tapered toward
+        // WIRE_FINE_MIN of full width, above it nothing changes. The head's
+        // features sit around 45px and its cranium spans around 85px, so the
+        // face thins and the silhouette does not; the brain's median edge is
+        // near 106px and is untouched.
+        WIRE_FINE_LEN: 78,
+        WIRE_FINE_MIN: 0.4,
         FORM_GLOW: 1.4,           // multiplies cell + wire alpha, faded by formAmount
 
         // ── The network band (stage 3) ──
@@ -96,6 +104,14 @@
         // Graph figures declare their own cell size (GRAPH_FIGURES.scale): the
         // drawn head figures need theirs small or the somata smear the
         // silhouette, while a graph's nodes ARE the figure and vanish at 0.3.
+        // A figure with `sizeByEdge` then modulates that per cell, by the
+        // length of the edges meeting it — the band a cell may be scaled
+        // within, and how hard the ratio is applied. Gamma is well under 1
+        // because the raw ratio is brutal: the tightest node on the head sits
+        // at 0.21 of the median edge, and a cell that small is not a cell.
+        GRAPH_CELL_MIN: 0.42,
+        GRAPH_CELL_MAX: 1.85,
+        GRAPH_CELL_GAMMA: 0.75,
         // A formation pins every cell exactly on its target, which reads as a
         // diagram rather than tissue. A slow orbit around the target keeps it
         // alive; the wires follow the cells, so the whole figure breathes.
@@ -449,6 +465,20 @@
             // 16.8, and at 0.85 the somata swallow the face.
             scale: 0.48,
             mirror: false,       // a front view has no handedness to correct
+            // ONE size for the whole figure is what buried the face. A single
+            // scale has to satisfy two opposite demands at once: the cranium
+            // and cheek panels are wide-open triangles that want a cell big
+            // enough to register, and the eye rings, nostrils and lips are
+            // built out of edges a third that length, where the same cell
+            // covers the feature it is supposed to describe. 0.48 split the
+            // difference and lost both — the outline read and the face did not.
+            //
+            // So size each cell by the edges that meet it (see nodeCellScales).
+            // Nothing moves: the coordinates are untouched and the graph is the
+            // graph. The big cells simply end up where there is room for them,
+            // which is the silhouette, and the features get cells scaled to the
+            // detail they carry.
+            sizeByEdge: true,
         },
     };
 
@@ -478,6 +508,35 @@
         return { def, level: pick };
     }
 
+    // Per-node cell size, from the edges that meet each node.
+    //
+    // A node's local edge length is a direct measure of how much room it has:
+    // a feature IS its short edges — an eye ring, a nostril, a lip — while the
+    // cranium and cheek panels span the long ones. So the median incident edge
+    // length, against the median across the figure, says how big that cell may
+    // be without covering what it sits on.
+    //
+    // Tempered by GRAPH_CELL_GAMMA rather than used raw: linearly, the tightest
+    // node on the head comes out at 0.21 of the median and the cell vanishes.
+    // The clamp then holds both ends — nothing smaller than a dot, nothing
+    // wider than the brain's own cells.
+    function nodeCellScales(g) {
+        const P = g.nodes;
+        const len = g.edges.map(([a, b]) => Math.hypot(P[a].x - P[b].x, P[a].y - P[b].y));
+        const inc = P.map(() => []);
+        g.edges.forEach(([a, b], i) => { inc[a].push(len[i]); inc[b].push(len[i]); });
+        const med = (arr) => {
+            if (!arr.length) return 0;
+            const s = arr.slice().sort((p, q) => p - q), h = s.length >> 1;
+            return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2;
+        };
+        const per = inc.map(med);
+        const ref = med(per.filter(v => v > 0)) || 1;
+        const shape = (v) => Math.min(CFG.GRAPH_CELL_MAX, Math.max(CFG.GRAPH_CELL_MIN,
+            Math.pow((v || ref) / ref, CFG.GRAPH_CELL_GAMMA)));
+        return { node: per.map(shape), edge: len.map(shape) };
+    }
+
     // Lay `count` neuron targets on a graph.
     //
     // Nodes come FIRST and are never dropped. Whatever is left over is spread
@@ -497,9 +556,12 @@
         const k = Math.min((W * CFG[def.fitW]) / bw, (H * CFG[def.fitH]) / bh);
         const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
         const sx = def.mirror ? -1 : 1;
-        const at = (n) => ({ x: sx * (n.x - cx) * k, y: (n.y - cy) * k, z: 0, g: 1 });
+        const at = (n, s) => ({ x: sx * (n.x - cx) * k, y: (n.y - cy) * k, z: 0, g: 1, s: s || 1 });
 
-        const pts = g.nodes.map(at);
+        // `s` is a per-cell multiplier on the figure's own scale, 1 where the
+        // figure does not ask for it.
+        const cell = def.sizeByEdge ? nodeCellScales(g) : null;
+        const pts = g.nodes.map((n, i) => at(n, cell ? cell.node[i] : 1));
         const extra = Math.max(0, (count || 0) - pts.length);
         if (extra > 0) {
             const P = g.nodes;
@@ -514,8 +576,11 @@
                 const [a, b] = g.edges[i];
                 for (let j = 1; j <= take; j++) {
                     const t = j / (take + 1);
+                    // A cell sitting ON an edge takes that edge's own size, so
+                    // the fill along a lip stays as fine as the lip's nodes.
                     pts.push(at({ x: P[a].x + (P[b].x - P[a].x) * t,
-                                  y: P[a].y + (P[b].y - P[a].y) * t }));
+                                  y: P[a].y + (P[b].y - P[a].y) * t },
+                                cell ? cell.edge[i] : 1));
                 }
             }
         }
@@ -706,6 +771,9 @@
     // Lane offset the current figure is assembling in. The drawn shell and
     // the neurons inside it both read this, so they can never separate.
     let formLaneX = 0;
+    // Global fallback. Every neuron also carries n.formShrink, which is this
+    // value except for a cell formed into a figure that sizes per node — see
+    // GRAPH_FIGURES.sizeByEdge. Draw sites read the per-neuron one.
     let formShrink = 1;      // radius/neurite multiplier, 1 = free, FORM_SCALE = formed
     // Reused per-frame buffers — avoid per-frame array allocations (a major
     // GC pressure source that shows up as jitter).
@@ -1211,11 +1279,19 @@
         sigMaxMul   = shape ? mix(shape.sigMax)   : 1;
         formWireAlpha = shape ? mix(shape.wireAlpha) : 1;
         formWireWidth = shape ? mix(shape.wireWidth) : 1;
+        // Per shape, not global: graph figures declare their own cell size.
+        // Computed before the loop because each cell now scales off it.
+        const fScale = (shape && shape.scale) || CFG.FORM_SCALE;
+        formShrink = 1 - (1 - fScale) * formAmount;
+
         const k = formAmount;
         for (const n of neurons) {
             const fx = n.x + n.laneX, fy = n.y, fz = n.z;
             if (shape && n.formIdx >= 0) {
                 const tgt = shape.pts[n.formIdx % shape.pts.length];
+                // Each formed cell carries its own shrink, easing in with the
+                // figure like the global one so a scatter is unaffected.
+                n.formShrink = 1 - (1 - fScale * (tgt.s || 1)) * formAmount;
                 const tx = tgt.x + n.laneX;   // figure assembles inside the lane
                 // Orbit the target rather than sitting on it. pulsePhase is
                 // already seeded per neuron and advanced with dt, so two
@@ -1227,16 +1303,13 @@
                 n.wz = fz + (tgt.z - fz) * k;
             } else {
                 n.wx = fx; n.wy = fy; n.wz = fz;
+                n.formShrink = formShrink;
             }
         }
 
         // The shell rides the same lane as the neurons forming inside it.
         const laneTarget = figureKind(formShapeName) === 'ai' ? t.aiX : t.bioX;
         formLaneX += (laneTarget - formLaneX) * e;
-
-        // Per shape, not global: graph figures declare their own cell size.
-        const fScale = (shape && shape.scale) || CFG.FORM_SCALE;
-        formShrink = 1 - (1 - fScale) * formAmount;
 
         if (rupture > 0) rupture = Math.max(0, rupture - CFG.RUPTURE_DECAY);
         for (let k2 = severed.length - 1; k2 >= 0; k2--) {
@@ -1572,7 +1645,7 @@
         // during a head stage that is most of a screen away from where the cell
         // is actually drawn, and the number pops off on its own in open space.
         // Everything else downstream reads n.wx/wy/wz — so does this.
-        const r = n.radius * formShrink;
+        const r = n.radius * (n.formShrink ?? formShrink);
         numberBubbles.push({
             x: n.wx + rand(-r, r),
             y: n.wy - r * 1.6,
@@ -1704,8 +1777,23 @@
             // A figure's own wiring is drawn thicker as well as brighter. At
             // WIRE_WIDTH_BASE the line antialiases to a grey smear and the
             // figure reads as a stain rather than a diagram, whatever its alpha.
+            //
+            // A figure's wires are also drawn FINER where they are short. This
+            // is what makes the head's face legible: its features are built out
+            // of edges a third the length of the cranium's, and at one width
+            // every stroke in the eye rings, nostrils and lips merges into a
+            // solid tangle long before the somata matter. Screen length rather
+            // than the authored edge, because that is what actually overlaps —
+            // and it leaves the brain alone for free, whose median edge lands
+            // near 106px on a desktop and never trips the threshold.
+            let fine = 1;
+            if (conn.structured && formAmount > 0.001) {
+                const wl = Math.hypot(sbx - sax, sby - say);
+                const t = Math.min(1, wl / CFG.WIRE_FINE_LEN);
+                fine = 1 - (1 - (CFG.WIRE_FINE_MIN + (1 - CFG.WIRE_FINE_MIN) * t)) * formAmount;
+            }
             const restWidth = conn.structured
-                ? CFG.WIRE_WIDTH_FORM * formWireWidth : CFG.WIRE_WIDTH_BASE;
+                ? CFG.WIRE_WIDTH_FORM * formWireWidth * fine : CFG.WIRE_WIDTH_BASE;
             const baseWidth = (isActive ? CFG.WIRE_WIDTH_ACTIVE : restWidth) * avgScale;
 
             // Bridge connections used to allocate a linear gradient per frame
@@ -1844,7 +1932,7 @@
                 arrival = left;
                 pulse += 0.6 * left;
             }
-            const r = n.radius * ps * pulse * formShrink;
+            const r = n.radius * ps * pulse * (n.formShrink ?? formShrink);
             const glow = 1 + (n.formGlow - 1) * formAmount;
             const alpha = Math.min(0.95, Math.min(ps * 0.8, 0.85) * n.presence * glow * tissueBoost);
             if (r < 0.3 || alpha < 0.02) continue;
@@ -1966,7 +2054,7 @@
         // ── Dendrites (drawn first so soma sits on top of their roots) ──
         if (n.dendrites) {
             for (const d of n.dendrites) {
-                const baseLen = d.length * ps * pulse * formShrink;
+                const baseLen = d.length * ps * pulse * (n.formShrink ?? formShrink);
                 const cosA = Math.cos(d.angle), sinA = Math.sin(d.angle);
                 // Tangent unit perpendicular for curving control point
                 const perpX = -sinA, perpY = cosA;
@@ -2002,7 +2090,7 @@
                     const bx = mt * mt * sx + 2 * mt * t * cpX + t * t * endX;
                     const by = mt * mt * sy + 2 * mt * t * cpY + t * t * endY;
                     const childAngle = d.angle + b.angleOff;
-                    const cLen = b.length * ps * pulse * formShrink;
+                    const cLen = b.length * ps * pulse * (n.formShrink ?? formShrink);
                     const childCosA = Math.cos(childAngle), childSinA = Math.sin(childAngle);
                     const childPerpX = -childSinA, childPerpY = childCosA;
                     const cEndX = bx + childCosA * cLen;
@@ -2023,7 +2111,7 @@
         // ── Axon (single long curved line + terminal bulb) ──
         if (n.axon) {
             const a = n.axon;
-            const len = a.length * ps * pulse * formShrink;
+            const len = a.length * ps * pulse * (n.formShrink ?? formShrink);
             const cosA = Math.cos(a.angle), sinA = Math.sin(a.angle);
             const perpX = -sinA, perpY = cosA;
             const endX = sx + cosA * len;

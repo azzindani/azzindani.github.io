@@ -462,9 +462,38 @@ over every pair — so 200 is the ceiling and 240 is where it starts to spike.
 its 30-node level to its 97-node one on its own, which is the point of keeping
 the levels rather than one fixed graph.
 
-**Cell size is per figure, not global.** The head's median edge is 9.2 units
-against the brain's 16.8, so at the brain's 0.85 the somata overlap their own
-wires and the face turns to mush; the head uses 0.38. `HEAD_GRAPH_FIT_H` is
+**Cell size is per figure, and on the head also per node.** The head's median
+edge is 9.2 units against the brain's 16.8, so at the brain's 0.85 the somata
+overlap their own wires and the face turns to mush; the head uses 0.48.
+
+But one number for a whole face cannot work, because it has to satisfy two
+opposite demands at once: the cranium and cheek panels are wide-open triangles
+wanting a cell big enough to register, while the eye rings, nostrils and lips
+are built from edges a third that length, where the same cell covers the very
+feature it describes. 0.48 split the difference and lost both — the silhouette
+read and the face did not.
+
+`GRAPH_FIGURES.sizeByEdge` turns on per-node sizing (`nodeCellScales`): a
+node's cell scales with **the median length of the edges meeting it**, against
+the figure's own median. Nothing moves — the coordinates are untouched — the
+big cells simply end up where there is room for them. Measured on the 89-node
+level: cranium 1.60, jaw 1.46, eyes 1.02, nose 0.88, mouth 0.86. The ratio is
+tempered by `GRAPH_CELL_GAMMA` (0.75) and clamped, because raw it sends the
+tightest node to 0.21 of the median, and a cell that small is not a cell.
+
+**The wires mattered more than the cells, which is not what it looked like.**
+The face was still a tangle after per-node sizing, and a zoom showed why: every
+edge was stroked at one width, so in the feature region the *strokes* merged
+into a solid mass before the somata were even reached. `WIRE_FINE_LEN` (78px)
+and `WIRE_FINE_MIN` (0.4) taper a formation's wire by its own **screen** length
+— short wire, finer stroke. Screen length rather than the authored edge because
+that is what actually overlaps, and it leaves the brain alone for free: its
+median edge lands near 106px on a desktop and never reaches the threshold.
+
+Verified rather than assumed. Stage 1 before against after measured **3.310**
+mean levels over the mesh half, against **3.565** between two captures of the
+*same* build — the change is smaller than the drift, so the brain is untouched.
+Frame cost at 1440×900: stage 1 17.4ms, stage 5 17.3ms, unchanged. `HEAD_GRAPH_FIT_H` is
 0.78 rather than the 0.9 the deleted drawn figure used: that one was allowed to
 run off the bottom because its rim fade dissolved the neck, and a graph has no
 fade, so a chin at the viewport edge just looks cut off. 0.78 leaves ~75px top
