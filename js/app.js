@@ -1107,18 +1107,18 @@ function renderLandingPage() {
                 <div class="lp-cards">
                     <a class="lp-card reveal" href="#/category/datasets">
                         <h3>Memory</h3>
-                        <p>The hippocampus stores connections, not facts. Knowledge graphs, embeddings, and
-                            the links between them.</p>
+                        <p>The hippocampus files every fact with its connections.
+                            Knowledge that persists.</p>
                     </a>
                     <a class="lp-card reveal" href="#/category/automation">
                         <h3>Reflex</h3>
-                        <p>The cerebellum runs what has been practised. Work rehearsed until it needs no
-                            attention.</p>
+                        <p>The cerebellum runs what has already been practised.
+                            Skill that needs no attention.</p>
                     </a>
                     <a class="lp-card reveal" href="#/category/models">
                         <h3>Judgment</h3>
-                        <p>The frontal lobe weighs one option against another. Models tuned on preference,
-                            not only on data.</p>
+                        <p>The frontal lobe weighs one option against another.
+                            Preference that had to be taught.</p>
                     </a>
                 </div>
             </div>
