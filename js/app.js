@@ -1253,18 +1253,43 @@ function renderLandingPage() {
              The figure is mirrored in neural-bg.js so it faces the copy. -->
         <section class="lp-stage lp-split lp-split-left" data-stage="7">
             <div class="lp-panel">
-                <p class="lp-kicker reveal">07 — Placeholder</p>
-                <h2 class="reveal">Placeholder heading</h2>
-                <p class="lp-lead reveal">Placeholder paragraph for the arm stage. The copy is unwritten;
-                    the figure and the layout are not.</p>
+                <p class="lp-kicker reveal">07 — Action</p>
+                <h2 class="reveal">Reliability is a method</h2>
+                <!-- The closed-book exam is the anchor because it is school, not
+                     science: stage 7's figure is a machine, so the biology that
+                     carries every stage above it would be borrowed here. The two
+                     objects in the second sentence — a calculator and a shelf —
+                     are the two cards, in order.
+                     "The time goes into the next one" is the productivity claim,
+                     and it carries no number deliberately: every available figure
+                     for what tools save is contested by an order of magnitude,
+                     and a stage about answers you can check cannot open with one
+                     you cannot. Stage 3 lost its multipliers for the same reason. -->
+                <p class="lp-lead reveal">AI with nothing to reach for is sitting a closed-book
+                    exam: fluent, fast, and impossible to check. With a calculator and a shelf
+                    within reach, the answer arrives finished, and the time goes into the next
+                    one.</p>
                 <div class="lp-cards">
+                    <!-- Execution before Retrieval, matching the lead's order, the
+                         kicker, and the arm. The route holds six actual servers —
+                         Math, File System, Web Browser, Office, Data Analyst,
+                         Machine Learning — so "the tool that fits it" is literal. -->
                     <a class="lp-card reveal" href="#/category/mcp">
-                        <h3>Placeholder one</h3>
-                        <p>Short dummy description. Replace with real copy.</p>
+                        <h3>Execution</h3>
+                        <p>Work runs in steps, and each step takes the tool that fits it. What
+                            one returns is what the next runs on — a chain.</p>
                     </a>
-                    <a class="lp-card reveal" href="#/collection/mcp-tools">
-                        <h3>Placeholder two</h3>
-                        <p>Short dummy description. Replace with real copy.</p>
+                    <!-- id-legal-rag rather than a tag: it is the only route with
+                         retrieval work behind it (250k regulation PDFs parsed, 3.5M
+                         articles, article-level quoting), where #/tag/rag is 3 items.
+                         It OVERLAPS stage 5's #/tag/legal, which is the broader set —
+                         an accepted cost, not an oversight. The framings differ: stage
+                         5 is one record in several forms, stage 7 is the answer built
+                         against the record. -->
+                    <a class="lp-card reveal" href="#/collection/id-legal-rag">
+                        <h3>Retrieval</h3>
+                        <p>The answer is built against the records themselves — the actual page,
+                            the actual row, the actual number.</p>
                     </a>
                 </div>
             </div>
