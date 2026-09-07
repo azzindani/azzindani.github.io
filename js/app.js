@@ -1086,10 +1086,10 @@ function renderLandingPage() {
 
         <section class="lp-stage lp-hero" data-stage="0">
             <div class="lp-hero-inner">
-                <p class="lp-eyebrow reveal">Placeholder eyebrow</p>
-                <h1 class="lp-hero-title reveal">Where biological<br>and artificial<br>networks meet</h1>
-                <p class="lp-hero-sub reveal">Placeholder subtitle — one or two lines describing what this
-                    site is about. Replace this copy later.</p>
+                <p class="lp-eyebrow reveal">Learn · Iterate · Orchestrate</p>
+                <h1 class="lp-hero-title reveal">Empowering<br>Artificial<br>Intelligence</h1>
+                <p class="lp-hero-sub reveal">Data you trust. Automation at scale. Productivity you can
+                    measure.</p>
                 <div class="lp-hero-actions reveal">
                     <a href="#/projects" class="lp-btn lp-btn-primary">View projects</a>
                     <a href="#/blog" class="lp-btn">Read the blog</a>
