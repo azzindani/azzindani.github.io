@@ -259,7 +259,15 @@ the panel, or the panel reads as closer to the screen edge than to the mesh.
 | 3     | ai figure + bio ghost, **network band**      | panel below  | accumulation — nothing replaced |
 | 4     | recombined, drifting                         | full width   | transfer — the domain varies    |
 | 5     | bio figure + ai ghost, **head graph**        | panel right  | multimodality — one record, several forms |
-| 6     | recombined, drifting                         | full width   | scale + open source *(unwritten)* |
+| 6     | recombined, drifting                         | full width   | orchestration — does the work vary |
+| 7     | recombined, drifting                         | full width   | scale + open source *(unwritten)* |
+
+**It is eight stages now, and it will be nine.** A robotic-arm figure lands
+between 6 and 7 — MCP, hands, the thing that acts — pushing the close to 8 and
+restoring the figure/combined alternation that 6 and 7 currently break by
+sitting adjacent. Adding a stage means `PHASE_STOPS`, `LANDING_STAGES`,
+`RUPTURE_POINTS`, and the e2e test that counts `.lp-stage`; all four moved
+together for stage 6 and must again.
 
 **Stage 3 is the one stage that is not a split**, and the only one whose panel
 is not beside the mesh — see "The network band" below.
@@ -306,6 +314,21 @@ Two structural consequences worth knowing before editing:
   the `id-legal-rag` collection, which reads better as an ordered chain but
   holds only the written posts: the datasets and models are separate `repo`
   entries and they are most of the evidence.
+
+**Stage 6 keeps orchestration OUT of its own list, and that is the point.**
+The row is automation, chatbot, agent, agentic — four answers to how much of
+the plan the machine writes. Orchestration is not a fifth: it is the act of
+choosing between them per task and holding the plan while they run, so
+everything in the row is a thing that gets orchestrated. Two drafts got this
+wrong in the same way. The first made A2A a rung, which is a different idea
+wearing the same badge — agents conversing with nothing to check against,
+where agreement proves nothing. The second made orchestration a rung, on the
+authority of sources that conflate it with agentic AI. They are orthogonal:
+**agentic AI generates its own control structure; orchestration imposes one
+from outside**, and a workflow engine with fixed edges orchestrates several
+components with zero agency. Inventing a rung is the same error as collapsing
+two, and both were caught by asking what the word actually denotes rather than
+what it is usually printed next to.
 
 Two more rules the copy earns the hard way, both from stage 5:
 

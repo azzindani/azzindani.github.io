@@ -3218,6 +3218,10 @@ body.cmd-open { overflow: hidden; }
     margin-top: 8px;
     text-align: left;
 }
+/* Stage 6 runs four. Its own modifier rather than auto-fit, so stage 2 keeps
+   exactly three columns at every width it holds them — auto-fit would let the
+   two stages disagree about their column count on the same viewport. */
+.lp-beats-4 { grid-template-columns: repeat(4, 1fr); gap: 20px; }
 .lp-beat { border-top: 1px solid var(--color-border-light); padding-top: 14px; }
 .lp-beat-term {
     display: block;
@@ -3431,6 +3435,10 @@ body.cmd-open { overflow: hidden; }
     .lp-stats { grid-template-columns: repeat(3, 1fr); gap: 10px; }
     .lp-stat { padding: 18px 8px; }
     .lp-beats { grid-template-columns: 1fr; gap: 14px; }
+    /* Four beats stacked is the tallest this stage gets; two columns holds
+       the height down through the tablet range, the same trade stage 3's era
+       labels make. */
+    .lp-beats-4 { grid-template-columns: repeat(2, 1fr); gap: 14px 20px; }
 }
 
 /* Reduced motion: no marquee, no reveal travel, no scroll cue bounce. The
@@ -3452,6 +3460,14 @@ body.cmd-open { overflow: hidden; }
    the height they cost — at 360x740 the panel measured 107% of the viewport
    before this. */
 @media (max-width: 560px) {
+    /* Stage 6's notes average 95 characters against stage 2's 28, so four of
+       them stacked is the tallest block on the page at this width — 119% of a
+       375x667 viewport before this. The row keeps its own tighter type rather
+       than shrinking every beat on the page. */
+    .lp-beats-4 { grid-template-columns: 1fr; gap: 8px; }
+    .lp-beats-4 .lp-beat { padding-top: 7px; }
+    .lp-beats-4 .lp-beat-term { font-size: 0.96rem; }
+    .lp-beats-4 .lp-beat-note { font-size: 0.8rem; line-height: 1.4; }
     .lp-eras { grid-template-columns: 1fr; gap: 7px; }
     .lp-era { padding-top: 7px; }
     .lp-era-note { line-height: 1.38; }
@@ -3486,6 +3502,9 @@ body.cmd-open { overflow: hidden; }
     .lp-chart-axis { font-size: 0.62rem; }
     .lp-eras { gap: 7px; }
     .lp-era { padding-top: 7px; }
+    .lp-beats-4 { gap: 6px; }
+    .lp-beats-4 .lp-beat { padding-top: 6px; }
+    .lp-beats-4 .lp-beat-note { line-height: 1.34; }
     .lp-stat { padding: 14px 8px; }
 }
 

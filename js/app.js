@@ -1075,7 +1075,7 @@ function renderBlogPage()     { return renderFeedPage({ kindFilter: 'blog' }); }
 // of it; on the free stages the mesh is ambient behind full-width content.
 // The mesh tears apart at each transition rather than morphing one figure
 // into the next. All copy here is placeholder.
-const LANDING_STAGES = 7;
+const LANDING_STAGES = 8;
 
 function renderLandingPage() {
     Head.set({ title: '', description: CONFIG.siteDescription });
@@ -1208,9 +1208,47 @@ function renderLandingPage() {
             </div>
         </section>
 
+        <!-- Orchestration is not one of the four below it — it is the act of
+             choosing between them per task and holding the plan while they
+             run, which is why it is the stage rather than a beat in the row.
+             Agentic AI generates its own control structure; orchestration
+             imposes one from outside, and can coordinate automation, tools and
+             people as readily as agents. -->
         <section class="lp-stage lp-full" data-stage="6">
             <div class="lp-panel lp-panel-wide">
-                <p class="lp-kicker reveal">06 — Together</p>
+                <p class="lp-kicker reveal">06 — Orchestration</p>
+                <h2 class="reveal">The question is whether the work varies</h2>
+                <p class="lp-lead reveal">A pipeline breaks when its inputs change. That is the trade that
+                    makes it cheap. Orchestration is choosing which of these a task actually needs, and
+                    holding the plan while it runs.</p>
+                <div class="lp-beats lp-beats-4">
+                    <div class="lp-beat reveal">
+                        <span class="lp-beat-term">Automation</span>
+                        <span class="lp-beat-note">every step written down in advance. Perfect while the
+                            inputs hold, and free to repeat forever.</span>
+                    </div>
+                    <div class="lp-beat reveal">
+                        <span class="lp-beat-term">Chatbot</span>
+                        <span class="lp-beat-note">answers when asked, and only that. No goal, no action,
+                            no memory of why.</span>
+                    </div>
+                    <div class="lp-beat reveal">
+                        <span class="lp-beat-term">Agent</span>
+                        <span class="lp-beat-note">given a goal, it picks the steps inside bounds someone
+                            set, and stops when the goal is met.</span>
+                    </div>
+                    <div class="lp-beat reveal">
+                        <span class="lp-beat-term">Agentic</span>
+                        <span class="lp-beat-note">plans, runs, checks its own work, and decides when it is
+                            done. For the cases nobody wrote a pipeline for.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="lp-stage lp-full" data-stage="7">
+            <div class="lp-panel lp-panel-wide">
+                <p class="lp-kicker reveal">07 — Together</p>
                 <h2 class="reveal">Recombined</h2>
                 <p class="lp-lead reveal">Placeholder closing paragraph. Both halves of the mesh are back.</p>
                 <div class="lp-stats" id="lp-stats"></div>

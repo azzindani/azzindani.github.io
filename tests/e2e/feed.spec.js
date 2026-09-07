@@ -207,10 +207,10 @@ test('pagination renders when there are enough posts', async ({ page }) => {
 
 // ── Landing page ──
 
-test('landing page renders all seven stages', async ({ page }) => {
+test('landing page renders all eight stages', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.lp-hero')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('.lp-stage')).toHaveCount(7);
+    await expect(page.locator('.lp-stage')).toHaveCount(8);
     await expect(page.locator('.lp-hero-title')).toBeVisible();
 });
 

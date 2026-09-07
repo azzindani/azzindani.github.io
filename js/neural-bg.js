@@ -205,6 +205,12 @@
         { bio: 0.34,  ai: 1,     bioX:  0, aiX: 0, shape: 'network' },
         { bio: 1,     ai: 1,     bioX:  0, aiX: 0, shape: null },
         { bio: 1,     ai: GHOST, bioX: -1, aiX: 0, shape: 'headGraph' },
+        // 6 — orchestration, and 7 — the close. Two drifting stops in a row,
+        // which the alternation elsewhere avoids. It is temporary: the robotic
+        // arm figure lands between them as the new 7 and pushes the close to 8,
+        // restoring figure/combined. Until then the mesh simply stays whole
+        // across both, which suits a stage about holding a plan together.
+        { bio: 1,     ai: 1,     bioX:  0, aiX: 0, shape: null },
         { bio: 1,     ai: 1,     bioX:  0, aiX: 0, shape: null },
     ];
 
@@ -753,7 +759,7 @@
     // Scroll positions (in phase units) at which the mesh visibly snaps apart.
     // These sit just past PHASE_HOLD, so the tear fires exactly when the stage
     // stops holding and starts morphing into the next one.
-    const RUPTURE_POINTS = [0.58, 1.58, 2.58, 3.58, 4.58, 5.58];
+    const RUPTURE_POINTS = [0.58, 1.58, 2.58, 3.58, 4.58, 5.58, 6.58];
 
     let canvas, ctx, W, H, dpr;
     let neurons = [], connections = [], signals = [], numberBubbles = [];
