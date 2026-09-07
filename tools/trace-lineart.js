@@ -371,6 +371,141 @@ function buildGraph(g, { tol = 1.4, minRun = 6, loopStep = 7 } = {}) {
     return { nodes: out, edges: E };
 }
 
+// ── Simplify the GRAPH, which is where the node count actually lives ──
+//
+// Douglas-Peucker only removes vertices along a run. It cannot touch a
+// junction, so on a busy drawing the junction count is a floor: the arm traced
+// to 983 junctions and 719 runs, and going from tolerance 1.4 to 4.0 moved the
+// total from 859 nodes to 752. Everything worth removing is here instead.
+//
+// Three passes to a fixpoint:
+//   weld     nodes closer than `weld` units, which is one crossing of thick
+//            lines read as several
+//   prune    degree-1 nodes on a short edge — line-end and raster spurs, and
+//            whole isolated fragments once their last edge goes
+//   dissolve degree-2 nodes whose removal barely moves the line, which were
+//            never junctions in the drawing, only in the skeleton
+//
+// The dissolve test is PERPENDICULAR DEVIATION, not the angle at the node.
+// Angle was tried first and quietly destroyed every curve: each individual turn
+// on a polygon looks nearly straight, and the pass runs to a fixpoint, so a
+// circle keeps losing nodes until its turns are sharp enough to survive — the
+// test drawing's two rings came back as a square and a pentagon. Deviation has
+// the memory that angle lacks: removing a node from a circle moves the chord by
+// the sagitta, which GROWS as the circle coarsens, so the erosion stops itself.
+// It is Douglas-Peucker's own criterion, applied across junctions.
+function simplifyGraph(nodes, edges, { weld = 2.5, minLeaf = 7, dissolve = 1.2 } = {}) {
+    let N = nodes.map(n => n.slice()), E = edges.map(e => e.slice());
+
+    const rebuild = () => {
+        const adj = N.map(() => []);
+        E.forEach(([a, b], i) => { adj[a].push({ to: b, i }); adj[b].push({ to: a, i }); });
+        return adj;
+    };
+    const dedupe = () => {
+        const seen = new Set(), out = [];
+        for (const [a, b] of E) {
+            if (a === b) continue;
+            const k = a < b ? `${a}-${b}` : `${b}-${a}`;
+            if (seen.has(k)) continue;
+            seen.add(k); out.push([a, b]);
+        }
+        E = out;
+    };
+    // Drop nodes no edge references, and renumber.
+    const compact = () => {
+        const used = new Set();
+        for (const [a, b] of E) { used.add(a); used.add(b); }
+        const map = new Map();
+        const out = [];
+        N.forEach((n, i) => { if (used.has(i)) { map.set(i, out.length); out.push(n); } });
+        N = out;
+        E = E.map(([a, b]) => [map.get(a), map.get(b)]);
+    };
+
+    let changed = true, guard = 0;
+    while (changed && guard++ < 40) {
+        changed = false;
+
+        // weld
+        const owner = N.map((_, i) => i);
+        const find = (i) => { while (owner[i] !== i) { owner[i] = owner[owner[i]]; i = owner[i]; } return i; };
+        const w2 = weld * weld;
+        for (let i = 0; i < N.length; i++) {
+            for (let j = i + 1; j < N.length; j++) {
+                const dx = N[i][0] - N[j][0], dy = N[i][1] - N[j][1];
+                if (dx * dx + dy * dy <= w2) {
+                    const a = find(i), b = find(j);
+                    if (a !== b) { owner[Math.max(a, b)] = Math.min(a, b); changed = true; }
+                }
+            }
+        }
+        if (changed) {
+            const groups = new Map();
+            for (let i = 0; i < N.length; i++) {
+                const r = find(i);
+                if (!groups.has(r)) groups.set(r, []);
+                groups.get(r).push(i);
+            }
+            const map = new Map(), out = [];
+            for (const [, g] of groups) {
+                const cx = g.reduce((a, i) => a + N[i][0], 0) / g.length;
+                const cy = g.reduce((a, i) => a + N[i][1], 0) / g.length;
+                for (const i of g) map.set(i, out.length);
+                out.push([cx, cy]);
+            }
+            N = out;
+            E = E.map(([a, b]) => [map.get(a), map.get(b)]);
+            dedupe();
+        }
+
+        // prune short leaves, repeatedly
+        for (;;) {
+            const adj = rebuild();
+            const kill = new Set();
+            for (let i = 0; i < N.length; i++) {
+                if (adj[i].length !== 1) continue;
+                const o = adj[i][0].to;
+                if (Math.hypot(N[i][0] - N[o][0], N[i][1] - N[o][1]) < minLeaf) kill.add(adj[i][0].i);
+            }
+            if (!kill.size) break;
+            E = E.filter((_, i) => !kill.has(i));
+            changed = true;
+        }
+        compact();
+
+        // dissolve straight-through degree-2 nodes
+        for (;;) {
+            const adj = rebuild();
+            let did = false;
+            for (let i = 0; i < N.length; i++) {
+                if (adj[i].length !== 2) continue;
+                const [p, q] = adj[i];
+                if (p.to === q.to) continue;
+                // How far does the line move if i goes? That is the distance
+                // from i to the chord joining its two neighbours.
+                const [px1, py1] = N[p.to], [qx1, qy1] = N[q.to];
+                const dx = qx1 - px1, dy = qy1 - py1;
+                const len = Math.hypot(dx, dy);
+                const dev = len < 1e-6
+                    ? Math.hypot(N[i][0] - px1, N[i][1] - py1)
+                    : Math.abs(dy * N[i][0] - dx * N[i][1] + qx1 * py1 - qy1 * px1) / len;
+                if (dev > dissolve) continue;
+                const drop = new Set([p.i, q.i]);
+                E = E.filter((_, k) => !drop.has(k));
+                E.push([p.to, q.to]);
+                dedupe();
+                did = true; changed = true;
+                break;
+            }
+            if (!did) break;
+            compact();
+        }
+        compact();
+    }
+    return { nodes: N, edges: E };
+}
+
 // Fit into a 0..100 box on the long side, the space the other graphs author in.
 function normalise(nodes) {
     const xs = nodes.map(n => n[0]), ys = nodes.map(n => n[1]);
@@ -402,23 +537,27 @@ function trace(file, opts = {}) {
     const sk = thin(mask, img.w, img.h);
     const g = skeletonGraph(sk, img.w, img.h);
     const built = buildGraph(g, opts);
-    return { img, mask, sk, raw: g, nodes: normalise(built.nodes), edges: built.edges };
+    const simp = opts.raw ? built : simplifyGraph(built.nodes, built.edges, opts);
+    return { img, mask, sk, raw: g, before: built.nodes.length,
+             nodes: normalise(simp.nodes), edges: simp.edges };
 }
 
 module.exports = { decodePNG, inkMask, thin, neighbours, crossings, skeletonGraph,
-                   rdp, buildGraph, normalise, trace, preview, fmt, fmtE };
+                   rdp, buildGraph, simplifyGraph, normalise, trace, preview, fmt, fmtE };
 
 if (require.main === module) {
     const args = process.argv.slice(2);
     const file = args[0];
     if (!file) { console.error('usage: node tools/trace-lineart.js input.png [--tol n] [--svg out]'); process.exit(1); }
     const opt = (name, d) => { const i = args.indexOf('--' + name); return i < 0 ? d : Number(args[i + 1]); };
-    const r = trace(file, { tol: opt('tol', 1.4), minRun: opt('min-run', 6), loopStep: opt('loop-step', 7) });
+    const r = trace(file, { tol: opt('tol', 1.4), minRun: opt('min-run', 6), loopStep: opt('loop-step', 7),
+                            weld: opt('weld', 2.5), minLeaf: opt('min-leaf', 7),
+                            dissolve: opt('dissolve', 1.2), raw: args.includes('--raw') });
     const svgI = args.indexOf('--svg');
     if (svgI >= 0) preview(r.nodes, r.edges, args[svgI + 1]);
     console.error(`${r.img.w}x${r.img.h}  ink ${r.mask.reduce((a, b) => a + b, 0)}px  ` +
                   `junctions ${r.raw.nodes.length}  runs ${r.raw.runs.length}  loops ${r.raw.loops.length}  ` +
-                  `-> ${r.nodes.length} nodes / ${r.edges.length} edges`);
+                  `-> ${r.before} raw -> ${r.nodes.length} nodes / ${r.edges.length} edges`);
     console.log(`XY: '${fmt(r.nodes)}'`);
     console.log(`E:  '${fmtE(r.edges)}'`);
 }
