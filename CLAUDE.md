@@ -261,7 +261,7 @@ the panel, or the panel reads as closer to the screen edge than to the mesh.
 | 5     | bio figure + ai ghost, **head graph**        | panel right  | multimodality — one record, several forms |
 | 6     | recombined, drifting                         | full width   | orchestration — does the work vary |
 | 7     | ai figure + bio ghost, **arm graph**         | panel **left** | action — a decision must touch something |
-| 8     | recombined, drifting                         | full width   | scale + open source *(unwritten)* |
+| 8     | recombined, drifting                         | full width   | contribution — the work is public |
 
 **Nine stages.** Adding one means `PHASE_STOPS`, `LANDING_STAGES`,
 `RUPTURE_POINTS` and the e2e test that counts `.lp-stage` — all four, together.
@@ -318,8 +318,8 @@ Two structural consequences worth knowing before editing:
   card and lights its border, so as articles they promised a click and did
   nothing. They point at `#/category/datasets`, `/automation` and `/models`,
   which is also why the card copy must keep matching what those routes hold.
-- **The stat row lives on stage 6, not stage 2.** Numbers belong with the
-  open-source framing at the end. `renderLandingStats` still fills `#lp-stats`
+- **The stat row lives on stage 8, not stage 2.** Numbers belong with the
+  contribution framing at the end. `renderLandingStats` still fills `#lp-stats`
   wherever it sits; stage 2 has `.lp-beats` instead, which is three words
   carrying one sentence and deliberately not boxed like `.lp-stat`.
 - **Stage 5's cards are anchors too**, to `#/tag/computer-vision` (5) and
@@ -327,6 +327,40 @@ Two structural consequences worth knowing before editing:
   the `id-legal-rag` collection, which reads better as an ordered chain but
   holds only the written posts: the datasets and models are separate `repo`
   entries and they are most of the evidence.
+- **Stage 7's Retrieval card DOES point at `#/collection/id-legal-rag`**, and
+  that overlap with stage 5 is accepted rather than overlooked. It is the only
+  route with retrieval work behind it — 250k regulation PDFs parsed, 3.5M
+  articles, article-level quoting — against three items on `#/tag/rag`. The
+  framings differ enough to carry it: stage 5 is one record in several forms,
+  stage 7 is the answer built against the record.
+- **Stage 7's cards break the card pattern, knowingly.** Stage 1 and stage 5
+  end every card with a short fragment naming the principle — "Knowledge that
+  persists", "Four forms of one fact". Stage 7's end on a noun ("a chain") and
+  on a list ("the actual number"). The reliability is carried by "the tool that
+  **fits** it" and "the records **themselves**" rather than stated, so these
+  read more descriptive than their peers. Both longer versions were drafted and
+  cut for landing better short; the tonal cost was the trade.
+- **Stage 8's stat cells are external anchors**, to the HuggingFace and GitHub
+  profiles. They are the only external links inside a stage — `.lp-cta` below
+  them goes to the site's own routes, and the footer repeats the same two
+  profiles a fifth of a screen lower. `.lp-stat` needed `display: block`,
+  `color: inherit` and a focus ring for the same reason `.lp-card` did: the box
+  already lifted on hover, so it promised a click before it had one.
+
+**The stat row counts ARTIFACTS, not projects, and that distinction is the
+stage.** `projects` is 64 and ten of those are posts *about* work that was
+never published as a repo — a number that overclaims under a heading about
+contribution. Only `type: "repo"` entries are counted, and those are public by
+construction: the site renders them by fetching their README through the public
+API, so an unpublished one could not appear at all.
+
+The split is by what the thing IS, and host is only a proxy for it. HuggingFace
+separates datasets from models in the URL; GitHub does not, and it carries
+datasets too. So an entry may declare `artifact` to override the guess — **tag
+any dataset you put on GitHub, or it is silently counted as code.** Nothing
+needs the tag today: all 20 GitHub repos read as code on inspection, including
+the two whose titles suggest otherwise (*Kaggle Biomed Dataset* is "exploration
+notes and quick-start scripts", *Data Source* is a scratch notebook).
 
 **Stage 6 keeps orchestration OUT of its own list, and that is the point.**
 The row is automation, chatbot, agent, agentic — four answers to how much of

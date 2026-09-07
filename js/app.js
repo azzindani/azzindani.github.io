@@ -1297,9 +1297,19 @@ function renderLandingPage() {
 
         <section class="lp-stage lp-full" data-stage="8">
             <div class="lp-panel lp-panel-wide">
-                <p class="lp-kicker reveal">08 — Together</p>
-                <h2 class="reveal">Recombined</h2>
-                <p class="lp-lead reveal">Placeholder closing paragraph. Both halves of the mesh are back.</p>
+                <p class="lp-kicker reveal">08 — Contribution</p>
+                <h2 class="reveal">The work belongs to whoever runs it</h2>
+                <!-- The close submits the page to stage 7's own standard: every
+                     claim above this is a claim until the work behind it can be
+                     run by someone else. Publishing is what makes the argument
+                     checkable rather than told, which is why the last stage is
+                     contribution and not a summary.
+                     The stat row below says WHAT was given away; the lead names
+                     the same three things in words, so the row does not repeat
+                     it — it answers "how much". -->
+                <p class="lp-lead reveal">The datasets, the models and the pipelines are public and
+                    free to take. Anyone can clone it today, without asking and without
+                    paying.</p>
                 <div class="lp-stats" id="lp-stats"></div>
                 <div class="lp-cta reveal">
                     <a href="#/projects" class="lp-btn lp-btn-primary">Browse projects</a>
@@ -1323,24 +1333,53 @@ function renderLandingPage() {
     return setupLandingScroll();
 }
 
-// Stage 2 — counts derived from the real post manifest (the numbers are free;
-// only the surrounding copy is placeholder). Fills in asynchronously so the
-// landing page paints immediately.
+// Stage 8 — what was given away, counted from the real manifest and linking
+// out to where it actually lives. Fills in asynchronously so the landing page
+// paints immediately.
+//
+// It counts ARTIFACTS, not projects, and the distinction is the whole point of
+// the stage. `projects` is 64 and ten of those are posts ABOUT work that is not
+// published as a repo — a number that would overclaim under a heading about
+// contribution. Only `type: "repo"` entries are counted, and those are public
+// by construction: the site renders them by fetching their README through the
+// public API, so an unpublished one could never appear here at all.
+//
+// The split is by what the thing IS. Host is a good enough proxy for two of the
+// three — HuggingFace separates datasets from models in the URL — but not for
+// GitHub, which carries datasets too. So an entry may declare `artifact` and
+// override the guess. Tag any dataset you put on GitHub, or it is silently
+// counted as code.
+const ARTIFACT_LINKS = {
+    dataset: 'https://huggingface.co/Azzindani',
+    model:   'https://huggingface.co/Azzindani',
+    code:    'https://github.com/azzindani',
+};
+
+function artifactKind(post) {
+    if (post.artifact) return post.artifact;
+    const url = post.repo || '';
+    if (!url.includes('huggingface.co')) return 'code';
+    return url.includes('/datasets/') ? 'dataset' : 'model';
+}
+
 function renderLandingStats() {
     const host = document.getElementById('lp-stats');
     if (!host) return;
-    const cell = (label, value) =>
-        `<div class="lp-stat reveal"><span class="lp-stat-value">${value}</span>
-         <span class="lp-stat-label">${label}</span></div>`;
-    host.innerHTML = cell('Projects', '—') + cell('Posts', '—') + cell('Topics', '—');
+    const cell = (label, value, href) =>
+        `<a class="lp-stat reveal" href="${href}" target="_blank" rel="noopener noreferrer">
+         <span class="lp-stat-value">${value}</span>
+         <span class="lp-stat-label">${label}</span></a>`;
+    const row = (d, m, c) =>
+        cell('Datasets', d, ARTIFACT_LINKS.dataset) +
+        cell('Models', m, ARTIFACT_LINKS.model) +
+        cell('Code', c, ARTIFACT_LINKS.code);
+    host.innerHTML = row('—', '—', '—');
 
     ContentService.getPosts().then(posts => {
-        const live = posts.filter(p => p.type !== 'doc');
-        const projects = live.filter(p => postKind(p) === 'project').length;
-        const blog = live.filter(p => postKind(p) === 'blog').length;
-        const topics = ContentService.getCategories(live).length;
+        const repos = posts.filter(p => p.type === 'repo' && p.repo);
+        const n = (kind) => repos.filter(p => artifactKind(p) === kind).length;
         if (!document.getElementById('lp-stats')) return;   // route changed
-        host.innerHTML = cell('Projects', projects) + cell('Posts', blog) + cell('Topics', topics);
+        host.innerHTML = row(n('dataset'), n('model'), n('code'));
         host.querySelectorAll('.reveal').forEach(el => el.classList.add('in-view'));
     }).catch(() => { /* leave the em-dashes in place */ });
 }
