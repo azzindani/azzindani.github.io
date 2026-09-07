@@ -1178,9 +1178,10 @@ function renderLandingPage() {
 
         <section class="lp-stage lp-full" data-stage="4">
             <div class="lp-panel lp-panel-wide">
-                <p class="lp-kicker reveal">04 — Combined</p>
-                <h2 class="reveal">Back in one piece</h2>
-                <p class="lp-lead reveal">Placeholder paragraph. Topics below loop continuously.</p>
+                <p class="lp-kicker reveal">04 — Transfer</p>
+                <h2 class="reveal">The domain is the variable</h2>
+                <p class="lp-lead reveal">Every domain keeps part of the last one and rebuilds the rest.
+                    Knowing which is which is the whole skill.</p>
                 <div class="lp-ticker" id="lp-ticker"></div>
             </div>
         </section>
@@ -1346,9 +1347,20 @@ function renderLandingEras() {
 function renderLandingTicker() {
     const host = document.getElementById('lp-ticker');
     if (!host) return;
+    // Subjects, not disciplines — and written out here rather than derived from
+    // the manifest. The manifest's categories are disciplines (datasets, nlp,
+    // mcp), and a ticker reading "data-science, nlp, mcp" under a heading that
+    // says the SUBJECT is what varies argues against itself.
+    //
+    // The cost is that this list does not know when something new is published,
+    // so add to it when the work reaches a domain that isn't here. Every entry
+    // must trace to a real post — this is evidence for the claim above it, and
+    // a subject nothing was ever built for would be a lie in the shop window.
     const topics = [
-        'Machine learning', 'Data engineering', 'Neural networks', 'Visualization',
-        'Python', 'Statistics', 'NLP', 'Computer vision', 'MLOps', 'Time series',
+        'Indonesian regulations', 'Supreme Court decisions', 'US federal code',
+        'Legal question banks', 'Financial statements', 'Broker transactions',
+        'Chest X-rays', 'Lung imaging', 'Facial identity',
+        'Invoices', 'Chemical reactions', 'Office documents',
     ];
     const chip = (t) => `<span class="lp-chip">${Utils.escapeHtml(t)}</span>`;
     const row = (items, dir) => `
