@@ -77,6 +77,17 @@ Two details worth keeping:
   the edges on purpose: platforms crop OG images further, so a figure bled off
   the frame loses more than intended. Checked at 500px and 360px, the sizes a
   LinkedIn feed and a Slack unfurl actually render.
+
+  **Both kinds are on it, because the site is named for both.** The brain's
+  nodes carry bio CELLS — soma, nucleus, neurites biased away from the axon —
+  not plain dots, and a receded ai ghost field fills the ground behind the
+  copy, which is exactly what stage 1 shows. Two things had to be tuned down
+  to get there: five short neurites per cell across 97 nodes reads as fuzz on a
+  dot rather than as a cell (two or three longer ones read), and a lone ghost
+  wire joining two far-apart dots over open ground reads as a scratch on the
+  image, so a wire is drawn only where one end is part of a cluster. Everything
+  random is seeded (`rng`), so regenerating the card is a no-op rather than a
+  diff — verified by byte-comparing two runs.
 - **The footer year is set at runtime**, from the `DOMContentLoaded` handler in
   `js/app.js` into `#footer-year`. A hard-coded year is wrong within twelve
   months and nobody notices; this one cannot go stale.
