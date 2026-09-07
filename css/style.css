@@ -3205,6 +3205,32 @@ body.cmd-open { overflow: hidden; }
     max-width: 60ch;   /* same reason as .lp-lead; bites once the panel is 720+ */
 }
 
+/* Stage 2's three beats. Deliberately not .lp-stat boxes: those are numbers in
+   a card, and these are three words carrying one sentence between them, so a
+   border around each would read as three separate claims. */
+.lp-beats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 8px;
+    text-align: left;
+}
+.lp-beat { border-top: 1px solid var(--color-border-light); padding-top: 14px; }
+.lp-beat-term {
+    display: block;
+    font-size: clamp(1.1rem, 1.02rem + 0.4cqi, 1.3rem);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--color-primary);
+}
+.lp-beat-note {
+    display: block;
+    margin-top: 4px;
+    color: var(--color-text-secondary);
+    font-size: clamp(0.9rem, 0.88rem + 0.14cqi, 0.98rem);
+    line-height: 1.5;
+}
+
 .lp-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -3352,6 +3378,7 @@ body.cmd-open { overflow: hidden; }
     .lp-panel { background: rgba(var(--color-surface-rgb), 0.88); }
     .lp-hero { min-height: 88vh; }
     .lp-stats { grid-template-columns: 1fr; gap: 12px; }
+    .lp-beats { grid-template-columns: 1fr; gap: 14px; }
 }
 
 /* Reduced motion: no marquee, no reveal travel, no scroll cue bounce. The

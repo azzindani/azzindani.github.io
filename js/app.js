@@ -1126,11 +1126,30 @@ function renderLandingPage() {
 
         <section class="lp-stage lp-full" data-stage="2">
             <div class="lp-panel lp-panel-wide">
-                <p class="lp-kicker reveal">02 — Combined</p>
-                <h2 class="reveal">Both halves, reconnected</h2>
-                <p class="lp-lead reveal">Placeholder paragraph. The mesh has snapped back together for this
-                    full-width section.</p>
-                <div class="lp-stats" id="lp-stats"></div>
+                <p class="lp-kicker reveal">02 — Plasticity</p>
+                <h2 class="reveal">Learning is physical</h2>
+                <p class="lp-lead reveal">A connection used often grows stronger; one left alone fades.
+                    Nothing is filed away for later — the practice becomes the structure itself.</p>
+                <!-- No name, no date, no quotation. The aphorism everyone reaches
+                     for here ("neurons that fire together wire together") is Carla
+                     Shatz's summary, not Hebb's words, and Hebbian learning is not
+                     how modern networks train — backpropagation is. The mechanism
+                     below is true of a brain and of a network without claiming the
+                     two share a rule. -->
+                <div class="lp-beats">
+                    <div class="lp-beat reveal">
+                        <span class="lp-beat-term">Repetition</span>
+                        <span class="lp-beat-note">what gets done again</span>
+                    </div>
+                    <div class="lp-beat reveal">
+                        <span class="lp-beat-term">Strength</span>
+                        <span class="lp-beat-note">what the doing leaves behind</span>
+                    </div>
+                    <div class="lp-beat reveal">
+                        <span class="lp-beat-term">Decay</span>
+                        <span class="lp-beat-note">what is allowed to go</span>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -1183,6 +1202,7 @@ function renderLandingPage() {
                 <p class="lp-kicker reveal">06 — Together</p>
                 <h2 class="reveal">Recombined</h2>
                 <p class="lp-lead reveal">Placeholder closing paragraph. Both halves of the mesh are back.</p>
+                <div class="lp-stats" id="lp-stats"></div>
                 <div class="lp-cta reveal">
                     <a href="#/projects" class="lp-btn lp-btn-primary">Browse projects</a>
                     <a href="#/docs" class="lp-btn">Read the docs</a>
