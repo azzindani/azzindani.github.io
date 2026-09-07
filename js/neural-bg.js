@@ -109,6 +109,10 @@
         // within, and how hard the ratio is applied. Gamma is well under 1
         // because the raw ratio is brutal: the tightest node on the head sits
         // at 0.21 of the median edge, and a cell that small is not a cell.
+        // The arm is the one figure on the RIGHT, so its width ceiling is the
+        // same centre line the others respect, measured from the other side.
+        ARM_FIT_W: 0.44,
+        ARM_FIT_H: 0.72,
         GRAPH_CELL_MIN: 0.35,
         GRAPH_CELL_MAX: 1.90,
         GRAPH_CELL_GAMMA: 1.5,
@@ -205,12 +209,11 @@
         { bio: 0.34,  ai: 1,     bioX:  0, aiX: 0, shape: 'network' },
         { bio: 1,     ai: 1,     bioX:  0, aiX: 0, shape: null },
         { bio: 1,     ai: GHOST, bioX: -1, aiX: 0, shape: 'headGraph' },
-        // 6 — orchestration, and 7 — the close. Two drifting stops in a row,
-        // which the alternation elsewhere avoids. It is temporary: the robotic
-        // arm figure lands between them as the new 7 and pushes the close to 8,
-        // restoring figure/combined. Until then the mesh simply stays whole
-        // across both, which suits a stage about holding a plan together.
         { bio: 1,     ai: 1,     bioX:  0, aiX: 0, shape: null },
+        // 7 — the arm. The only figure that rides the RIGHT lane, because its
+        // stage puts the copy on the left; aiX is +1 where every other figure
+        // stop is -1 on bioX. The ghost is bio and keeps its lane at 0.
+        { bio: GHOST, ai: 1,     bioX:  0, aiX: 1, shape: 'armGraph' },
         { bio: 1,     ai: 1,     bioX:  0, aiX: 0, shape: null },
     ];
 
@@ -454,6 +457,62 @@
     // on a desktop and 38 on a phone. A level whose junctions the budget cannot
     // fill is not a sparser figure, it is a broken one — the edges meeting an
     // empty node have nothing to join — so only levels that fit are offered.
+
+    // ── Robot arm (stage 7) ──
+    //
+    // Authored, not traced. Three stock wireframes were run through
+    // tools/trace-lineart.js first and none survived the budget: the technical
+    // one lost its joint circles, the mesh ones have no outline to preserve at
+    // all, and every one of them was watermarked stock whose licence the
+    // shipped geometry would have inherited.
+    //
+    // tools/make-arm.js builds it in 3D — base, three cylinder joints, two box
+    // links, and a two-segment claw on each side — then projects once,
+    // orthographically, because the mesh applies its own perspective and two
+    // stacked read as a lens error. Re-run that tool to change the pose; do not
+    // edit these arrays by hand.
+    //
+    // The coarse level is FLAT rather than a thinner 3D version: mobile is
+    // NEURON_COUNT_MOBILE 70 at 45% ai, about 31 cells, and a box costs eight
+    // nodes before the figure has said anything. The head graph hit the same
+    // wall at 34 and made the same trade.
+    const ARM_XY0 =
+        '34.4 88.3 0 80.4 0 58.5 34.4 66.4 24.1 56.4 10.3 46.5 27.5 5.4 41.3 15.3 ' +
+        '35.6 17.2 33.2 3.5 64.4 3.4 66.8 17.1 26.3 53.6 17.2 61.8 8.1 49.4 17.2 ' +
+        '41.1 41.4 12 34.4 18.3 27.4 8.7 34.4 2.4 70.4 11.3 63.2 14.4 63.2 4.9 91.4 ' +
+        '3.6 93.5 0 100 8.4 93.5 33.3 91.4 28.8 100 27.9';
+    const ARM_E0 =
+        '0 1 1 2 2 3 3 0 4 5 5 6 6 7 7 4 8 9 9 10 10 11 11 8 12 13 13 14 14 15 15 ' +
+        '12 16 17 17 18 18 19 19 16 20 21 21 22 22 20 2 12 3 14 1 13 4 13 6 16 8 18 ' +
+        '10 20 23 24 23 25 24 25 26 27 26 28 27 28 22 23 22 24 22 27';
+    const ARM_XY1 =
+        '51.1 77.1 36.7 84.3 14.3 68.6 0 75.9 14.3 60.9 0 68.2 51.1 69.4 36.7 76.7 ' +
+        '40.7 68.9 31.6 73.6 19.5 64 10.3 68.6 19.5 50.9 10.3 55.5 40.7 55.8 31.6 ' +
+        '60.4 35 49.7 28.5 53 22.6 40.7 16.1 44 38.1 3.7 31.5 7.1 50.5 12.7 44 16 ' +
+        '44.7 14.7 39.5 17.4 42.5 2.4 37.3 5.1 70.6 2.3 65.4 4.9 72.7 14.6 67.5 ' +
+        '17.2 38 46.6 29.5 50.9 33.9 53.7 25.4 58 25.7 51.8 17.2 56.1 21.6 42.8 ' +
+        '13.1 47.1 25.7 35.7 17.2 40 33.9 37.6 25.4 41.9 50.6 9.7 44 13 47.4 15.1 ' +
+        '40.9 18.4 41.1 13.7 34.6 17 38 6.8 31.5 10.1 41.1 1.3 34.6 4.6 47.4 2.8 ' +
+        '40.9 6.1 75.7 9.6 71.1 11.9 71.3 13.5 66.8 15.9 67 7.6 62.4 9.9 71.3 3.7 ' +
+        '66.8 6 78.8 16.4 72.9 19.4 78.8 3.3 72.9 6.2 86.5 5.1 80.6 8 86.5 18.2 ' +
+        '80.6 21.2 86.3 9.4 83.7 4.4 80.8 5.9 83.5 10.8 93.5 3.2 95.3 0 93 1.2 91.2 ' +
+        '4.4 100 8.1 83.7 19.7 86.3 16 83.5 17.5 80.8 21.2 95.3 30 93.5 25.9 91.2 ' +
+        '27 93 31.1 100 25.7';
+    const ARM_E1 =
+        '0 2 2 4 4 6 6 0 1 3 3 5 5 7 7 1 0 1 2 3 4 5 6 7 8 10 10 12 12 14 14 8 9 11 ' +
+        '11 13 13 15 15 9 8 9 10 11 12 13 14 15 0 8 1 9 2 10 3 11 4 12 5 13 6 14 7 ' +
+        '15 16 18 18 20 20 22 22 16 17 19 19 21 21 23 23 17 16 17 18 19 20 21 22 23 ' +
+        '24 26 26 28 28 30 30 24 25 27 27 29 29 31 31 25 24 25 26 27 28 29 30 31 32 ' +
+        '34 34 36 36 38 38 40 40 42 42 32 33 35 35 37 37 39 39 41 41 43 43 33 32 33 ' +
+        '34 35 36 37 38 39 40 41 42 43 44 46 46 48 48 50 50 52 52 54 54 44 45 47 47 ' +
+        '49 49 51 51 53 53 55 55 45 44 45 46 47 48 49 50 51 52 53 54 55 56 58 58 60 ' +
+        '60 62 62 56 57 59 59 61 61 63 63 57 56 57 58 59 60 61 62 63 12 32 14 38 13 ' +
+        '33 15 39 16 34 17 35 20 44 21 45 24 50 25 51 28 56 29 57 64 66 66 68 68 70 ' +
+        '70 64 65 67 67 69 69 71 71 65 64 65 66 67 68 69 70 71 56 64 57 65 60 66 61 ' +
+        '67 72 73 73 74 74 75 75 72 76 77 77 78 78 79 79 76 72 76 73 77 74 78 75 79 ' +
+        '76 80 77 80 78 80 79 80 81 82 82 83 83 84 84 81 85 86 86 87 87 88 88 85 81 ' +
+        '85 82 86 83 87 84 88 85 89 86 89 87 89 88 89 70 72 71 75 68 82 69 83';
+
     const GRAPH_FIGURES = {
         brainGraph: {
             raw: [[BRAIN_GRAPH_XY0, BRAIN_GRAPH_E0], [BRAIN_GRAPH_XY1, BRAIN_GRAPH_E1],
@@ -466,6 +525,19 @@
             // source, and mirroring about the figure's own centre leaves the
             // offsets and the edge list untouched.
             mirror: true,
+        },
+        armGraph: {
+            kind: 'ai',
+            raw: [[ARM_XY0, ARM_E0], [ARM_XY1, ARM_E1]],
+            fitW: 'ARM_FIT_W', fitH: 'ARM_FIT_H',
+            // The figure is authored facing right and stage 7 puts it on the
+            // right of the viewport, so it has to turn and face the copy. Same
+            // flip the brain uses, and for the same reason.
+            mirror: true,
+            // An ai cell is a plain circle with no dendrites, so the somata
+            // never smear the way the head's did: this can run near the
+            // brain's size rather than the head's.
+            scale: 0.8,
         },
         headGraph: {
             kind: 'bio',
@@ -759,7 +831,7 @@
     // Scroll positions (in phase units) at which the mesh visibly snaps apart.
     // These sit just past PHASE_HOLD, so the tear fires exactly when the stage
     // stops holding and starts morphing into the next one.
-    const RUPTURE_POINTS = [0.58, 1.58, 2.58, 3.58, 4.58, 5.58, 6.58];
+    const RUPTURE_POINTS = [0.58, 1.58, 2.58, 3.58, 4.58, 5.58, 6.58, 7.58];
 
     let canvas, ctx, W, H, dpr;
     let neurons = [], connections = [], signals = [], numberBubbles = [];
@@ -1170,8 +1242,14 @@
             // centre, which is not the middle of the half it has to fill. This
             // nudge centres it there, which is what lets BRAIN_FIT_W reach 0.46
             // without the figure crossing the centre line or the viewport edge.
-            // Both graph figures use it, so they share a vertical axis.
-            const dx = -(0.25 - CFG.LANE_FRACTION) * W;
+            //
+            // The SIGN follows the side the figure rides on. It was a bare
+            // negative while every figure sat left; the arm is the first on the
+            // right, and left there it would have been nudged further right
+            // still, off the viewport edge rather than into the middle of its
+            // own half.
+            const side = figureKind(name) === 'ai' ? 1 : -1;
+            const dx = side * (0.25 - CFG.LANE_FRACTION) * W;
             const dy = (CFG.HEAD_CENTER_Y - 0.5) * H;
             entry = { pts: shape.pts.map(q => ({ ...q, x: q.x + dx, y: q.y + dy,
                                                 g: CFG.FORM_GLOW })),

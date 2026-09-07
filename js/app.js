@@ -1075,7 +1075,7 @@ function renderBlogPage()     { return renderFeedPage({ kindFilter: 'blog' }); }
 // of it; on the free stages the mesh is ambient behind full-width content.
 // The mesh tears apart at each transition rather than morphing one figure
 // into the next. All copy here is placeholder.
-const LANDING_STAGES = 8;
+const LANDING_STAGES = 9;
 
 function renderLandingPage() {
     Head.set({ title: '', description: CONFIG.siteDescription });
@@ -1246,9 +1246,36 @@ function renderLandingPage() {
             </div>
         </section>
 
-        <section class="lp-stage lp-full" data-stage="7">
+        <!-- The one stage whose panel sits on the LEFT. Everything else puts
+             the copy on the right, so the mesh has spent the whole page on the
+             left half; handing the arm the other side is what makes it read as
+             a reply to the four decisions above rather than another of them.
+             The figure is mirrored in neural-bg.js so it faces the copy. -->
+        <section class="lp-stage lp-split lp-split-left" data-stage="7">
+            <div class="lp-panel">
+                <p class="lp-kicker reveal">07 — Action</p>
+                <h2 class="reveal">A decision still has to touch something</h2>
+                <p class="lp-lead reveal">All four of those decide. None of them reach anything on their own.
+                    What turns an answer into a change is the part that opens the file, writes the row, sends
+                    the message.</p>
+                <div class="lp-cards">
+                    <a class="lp-card reveal" href="#/category/mcp">
+                        <h3>Hands</h3>
+                        <p>Six servers a model can pick up and use — files, spreadsheets, a browser, a
+                            dataset, a proof.</p>
+                    </a>
+                    <a class="lp-card reveal" href="#/collection/mcp-tools">
+                        <h3>Reach</h3>
+                        <p>Each one is a boundary someone drew on purpose. A tool it does not have is a
+                            thing it cannot do.</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="lp-stage lp-full" data-stage="8">
             <div class="lp-panel lp-panel-wide">
-                <p class="lp-kicker reveal">07 — Together</p>
+                <p class="lp-kicker reveal">08 — Together</p>
                 <h2 class="reveal">Recombined</h2>
                 <p class="lp-lead reveal">Placeholder closing paragraph. Both halves of the mesh are back.</p>
                 <div class="lp-stats" id="lp-stats"></div>

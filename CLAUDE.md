@@ -260,14 +260,27 @@ the panel, or the panel reads as closer to the screen edge than to the mesh.
 | 4     | recombined, drifting                         | full width   | transfer — the domain varies    |
 | 5     | bio figure + ai ghost, **head graph**        | panel right  | multimodality — one record, several forms |
 | 6     | recombined, drifting                         | full width   | orchestration — does the work vary |
-| 7     | recombined, drifting                         | full width   | scale + open source *(unwritten)* |
+| 7     | ai figure + bio ghost, **arm graph**         | panel **left** | action — a decision must touch something |
+| 8     | recombined, drifting                         | full width   | scale + open source *(unwritten)* |
 
-**It is eight stages now, and it will be nine.** A robotic-arm figure lands
-between 6 and 7 — MCP, hands, the thing that acts — pushing the close to 8 and
-restoring the figure/combined alternation that 6 and 7 currently break by
-sitting adjacent. Adding a stage means `PHASE_STOPS`, `LANDING_STAGES`,
-`RUPTURE_POINTS`, and the e2e test that counts `.lp-stage`; all four moved
-together for stage 6 and must again.
+**Nine stages.** Adding one means `PHASE_STOPS`, `LANDING_STAGES`,
+`RUPTURE_POINTS` and the e2e test that counts `.lp-stage` — all four, together.
+
+**Stage 7 is the only one whose panel sits on the LEFT** (`.lp-split-left`,
+which already existed for it). Every other stage puts the copy on the right, so
+the mesh has spent the whole page on the left half; handing the arm the other
+side is what makes it read as a reply to stage 6's four decisions rather than
+another of them.
+
+Two consequences in `neural-bg.js`, both of which were hard-coded for a
+left-hand figure and had to learn a side:
+
+- **The lane.** Stage 7 is the first stop with `aiX: 1`; every other figure
+  stop is `bioX: -1`.
+- **The centring nudge.** `getShapePoints` adds `(0.25 - LANE_FRACTION) * W` to
+  centre a figure within its own half, and the sign now follows `figureKind`.
+  Left as a bare negative it would have pushed the arm further right, off the
+  viewport edge instead of into the middle of its half.
 
 **Stage 3 is the one stage that is not a split**, and the only one whose panel
 is not beside the mesh — see "The network band" below.
