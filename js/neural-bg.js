@@ -105,14 +105,22 @@
         // drawn head figures need theirs small or the somata smear the
         // silhouette, while a graph's nodes ARE the figure and vanish at 0.3.
         // A figure with `sizeByEdge` then modulates that per cell, by the
-        // length of the edges meeting it — the band a cell may be scaled
-        // within, and how hard the ratio is applied. Gamma is well under 1
-        // because the raw ratio is brutal: the tightest node on the head sits
-        // at 0.21 of the median edge, and a cell that small is not a cell.
+        // length of the edges meeting it — MIN/MAX are the band a cell may be
+        // scaled within and GAMMA is how hard the ratio is applied. Gamma is
+        // ABOVE 1, which widens the ratio rather than taming it: the head's raw
+        // ratios only span 0.81 to 1.88, so the first version's 0.75 compressed
+        // an already narrow range and the face stayed a mush.
+        //
         // The arm is the one figure on the RIGHT, so its width ceiling is the
         // same centre line the others respect, measured from the other side.
-        ARM_FIT_W: 0.44,
-        ARM_FIT_H: 0.72,
+        // Smaller than the brain's half rather than as large as it will go: at
+        // 0.44/0.72 the arm filled 655x570 and its own line work was 1.3px in
+        // it, so the rails and joint rings that make a machine read as a
+        // machine came out as scaffolding. Ink per unit of figure is the
+        // number that matters here, and shrinking the figure raises it for
+        // free where thickening the wire costs contrast against the mesh.
+        ARM_FIT_W: 0.35,
+        ARM_FIT_H: 0.58,
         GRAPH_CELL_MIN: 0.35,
         GRAPH_CELL_MAX: 1.90,
         GRAPH_CELL_GAMMA: 1.5,
@@ -528,6 +536,14 @@
         },
         armGraph: {
             kind: 'ai',
+            // The fine level is 90 nodes and the ai half is EXACTLY 90
+            // (NEURON_COUNT 200 x AI_RATIO 0.45), so this figure sits right on
+            // its budget with nothing to spare — and there is no middle level
+            // to fall back to, because a 3D arm cannot go below ~74 nodes
+            // without losing a box. Anything that lowers the ai count by one
+            // drops the whole stage to the 29-node COARSE level, which is not a
+            // sparser arm but a different and much worse one. That is why the
+            // kind split is exact rather than a coin flip; see init().
             raw: [[ARM_XY0, ARM_E0], [ARM_XY1, ARM_E1]],
             fitW: 'ARM_FIT_W', fitH: 'ARM_FIT_H',
             // The figure is authored facing right and stage 7 puts it on the
@@ -538,6 +554,15 @@
             // never smear the way the head's did: this can run near the
             // brain's size rather than the head's.
             scale: 0.8,
+            // A MACHINE is read from its rails and its rings, and both are
+            // line work — where the brain is a blob whose sparse wiring still
+            // reads as a mesh, an arm drawn in hairlines over 650px reads as
+            // scaffolding with nothing built on it. The preview that this
+            // figure was signed off on strokes at ~1% of the figure's width;
+            // WIRE_WIDTH_FORM at that size is a fifth of that. Some of the gap
+            // is closed here and the rest by ARM_FIT_*, which shrinks the
+            // figure so the same ink covers more of it.
+            wireAlpha: 1.15, wireWidth: 1.5,
         },
         headGraph: {
             kind: 'bio',
@@ -858,6 +883,9 @@
     // 0.95 clamp — scaling underneath the clamp moved the band's mean ink by
     // 4% where cutting the base moved it by a third.
     let formWireAlpha = 1, formWireWidth = 1;
+    // Whether the held figure wants its short wires tapered — see WIRE_FINE_LEN
+    // and the gate in updatePhase.
+    let formWireFine = false;
     const WIRE_FINE_LEN2 = CFG.WIRE_FINE_LEN * CFG.WIRE_FINE_LEN;
     // Lane offset the current figure is assembling in. The drawn shell and
     // the neurons inside it both read this, so they can never separate.
@@ -954,8 +982,7 @@
     // Bio neuron: soma (cell body) + nucleus + nucleolus + branching dendrite
     //             tree + a single longer axon ending in a terminal bulb.
     // AI neuron:  hexagon ('node') or hex-with-inner-hex ('layer'), crisp edges.
-    function createNeuron() {
-        const isAI = Math.random() < CFG.AI_RATIO;
+    function createNeuron(isAI) {
         const kind = isAI ? 'ai' : 'bio';
         let subtype, radius, color;
 
@@ -1139,9 +1166,27 @@
         resize();
         window.addEventListener('resize', resize);
 
-        // Spawn neurons
+        // Spawn neurons. The ai/bio split is EXACT, not a coin flip per cell.
+        //
+        // `Math.random() < AI_RATIO` gives Binomial(200, 0.45): a mean of 90
+        // with a standard deviation near 7, so the ai half was anywhere from
+        // about 76 to 104 between reloads. Every figure budget in this file is
+        // reasoned against a fixed 90/110 — and the arm's fine level is exactly
+        // 90 nodes, so it fell back to the 29-node COARSE level on more than
+        // half of all loads. That does not look like a sparser arm; it looks
+        // like a different, broken one, and it is invisible in code review
+        // because the same build renders correctly on the next reload.
+        //
+        // Shuffled after, so the kinds are still interleaved in draw order.
+        const aiTotal = Math.round(neuronCount * CFG.AI_RATIO);
+        const kinds = [];
+        for (let i = 0; i < neuronCount; i++) kinds.push(i < aiTotal);
+        for (let i = kinds.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const t = kinds[i]; kinds[i] = kinds[j]; kinds[j] = t;
+        }
         for (let i = 0; i < neuronCount; i++) {
-            const n = createNeuron();
+            const n = createNeuron(kinds[i]);
             n.wx = n.x; n.wy = n.y; n.wz = n.z;
             neurons.push(n);
         }
@@ -1251,9 +1296,15 @@
             const side = figureKind(name) === 'ai' ? 1 : -1;
             const dx = side * (0.25 - CFG.LANE_FRACTION) * W;
             const dy = (CFG.HEAD_CENTER_Y - 0.5) * H;
+            const def = GRAPH_FIGURES[name];
             entry = { pts: shape.pts.map(q => ({ ...q, x: q.x + dx, y: q.y + dy,
                                                 g: CFG.FORM_GLOW })),
-                      edges: shape.edges, scale: shape.scale };
+                      edges: shape.edges, scale: shape.scale,
+                      // sizeByEdge reaches the draw loop through here: it gates
+                      // both the per-node neurite allowance and the short-wire
+                      // taper, and the head is the only figure that wants either.
+                      sizeByEdge: shape.sizeByEdge,
+                      wireAlpha: def.wireAlpha, wireWidth: def.wireWidth };
         } else if (name === 'network') {
             // A band across the whole viewport, with the copy below it — not a
             // figure in a lane. Edges are authored layer c -> layer c+1 and
@@ -1376,6 +1427,15 @@
         sigMaxMul   = shape ? mix(shape.sigMax)   : 1;
         formWireAlpha = shape ? mix(shape.wireAlpha) : 1;
         formWireWidth = shape ? mix(shape.wireWidth) : 1;
+        // The short-wire taper is per figure, on the same gate as the neurite
+        // allowance and for the same reason. It was written for the head, where
+        // the short edges are the eye rings, nostrils and lips and thinning them
+        // is what makes the face legible. On the ARM the short edges are the
+        // joint rings and the claw — the mechanism itself — so the same taper
+        // erased exactly the feature that makes it read as articulated. A figure
+        // that never asked for per-node sizing does not want its wires graded
+        // by length either.
+        formWireFine = !!(shape && shape.sizeByEdge);
         // Per shape, not global: graph figures declare their own cell size.
         // Computed before the loop because each cell now scales off it.
         const fScale = (shape && shape.scale) || CFG.FORM_SCALE;
@@ -1889,19 +1949,18 @@
             // WIRE_WIDTH_BASE the line antialiases to a grey smear and the
             // figure reads as a stain rather than a diagram, whatever its alpha.
             //
-            // A figure's wires are also drawn FINER where they are short. This
-            // is what makes the head's face legible: its features are built out
-            // of edges a third the length of the cranium's, and at one width
-            // every stroke in the eye rings, nostrils and lips merges into a
-            // solid tangle long before the somata matter. Screen length rather
-            // than the authored edge, because that is what actually overlaps —
-            // and it leaves the brain alone for free, whose median edge lands
-            // near 106px on a desktop and never trips the threshold.
+            // A figure that asks for it (formWireFine) is also drawn FINER where
+            // its wires are short. This is what makes the head's face legible:
+            // its features are built out of edges a third the length of the
+            // cranium's, and at one width every stroke in the eye rings,
+            // nostrils and lips merges into a solid tangle long before the
+            // somata matter. Screen length rather than the authored edge,
+            // because that is what actually overlaps.
             // Squared first, so a long wire — most of them — never pays for a
             // square root. This is per structured wire per frame, and stage 3's
             // band has the most of any stage.
             let fine = 1;
-            if (conn.structured && formAmount > 0.001) {
+            if (formWireFine && conn.structured && formAmount > 0.001) {
                 const dxw = sbx - sax, dyw = sby - say, d2w = dxw * dxw + dyw * dyw;
                 if (d2w < WIRE_FINE_LEN2) {
                     const t = Math.sqrt(d2w) / CFG.WIRE_FINE_LEN;

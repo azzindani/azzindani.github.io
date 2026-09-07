@@ -434,6 +434,23 @@ edges meeting an empty node have nothing to join. So `brainGraphData(count)`
 returns the densest level whose node count the budget covers, and level 2 only
 becomes reachable if `NEURON_COUNT` goes past ~350.
 
+**The budget has to be EXACT, and for a long time it was a coin flip.**
+`createNeuron` used `Math.random() < AI_RATIO` per cell, which is
+Binomial(200, 0.45): a mean of 90 with a standard deviation near 7, so the ai
+half landed anywhere from about 76 to 104 between reloads. The arm's fine level
+is exactly 90 nodes, so **stage 7 fell back to its 29-node coarse level on more
+than half of all loads** — and a coarse level is not a sparser figure, it is a
+different one: the base loses its prism, the links lose their rails, and the
+extra cells string themselves along 39 edges as dots. `init` now deals an exact
+`round(neuronCount * AI_RATIO)` and shuffles, so every level choice in the file
+is deterministic.
+
+This is the worst class of bug this file can have, because **the same build
+renders correctly on the next reload**. Diagnosing it took dumping the runtime
+`connections` and redrawing them as an SVG against the authored source: 39
+wires where the data has 168. Any "the figure looks wrong sometimes" report
+should start there.
+
 **The figure is mirrored in x.** The source graphic faces left and the figure
 has to face the page's content, which sits on the right. The flip lives in
 `buildBrainGraphShape`'s transform rather than in the coordinates, so the
@@ -566,6 +583,21 @@ and `WIRE_FINE_MIN` (0.4) taper a formation's wire by its own **screen** length
 that is what actually overlaps, and it leaves the brain alone for free: its
 median edge lands near 106px on a desktop and never reaches the threshold.
 
+**The taper is on `sizeByEdge` too, and it took the arm to notice.** It was
+written for the head and applied to every formation, which was harmless while
+the brain and the band both sit above the threshold. The arm does not: its
+short edges **are** its joint rings and its claw — the mechanism itself — so
+the taper thinned out exactly the feature that makes it read as articulated.
+Both length-graded features now answer to the same declaration, which is the
+honest one: a figure of unequal edge lengths asks to be graded by them, and
+nothing else should be.
+
+**`sizeByEdge` was not reaching the draw loop at all.** `buildGraphShape`
+returned it and `getShapePoints` dropped it on the way through, so the neurite
+allowance above had been a silent no-op since it was written — the head's fix
+came entirely from per-node cell sizes and the wire taper. It is passed through
+now, which is the first time stage 5 has actually run it.
+
 Verified rather than assumed. Stage 1 before against after measured **3.605**
 mean levels over the mesh half, against **3.565** between two captures of the
 *same* build — the change is inside the drift, so the brain is untouched.
@@ -599,6 +631,41 @@ draw the same figure. A real side view needs a side-view wireframe SVG of the
 same kind — depth cannot be recovered from a front projection, and every
 attempt to lay a profile out by hand from the front head's landmarks produced
 something worse than the mesh it was derived from.
+
+### The arm graph (stage 7)
+
+Authored rather than traced — `tools/make-arm.js` builds a base, three joints,
+two links and a two-segment claw in 3D and projects them orthographically at
+34° yaw / 20° pitch. Three stock wireframes were traced first and all three
+lost their joint circles at the budget; a robot arm is a parametric object, so
+authoring gives an exact node count at every level, joint circles that stay
+circles because they ARE circles, and no provenance question. Fine is 90 nodes
+/ 168 edges, coarse 29 / 39 — and the coarse level is FLAT rather than a
+thinner fine, because a phone's ~32 ai cells cannot pay eight nodes a box.
+
+**A machine is read from its rails and its rings, and both are line work.**
+That is what separates it from the brain, where sparse wiring over a wide
+figure still reads as a mesh. At `ARM_FIT_W` 0.44 the arm filled 655 × 570 and
+was drawn in 1.3px, against a preview that strokes at ~1% of the figure's own
+width — a fifth of the ink per unit of figure, and it came out as scaffolding.
+Fit is 0.35 / 0.58 with `wireAlpha` 1.15 and `wireWidth` 1.5: shrinking the
+figure raises ink density for free, where thickening the wire spends contrast
+against the rest of the mesh.
+
+**The figure sits on its budget with nothing to spare, and there is no middle
+level.** A 3D arm cannot go below ~74 nodes without losing a box — ring 5 gives
+84, ring 4 gives 80, and at ring 3 the joints stop being cylinders — so there
+is no useful tier between 90 and the flat 29. Anything that lowers the ai count
+by one drops stage 7 to coarse. See the exact-split note above; that coupling
+is the reason for it.
+
+**Validate the RENDERED figure, never the preview.** The arm was signed off on
+`--svg` output and shipped looking nothing like it: the preview has uniform
+dots, uniform strokes, no `FORM_FLOAT` orbit, no ghost field over it and no
+level selection at all. It is a check on the geometry and on nothing else. This
+is the same error the background wash section records — "the gradient renders"
+and "the gradient is visible" are different claims — and the fix is the same:
+capture the actual page, at the actual stage, after the phase has settled.
 
 ### The background wash
 
