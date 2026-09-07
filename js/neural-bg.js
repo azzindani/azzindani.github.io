@@ -109,9 +109,19 @@
         // within, and how hard the ratio is applied. Gamma is well under 1
         // because the raw ratio is brutal: the tightest node on the head sits
         // at 0.21 of the median edge, and a cell that small is not a cell.
-        GRAPH_CELL_MIN: 0.42,
-        GRAPH_CELL_MAX: 1.85,
-        GRAPH_CELL_GAMMA: 0.75,
+        GRAPH_CELL_MIN: 0.35,
+        GRAPH_CELL_MAX: 1.90,
+        GRAPH_CELL_GAMMA: 1.5,
+        // A bio cell is a starburst — soma, dendrites, axon — and on the head
+        // 72 of the 89 nodes fall in the eyes, nose and mouth. Scaling those
+        // cells down shrinks the spikes but does not remove them, and 72
+        // overlapping starbursts is the noise that was left. Below
+        // GRAPH_NEURITE_MIN a cell keeps its soma and drops its neurites
+        // entirely; above GRAPH_NEURITE_FULL it is a whole cell. The node still
+        // holds its wires either way, which is why this is the right thing to
+        // take away — dropping the node would leave its edges joining nothing.
+        GRAPH_NEURITE_MIN: 0.80,
+        GRAPH_NEURITE_FULL: 1.25,
         // A formation pins every cell exactly on its target, which reads as a
         // diagram rather than tissue. A slow orbit around the target keeps it
         // alive; the wires follow the cells, so the whole figure breathes.
@@ -516,10 +526,12 @@
     // length, against the median across the figure, says how big that cell may
     // be without covering what it sits on.
     //
-    // Tempered by GRAPH_CELL_GAMMA rather than used raw: linearly, the tightest
-    // node on the head comes out at 0.21 of the median and the cell vanishes.
-    // The clamp then holds both ends — nothing smaller than a dot, nothing
-    // wider than the brain's own cells.
+    // GRAPH_CELL_GAMMA is above 1, which WIDENS the ratio rather than taming it.
+    // That is the opposite of the first version, and the first version was
+    // wrong: the head's raw ratios only span 0.81 to 1.88, so a gamma under 1
+    // compressed an already narrow range and the face stayed a mush. The clamp
+    // holds both ends — nothing smaller than a dot, nothing wider than the
+    // brain's own cells.
     function nodeCellScales(g) {
         const P = g.nodes;
         const len = g.edges.map(([a, b]) => Math.hypot(P[a].x - P[b].x, P[a].y - P[b].y));
@@ -584,7 +596,7 @@
                 }
             }
         }
-        return { pts, edges: g.edges, scale: def.scale };
+        return { pts, edges: g.edges, scale: def.scale, sizeByEdge: !!def.sizeByEdge };
     }
 
     // A structured feed-forward network: evenly spaced columns of nodes with
@@ -768,6 +780,7 @@
     // 0.95 clamp — scaling underneath the clamp moved the band's mean ink by
     // 4% where cutting the base moved it by a third.
     let formWireAlpha = 1, formWireWidth = 1;
+    const WIRE_FINE_LEN2 = CFG.WIRE_FINE_LEN * CFG.WIRE_FINE_LEN;
     // Lane offset the current figure is assembling in. The drawn shell and
     // the neurons inside it both read this, so they can never separate.
     let formLaneX = 0;
@@ -1291,7 +1304,20 @@
                 const tgt = shape.pts[n.formIdx % shape.pts.length];
                 // Each formed cell carries its own shrink, easing in with the
                 // figure like the global one so a scatter is unaffected.
-                n.formShrink = 1 - (1 - fScale * (tgt.s || 1)) * formAmount;
+                const cs = tgt.s || 1;
+                n.formShrink = 1 - (1 - fScale * cs) * formAmount;
+                // ...and its own neurite allowance, on the same easing — but
+                // ONLY where the shape sizes per node. Every other figure
+                // reports s = 1, which lands mid-ramp and quietly cut the
+                // brain's dendrites by 58%: a figure that never asked for this
+                // must not pay for it.
+                if (shape.sizeByEdge) {
+                    const u = Math.min(1, Math.max(0, (cs - CFG.GRAPH_NEURITE_MIN)
+                        / (CFG.GRAPH_NEURITE_FULL - CFG.GRAPH_NEURITE_MIN)));
+                    n.formNeurite = 1 - (1 - (u * u * (3 - 2 * u))) * formAmount;
+                } else {
+                    n.formNeurite = 1;
+                }
                 const tx = tgt.x + n.laneX;   // figure assembles inside the lane
                 // Orbit the target rather than sitting on it. pulsePhase is
                 // already seeded per neuron and advanced with dt, so two
@@ -1304,6 +1330,7 @@
             } else {
                 n.wx = fx; n.wy = fy; n.wz = fz;
                 n.formShrink = formShrink;
+                n.formNeurite = 1;
             }
         }
 
@@ -1786,11 +1813,16 @@
             // than the authored edge, because that is what actually overlaps —
             // and it leaves the brain alone for free, whose median edge lands
             // near 106px on a desktop and never trips the threshold.
+            // Squared first, so a long wire — most of them — never pays for a
+            // square root. This is per structured wire per frame, and stage 3's
+            // band has the most of any stage.
             let fine = 1;
             if (conn.structured && formAmount > 0.001) {
-                const wl = Math.hypot(sbx - sax, sby - say);
-                const t = Math.min(1, wl / CFG.WIRE_FINE_LEN);
-                fine = 1 - (1 - (CFG.WIRE_FINE_MIN + (1 - CFG.WIRE_FINE_MIN) * t)) * formAmount;
+                const dxw = sbx - sax, dyw = sby - say, d2w = dxw * dxw + dyw * dyw;
+                if (d2w < WIRE_FINE_LEN2) {
+                    const t = Math.sqrt(d2w) / CFG.WIRE_FINE_LEN;
+                    fine = 1 - (1 - (CFG.WIRE_FINE_MIN + (1 - CFG.WIRE_FINE_MIN) * t)) * formAmount;
+                }
             }
             const restWidth = conn.structured
                 ? CFG.WIRE_WIDTH_FORM * formWireWidth * fine : CFG.WIRE_WIDTH_BASE;
@@ -2052,9 +2084,9 @@
         }
 
         // ── Dendrites (drawn first so soma sits on top of their roots) ──
-        if (n.dendrites) {
+        if (n.dendrites && (n.formNeurite ?? 1) > 0.06) {
             for (const d of n.dendrites) {
-                const baseLen = d.length * ps * pulse * (n.formShrink ?? formShrink);
+                const baseLen = d.length * ps * pulse * (n.formShrink ?? formShrink) * (n.formNeurite ?? 1);
                 const cosA = Math.cos(d.angle), sinA = Math.sin(d.angle);
                 // Tangent unit perpendicular for curving control point
                 const perpX = -sinA, perpY = cosA;
@@ -2090,7 +2122,7 @@
                     const bx = mt * mt * sx + 2 * mt * t * cpX + t * t * endX;
                     const by = mt * mt * sy + 2 * mt * t * cpY + t * t * endY;
                     const childAngle = d.angle + b.angleOff;
-                    const cLen = b.length * ps * pulse * (n.formShrink ?? formShrink);
+                    const cLen = b.length * ps * pulse * (n.formShrink ?? formShrink) * (n.formNeurite ?? 1);
                     const childCosA = Math.cos(childAngle), childSinA = Math.sin(childAngle);
                     const childPerpX = -childSinA, childPerpY = childCosA;
                     const cEndX = bx + childCosA * cLen;
@@ -2109,9 +2141,9 @@
         }
 
         // ── Axon (single long curved line + terminal bulb) ──
-        if (n.axon) {
+        if (n.axon && (n.formNeurite ?? 1) > 0.06) {
             const a = n.axon;
-            const len = a.length * ps * pulse * (n.formShrink ?? formShrink);
+            const len = a.length * ps * pulse * (n.formShrink ?? formShrink) * (n.formNeurite ?? 1);
             const cosA = Math.cos(a.angle), sinA = Math.sin(a.angle);
             const perpX = -sinA, perpY = cosA;
             const endX = sx + cosA * len;

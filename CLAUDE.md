@@ -476,10 +476,30 @@ read and the face did not.
 `GRAPH_FIGURES.sizeByEdge` turns on per-node sizing (`nodeCellScales`): a
 node's cell scales with **the median length of the edges meeting it**, against
 the figure's own median. Nothing moves — the coordinates are untouched — the
-big cells simply end up where there is room for them. Measured on the 89-node
-level: cranium 1.60, jaw 1.46, eyes 1.02, nose 0.88, mouth 0.86. The ratio is
-tempered by `GRAPH_CELL_GAMMA` (0.75) and clamped, because raw it sends the
-tightest node to 0.21 of the median, and a cell that small is not a cell.
+big cells simply end up where there is room for them.
+
+**`GRAPH_CELL_GAMMA` is 1.5, and being above 1 is the point.** The first
+version used 0.75, reasoning that the raw ratio was brutal. It is not: the
+head's raw ratios only span **0.81 to 1.88**, so a gamma under 1 compressed an
+already narrow range and the face stayed a mush. Above 1 it widens. Measured on
+the 89-node level after: cranium and jaw clamp at 1.90, eyes 1.05, nose 0.77,
+mouth 0.73 — against 0.48, an effective radius from 0.35 to 0.91.
+
+**Then the neurites, which is where the density actually lived.** A bio cell is
+a starburst — soma, dendrites, axon — and **72 of the head's 89 nodes fall in
+the eyes, nose and mouth**. Shrinking those cells shortens the spikes but does
+not remove them, and 72 overlapping starbursts is what was left. Below
+`GRAPH_NEURITE_MIN` (0.80) a cell keeps its soma and drops its neurites
+entirely; above `GRAPH_NEURITE_FULL` (1.25) it is a whole cell. Dropping the
+*node* would have been the wrong cut — its edges would join nothing — but the
+node holds its wires with or without dendrites.
+
+**That allowance is gated on `shape.sizeByEdge`, and has to be.** Every other
+figure reports `s = 1`, which lands mid-ramp: ungated, it quietly cut the
+brain's dendrites by 58%. A figure that never asked for per-node sizing must
+not pay for it. Caught by the brain's before/after diff rising above the
+same-build drift — 3.692 against a 3.565 control — and back to 3.605 once
+gated.
 
 **The wires mattered more than the cells, which is not what it looked like.**
 The face was still a tangle after per-node sizing, and a zoom showed why: every
@@ -490,10 +510,19 @@ and `WIRE_FINE_MIN` (0.4) taper a formation's wire by its own **screen** length
 that is what actually overlaps, and it leaves the brain alone for free: its
 median edge lands near 106px on a desktop and never reaches the threshold.
 
-Verified rather than assumed. Stage 1 before against after measured **3.310**
+Verified rather than assumed. Stage 1 before against after measured **3.605**
 mean levels over the mesh half, against **3.565** between two captures of the
-*same* build — the change is smaller than the drift, so the brain is untouched.
-Frame cost at 1440×900: stage 1 17.4ms, stage 5 17.3ms, unchanged. `HEAD_GRAPH_FIT_H` is
+*same* build — the change is inside the drift, so the brain is untouched.
+
+**Frame cost has to be attributed against a stashed baseline, not against the
+numbers written here.** Measured on the same machine with `js/neural-bg.js`
+stashed, stage 1 is 20.6ms and stage 3 20.9ms — the 17.2 and 16.7 recorded
+elsewhere in this file do not reproduce on it at all. Against that real
+baseline: stage 1 20.6 → 20.1, stage 5 16.9 → 16.6, stage 3 20.9 → 22.0, every
+one inside the run-to-run spread of three runs. Reading the difference off the
+older figures instead would have shown a 5ms regression that does not exist —
+`WIRE_FINE_LEN2` (squaring the threshold so long wires skip the square root)
+was written to chase exactly that phantom, and changed nothing measurable. `HEAD_GRAPH_FIT_H` is
 0.78 rather than the 0.9 the deleted drawn figure used: that one was allowed to
 run off the bottom because its rim fade dissolved the neck, and a graph has no
 fade, so a chin at the viewport edge just looks cut off. 0.78 leaves ~75px top
