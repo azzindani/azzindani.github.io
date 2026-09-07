@@ -7,6 +7,11 @@ const CONFIG = {
     siteDescription: 'Data science and AI — Indonesian legal AI datasets and models, office automation, and computer vision projects.',
     author: 'Azzindani',
     authorInitial: 'A',
+    // Absolute, because og:image and canonical are read by crawlers that do
+    // not resolve relative paths reliably. defaultImage is the fallback share
+    // card — see tools/make-og-card.js and the note in index.html's <head>.
+    siteUrl: 'https://azzindani.github.io/',
+    defaultImage: 'https://azzindani.github.io/og-card.png',
     github: { username: 'azzindani', repo: 'azzindani.github.io', branch: 'main' },
     social: {
         linkedin: 'https://www.linkedin.com/in/azzindan1',
@@ -296,8 +301,13 @@ const Head = {
             el.setAttribute(attr, value);
         };
         setOrCreate('meta[property="og:url"]', 'content', canonical);
-        setOrCreate('meta[property="og:image"]', 'content', image || '');
-        setOrCreate('meta[name="twitter:image"]', 'content', image || '');
+        // Falls back to the default card rather than removing the tag. A post
+        // without a cover — 81 of 91 of them — otherwise shared as a large
+        // empty box, because twitter:card is summary_large_image. Absolute,
+        // since crawlers do not resolve a relative og:image reliably.
+        const img = image ? new URL(image, CONFIG.siteUrl).href : CONFIG.defaultImage;
+        setOrCreate('meta[property="og:image"]', 'content', img);
+        setOrCreate('meta[name="twitter:image"]', 'content', img);
 
         // Article-specific OG fields
         setOrCreate('meta[property="article:published_time"]', 'content', publishedDate || '');
@@ -857,10 +867,15 @@ function renderFeedItem(post) {
 // kindFilter: 'project' | 'blog' | null (null = all kinds, used by /collection etc.)
 async function renderFeedPage(opts = {}) {
     const kindFilter = opts.kindFilter || null;
-    // Home page (/) is the Projects feed — use the plain site name there.
-    // Only label the page when it's an explicitly separate route (/blog).
+    // Both /projects and /blog are explicitly separate routes and both get a
+    // title. This used to leave /projects unlabelled, on the reasoning that the
+    // home page WAS the projects feed — true until the landing page took `/`,
+    // after which the Projects tab simply had no page title and its browser tab
+    // and history entry read "Azzindani" like every other route.
+    // The bare site name is now only for an unfiltered feed, which no route
+    // reaches: /collection and friends render their own pages.
     Head.set({
-        title: kindFilter === 'blog' ? 'Blog' : '',
+        title: kindFilter === 'blog' ? 'Blog' : kindFilter === 'project' ? 'Projects' : '',
         description: kindFilter === 'blog' ? 'Posts and write-ups.'
             : kindFilter === 'project' ? 'Showcase work and projects.'
             : CONFIG.siteDescription,
@@ -1063,18 +1078,25 @@ function renderBlogPage()     { return renderFeedPage({ kindFilter: 'blog' }); }
 // The site's front door. Scroll position drives the shared neural background
 // through a sequence of phases (see NeuralBG.setPhase in js/neural-bg.js):
 //
-//   stage 0  hero        full mesh, drifting        — title only
-//   stage 1  section 1   bio only, forms a BRAIN    — content on the right
-//   stage 2  section 2   recombined, drifting       — full-width content
-//   stage 3  section 3   ai only, forms a NETWORK   — content on the left
-//   stage 4  section 4   recombined, drifting       — full-width content
-//   stage 5  section 5   bio only, forms a FACE     — content on the right
-//   stage 6  section 6   recombined, drifting       — full-width content
+//   stage 0  hero      full mesh, drifting          — title only
+//   stage 1  anatomy   BRAIN graph + ai ghost       — panel right
+//   stage 2  plasticity        recombined, drifting — full width
+//   stage 3  accumulation      NETWORK band + ghost — panel BELOW the band
+//   stage 4  transfer          recombined, drifting — full width
+//   stage 5  multimodality     HEAD graph + ghost   — panel right
+//   stage 6  orchestration     recombined, drifting — full width
+//   stage 7  action    ARM graph + bio ghost        — panel LEFT (the only one)
+//   stage 8  contribution      recombined, drifting — full width, stats
 //
-// On the forming stages the figure is centered and the copy sits to one side
-// of it; on the free stages the mesh is ambient behind full-width content.
-// The mesh tears apart at each transition rather than morphing one figure
-// into the next. All copy here is placeholder.
+// On a figure stage the copy sits to one side and the departing kind RECEDES
+// rather than leaving — see the ghost field in CLAUDE.md. Stage 3 is the
+// exception to the split: the network is a full-bleed band with the copy under
+// it. The mesh tears apart at each transition rather than morphing one figure
+// into the next.
+//
+// Adding or removing a stage means LANDING_STAGES, PHASE_STOPS and
+// RUPTURE_POINTS in neural-bg.js, and the e2e test that counts .lp-stage —
+// all four together.
 const LANDING_STAGES = 9;
 
 function renderLandingPage() {
@@ -2598,6 +2620,9 @@ function renderAdminLogin() {
 
 async function renderAdminDashboard() {
     if (!GitHubAPI.isAuthenticated()) { renderAdminLogin(); return; }
+    // Admin is noindex by nature but still owes Head.set a call: without one
+    // the tab keeps whatever public route came before it.
+    Head.set({ title: 'Admin', description: 'Post management.' });
     const app = document.getElementById('app');
     app.innerHTML = `
         <div class="admin-container">
@@ -2695,6 +2720,7 @@ async function loadAdminFiles() {
 async function renderEditorPage({ slug } = {}) {
     if (!GitHubAPI.isAuthenticated()) { renderAdminLogin(); return; }
     const isEdit = !!slug;
+    Head.set({ title: isEdit ? 'Edit post' : 'New post', description: 'Post editor.' });
     let post = null, existingBody = '';
     if (isEdit) {
         post = await ContentService.getPost(slug);
@@ -3091,6 +3117,7 @@ async function renderEditorPage({ slug } = {}) {
 
 function renderUploadPage() {
     if (!GitHubAPI.isAuthenticated()) { renderAdminLogin(); return; }
+    Head.set({ title: 'Upload', description: 'Image and PDF uploads.' });
     document.getElementById('app').innerHTML = `
     <div class="editor-container">
         <div class="editor-toolbar"><div class="editor-toolbar-left"><a href="#/admin" class="btn btn-ghost btn-sm">${ICON.chevronLeft} Dashboard</a><span style="color:var(--color-text-muted);font-size:0.9rem;">Upload Files</span></div></div>
@@ -3203,6 +3230,12 @@ async function renderCollectionDetail({ slug }) {
     const app = document.getElementById('app');
     const posts = await ContentService.getPosts();
     const list = posts.filter(p => p.collection === slug);
+    // Without this the title, description, canonical and JSON-LD from whatever
+    // route came before are still in <head> — arriving here from /docs left the
+    // tab reading "How This Site Works". Every route that renders into #app owes
+    // Head.set a call; this one and the three admin routes were missing it.
+    const name = Utils.titleCase(slug.replace(/-/g, ' '));
+    Head.set({ title: name, description: `A series of posts on ${name}.` });
     if (list.length === 0) {
         app.innerHTML = `<div class="collection-detail">
             <a href="#/collections" class="post-back">${ICON.chevronLeft} Back to collections</a>
@@ -3216,7 +3249,10 @@ async function renderCollectionDetail({ slug }) {
     app.innerHTML = `
         <div class="collection-detail">
             <a href="#/collections" class="post-back">${ICON.chevronLeft} All collections</a>
-            <h1>${Utils.escapeHtml(slug.replace(/-/g, ' '))}</h1>
+            <!-- Title-cased like the cards on /collections. Raw, this rendered
+                 "id legal rag" while the card that linked here said "Id Legal
+                 Rag", so the page you arrived at looked unfinished. -->
+            <h1>${Utils.escapeHtml(name)}</h1>
             <p class="collection-desc">${list.length} post${list.length === 1 ? '' : 's'} in this series.</p>
             ${list.map((p, i) => {
                 const link = p.type === 'pdf' ? `#/pdf/${p.slug}` : `#/post/${p.slug}`;
