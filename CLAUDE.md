@@ -212,6 +212,26 @@ top padding**: it is exactly `--nav-height`, and below it a full panel runs
 under the navbar. After: every stage fits every viewport tested, worst case
 83% at 960×720, and stage 1 keeps its third card.
 
+**Phones needed a third tier, and it has to be gated on both axes.** The two
+tiers above stop at 760px because that was the shortest laptop; a 730-, 667- or
+640-high screen has 30–120px less again. `max-height: 730px` carries the box —
+and takes **no width term**, because 900×700 and 820×640 are landscape tablets
+that need identical treatment; the first version gated on `max-width: 560px`
+too and silently missed three of the five sizes it was written for. A
+`max-width: 560px` tier then repeats the same box on the other axis, for a
+360×740 phone that is tall enough to miss the height query and narrow enough to
+need it — there the *content* is oversized, not the screen.
+
+That tier is also the one place type gives way, after the box was spent. The
+landing scale sits a step above the rest of the site because the figure beside
+it is most of a screen tall; at 360px wide there is no figure beside it, so the
+step pays for nothing and costs three wrapped lines a card.
+
+Measured across 16 sizes from 1920×1080 down: **14 hold every stage inside one
+screen.** 360×640 and 320×568 do not (stage 1 at 106% and 124%, from 109% and
+142% before), and closing those would mean cutting copy rather than box — both
+are pre-2017 devices, so they were left.
+
 **Two sizes that were doing one job.** `.lp-kicker` (0.84rem/0.14em) and
 `.lp-eyebrow` (0.8rem/0.18em) are the same mono label two stages apart and now
 share one rule, differing only in colour. `.lp-stat-value` capped at 2.8rem tied
@@ -231,18 +251,56 @@ trade is unavoidable without growing the figure, and the gutter between the two
 is the number to keep honest — it should not be larger than the margin outside
 the panel, or the panel reads as closer to the screen edge than to the mesh.
 
-| Stage | Mesh state                                   | Content      |
-| ----- | -------------------------------------------- | ------------ |
-| 0     | full mesh, drifting                          | hero, title  |
-| 1     | bio figure + ai ghost, **brain graph**       | panel right  |
-| 2     | recombined, drifting                         | full width   |
-| 3     | ai figure + bio ghost, **network band**      | panel below  |
-| 4     | recombined, drifting                         | full width   |
-| 5     | bio figure + ai ghost, **head graph**        | panel right  |
-| 6     | recombined, drifting                         | full width   |
+| Stage | Mesh state                                   | Content      | Argues                          |
+| ----- | -------------------------------------------- | ------------ | ------------------------------- |
+| 0     | full mesh, drifting                          | hero, title  | Empowering Artificial Intelligence |
+| 1     | bio figure + ai ghost, **brain graph**       | panel right  | anatomy — specialised parts     |
+| 2     | recombined, drifting                         | full width   | plasticity — learning is physical |
+| 3     | ai figure + bio ghost, **network band**      | panel below  | accumulation — nothing replaced |
+| 4     | recombined, drifting                         | full width   | transfer — the domain varies    |
+| 5     | bio figure + ai ghost, **head graph**        | panel right  | multimodality *(unwritten)*     |
+| 6     | recombined, drifting                         | full width   | scale + open source *(unwritten)* |
 
 **Stage 3 is the one stage that is not a split**, and the only one whose panel
 is not beside the mesh — see "The network band" below.
+
+### What the copy is allowed to do
+
+The page argues one thesis — *data collection and automation are the same act:
+both turn human experience into something a machine can run* — and each stage
+carries one move in it. Four rules hold it together, and each was arrived at by
+getting it wrong first.
+
+- **Science before philosophy, and no field vocabulary.** A hippocampus is
+  common ground; "knowledge graphs" and "embeddings" are not, and they narrow
+  the audience rather than impressing it. Every card names something anyone
+  half-remembers from school, then turns it into a principle. The reader who
+  knows the field still sees exactly which work is being pointed at.
+- **No subject.** No "I", no "we". The stages describe process, output and
+  outcome, because the claim should hold whoever is making it.
+- **Negation is a budget, not a default.** Stage 1 opens "No part of the brain
+  does everything" and stage 3 "Nothing was ever replaced". A third would have
+  made a device into a tic, so stage 4 is positive. Stage 3 keeps its because
+  it contradicts the industry's replacement story, which is what negation is
+  for.
+- **Nothing gets published that cannot be checked.** Stage 2 was drafted around
+  "neurons that fire together wire together — Hebb, 1949"; the phrase is Carla
+  Shatz's summary, not Hebb's words, and Hebbian learning is not how modern
+  networks train. Stage 3 was drafted with productivity multipliers; every
+  available figure is contested and varies by an order of magnitude. Both were
+  cut. A page whose subject is trustworthy data cannot afford a decorative
+  fact — and in both cases the honest version was the better sentence.
+
+Two structural consequences worth knowing before editing:
+
+- **Stage 1's cards are `<a>`, not `<article>`.** `.lp-card:hover` lifts the
+  card and lights its border, so as articles they promised a click and did
+  nothing. They point at `#/category/datasets`, `/automation` and `/models`,
+  which is also why the card copy must keep matching what those routes hold.
+- **The stat row lives on stage 6, not stage 2.** Numbers belong with the
+  open-source framing at the end. `renderLandingStats` still fills `#lp-stats`
+  wherever it sits; stage 2 has `.lp-beats` instead, which is three words
+  carrying one sentence and deliberately not boxed like `.lp-stat`.
 
 ### Formations
 
@@ -548,6 +606,24 @@ layers and the left-to-right flow reads end to end.
 - **The panel is bottom-anchored and `NET_CENTER_Y` (0.33) centres the band in
   what is left above it** — not in the viewport. The two numbers are one
   control between them; move the panel's height and the band wants moving too.
+- **`NETWORK_LEVELS[0]` is five layers, and the copy depends on that.** The
+  stage names five eras of capacity — by hand, recorded, digitised, automated,
+  delegated — one per layer, left to right, so the band is the argument rather
+  than a backdrop to it. Changing the layer count breaks the correspondence,
+  not just the picture.
+- **`.lp-panel-band` is one column, not two.** It was `copy | chart`, which
+  gave the five era labels half of 1040px to share: 100px each and three words
+  a line. Copy, then chart, then labels, all full width.
+- **The chart carries no values, and that is the design.** Five stacked bands,
+  each starting later and none ever ending, say *nothing was replaced* before a
+  word is read; a rising line would only have said it got better. There is no
+  y-axis and no ticks — just an arrow labelled `capacity`, direction without
+  scale — because any number there would be invented. The era labels below
+  double as the x-axis, which is what keeps a value-free chart from reading as
+  one that lost its data: it still carries the sequence. `preserveAspectRatio`
+  is `none` deliberately, so the bands squash to whatever height is left; a
+  shape has no aspect ratio to protect, and that is where the short-viewport
+  tiers take their savings from.
 - **Density has a ceiling that node count reaches long before edge count
   does.** Edges are the product across each consecutive pair of layers, so
   `[6,10,13,13,10,6]` is 58 nodes but **549 wires**, and across a 270px band

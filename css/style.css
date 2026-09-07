@@ -3404,7 +3404,10 @@ body.cmd-open { overflow: hidden; }
 }
 
 @media (max-width: 900px) {
-    .lp-stage { min-height: auto; padding: 72px 18px; }
+    /* 72px top and bottom was 144px of a phone's screen spent on air. The top
+       stays at --nav-height for the reason the height tier below gives; the
+       bottom has nothing under it to clear. */
+    .lp-stage { min-height: auto; padding: 56px 18px 40px; }
     .lp-split, .lp-split-left, .lp-full, .lp-band { justify-content: center; }
     .lp-band { align-items: center; }
     .lp-panel, .lp-panel-wide { width: 100%; max-width: 640px; padding: 28px 22px; }
@@ -3449,19 +3452,58 @@ body.cmd-open { overflow: hidden; }
    the height they cost — at 360x740 the panel measured 107% of the viewport
    before this. */
 @media (max-width: 560px) {
-    .lp-eras { grid-template-columns: 1fr; gap: 10px; }
-    .lp-panel-band { gap: 14px; }
-    .lp-chart svg { height: clamp(64px, 10vh, 100px); }
+    .lp-eras { grid-template-columns: 1fr; gap: 7px; }
+    .lp-era { padding-top: 7px; }
+    .lp-era-note { line-height: 1.38; }
+    .lp-panel-band { gap: 11px; }
+    /* Five stacked eras are the tallest thing on any stage at this width, and
+       the chart is the only part of the stage with height to give: it carries
+       no values, so its size means nothing. */
+    .lp-chart svg { height: 52px; }
 }
-/* Short phones. Height is its own breakpoint axis here, the same way it is for
-   the laptop tiers above: a 375x667 or 320x568 screen keeps the one-column
-   layout but has 180-280px less to spend on it, and five stacked eras plus a
-   chart put stage 3 at 109% and 132% of the viewport. The chart gives back
-   most of it — it carries no values, so its height is free. */
-@media (max-width: 560px) and (max-height: 700px) {
+/* Third height tier, and the first that has to reach phones. The two above
+   stop at 760px because that was the shortest laptop; a 730-, 667- or 640-high
+   screen has 30-120px less again, and stage 1 — a kicker, a heading, a lead
+   and three cards — is the binding case at every one of them.
+   Height only, no width term: 900x700 and 820x640 are landscape tablets that
+   need exactly the same treatment, and a max-width gate skipped them. That is
+   how the first version of this tier missed three of the five sizes it was
+   written for.
+   The top padding stays at 56px throughout. It is --nav-height, and the navbar
+   is fixed and only semi-opaque, so a stage scrolled to centre with less than
+   that runs its own heading under the bar. The saving comes off the bottom,
+   where nothing overlaps. */
+@media (max-height: 730px) {
+    .lp-stage { padding: 56px 18px 28px; }
+    .lp-panel, .lp-panel-wide { padding: 18px 20px; }
+    .lp-panel h2 { margin-bottom: 8px; }
+    .lp-lead { margin-bottom: 12px; }
+    .lp-kicker, .lp-eyebrow { margin-bottom: 8px; }
+    .lp-cards { gap: 8px; }
+    .lp-card { padding: 10px 14px; }
     .lp-panel-band { gap: 10px; }
     .lp-chart svg { height: 44px; }
     .lp-chart-axis { font-size: 0.62rem; }
     .lp-eras { gap: 7px; }
     .lp-era { padding-top: 7px; }
+    .lp-stat { padding: 14px 8px; }
+}
+
+/* Type, and only once the box was spent — the order the tiers above establish.
+   A phone is the one place the landing scale genuinely cannot hold. It was set
+   a step above the rest of the site because the figure beside it is most of a
+   screen tall; at 390px wide there is no figure beside it, so the step pays
+   for nothing and costs three wrapped lines a card. */
+@media (max-width: 560px) {
+    /* The same box the height tier gives, applied on the width axis too: a
+       360x740 phone is tall enough to miss that tier and narrow enough to need
+       it, because there the content is what is oversized, not the screen. */
+    .lp-panel, .lp-panel-wide { padding: 18px 18px; }
+    .lp-panel h2 { margin-bottom: 8px; }
+    .lp-lead { margin-bottom: 12px; }
+    .lp-cards { gap: 8px; }
+    .lp-card { padding: 10px 14px; }
+    .lp-card p { font-size: 0.88rem; }
+    .lp-lead { font-size: 0.94rem; }
+    .lp-panel h2 { font-size: clamp(1.5rem, 6.4vw, 1.9rem); }
 }
