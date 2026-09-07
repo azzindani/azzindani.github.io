@@ -3176,7 +3176,13 @@ body.cmd-open { overflow: hidden; }
 
 /* ── Stage components ── */
 .lp-cards { display: grid; gap: 14px; }
+/* The cards are anchors into the category routes. They were <article>s while
+   the copy was placeholder, and the hover below already lifted them and lit
+   their border — so the card promised a click and had nothing behind it. */
 .lp-card {
+    display: block;
+    color: inherit;
+    text-decoration: none;
     padding: 20px 24px;
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-md);
@@ -3184,6 +3190,12 @@ body.cmd-open { overflow: hidden; }
     transition: transform var(--transition), border-color var(--transition);
 }
 .lp-card:hover { transform: translateY(-3px); border-color: var(--color-primary); }
+.lp-card:hover h3 { color: var(--color-primary); }
+.lp-card h3 { transition: color var(--transition); }
+.lp-card:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+}
 /* The card title and the section lead were 1.16rem and 1.14rem — the same
    size in the same panel, so the title carried no step. */
 .lp-card h3 { margin: 0 0 6px; font-size: clamp(1.08rem, 1.02rem + 0.32cqi, 1.24rem); }

@@ -1100,23 +1100,26 @@ function renderLandingPage() {
 
         <section class="lp-stage lp-split lp-split-right" data-stage="1">
             <div class="lp-panel">
-                <p class="lp-kicker reveal">01 — Human</p>
-                <h2 class="reveal">The biological side</h2>
-                <p class="lp-lead reveal">Placeholder paragraph for the first section. The bio neurons have
-                    pulled to the left, leaving this side clear.</p>
+                <p class="lp-kicker reveal">01 — Anatomy</p>
+                <h2 class="reveal">Specialised parts, one system</h2>
+                <p class="lp-lead reveal">No part of the brain does everything. Regions divide the work, then
+                    cooperate — and systems that hold up are built the same way.</p>
                 <div class="lp-cards">
-                    <article class="lp-card reveal">
-                        <h3>Placeholder card one</h3>
-                        <p>Short dummy description of the first idea. Replace with real copy.</p>
-                    </article>
-                    <article class="lp-card reveal">
-                        <h3>Placeholder card two</h3>
-                        <p>Short dummy description of the second idea. Replace with real copy.</p>
-                    </article>
-                    <article class="lp-card reveal">
-                        <h3>Placeholder card three</h3>
-                        <p>Short dummy description of the third idea. Replace with real copy.</p>
-                    </article>
+                    <a class="lp-card reveal" href="#/category/datasets">
+                        <h3>Memory</h3>
+                        <p>The hippocampus stores connections, not facts. Knowledge graphs, embeddings, and
+                            the links between them.</p>
+                    </a>
+                    <a class="lp-card reveal" href="#/category/automation">
+                        <h3>Reflex</h3>
+                        <p>The cerebellum runs what has been practised. Work rehearsed until it needs no
+                            attention.</p>
+                    </a>
+                    <a class="lp-card reveal" href="#/category/models">
+                        <h3>Judgment</h3>
+                        <p>The frontal lobe weighs one option against another. Models tuned on preference,
+                            not only on data.</p>
+                    </a>
                 </div>
             </div>
         </section>
