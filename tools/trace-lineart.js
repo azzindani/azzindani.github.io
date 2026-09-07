@@ -506,6 +506,135 @@ function simplifyGraph(nodes, edges, { weld = 2.5, minLeaf = 7, dissolve = 1.2 }
     return { nodes: N, edges: E };
 }
 
+// ── Decimate to a target node count, by quadric error ──
+//
+// This is the pass that matters, and welding by DISTANCE was the wrong tool:
+// it merges whatever is nearby whether or not the shape moves, so on a dense
+// mesh whole regions collapsed to a point and every edge that crossed their
+// boundary survived as a spoke — the traced arm came back as a starburst.
+//
+// Rank collapses by how far the local line work MOVES instead. Each node
+// carries a quadric summed from the lines through its own edges, so the error
+// of putting a merged node at p is Qu(p) + Qv(p): cheap along a straight run,
+// expensive at a corner. Flat panels thin out and corners hold, which is the
+// same reason CLAUDE.md gives for the head graph's coarse level.
+//
+// The quadric is the homogeneous 2D form E(x,y) = ax^2 + 2bxy + cy^2 + 2dx +
+// 2ey + f, stored as [a,b,c,d,e,f]. A line with unit normal (nx,ny) and offset
+// w contributes exactly (nx*x + ny*y + w)^2.
+function lineQuadric(x1, y1, x2, y2) {
+    let nx = y1 - y2, ny = x2 - x1;
+    const len = Math.hypot(nx, ny) || 1;
+    nx /= len; ny /= len;
+    const w = -(nx * x1 + ny * y1);
+    return [nx * nx, nx * ny, ny * ny, nx * w, ny * w, w * w];
+}
+const qAdd = (A, B) => A.map((v, i) => v + B[i]);
+const qEval = (Q, x, y) =>
+    Q[0] * x * x + 2 * Q[1] * x * y + Q[2] * y * y + 2 * Q[3] * x + 2 * Q[4] * y + Q[5];
+
+function decimate(nodes, edges, target) {
+    const N = nodes.map(n => n.slice());
+    const alive = new Uint8Array(N.length).fill(1);
+    const adj = N.map(() => new Set());
+    for (const [a, b] of edges) { if (a !== b) { adj[a].add(b); adj[b].add(a); } }
+
+    const Q = N.map(() => [0, 0, 0, 0, 0, 0]);
+    for (const [a, b] of edges) {
+        if (a === b) continue;
+        const q = lineQuadric(N[a][0], N[a][1], N[b][0], N[b][1]);
+        Q[a] = qAdd(Q[a], q); Q[b] = qAdd(Q[b], q);
+    }
+
+    // Where to put a merged pair, and what it costs. The optimal point solves
+    // the 2x2 system from the summed quadric; a degenerate one (two collinear
+    // runs give no unique minimum) falls back to the midpoint.
+    const place = (u, v) => {
+        const S = qAdd(Q[u], Q[v]);
+        const det = S[0] * S[2] - S[1] * S[1];
+        let x, y;
+        if (Math.abs(det) > 1e-9) {
+            x = (S[1] * S[4] - S[2] * S[3]) / det;
+            y = (S[1] * S[3] - S[0] * S[4]) / det;
+        } else {
+            x = (N[u][0] + N[v][0]) / 2; y = (N[u][1] + N[v][1]) / 2;
+        }
+        return { x, y, cost: Math.max(0, qEval(S, x, y)) };
+    };
+
+    let live = N.length;
+    let guard = 0;
+    while (live > target && guard++ < nodes.length * 4) {
+        // Cheapest surviving edge.
+        let best = null;
+        for (let u = 0; u < N.length; u++) {
+            if (!alive[u]) continue;
+            for (const v of adj[u]) {
+                if (v <= u || !alive[v]) continue;
+                const p = place(u, v);
+                if (!best || p.cost < best.cost) best = { u, v, ...p };
+            }
+        }
+        if (!best) break;
+        const { u, v, x, y } = best;
+        N[u] = [x, y];
+        Q[u] = qAdd(Q[u], Q[v]);
+        for (const w of adj[v]) {
+            if (w === u) continue;
+            adj[w].delete(v); adj[w].add(u); adj[u].add(w);
+        }
+        adj[u].delete(v); adj[v].clear();
+        alive[v] = 0; live--;
+    }
+
+    const map = new Map(), out = [];
+    for (let i = 0; i < N.length; i++) if (alive[i]) { map.set(i, out.length); out.push(N[i]); }
+    const seen = new Set(), E = [];
+    for (let u = 0; u < N.length; u++) {
+        if (!alive[u]) continue;
+        for (const v of adj[u]) {
+            if (!alive[v] || v === u) continue;
+            const a = map.get(u), b = map.get(v);
+            const k = a < b ? `${a}-${b}` : `${b}-${a}`;
+            if (seen.has(k)) continue;
+            seen.add(k); E.push([a, b]);
+        }
+    }
+    return { nodes: out, edges: E };
+}
+
+// Drop components smaller than `min` nodes.
+//
+// Decimation cannot merge across components — it only collapses along edges —
+// so a fragmented trace has a hard floor at one node per component, and
+// pushing past it just turns whole fragments into isolated dots. The arm
+// traced to 149 components, 113 of them three nodes or fewer, and asking for
+// 90 nodes returned 90 nodes with 12 edges. A small weld stitches the pieces
+// that are one line in the drawing broken by rasterisation; this removes what
+// is left, which is debris.
+function dropSmallComponents(nodes, edges, min = 5) {
+    const adj = nodes.map(() => []);
+    edges.forEach(([a, b], i) => { adj[a].push(b); adj[b].push(a); });
+    const comp = new Int32Array(nodes.length).fill(-1);
+    const size = [];
+    for (let i = 0; i < nodes.length; i++) {
+        if (comp[i] >= 0) continue;
+        const id = size.length, stack = [i];
+        comp[i] = id; let n = 0;
+        while (stack.length) {
+            const u = stack.pop(); n++;
+            for (const v of adj[u]) if (comp[v] < 0) { comp[v] = id; stack.push(v); }
+        }
+        size.push(n);
+    }
+    const keep = (i) => size[comp[i]] >= min;
+    const map = new Map(), out = [];
+    for (let i = 0; i < nodes.length; i++) if (keep(i)) { map.set(i, out.length); out.push(nodes[i]); }
+    return { nodes: out, edges: edges.filter(([a, b]) => keep(a) && keep(b))
+                                     .map(([a, b]) => [map.get(a), map.get(b)]),
+             components: size.length, kept: size.filter(n => n >= min).length };
+}
+
 // Fit into a 0..100 box on the long side, the space the other graphs author in.
 function normalise(nodes) {
     const xs = nodes.map(n => n[0]), ys = nodes.map(n => n[1]);
@@ -537,13 +666,27 @@ function trace(file, opts = {}) {
     const sk = thin(mask, img.w, img.h);
     const g = skeletonGraph(sk, img.w, img.h);
     const built = buildGraph(g, opts);
-    const simp = opts.raw ? built : simplifyGraph(built.nodes, built.edges, opts);
-    return { img, mask, sk, raw: g, before: built.nodes.length,
+    // Prune spurs first — they are raster noise, not geometry, and decimation
+    // would happily spend collapses on them. Then decimate to the budget.
+    let simp = built, comps = null;
+    if (!opts.raw) {
+        // Stitch, then clear the debris, then decimate. Order matters: welding
+        // first is what turns 149 fragments back into a drawing.
+        simp = simplifyGraph(built.nodes, built.edges,
+            { weld: opts.weld, minLeaf: opts.minLeaf, dissolve: 0 });
+        const d = dropSmallComponents(simp.nodes, simp.edges, opts.minComp);
+        comps = { total: d.components, kept: d.kept };
+        simp = { nodes: d.nodes, edges: d.edges };
+        if (opts.target && simp.nodes.length > opts.target) {
+            simp = decimate(simp.nodes, simp.edges, opts.target);
+        }
+    }
+    return { img, mask, sk, raw: g, before: built.nodes.length, comps,
              nodes: normalise(simp.nodes), edges: simp.edges };
 }
 
 module.exports = { decodePNG, inkMask, thin, neighbours, crossings, skeletonGraph,
-                   rdp, buildGraph, simplifyGraph, normalise, trace, preview, fmt, fmtE };
+                   rdp, buildGraph, simplifyGraph, dropSmallComponents, decimate, normalise, trace, preview, fmt, fmtE };
 
 if (require.main === module) {
     const args = process.argv.slice(2);
@@ -552,12 +695,15 @@ if (require.main === module) {
     const opt = (name, d) => { const i = args.indexOf('--' + name); return i < 0 ? d : Number(args[i + 1]); };
     const r = trace(file, { tol: opt('tol', 1.4), minRun: opt('min-run', 6), loopStep: opt('loop-step', 7),
                             weld: opt('weld', 2.5), minLeaf: opt('min-leaf', 7),
-                            dissolve: opt('dissolve', 1.2), raw: args.includes('--raw') });
+                            dissolve: opt('dissolve', 1.2), target: opt('target', 0), minComp: opt('min-comp', 5),
+                            raw: args.includes('--raw') });
     const svgI = args.indexOf('--svg');
     if (svgI >= 0) preview(r.nodes, r.edges, args[svgI + 1]);
     console.error(`${r.img.w}x${r.img.h}  ink ${r.mask.reduce((a, b) => a + b, 0)}px  ` +
                   `junctions ${r.raw.nodes.length}  runs ${r.raw.runs.length}  loops ${r.raw.loops.length}  ` +
-                  `-> ${r.before} raw -> ${r.nodes.length} nodes / ${r.edges.length} edges`);
+                  `-> ${r.before} raw` +
+                  (r.comps ? `  components ${r.comps.total} -> ${r.comps.kept}` : '') +
+                  `  -> ${r.nodes.length} nodes / ${r.edges.length} edges`);
     console.log(`XY: '${fmt(r.nodes)}'`);
     console.log(`E:  '${fmtE(r.edges)}'`);
 }
