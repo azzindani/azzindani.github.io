@@ -1971,6 +1971,12 @@ body.on-landing #bg-wash { display: block; }
     text-align: center;
     color: var(--color-text-muted); font-size: 0.8rem;
 }
+/* The Source link is a footnote, not a call to action. Left to the global
+   rule it paints in --color-primary and becomes the brightest thing in a
+   muted grey bar, which is the opposite of its weight. Matches
+   .footer-links a instead: quiet until hovered. */
+.footer-bottom a { color: var(--color-text-secondary); }
+.footer-bottom a:hover { color: var(--color-primary); }
 
 /* ============================================
    Back to Top

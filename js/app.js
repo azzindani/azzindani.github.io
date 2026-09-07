@@ -1312,8 +1312,12 @@ function renderLandingPage() {
                     paying.</p>
                 <div class="lp-stats" id="lp-stats"></div>
                 <div class="lp-cta reveal">
+                    <!-- Blog rather than docs: the docs are two pages about how
+                         this site works, which is of interest to nobody the
+                         landing page is written for. The labels also avoid
+                         repeating a verb — "Browse" then "Read". -->
                     <a href="#/projects" class="lp-btn lp-btn-primary">Browse projects</a>
-                    <a href="#/docs" class="lp-btn">Read the docs</a>
+                    <a href="#/blog" class="lp-btn">Read the blog</a>
                 </div>
             </div>
         </section>

@@ -63,6 +63,18 @@ Two details worth keeping:
 - **The footer year is set at runtime**, from the `DOMContentLoaded` handler in
   `js/app.js` into `#footer-year`. A hard-coded year is wrong within twelve
   months and nobody notices; this one cannot go stale.
+- **`.footer-text` is NOT `CONFIG.siteDescription`, deliberately.** The
+  description is for crawlers and has to name the work; the footer is read by a
+  person who has already scrolled the whole page, next to four links and under
+  a sticky navbar, so it does not have to describe anything. It also used to
+  name three domains, which stage 4 of the landing page argues is the variable
+  rather than the subject — so a new domain silently made the footer wrong.
+  Keep the two strings apart when either changes.
+- **The bottom bar links to this site's own repository.** Stage 8 claims the
+  work is public; this is the page proving it about itself, and the repo is
+  already one of the published projects. `.footer-bottom a` overrides the
+  global link colour — left to `--color-primary` a footnote becomes the
+  brightest thing in a muted grey bar.
 
 ## Top-level layout
 
