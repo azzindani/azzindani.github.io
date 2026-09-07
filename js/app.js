@@ -1087,7 +1087,7 @@ function renderLandingPage() {
         <section class="lp-stage lp-hero" data-stage="0">
             <div class="lp-hero-inner">
                 <p class="lp-eyebrow reveal">Learn · Iterate · Orchestrate</p>
-                <h1 class="lp-hero-title reveal">Empowering<br>Artificial<br>Intelligence</h1>
+                <h1 class="lp-hero-title reveal">Empowering<br>Artificial Intelligence</h1>
                 <p class="lp-hero-sub reveal">Data you trust. Automation at scale. Productivity you can
                     measure.</p>
                 <div class="lp-hero-actions reveal">
