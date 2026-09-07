@@ -258,7 +258,7 @@ the panel, or the panel reads as closer to the screen edge than to the mesh.
 | 2     | recombined, drifting                         | full width   | plasticity — learning is physical |
 | 3     | ai figure + bio ghost, **network band**      | panel below  | accumulation — nothing replaced |
 | 4     | recombined, drifting                         | full width   | transfer — the domain varies    |
-| 5     | bio figure + ai ghost, **head graph**        | panel right  | multimodality *(unwritten)*     |
+| 5     | bio figure + ai ghost, **head graph**        | panel right  | multimodality — one record, several forms |
 | 6     | recombined, drifting                         | full width   | scale + open source *(unwritten)* |
 
 **Stage 3 is the one stage that is not a split**, and the only one whose panel
@@ -301,6 +301,26 @@ Two structural consequences worth knowing before editing:
   open-source framing at the end. `renderLandingStats` still fills `#lp-stats`
   wherever it sits; stage 2 has `.lp-beats` instead, which is three words
   carrying one sentence and deliberately not boxed like `.lp-stat`.
+- **Stage 5's cards are anchors too**, to `#/tag/computer-vision` (5) and
+  `#/tag/legal` (27 — 20 HuggingFace repos and 7 posts). `legal` rather than
+  the `id-legal-rag` collection, which reads better as an ordered chain but
+  holds only the written posts: the datasets and models are separate `repo`
+  entries and they are most of the evidence.
+
+Two more rules the copy earns the hard way, both from stage 5:
+
+- **Claim only the modalities that exist.** Stage 5 was first drafted as the
+  five senses cross-checking each other. There is no finished audio work and
+  the vision work is old, so the copy went vague to cover the gap — it read as
+  atmosphere rather than as a claim. The honest version is narrower and
+  sharper: one record held in several FORMS (scan, text, relations, questions),
+  which is exactly what the corpus pipeline is. Vagueness is usually a symptom
+  of a claim that is reaching past the evidence.
+- **Concrete does not mean domain-specific.** The redraft opened "A regulation
+  is a scanned page..." — concrete, but it pinned a universal stage to one
+  subject two stages after stage 4 argued the subject is the variable. "A
+  document" keeps the reader picturing a real object and claims nothing about
+  what is on it. The destination carries the domain; the copy does not.
 
 ### Formations
 

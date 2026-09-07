@@ -1188,19 +1188,22 @@ function renderLandingPage() {
 
         <section class="lp-stage lp-split lp-split-right" data-stage="5">
             <div class="lp-panel">
-                <p class="lp-kicker reveal">05 — Human</p>
-                <h2 class="reveal">A face, not a dataset</h2>
-                <p class="lp-lead reveal">Placeholder paragraph for the fifth section. The biological neurons
-                    gather into a profile on the left.</p>
+                <p class="lp-kicker reveal">05 — Multimodality</p>
+                <h2 class="reveal">One form is never the whole record</h2>
+                <p class="lp-lead reveal">A document is a scanned page, a block of text, a set of relations,
+                    and a question someone asks. Each form drops what another keeps, and an answer that
+                    survives all four is the one worth trusting.</p>
                 <div class="lp-cards">
-                    <article class="lp-card reveal">
-                        <h3>Placeholder card four</h3>
-                        <p>Short dummy description. Replace with real copy.</p>
-                    </article>
-                    <article class="lp-card reveal">
-                        <h3>Placeholder card five</h3>
-                        <p>Short dummy description. Replace with real copy.</p>
-                    </article>
+                    <a class="lp-card reveal" href="#/tag/computer-vision">
+                        <h3>Seeing</h3>
+                        <p>A scan holds what its text never did — layout, tables, stamps, handwriting.
+                            Reading is what comes after.</p>
+                    </a>
+                    <a class="lp-card reveal" href="#/tag/legal">
+                        <h3>Reading</h3>
+                        <p>The same page becomes sentences, then relations, then questions.
+                            Four forms of one fact.</p>
+                    </a>
                 </div>
             </div>
         </section>
