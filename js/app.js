@@ -1253,21 +1253,18 @@ function renderLandingPage() {
              The figure is mirrored in neural-bg.js so it faces the copy. -->
         <section class="lp-stage lp-split lp-split-left" data-stage="7">
             <div class="lp-panel">
-                <p class="lp-kicker reveal">07 — Action</p>
-                <h2 class="reveal">A decision still has to touch something</h2>
-                <p class="lp-lead reveal">All four of those decide. None of them reach anything on their own.
-                    What turns an answer into a change is the part that opens the file, writes the row, sends
-                    the message.</p>
+                <p class="lp-kicker reveal">07 — Placeholder</p>
+                <h2 class="reveal">Placeholder heading</h2>
+                <p class="lp-lead reveal">Placeholder paragraph for the arm stage. The copy is unwritten;
+                    the figure and the layout are not.</p>
                 <div class="lp-cards">
                     <a class="lp-card reveal" href="#/category/mcp">
-                        <h3>Hands</h3>
-                        <p>Six servers a model can pick up and use — files, spreadsheets, a browser, a
-                            dataset, a proof.</p>
+                        <h3>Placeholder one</h3>
+                        <p>Short dummy description. Replace with real copy.</p>
                     </a>
                     <a class="lp-card reveal" href="#/collection/mcp-tools">
-                        <h3>Reach</h3>
-                        <p>Each one is a boundary someone drew on purpose. A tool it does not have is a
-                            thing it cannot do.</p>
+                        <h3>Placeholder two</h3>
+                        <p>Short dummy description. Replace with real copy.</p>
                     </a>
                 </div>
             </div>
