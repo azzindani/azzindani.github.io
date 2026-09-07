@@ -25,111 +25,168 @@
 
 const fs = require('fs');
 
-// Joint centres, base upward. The pose is a working reach: the arm rises from
-// the base, folds forward at the elbow and levels off at the wrist, which
-// reads as a machine mid-task rather than a diagram at rest.
-const SHOULDER = [27, 70];
-const ELBOW    = [43, 33];
-const WRIST    = [72, 27];
+// Joint centres, in 3D. x right, y down, z toward the viewer; the arm swings
+// in the xy plane and every joint pivots about z, which is what makes the
+// joints read as cylinders seen three-quarter on.
+const SHOULDER = [27, 70, 0];
+const ELBOW    = [43, 33, 0];
+const WRIST    = [72, 27, 0];
 
 // Fine / coarse. The coarse level exists for the same reason the head's does:
 // a phone's neuron budget cannot fill the fine one, and a graph whose
 // junctions cannot all be filled is broken rather than sparse.
+// The coarse level is FLAT, not a thinner version of the fine one. A phone's
+// budget is NEURON_COUNT_MOBILE 70 at 45% ai, so about 31 cells, and no 3D
+// wireframe survives that — every box costs eight nodes before the figure has
+// said anything. Dropping depth buys the whole silhouette back for the price
+// of one face. The head level hit the same wall at 34 nodes and made the same
+// trade: a head rather than a face.
 const LEVELS = {
-    fine:   { ring: 10, wristRing: 8, baseArc: 9 },
-    coarse: { ring: 6,  wristRing: 5, baseArc: 5 },
+    fine:   { ring: 7, wristRing: 5, flat: false },
+    coarse: { ring: 4, wristRing: 3, flat: true, spare: true },
 };
+
+// Three-quarter view. Yaw then pitch, then drop z — orthographic rather than
+// perspective, because the mesh applies its OWN perspective to whatever this
+// emits and two projections stacked would read as a lens error.
+const YAW = 34 * Math.PI / 180;
+const PITCH = 20 * Math.PI / 180;
+function project([x, y, z]) {
+    const cx = x - 50, cy = y - 50;
+    const rx = cx * Math.cos(YAW) + z * Math.sin(YAW);
+    const rz = -cx * Math.sin(YAW) + z * Math.cos(YAW);
+    const ry = cy * Math.cos(PITCH) - rz * Math.sin(PITCH);
+    return [rx + 50, ry + 50];
+}
 
 function build(level) {
     const L = LEVELS[level];
-    const P = [];                       // [x, y]
-    const E = [];                       // [i, j]
-    const at = (x, y) => { P.push([+x.toFixed(1), +y.toFixed(1)]); return P.length - 1; };
-    const link = (a, b) => { if (a !== b) E.push([a, b]); };
+    const V = [];                       // 3D vertices
+    const E = [];
+    const at = (x, y, z) => { V.push([x, y, z]); return V.length - 1; };
+    const link = (a, b) => { if (a !== b && !E.some(([p, q]) => (p === a && q === b) || (p === b && q === a))) E.push([a, b]); };
     const chain = (ids, close) => {
         for (let i = 1; i < ids.length; i++) link(ids[i - 1], ids[i]);
         if (close && ids.length > 2) link(ids[ids.length - 1], ids[0]);
     };
 
-    // A ring of `n` points. The joints are the whole reason for authoring
-    // this: traced, they were the first thing decimation threw away, and they
-    // are what makes the figure read as articulated rather than as a bent bar.
-    const ring = (cx, cy, r, n, from = 0) => {
-        const ids = [];
-        for (let i = 0; i < n; i++) {
-            const t = from + (i / n) * Math.PI * 2;
-            ids.push(at(cx + Math.cos(t) * r, cy + Math.sin(t) * r));
-        }
-        chain(ids, true);
-        return ids;
-    };
-
-    // A link drawn as its own outline — a rectangle around the segment ab,
-    // squared off at both ends. Outline, not centreline, because every other
-    // figure in the mesh is an outline drawing and the cells sit on its edges.
-    const bar = (a, b, halfW) => {
+    // A box around the segment a->b: four corners at each end, the near face,
+    // the far face, and the rails between them. Eight nodes buy the depth that
+    // four never could.
+    const box = (a, b, halfW, halfD) => {
         const dx = b[0] - a[0], dy = b[1] - a[1];
         const len = Math.hypot(dx, dy) || 1;
         const nx = -dy / len * halfW, ny = dx / len * halfW;
-        const ids = [
-            at(a[0] + nx, a[1] + ny), at(b[0] + nx, b[1] + ny),
-            at(b[0] - nx, b[1] - ny), at(a[0] - nx, a[1] - ny),
-        ];
-        chain(ids, true);
-        return ids;
+        const near = [], far = [];
+        for (const [p, sgn] of [[a, 1], [a, -1], [b, -1], [b, 1]]) {
+            near.push(at(p[0] + nx * sgn, p[1] + ny * sgn, L.flat ? 0 :  halfD));
+            if (!L.flat) far.push(at(p[0] + nx * sgn, p[1] + ny * sgn, -halfD));
+        }
+        chain(near, true);
+        if (L.flat) return { near, far: near };
+        chain(far, true);
+        for (let i = 0; i < 4; i++) link(near[i], far[i]);
+        return { near, far };
     };
 
-    return { P, E, at, link, chain, ring, bar, L };
+    // A joint is a cylinder: two rings on the z axis with rails between them.
+    const joint = (c, r, n, halfD) => {
+        const near = [], far = [];
+        for (let i = 0; i < n; i++) {
+            const t = (i / n) * Math.PI * 2;
+            const x = c[0] + Math.cos(t) * r, y = c[1] + Math.sin(t) * r;
+            near.push(at(x, y, L.flat ? 0 :  halfD));
+            if (!L.flat) far.push(at(x, y, -halfD));
+        }
+        chain(near, true);
+        if (L.flat) return { near, far: near };
+        chain(far, true);
+        for (let i = 0; i < n; i++) link(near[i], far[i]);
+        return { near, far };
+    };
+
+    // A claw: four corners tapering to a single point. The tip is one node and
+    // it is the whole difference between a gripper and a pair of blocks.
+    const claw = (root, tip, halfW, halfD) => {
+        const dx = tip[0] - root[0], dy = tip[1] - root[1];
+        const len = Math.hypot(dx, dy) || 1;
+        const nx = -dy / len * halfW, ny = dx / len * halfW;
+        const base = L.flat
+            ? [at(root[0] + nx, root[1] + ny, 0), at(root[0] - nx, root[1] - ny, 0)]
+            : [at(root[0] + nx, root[1] + ny,  halfD), at(root[0] - nx, root[1] - ny,  halfD),
+               at(root[0] - nx, root[1] - ny, -halfD), at(root[0] + nx, root[1] + ny, -halfD)];
+        const point = at(tip[0], tip[1], 0);
+        chain(base, true);
+        for (const b of base) link(b, point);
+        return { base, point };
+    };
+
+    return { V, E, at, link, chain, box, joint, claw, L };
 }
 
 // ── The figure ──
 function arm(level = 'fine') {
     const g = build(level);
-    const { P, at, link, chain, ring, bar, L } = g;
+    const { V, at, link, chain, box, joint, claw, L } = g;
 
-    // Base: a plinth, a tapered column and the turret the shoulder sits on.
-    const plinth = [at(9, 97), at(45, 97), at(41, 90), at(13, 90)];
-    chain(plinth, true);
-    const column = [at(16, 90), at(38, 90), at(34, 78), at(20, 78)];
-    chain(column, true);
-    link(plinth[3], column[0]); link(plinth[2], column[1]);
-
-    // The turret arc: the shoulder housing, drawn as a half ring so the joint
-    // reads as seated in something rather than floating.
-    const turret = [];
-    for (let i = 0; i <= L.baseArc; i++) {
-        const t = Math.PI + (i / L.baseArc) * Math.PI;
-        turret.push(at(SHOULDER[0] + Math.cos(t) * 11, SHOULDER[1] + Math.sin(t) * 8));
+    // Base: a plinth box and the column standing on it.
+    // At the coarse level the base is one tapered block rather than a plinth
+    // and a column: two boxes is eight nodes spent on a detail that a 31-cell
+    // budget cannot afford, and the taper alone still reads as a base.
+    const plinth = L.spare
+        ? box([27, 97, 0], [27, 79, 0], 16, 11)   // one taller block, up to the shoulder
+        : box([27, 97, 0], [27, 90, 0], 19, 11);
+    const column = L.spare ? plinth : box([27, 90, 0], [27, 78, 0], 11, 7);
+    if (!L.spare) {
+        for (let i = 0; i < 4; i++) { link(plinth.near[i], column.near[i]); link(plinth.far[i], column.far[i]); }
     }
-    chain(turret, false);
-    link(column[3], turret[0]); link(column[2], turret[turret.length - 1]);
+    void V;
 
-    // Upper arm, forearm, and the three joints.
-    const upper = bar(SHOULDER, ELBOW, 7);
-    const fore  = bar(ELBOW, WRIST, 5.5);
-    const jShoulder = ring(SHOULDER[0], SHOULDER[1], 8, L.ring);
-    const jElbow    = ring(ELBOW[0], ELBOW[1], 6.5, L.ring);
-    const jWrist    = ring(WRIST[0], WRIST[1], 4.5, L.wristRing);
+    // Links and the three joints.
+    const upper = box(SHOULDER, ELBOW, 7, 5);
+    const fore  = box(ELBOW, WRIST, 5.5, 4);
+    const jS = joint(SHOULDER, 8.5, L.ring, 6.5);
+    const jE = joint(ELBOW, 6.5, L.ring, 5);
+    const jW = joint(WRIST, 4.5, L.wristRing, 3.5);
 
-    // Tie each link to the joint it pivots on, so the figure is one component
-    // and formEdges never has to bridge a gap.
-    link(upper[0], jShoulder[0]); link(upper[3], jShoulder[Math.floor(L.ring / 2)]);
-    link(upper[1], jElbow[0]);    link(upper[2], jElbow[Math.floor(L.ring / 2)]);
-    link(fore[0], jElbow[1]);     link(fore[3], jElbow[Math.floor(L.ring / 2) + 1]);
-    link(fore[1], jWrist[0]);     link(fore[2], jWrist[Math.floor(L.wristRing / 2)]);
+    // Seat the column under the shoulder, and tie every link to the joint it
+    // pivots on, so the figure is one component and formEdges never bridges a
+    // gap.
+    link(column.near[2], jS.near[0]); link(column.near[3], jS.near[Math.floor(L.ring / 2)]);
+    if (L.spare) link(column.near[1], jS.near[Math.min(1, L.ring - 1)]);
+    link(column.far[2],  jS.far[0]);  link(column.far[3],  jS.far[Math.floor(L.ring / 2)]);
+    link(upper.near[0], jS.near[1]); link(upper.far[0], jS.far[1]);
+    link(upper.near[2], jE.near[0]); link(upper.far[2], jE.far[0]);
+    link(fore.near[0], jE.near[Math.floor(L.ring / 2)]); link(fore.far[0], jE.far[Math.floor(L.ring / 2)]);
+    link(fore.near[2], jW.near[0]); link(fore.far[2], jW.far[0]);
 
-    // Gripper: a palm and two fingers, open. This is the part that says HANDS,
-    // which is the whole reason the stage exists, so it keeps its detail even
-    // at the coarse level.
-    const palm = [at(78, 21), at(85, 21), at(85, 33), at(78, 33)];
-    chain(palm, true);
-    link(jWrist[0], palm[0]); link(jWrist[Math.floor(L.wristRing / 2)], palm[3]);
-    const fingerA = [at(85, 22), at(96, 16), at(98, 19), at(87, 25)];
-    const fingerB = [at(85, 32), at(96, 38), at(98, 35), at(87, 29)];
-    chain(fingerA, true); chain(fingerB, true);
-    link(palm[1], fingerA[0]); link(palm[2], fingerB[0]);
+    // Gripper: a palm box, then two claws tapering to points. The palm is set
+    // clear of the wrist and tied to it by two rails rather than four — run
+    // through the whole ring it crossed itself into a knot, and the gripper is
+    // the one part of this figure that has to stay legible.
+    // Same trade at the wrist: coarse hangs the claws straight off the joint.
+    const palm = L.spare ? jW : box([79, 27, 0], [87, 27, 0], 6, 4.5);
+    if (!L.spare) {
+        link(jW.near[0], palm.near[0]); link(jW.far[0], palm.far[0]);
+        link(jW.near[Math.floor(L.wristRing / 2)], palm.near[1]);
+        link(jW.far[Math.floor(L.wristRing / 2)], palm.far[1]);
+    }
+    const upperClaw = claw([87, 22, 0], [100, 12, 0], 2.4, 2.2);
+    const lowerClaw = claw([87, 32, 0], [100, 42, 0], 2.4, 2.2);
+    const cb = (c, i) => c.base[Math.min(i, c.base.length - 1)];
+    const pn = (i) => palm.near[Math.min(i, palm.near.length - 1)];
+    const pf = (i) => palm.far[Math.min(i, palm.far.length - 1)];
+    link(pn(3), cb(upperClaw, 0)); link(pf(3), cb(upperClaw, 3));
+    link(pn(2), cb(lowerClaw, 1)); link(pf(2), cb(lowerClaw, 2));
 
-    return { nodes: P, edges: g.E };
+    // Project once, at the end, then fit the 0..100 box the other graphs use.
+    const P = V.map(project);
+    const xs = P.map(p => p[0]), ys = P.map(p => p[1]);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs);
+    const y0 = Math.min(...ys), y1 = Math.max(...ys);
+    const k = 100 / Math.max(x1 - x0, y1 - y0);
+    const nodes = P.map(([x, y]) => [+((x - x0) * k).toFixed(1), +((y - y0) * k).toFixed(1)]);
+    return { nodes, edges: g.E };
 }
 
 const fmt  = (n) => n.map(([x, y]) => `${x} ${y}`).join(' ');
