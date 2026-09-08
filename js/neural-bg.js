@@ -14,8 +14,40 @@
         // formations, which supply their own edge list: 150 -> 16.6ms,
         // 200 -> 16.5ms, 240 -> 17.6ms with a 53ms worst frame. 200 is the
         // ceiling. Mobile stays at 70 and falls back to the coarse levels.
+        // ── FIDELITY IS NOT NEGOTIABLE ──
+        //
+        // The brain, the network, the face and the arm are the argument this
+        // page makes; the section transitions are what the whole landing page
+        // is FOR. None of them may be softened to buy frame rate, on any
+        // device. Three mechanisms used to do it and all three are now closed:
+        //
+        //   1. Backing-store scale   — no longer steps (scaleMayDrop = false).
+        //   2. perfLevel             — pinned at 1; every branch it guarded
+        //                              shed cell halos, soma and nucleus
+        //                              gradients, dendrite sub-branches, axon
+        //                              terminals or signal trails, all of
+        //                              which ARE the figures.
+        //   3. Graph LEVEL selection — the quiet one. The budget below picks
+        //                              between a figure's fine and coarse
+        //                              levels, and a coarse level is not a
+        //                              sparser figure but a different, worse
+        //                              one.
+        //
+        // If frame rate ever has to be bought again, take it from somewhere
+        // that is not these four: signal spawn rate, the number bubbles, the
+        // drifting stages' O(n^2) wiring. Not from the figures.
         NEURON_COUNT: 200,
-        NEURON_COUNT_MOBILE: 70,
+        // Was 70, and that quietly made a PHONE a different site: at 45% ai
+        // it gave ~31 ai and ~38 bio cells, so every figure fell to its coarse
+        // level — the brain at 30 nodes instead of 97, the face at 34 instead
+        // of 89 (a head, not a face), the arm at its flat 29 instead of 90.
+        // All four section transitions are the argument this page makes, and
+        // half the audience was seeing the stand-ins.
+        //
+        // 200 is what the fine levels need: the arm is exactly 90 nodes and
+        // 200 x 0.45 is exactly 90. It cannot go lower without one of the four
+        // dropping a level. See the measured mobile cost in CLAUDE.md.
+        NEURON_COUNT_MOBILE: 200,
         AI_RATIO: 0.45,
         CONNECTION_DIST: 220,
         MIN_NEIGHBORS: 3,
@@ -964,48 +996,32 @@
     // Reused point pool for soma outlines — grown once, mutated per draw.
     const somaScratch = [];
     // Adaptive perf state — if frames take too long, we shed work.
-    let perfLevel = 1;       // 1 = full, 0.5 = degraded (no extras)
+    // Pinned at 1, permanently. Every branch guarded by `perfLevel === 1` sheds
+    // something that IS the figure — cell halos, the soma and nucleus
+    // gradients, dendrite sub-branches, axon terminals, signal trails. Those
+    // are not "extras" around the brain, the network, the face and the arm;
+    // they are what those four are drawn out of.
+    //
+    // It was also measured worthless: forcing 0.5 for a whole scroll at 4x CPU
+    // moved the median from 131.9ms to 133.7ms. It cost the look and bought
+    // nothing, which is the worst possible trade.
+    const perfLevel = 1;
     let slowFrames = 0, fastFrames = 0;
-    // Whether this device is allowed to trade RESOLUTION for frame rate.
-    //
-    // Only phones are. On a desktop the mesh is the landing page's whole
-    // graphic and it is looked at directly, so a soft figure is a worse
-    // outcome than a slow one — that is the call the site owner made after
-    // seeing a stepped-down render, and it is the right one for a portfolio.
-    // A desktop under load still sheds decorations through perfLevel; it just
-    // never gives up pixels.
-    //
-    // Phones keep the ladder: their dpr is often 3, the screen is small enough
-    // that 1.5 is indistinguishable at arm's length, and the alternative there
-    // is genuinely unusable rather than merely slow.
-    let scaleMayDrop = window.matchMedia('(max-width: 768px)').matches;
+    // FIDELITY IS NOT NEGOTIABLE — see the note at the top of CFG.
+    // Nothing may step the backing store down, on any device.
+    const scaleMayDrop = false;
 
     // Frames to let pass before the adaptive loop is allowed to judge anything.
     // ~1.5s at 60fps, re-armed every time the mesh becomes active.
     let warmupFrames = 90;
     // Index into CFG.DPR_STEPS. Never rises above what the display can show.
     //
-    // Guessed from the device rather than discovered by janking: the loop
-    // needs 20 slow frames per step, so a phone that has to walk down two
-    // steps pays about 60 janky frames first — measured as the first three
-    // stages of the landing page running at 80-88ms while later ones sat at
-    // 35-49ms. hardwareConcurrency and deviceMemory are crude and sometimes
-    // absent, which is fine: this only picks the STARTING point, and the loop
-    // corrects it either way.
-    let dprStep = (() => {
-        const cores = navigator.hardwareConcurrency || 0;
-        const mem = navigator.deviceMemory || 0;                 // Chromium only
-        const weak = (cores && cores <= 4) || (mem && mem <= 4);
-        const phone = window.matchMedia('(max-width: 768px)').matches;
-        // Only a PHONE starts below full resolution. A four-core laptop
-        // reports `weak` and is perfectly capable of the top step; starting it
-        // soft to save a few ms it did not need is exactly the trade that made
-        // the figure look worse. A desktop begins at full and steps down only
-        // if it is measured struggling.
-        if (weak && phone) return 2;
-        if (phone) return 1;
-        return 0;
-    })();
+    // Always the top step. There WAS a device guess here — cores, deviceMemory
+    // and a phone query picking a lower starting rung — and it is gone for the
+    // same reason the stepping is: a phone that guesses itself down starts the
+    // page with a soft figure and never recovers, which is exactly the outcome
+    // this file is no longer allowed to produce.
+    let dprStep = 0;
     const isMobile = window.matchMedia('(max-width: 768px)').matches;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const neuronCount = reducedMotion
@@ -2575,8 +2591,6 @@
             if (slowFrames > 30) {
                 if (scaleMayDrop && dprStep < CFG.DPR_STEPS.length - 1) {
                     dprStep++; applyRenderScale(); slowFrames = 0;
-                } else if (perfLevel === 1) {
-                    perfLevel = 0.5; slowFrames = 0;
                 }
             }
         } else if (frameMs < CFG.FAST_FRAME_MS) {
@@ -2584,10 +2598,7 @@
             // Recovery is deliberately slow and in the reverse order: the
             // cheap extras come back first, and only a sustained run of
             // healthy frames buys the pixels back.
-            if (fastFrames > 240) {
-                if (perfLevel < 1) { perfLevel = 1; fastFrames = 0; }
-                else if (dprStep > 0) { dprStep--; applyRenderScale(); fastFrames = 0; }
-            }
+            if (fastFrames > 240 && dprStep > 0) { dprStep--; applyRenderScale(); fastFrames = 0; }
         } else {
             // CONSECUTIVE, not cumulative. Decaying by one meant a page that
             // ran at a mediocre-but-fine 25ms accumulated slow frames faster

@@ -1247,6 +1247,42 @@ properties:
 If you boost particle count, also boost `MAX_SIGNALS` proportionally and
 re-test on a mid-tier phone.
 
+### FIDELITY IS NOT NEGOTIABLE
+
+The brain, the network band, the face and the arm are the argument this page
+makes, and the section transitions are what the landing page is FOR. **None of
+them may be softened to buy frame rate, on any device.** Three separate
+mechanisms used to do it and all three are closed — if one is ever reopened,
+the figures go soft again and nobody notices until it is live:
+
+1. **Backing-store scale.** `scaleMayDrop` is `false` and `dprStep` is pinned
+   at 0. `DPR_STEPS[0]` is 2, which is what the file always did
+   (`Math.min(devicePixelRatio, 2)`) — that is full fidelity, not a cap.
+2. **`perfLevel`.** `const perfLevel = 1`, permanently. Every branch it guarded
+   shed cell halos, the soma and nucleus gradients, dendrite sub-branches, axon
+   terminals or signal trails — those are not extras AROUND the figures, they
+   are what the figures are drawn out of. It also measured worthless: forcing
+   0.5 for a whole scroll at 4x moved the median 131.9ms → 133.7ms.
+3. **Graph LEVEL selection** — the quiet one, invisible on a desktop.
+   `NEURON_COUNT_MOBILE` was 70, which at 45% ai gives ~31 ai and ~38 bio
+   cells, so **every figure fell to its coarse level on every phone**: the
+   brain at 30 nodes instead of 97, the face at 34 instead of 89 (a head, not a
+   face), the arm at its flat 29 instead of 90. It is 200, which is exactly
+   what the fine levels need — the arm is 90 nodes and 200 x 0.45 is 90.
+
+If frame rate has to be bought again, take it from something that is not these
+four: signal spawn rate, the number bubbles, or the drifting stages' O(n²)
+wiring. Not from the figures.
+
+**One thing to know before defending the mobile budget.** Below 900px the split
+layout stacks and the panel goes full width, so on a phone the figure sits
+BEHIND the copy and only a sliver shows at the edge — verified by capture on a
+390x844 device at all four figure stages. The fine levels are being paid for
+and largely hidden there. Measured on that viewport: 27.2ms median unthrottled,
+183ms at 4x CPU. Keeping it is a deliberate choice (the directive is absolute,
+and a phone rotated to landscape does show the figure); reverting
+`NEURON_COUNT_MOBILE` alone would claw that back without touching desktop.
+
 ### Performance: this canvas is PAINT-bound, and almost nothing else is
 
 Every intuition about where the time goes in this file was wrong, so measure
