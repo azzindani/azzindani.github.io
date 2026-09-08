@@ -149,8 +149,64 @@ function cleanReadmeMarkdown(md) {
 const LibLoader = {
     _hljs: null,
     _pdfjs: null,
+    _marked: null,
+
+    // marked was a plain <script> in the <head>'s tail, loaded on EVERY route.
+    // The landing page never parses markdown, so a first-time visitor paid a
+    // third-party round trip for a library that stage 0 has no use for — and
+    // paid it before the page could finish loading. It joins the other four
+    // here: fetched the first time something actually renders markdown.
+    loadMarked() {
+        if (this._marked) return this._marked;
+        this._marked = new Promise((resolve, reject) => {
+            if (window.marked) { resolve(window.marked); return; }
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/marked/marked.min.js';
+            s.onload = () => resolve(window.marked);
+            s.onerror = reject;
+            document.head.appendChild(s);
+        });
+        return this._marked;
+    },
+
+    // The highlight.js THEME, which shipped as an eager <link> alongside it.
+    // The stylesheet is useless without the library, so it loads with it.
+    loadHighlightCss() {
+        if (document.getElementById('hljs-dark')) return;
+        const l = document.createElement('link');
+        l.id = 'hljs-dark';
+        l.rel = 'stylesheet';
+        l.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css';
+        document.head.appendChild(l);
+    },
+
+    // The neural background is 137KB of decorative canvas, and it used to be a
+    // plain <script> in index.html — downloaded, parsed and initialised before
+    // DOMContentLoaded on EVERY route. Measured on /blog at 4x CPU over slow
+    // 4G: FCP 884ms and DCL 1213ms with it, against 696ms and 809ms without,
+    // for a mesh that does not even animate there.
+    //
+    // It is fetched eagerly on the landing route (the mesh IS that page) and
+    // after the load event everywhere else, so a reader opening a post link
+    // gets their article first and the texture a moment later.
+    _mesh: null,
+    loadNeuralBG() {
+        if (this._mesh) return this._mesh;
+        this._mesh = new Promise((resolve) => {
+            if (window.NeuralBG) { resolve(window.NeuralBG); return; }
+            const s = document.createElement('script');
+            s.src = 'js/neural-bg.js';
+            // Resolves either way: the mesh is decoration, and a page that
+            // cannot fetch it should still work rather than hang on a promise.
+            s.onload = () => resolve(window.NeuralBG || null);
+            s.onerror = () => resolve(null);
+            document.body.appendChild(s);
+        });
+        return this._mesh;
+    },
 
     loadHighlightJs() {
+        this.loadHighlightCss();
         if (this._hljs) return this._hljs;
         this._hljs = new Promise((resolve, reject) => {
             if (window.hljs) { resolve(window.hljs); return; }
@@ -678,6 +734,7 @@ const MathExtractor = {
 
 // Parse markdown (with math support) and place rendered HTML into a target.
 async function renderMarkdownInto(targetEl, markdown) {
+    await LibLoader.loadMarked();
     const withPlaceholders = MathExtractor.extract(markdown || '');
     const rawHtml = marked.parse(withPlaceholders);
     targetEl.innerHTML = await MathExtractor.render(rawHtml);
@@ -714,7 +771,11 @@ async function renderMermaidBlocks(containerSelector) {
 
 // ── Shared marked configuration ──
 
-function configureMarked(options = {}) {
+// Async because marked is now lazy-loaded (see LibLoader.loadMarked). Every
+// caller already sits inside an async render function, and the promise is
+// memoised, so the await costs nothing after the first markdown page.
+async function configureMarked(options = {}) {
+    await LibLoader.loadMarked();
     const renderer = new marked.Renderer();
     const ytRenderer = getYouTubeRenderer();
     renderer.paragraph = ytRenderer.paragraph;
@@ -1099,7 +1160,7 @@ function renderBlogPage()     { return renderFeedPage({ kindFilter: 'blog' }); }
 // all four together.
 const LANDING_STAGES = 9;
 
-function renderLandingPage() {
+async function renderLandingPage() {
     Head.set({ title: '', description: CONFIG.siteDescription });
 
     const app = document.getElementById('app');
@@ -1356,6 +1417,9 @@ function renderLandingPage() {
     // body text is noise, but an animated canvas behind body text is noise
     // that costs a frame budget. Measured on /blog at 4x CPU it was the
     // difference between a 36.1ms and a 22.8ms median.
+    // The mesh may still be in flight on a first visit; the rest of the page
+    // is already interactive by here, and the canvas fades in behind it.
+    await LibLoader.loadNeuralBG();
     if (window.NeuralBG && window.NeuralBG.setActive) {
         window.NeuralBG.setActive(true);
         Cleanup.add(() => window.NeuralBG.setActive(false));
@@ -2105,7 +2169,7 @@ async function renderPostPage({ slug }) {
 
     // Configure marked with YouTube auto-embed, heading anchors, mermaid, tables
     const tocItems = [];
-    configureMarked({ hljs, tocItems, slug });
+    await configureMarked({ hljs, tocItems, slug });
 
     // SEO / sharing tags for this post
     Head.set({
@@ -3047,7 +3111,7 @@ async function renderEditorPage({ slug } = {}) {
         if (!_editorHljs) {
             try { _editorHljs = await LibLoader.loadHighlightJs(); } catch (e) { _editorHljs = null; }
         }
-        configureMarked({ hljs: _editorHljs });
+        await configureMarked({ hljs: _editorHljs });
         await renderMarkdownInto(preview, textarea.value || '*Start typing...*');
         renderMermaidBlocks('#ed-preview');
     }
@@ -3415,7 +3479,7 @@ async function renderDocsPage({ slug } = {}) {
     // Same configureMarked path as posts so headings are slugged into a TOC.
     const hljs = await LibLoader.loadHighlightJs();
     const docTocItems = [];
-    configureMarked({ hljs, tocItems: docTocItems });
+    await configureMarked({ hljs, tocItems: docTocItems });
     await renderMarkdownInto(document.getElementById('docs-content'), post.body);
     renderMermaidBlocks('#docs-content');
 
@@ -3743,4 +3807,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Start router
     Router.init();
+
+    // The background is decoration, so it never blocks a reading route. On the
+    // landing route it IS the page, so it starts at once.
+    const onLanding = !location.hash || location.hash === '#' || location.hash === '#/';
+    if (onLanding) LibLoader.loadNeuralBG();
+    else window.addEventListener('load', () => LibLoader.loadNeuralBG(), { once: true });
 });

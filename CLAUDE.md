@@ -1310,6 +1310,54 @@ Re-measure with a harness that scrolls in **wheel-sized steps** (60-80px, one
 per frame) rather than one shove — a big synthetic jump hides exactly the jank
 a reader feels, the same trap the scroll-snap testing fell into.
 
+### Performance: the LOAD path, which is a separate problem
+
+Frame rate and load are different failures and the second one was worse. On
+GitHub Pages there are no headers to tune and no server push, so the only
+levers are bytes and blocking. Measured at 1440x900, no CPU or network
+throttling, first contentful paint:
+
+| | FCP |
+| --- | --- |
+| as shipped | **12,524ms** |
+| minus the Google Fonts `<link>` | **64ms** |
+| minus fonts + marked.js + hljs CSS | **48ms** |
+
+**A render-blocking third-party stylesheet held the first paint for the whole
+wait.** The 12.5s figure is this sandbox — the request is blocked and hangs to
+timeout — so it is the FAILURE MODE, not what a typical visitor sees. But the
+structure it exposes is real on any host: every visitor waited on a
+`fonts.googleapis.com` round trip before a single pixel appeared, and that host
+is not always fast for readers in Indonesia, which is most of this audience.
+It is `rel="preload" as="style"` with an `onload` swap and a `<noscript>`
+fallback now; `display=swap` was already set, so the local stack paints first
+and the webfont swaps in without a second reflow.
+
+Three things now load on demand instead of eagerly, all through `LibLoader`:
+
+- **marked** — the landing page never parses markdown and was fetching a
+  markdown parser anyway. `configureMarked` is `async` for this reason and all
+  three call sites `await` it; the promise is memoised so it costs nothing
+  after the first markdown page.
+- **the highlight.js theme** — useless without the library, so it is injected
+  by `loadHighlightCss` when the library is fetched.
+- **`js/neural-bg.js`** — 137KB of decorative canvas that was downloaded,
+  parsed and initialised before `DOMContentLoaded` on every route. On `/blog`
+  at 4x CPU over slow 4G: FCP 884ms / DCL 1213ms with it, **700ms / 813ms**
+  without. It is fetched immediately on the landing route (there the mesh IS
+  the page) and after the `load` event everywhere else. `renderLandingPage` is
+  `async` and awaits it before wiring the scroll-to-phase link.
+
+`loadNeuralBG` **resolves rather than rejects on error**: the mesh is
+decoration, and a page that cannot fetch it should still work rather than hang
+forever on a promise nothing else is waiting for.
+
+**Transfer size is not the problem, and the local numbers lie about it.**
+`python3 -m http.server` does not compress, so a local measurement reports
+~478KB. Pages serves gzip: app.js 179KB raw is 47.5KB, neural-bg.js 136KB is
+44.6KB, style.css 100KB is 21.6KB — about 120KB total. Do not go chasing byte
+counts off a local server.
+
 ## Theming
 
 CSS variables are split into two layers in `css/style.css`:
