@@ -76,13 +76,18 @@
         CONN_RECALC_INTERVAL: 60,
         // Adaptive degradation thresholds (ms per frame).
         //
-        // 28ms is "already at 36fps" — a threshold that only catches
-        // catastrophe. Measured on the landing page at 1440x900, the mesh sat
-        // at a 25.8ms median forever: bad, and never slow enough to trip its
-        // own safety net, so it stayed on the expensive path permanently.
-        // 21ms defends ~48fps instead, which is the point of having a net.
-        SLOW_FRAME_MS: 21,
-        FAST_FRAME_MS: 15,
+        // 21ms was too tight and it cost the figure its resolution. A healthy
+        // frame on a 60Hz display IS 16.7ms, and ordinary jitter clears 21
+        // constantly — so a perfectly capable machine walked itself down two
+        // steps during a quiet scroll and the mesh came out visibly soft.
+        // Measured: a canvas backing store of 1656x1035 against the 2880x1800
+        // the display could show.
+        //
+        // 30ms means "sustained below 33fps", which is the case where a softer
+        // figure genuinely beats a stuttering one. Between 16.7 and 30 the
+        // machine is coping and keeps every pixel.
+        SLOW_FRAME_MS: 30,
+        FAST_FRAME_MS: 18,
 
         // ── Render scale: the one lever that actually moves the needle ──
         //
@@ -104,13 +109,22 @@
         // every millisecond of jank is this file, and three quarters of it is
         // resolution alone.
         //
-        // 1.5 is the cap rather than 2: the mesh is a decorative background of
-        // soft strokes and blurred cells, and half-resolution detail in it is
-        // not perceptible the way half-resolution TEXT would be.
-        MAX_DPR: 1.5,
-        // Under sustained load the scale steps down through these rather than
-        // the page shedding decorations — see the note on perfLevel in animate.
-        DPR_STEPS: [1.5, 1.15, 0.85],
+        // The cap was 1.5 for one release and that was the wrong trade. The
+        // reasoning — "a decorative background does not need full resolution"
+        // — is true of a blurred wash and FALSE of this mesh: it is 1px
+        // strokes and small somata, exactly the content that a fractional
+        // backing store softens most, and on a retina display the difference
+        // is visible at a glance. The landing figure is the product on a
+        // portfolio site; it does not get to look worse to save 3ms on a
+        // machine that had the headroom anyway.
+        //
+        // So full resolution is the TOP step, and the lower ones stay as what
+        // they should always have been: an emergency for devices that cannot
+        // hold a frame rate, not a tax on devices that can.
+        MAX_DPR: 2,
+        // Stepped down only under sustained load — see the note in animate.
+        // A capable machine never leaves DPR_STEPS[0].
+        DPR_STEPS: [2, 1.5, 1.15],
 
         // ── Phase / split system (driven by landing-page scroll) ──
         // The mesh splits into its bio and ai halves and recombines as the
@@ -952,6 +966,23 @@
     // Adaptive perf state — if frames take too long, we shed work.
     let perfLevel = 1;       // 1 = full, 0.5 = degraded (no extras)
     let slowFrames = 0, fastFrames = 0;
+    // Whether this device is allowed to trade RESOLUTION for frame rate.
+    //
+    // Only phones are. On a desktop the mesh is the landing page's whole
+    // graphic and it is looked at directly, so a soft figure is a worse
+    // outcome than a slow one — that is the call the site owner made after
+    // seeing a stepped-down render, and it is the right one for a portfolio.
+    // A desktop under load still sheds decorations through perfLevel; it just
+    // never gives up pixels.
+    //
+    // Phones keep the ladder: their dpr is often 3, the screen is small enough
+    // that 1.5 is indistinguishable at arm's length, and the alternative there
+    // is genuinely unusable rather than merely slow.
+    let scaleMayDrop = window.matchMedia('(max-width: 768px)').matches;
+
+    // Frames to let pass before the adaptive loop is allowed to judge anything.
+    // ~1.5s at 60fps, re-armed every time the mesh becomes active.
+    let warmupFrames = 90;
     // Index into CFG.DPR_STEPS. Never rises above what the display can show.
     //
     // Guessed from the device rather than discovered by janking: the loop
@@ -966,8 +997,13 @@
         const mem = navigator.deviceMemory || 0;                 // Chromium only
         const weak = (cores && cores <= 4) || (mem && mem <= 4);
         const phone = window.matchMedia('(max-width: 768px)').matches;
+        // Only a PHONE starts below full resolution. A four-core laptop
+        // reports `weak` and is perfectly capable of the top step; starting it
+        // soft to save a few ms it did not need is exactly the trade that made
+        // the figure look worse. A desktop begins at full and steps down only
+        // if it is measured struggling.
         if (weak && phone) return 2;
-        if (weak || phone) return 1;
+        if (phone) return 1;
         return 0;
     })();
     const isMobile = window.matchMedia('(max-width: 768px)').matches;
@@ -2520,14 +2556,24 @@
         //
         // 20 frames of hysteresis each way, and a step at a time, so a single
         // slow patch cannot visibly re-scale the canvas under the reader.
-        if (frameMs > CFG.SLOW_FRAME_MS) {
+        // Ignore the first stretch entirely. Script parse, style resolution,
+        // font swap and the first route render all land in the same window as
+        // the opening frames, and they are slow for reasons that have nothing
+        // to do with this canvas — but the loop read them as "this device
+        // cannot cope" and cost the mesh a resolution step it then kept for
+        // the whole visit. That is what made the figure look worse: not the
+        // cap, a load burst being mistaken for a weak machine.
+        if (warmupFrames > 0) { warmupFrames--; }
+        else if (frameMs > CFG.SLOW_FRAME_MS) {
             slowFrames++; fastFrames = 0;
-            // The FIRST step reacts fast, later ones slowly. A device that was
-            // guessed wrong should find out in a few frames, not after a third
-            // of the page has scrolled past; but once it has stepped, only a
-            // sustained problem should cost it more.
-            if (slowFrames > (dprStep === 0 ? 8 : 20)) {
-                if (dprStep < CFG.DPR_STEPS.length - 1) {
+            // scaleMayDrop is false on a desktop — see its declaration.
+            // SUSTAINED, not momentary. 8 frames was enough for a scroll-start
+            // hitch or a garbage collection to cost the figure a resolution
+            // step it never got back inside the same visit. Half a second of
+            // genuinely bad frames is the bar now, and recovery below is
+            // deliberately slower still.
+            if (slowFrames > 30) {
+                if (scaleMayDrop && dprStep < CFG.DPR_STEPS.length - 1) {
                     dprStep++; applyRenderScale(); slowFrames = 0;
                 } else if (perfLevel === 1) {
                     perfLevel = 0.5; slowFrames = 0;
@@ -2543,7 +2589,12 @@
                 else if (dprStep > 0) { dprStep--; applyRenderScale(); fastFrames = 0; }
             }
         } else {
-            slowFrames = Math.max(0, slowFrames - 1);
+            // CONSECUTIVE, not cumulative. Decaying by one meant a page that
+            // ran at a mediocre-but-fine 25ms accumulated slow frames faster
+            // than it shed them, and eventually stepped its own resolution
+            // down over a long scroll even though it was never actually
+            // struggling. Any frame inside the healthy band clears the count.
+            slowFrames = 0;
             fastFrames = Math.max(0, fastFrames - 1);
         }
 
@@ -2588,7 +2639,7 @@
             const next = !!on;
             if (next === active) return;
             active = next;
-            if (active) { lastTime = performance.now(); requestAnimationFrame(animate); }
+            if (active) { lastTime = performance.now(); warmupFrames = 90; requestAnimationFrame(animate); }
             else render(performance.now());
         },
         phaseCount: PHASE_STOPS.length,

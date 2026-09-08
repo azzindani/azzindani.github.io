@@ -1271,11 +1271,36 @@ the floor is ~20ms and every millisecond above it was this file.
 
 Four things this changed, each of which was a wrong assumption first:
 
-- **`MAX_DPR` is 1.5 and the adaptive loop steps it to 1.15 then 0.85.** The
-  mesh is soft strokes and blurred cells; half-resolution detail in it is not
-  perceptible the way half-resolution text would be. `applyRenderScale` only
-  touches the backing store — `W`/`H` stay in CSS pixels, so `shapeCache` stays
-  valid and **the figures do not move when the scale changes mid-scroll**.
+- **Resolution is FULL on desktop and only phones may trade it away.** The cap
+  was 1.5 for one release and it was the wrong call: "a decorative background
+  does not need full resolution" is true of a blurred wash and false of this
+  mesh, which is 1px strokes and small somata — exactly what a fractional
+  backing store softens most. On a retina display the difference is visible at
+  a glance, and the landing figure is the product on a portfolio site. A
+  desktop under load sheds decorations through `perfLevel`; it never gives up
+  pixels. `scaleMayDrop` is the gate, and it is the phone media query.
+  `applyRenderScale` only touches the backing store — `W`/`H` stay in CSS
+  pixels, so `shapeCache` stays valid and **the figures do not move when the
+  scale changes mid-scroll**.
+- **Three separate bugs made the adaptive loop degrade machines that were
+  fine**, and each one alone was enough to soften the figure:
+  - **`SLOW_FRAME_MS` at 21ms.** A healthy frame on a 60Hz display IS 16.7ms
+    and ordinary jitter clears 21 constantly. 30ms — sustained below 33fps —
+    is the case where a softer figure genuinely beats a stuttering one.
+  - **`slowFrames` decayed instead of resetting.** A page at a mediocre-but-fine
+    25ms accumulated slow frames faster than it shed them and stepped itself
+    down over a long scroll while never actually struggling. Any frame inside
+    the healthy band clears the count now.
+  - **No warm-up.** Script parse, style resolution, font swap and the first
+    route render all land in the opening frames and are slow for reasons that
+    have nothing to do with this canvas — and the loop read them as "this
+    device cannot cope", costing the mesh a step it kept for the whole visit.
+    `warmupFrames` (90, re-armed on activation) ignores that window.
+
+  Diagnosing this needed the backing-store scale sampled **from the first
+  frame**, not after a settle: a probe that waited 2s reported 1.5 and looked
+  like the adaptive loop misbehaving mid-scroll, when the step had already
+  happened during load.
 - **`perfLevel` is nearly worthless and is now the LAST resort, not the
   first.** Forcing it to 0.5 for a whole scroll at 4x moved the median from
   131.9ms to 133.7ms — the halos, trails, bubbles and gradients it sheds are a
