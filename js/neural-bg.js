@@ -75,8 +75,42 @@
         COLOR_SIGNAL_BRIDGE: [200, 190, 255],
         CONN_RECALC_INTERVAL: 60,
         // Adaptive degradation thresholds (ms per frame).
-        SLOW_FRAME_MS: 28,    // ~36 fps
-        FAST_FRAME_MS: 20,    // ~50 fps
+        //
+        // 28ms is "already at 36fps" — a threshold that only catches
+        // catastrophe. Measured on the landing page at 1440x900, the mesh sat
+        // at a 25.8ms median forever: bad, and never slow enough to trip its
+        // own safety net, so it stayed on the expensive path permanently.
+        // 21ms defends ~48fps instead, which is the point of having a net.
+        SLOW_FRAME_MS: 21,
+        FAST_FRAME_MS: 15,
+
+        // ── Render scale: the one lever that actually moves the needle ──
+        //
+        // This canvas is PAINT-bound, not script-bound. A CPU profile over a
+        // full scroll attributes 84% of the time to (program) — rasterisation —
+        // against 3.3% for render() and 0.3% for buildConnections, the O(n^2)
+        // that looks like the obvious suspect and is not.
+        //
+        // So the cost is pixels. At devicePixelRatio 2 the backing store is
+        // 2880x1800 = 5.18 MEGAPIXELS, cleared and repainted every frame.
+        // Measured medians over an identical scroll:
+        //
+        //   dpr   1x CPU    4x CPU
+        //   2.0   25.8ms    131.9ms
+        //   1.5   23.2ms     94.2ms
+        //   1.0   18.9ms     48.2ms
+        //
+        // With the canvas switched off the same page holds 19.5ms at 4x, so
+        // every millisecond of jank is this file, and three quarters of it is
+        // resolution alone.
+        //
+        // 1.5 is the cap rather than 2: the mesh is a decorative background of
+        // soft strokes and blurred cells, and half-resolution detail in it is
+        // not perceptible the way half-resolution TEXT would be.
+        MAX_DPR: 1.5,
+        // Under sustained load the scale steps down through these rather than
+        // the page shedding decorations — see the note on perfLevel in animate.
+        DPR_STEPS: [1.5, 1.15, 0.85],
 
         // ── Phase / split system (driven by landing-page scroll) ──
         // The mesh splits into its bio and ai halves and recombines as the
@@ -861,6 +895,20 @@
     let canvas, ctx, W, H, dpr;
     let neurons = [], connections = [], signals = [], numberBubbles = [];
     let frameCount = 0, lastTime = 0, paused = false;
+    // The mesh ANIMATES on the landing route only. Everywhere else it is a
+    // static texture behind body text.
+    //
+    // It used to drift at ~55fps on every reading page, and `reset()` parks it
+    // at phase 0 — the full undivided mesh, the most expensive state there is.
+    // Measured on /blog at 4x CPU: median 36.1ms with it against 22.8ms
+    // without, and 61 of 76 frames over 32ms against 1. A reader scrolling an
+    // article was paying for an animation they had no reason to look at.
+    //
+    // Defaults to FALSE, not true. Starting active and letting the landing
+    // route's Cleanup switch it off would leave the loop running forever for
+    // anyone who opened a post link directly, which is most inbound traffic.
+    // init paints one frame either way, so the canvas still has its texture.
+    let active = false;
     // ── Phase state ──
     // `phase` is the scroll-driven target (0..PHASE_STOPS.length-1). Presence
     // and lane offsets ease toward the interpolated stop every frame, so the
@@ -904,6 +952,24 @@
     // Adaptive perf state — if frames take too long, we shed work.
     let perfLevel = 1;       // 1 = full, 0.5 = degraded (no extras)
     let slowFrames = 0, fastFrames = 0;
+    // Index into CFG.DPR_STEPS. Never rises above what the display can show.
+    //
+    // Guessed from the device rather than discovered by janking: the loop
+    // needs 20 slow frames per step, so a phone that has to walk down two
+    // steps pays about 60 janky frames first — measured as the first three
+    // stages of the landing page running at 80-88ms while later ones sat at
+    // 35-49ms. hardwareConcurrency and deviceMemory are crude and sometimes
+    // absent, which is fine: this only picks the STARTING point, and the loop
+    // corrects it either way.
+    let dprStep = (() => {
+        const cores = navigator.hardwareConcurrency || 0;
+        const mem = navigator.deviceMemory || 0;                 // Chromium only
+        const weak = (cores && cores <= 4) || (mem && mem <= 4);
+        const phone = window.matchMedia('(max-width: 768px)').matches;
+        if (weak && phone) return 2;
+        if (weak || phone) return 1;
+        return 0;
+    })();
     const isMobile = window.matchMedia('(max-width: 768px)').matches;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const neuronCount = reducedMotion
@@ -1161,7 +1227,7 @@
         canvas = document.getElementById('neural-bg');
         if (!canvas) return;
         ctx = canvas.getContext('2d');
-        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        dpr = renderScale();
 
         resize();
         window.addEventListener('resize', resize);
@@ -1207,18 +1273,44 @@
         // Visibility handler
         document.addEventListener('visibilitychange', () => {
             paused = document.hidden;
-            if (!paused) { lastTime = performance.now(); requestAnimationFrame(animate); }
+            if (!paused && active) { lastTime = performance.now(); requestAnimationFrame(animate); }
         });
 
         watchTheme();
 
         lastTime = performance.now();
-        requestAnimationFrame(animate);
+        // One frame unconditionally, so a reading route gets the mesh as a
+        // still texture. The loop itself only runs once a route asks for it.
+        buildConnections();
+        render(lastTime);
+        if (active) requestAnimationFrame(animate);
+    }
+
+    // The backing-store scale: the display's own ratio, capped, and stepped
+    // down again by the adaptive loop. Never ABOVE the device ratio — painting
+    // more pixels than the screen can show is pure waste.
+    function renderScale() {
+        const device = window.devicePixelRatio || 1;
+        return Math.min(device, CFG.DPR_STEPS[dprStep]);
+    }
+
+    // Re-scale the backing store WITHOUT touching W/H. Shapes are sampled in
+    // CSS pixels, so the figures do not move and shapeCache stays valid — this
+    // is the whole reason the scale can be changed mid-scroll without the mesh
+    // reshuffling under the reader.
+    function applyRenderScale() {
+        const next = renderScale();
+        if (next === dpr || !canvas) return;
+        dpr = next;
+        canvas.width = Math.round(W * dpr);
+        canvas.height = Math.round(H * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
     function resize() {
         W = window.innerWidth;
         H = window.innerHeight;
+        dpr = renderScale();
         // Shapes are sampled in viewport units, so they must be rebuilt and
         // re-assigned when the viewport changes.
         shapeCache = {};
@@ -2410,20 +2502,46 @@
 
     // ── Animation Loop ──
     function animate(now) {
-        if (paused) return;
+        if (paused || !active) return;
         const frameMs = now - lastTime;
         const dt = Math.min(frameMs / 16.667, 3); // normalize to ~60fps, cap at 3
         lastTime = now;
 
-        // Adaptive degradation: if frames are consistently slow we shed the
-        // expensive extras (radial-gradient halos, signal trails, bubbles).
-        // Recover gradually once frames are healthy again.
+        // Adaptive load shedding, in the order the costs actually rank.
+        //
+        // RESOLUTION FIRST. Measured at 4x CPU, forcing perfLevel 0.5 for a
+        // whole scroll moved the median from 131.9ms to 133.7ms — the halos,
+        // trails, bubbles and gradients it sheds are worth nothing, because
+        // the page is paint-bound and they are a rounding error against the
+        // 5.18 megapixels underneath them. Dropping the backing store one step
+        // is worth 30-40% on its own. perfLevel is kept as a second, later
+        // step; it is nearly free to keep and it does help a little once the
+        // resolution floor is reached.
+        //
+        // 20 frames of hysteresis each way, and a step at a time, so a single
+        // slow patch cannot visibly re-scale the canvas under the reader.
         if (frameMs > CFG.SLOW_FRAME_MS) {
             slowFrames++; fastFrames = 0;
-            if (slowFrames > 30 && perfLevel === 1) perfLevel = 0.5;
+            // The FIRST step reacts fast, later ones slowly. A device that was
+            // guessed wrong should find out in a few frames, not after a third
+            // of the page has scrolled past; but once it has stepped, only a
+            // sustained problem should cost it more.
+            if (slowFrames > (dprStep === 0 ? 8 : 20)) {
+                if (dprStep < CFG.DPR_STEPS.length - 1) {
+                    dprStep++; applyRenderScale(); slowFrames = 0;
+                } else if (perfLevel === 1) {
+                    perfLevel = 0.5; slowFrames = 0;
+                }
+            }
         } else if (frameMs < CFG.FAST_FRAME_MS) {
             fastFrames++; slowFrames = 0;
-            if (fastFrames > 240 && perfLevel < 1) perfLevel = 1;
+            // Recovery is deliberately slow and in the reverse order: the
+            // cheap extras come back first, and only a sustained run of
+            // healthy frames buys the pixels back.
+            if (fastFrames > 240) {
+                if (perfLevel < 1) { perfLevel = 1; fastFrames = 0; }
+                else if (dprStep > 0) { dprStep--; applyRenderScale(); fastFrames = 0; }
+            }
         } else {
             slowFrames = Math.max(0, slowFrames - 1);
             fastFrames = Math.max(0, fastFrames - 1);
@@ -2462,6 +2580,17 @@
     window.NeuralBG = {
         setPhase,
         reset() { setPhase(0); },
+        // Called by the router: true on the landing route, false everywhere
+        // else. Going idle paints one last frame so the canvas keeps its
+        // texture rather than blanking, then stops the loop entirely — the
+        // point is to stop PAINTING, not to hide the mesh.
+        setActive(on) {
+            const next = !!on;
+            if (next === active) return;
+            active = next;
+            if (active) { lastTime = performance.now(); requestAnimationFrame(animate); }
+            else render(performance.now());
+        },
         phaseCount: PHASE_STOPS.length,
         reducedMotion,
     };

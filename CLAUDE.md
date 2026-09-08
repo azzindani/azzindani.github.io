@@ -1241,9 +1241,74 @@ properties:
 - Signals travel along connections at `SIGNAL_SPEED`; bridge signals
   (AI ↔ bio) cascade once into a same-kind neighbour.
 - Pauses on `visibilitychange` to spare battery.
+- **Animates on the landing route only** — `NeuralBG.setActive()`, driven from
+  `renderLandingPage` and its `Cleanup`. See the performance section below.
 
 If you boost particle count, also boost `MAX_SIGNALS` proportionally and
 re-test on a mid-tier phone.
+
+### Performance: this canvas is PAINT-bound, and almost nothing else is
+
+Every intuition about where the time goes in this file was wrong, so measure
+before changing anything. A CPU profile over a full scroll of the landing page
+attributes **84% of samples to `(program)`** — rasterisation — against 3.3% for
+`render`, 2.8% for `drawBioNeuron` and **0.3% for `buildConnections`**, the
+O(n²) that looks like the obvious suspect and is not.
+
+**The cost is pixels.** At `devicePixelRatio` 2 the backing store was 2880x1800
+= 5.18 megapixels, cleared and repainted every frame. Medians over an identical
+1440x900 scroll, wheel-sized steps:
+
+| backing scale | 1x CPU | 4x CPU | 6x CPU |
+| --- | --- | --- | --- |
+| 2.0 (before) | 25.8ms | 131.9ms | 199.7ms |
+| 1.5 | 23.2ms | 94.2ms | — |
+| 1.0 | 18.9ms | 48.2ms | — |
+| **adaptive (now)** | **20.0ms** | **39.4ms** | **65.9ms** |
+
+With the canvas switched off entirely the same page holds **19.5ms at 4x**, so
+the floor is ~20ms and every millisecond above it was this file.
+
+Four things this changed, each of which was a wrong assumption first:
+
+- **`MAX_DPR` is 1.5 and the adaptive loop steps it to 1.15 then 0.85.** The
+  mesh is soft strokes and blurred cells; half-resolution detail in it is not
+  perceptible the way half-resolution text would be. `applyRenderScale` only
+  touches the backing store — `W`/`H` stay in CSS pixels, so `shapeCache` stays
+  valid and **the figures do not move when the scale changes mid-scroll**.
+- **`perfLevel` is nearly worthless and is now the LAST resort, not the
+  first.** Forcing it to 0.5 for a whole scroll at 4x moved the median from
+  131.9ms to 133.7ms — the halos, trails, bubbles and gradients it sheds are a
+  rounding error against the megapixels underneath them. It sheds after the
+  resolution floor is reached, where it is worth a few percent.
+- **`SLOW_FRAME_MS` was 28**, i.e. "degrade only once already at 36fps", and it
+  needed 30 *consecutive* slow frames. The page sat at a 25.8ms median forever:
+  bad, and never quite slow enough to trip its own safety net. It is 21ms now
+  (defending ~48fps), the first step-down takes 8 frames and later ones 20.
+- **The starting scale is GUESSED from the device, not discovered.** Walking
+  down two steps costs ~60 janky frames — measured as the first three stages
+  running at 80-88ms while later ones sat at 35-49ms. `hardwareConcurrency` and
+  `deviceMemory` are crude and sometimes absent, which is fine: they only pick
+  the starting point and the loop corrects either way.
+
+**The mesh used to animate on every reading page.** `reset()` parks it at phase
+0 — the full undivided mesh, the most expensive state there is — and it drifted
+at ~55fps behind body text on `/blog`, `/post/:slug` and `/docs`. Measured on
+`/blog` at 4x: **36.1ms median with it against 22.8ms without, and 61 of 76
+frames over 32ms against 1.** It now animates on the landing route only.
+
+Two details that make that safe:
+
+- **`active` defaults to FALSE.** Starting true and letting the landing route's
+  `Cleanup` switch it off would leave the loop running forever for anyone who
+  opened a post link directly, which is most inbound traffic.
+- **`init` paints one frame unconditionally**, so a reading route still gets
+  the mesh as a still texture rather than a blank canvas. Verified: a direct
+  load of `/blog` reports 0 rAF callbacks and 63,810 lit pixels.
+
+Re-measure with a harness that scrolls in **wheel-sized steps** (60-80px, one
+per frame) rather than one shove — a big synthetic jump hides exactly the jank
+a reader feels, the same trap the scroll-snap testing fell into.
 
 ## Theming
 

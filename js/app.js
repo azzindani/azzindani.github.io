@@ -1351,6 +1351,16 @@ function renderLandingPage() {
     document.body.classList.add('on-landing');
     Cleanup.add(() => document.body.classList.remove('on-landing'));
 
+    // The mesh ANIMATES here and nowhere else. It rides the same route gate as
+    // the wash, for a stronger version of the same reason: a gradient behind
+    // body text is noise, but an animated canvas behind body text is noise
+    // that costs a frame budget. Measured on /blog at 4x CPU it was the
+    // difference between a 36.1ms and a 22.8ms median.
+    if (window.NeuralBG && window.NeuralBG.setActive) {
+        window.NeuralBG.setActive(true);
+        Cleanup.add(() => window.NeuralBG.setActive(false));
+    }
+
     renderLandingStats();
     renderLandingChart();
     renderLandingEras();
