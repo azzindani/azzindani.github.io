@@ -269,6 +269,21 @@ function createEngine(ENV) {
         // they fill, a figure centred in the viewport puts its crown under the
         // navbar.
         HEAD_CENTER_Y: 0.545,         // figure centre, as a fraction of H
+
+        // ── Stacked layout: below 900px the figure heads its stage ──
+        // The same breakpoint as the CSS, where the copy goes full width. Side
+        // lanes there put the figure BEHIND the text and only a sliver showed at
+        // the screen edge, so a stacked figure is centred in x and placed in the
+        // band the stage leaves clear above its copy (nav + 40vh). Lanes go to
+        // zero, so the two kinds share the screen as they do between figures.
+        STACK_BELOW: 900,
+        STACK_FIT_W: 0.86,
+        STACK_FIT_H: 0.34,
+        STACK_CENTER_Y: 0.27,         // centre of the clear band, fraction of H
+        // A stacked figure is about half its desktop size while a cell is drawn
+        // at the same pixel size, so the brain and the face clotted into lumps.
+        // Cells shrink with the figure; the node count and every edge stay.
+        STACK_CELL: 0.68,
     };
 
     // Phase stops. Index = integer phase; the renderer interpolates between
@@ -761,7 +776,9 @@ function createEngine(ENV) {
             y0 = Math.min(y0, n.y); y1 = Math.max(y1, n.y);
         }
         const bw = Math.max(1, x1 - x0), bh = Math.max(1, y1 - y0);
-        const k = Math.min((W * CFG[def.fitW]) / bw, (H * CFG[def.fitH]) / bh);
+        const fitW = stacked() ? CFG.STACK_FIT_W : CFG[def.fitW];
+        const fitH = stacked() ? CFG.STACK_FIT_H : CFG[def.fitH];
+        const k = Math.min((W * fitW) / bw, (H * fitH) / bh);
         const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
         const sx = def.mirror ? -1 : 1;
         const at = (n, s) => ({ x: sx * (n.x - cx) * k, y: (n.y - cy) * k, z: 0, g: 1, s: s || 1 });
@@ -1304,6 +1321,10 @@ function createEngine(ENV) {
 
     // ── Phase system ──
 
+    // Below the CSS stacking breakpoint figures head their stage rather than
+    // riding a lane beside it — see STACK_* in CFG.
+    function stacked() { return W < CFG.STACK_BELOW; }
+
     function smoothstep(t) { return t * t * (3 - 2 * t); }
 
     // Resolve the interpolated stop for the current phase value.
@@ -1317,7 +1338,7 @@ function createEngine(ENV) {
         const hold = CFG.PHASE_HOLD;
         const f = smoothstep(Math.max(0, Math.min(1, (raw - hold) / (1 - hold))));
         const a = PHASE_STOPS[i], b = PHASE_STOPS[i + 1] || PHASE_STOPS[maxI];
-        const lane = W * CFG.LANE_FRACTION, exit = W * CFG.EXIT_FRACTION;
+        const lane = stacked() ? 0 : W * CFG.LANE_FRACTION, exit = W * CFG.EXIT_FRACTION;
         // bioX/aiX are authored as multiples of the lane width; values beyond
         // ±1 push the departing kind off toward the exit distance instead.
         const toPx = (v) => (Math.abs(v) <= 1 ? v * lane : Math.sign(v) * exit);
@@ -1366,12 +1387,13 @@ function createEngine(ENV) {
             // still, off the viewport edge rather than into the middle of its
             // own half.
             const side = figureKind(name) === 'ai' ? 1 : -1;
-            const dx = side * (0.25 - CFG.LANE_FRACTION) * W;
-            const dy = (CFG.HEAD_CENTER_Y - 0.5) * H;
+            const dx = stacked() ? 0 : side * (0.25 - CFG.LANE_FRACTION) * W;
+            const dy = ((stacked() ? CFG.STACK_CENTER_Y : CFG.HEAD_CENTER_Y) - 0.5) * H;
             const def = GRAPH_FIGURES[name];
             entry = { pts: shape.pts.map(q => ({ ...q, x: q.x + dx, y: q.y + dy,
                                                 g: CFG.FORM_GLOW })),
-                      edges: shape.edges, scale: shape.scale,
+                      edges: shape.edges,
+                      scale: shape.scale * (stacked() ? CFG.STACK_CELL : 1),
                       // sizeByEdge reaches the draw loop through here: it gates
                       // both the per-node neurite allowance and the short-wire
                       // taper, and the head is the only figure that wants either.
@@ -1385,15 +1407,16 @@ function createEngine(ENV) {
             // instead of a coin flip per signal.
             const net = buildNetworkShape(
                 networkLevel(Math.round((count || neuronCount) * 0.9)),
-                W * CFG.NET_FIT_W, Math.min(H * CFG.NET_FIT_H, 300), CFG.NET_FANOUT);
-            const dy = (CFG.NET_CENTER_Y - 0.5) * H;
+                W * CFG.NET_FIT_W,
+                Math.min(H * (stacked() ? CFG.STACK_FIT_H : CFG.NET_FIT_H), 300), CFG.NET_FANOUT);
+            const dy = ((stacked() ? CFG.STACK_CENTER_Y : CFG.NET_CENTER_Y) - 0.5) * H;
             entry = {
                 // Less emphasis than the graph figures, not more: the band's
                 // wires supply their own weight by sheer count, and at
                 // FORM_GLOW it turned into a solid block of colour.
                 pts: net.pts.map(q => ({ ...q, y: q.y + dy, g: 0.95 })),
                 edges: net.edges,
-                scale: CFG.NET_FORM_SCALE,
+                scale: CFG.NET_FORM_SCALE * (stacked() ? CFG.STACK_CELL : 1),
                 // The band covers the whole viewport in lines where the graph
                 // figures occupy a corner of it, so it is drawn lighter and
                 // thinner. Same wires, a third of the ink.

@@ -268,6 +268,24 @@ test('scrolling drives the neural background phase', async ({ page }) => {
     expect(atBottom).toBeLessThan(9);
 });
 
+test('progress rail marks the current stage and jumps to another', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('.lp-hero')).toBeVisible({ timeout: 10000 });
+    const marks = page.locator('.lp-rail .lp-rail-mark');
+    await expect(marks).toHaveCount(9);
+    await expect(marks.nth(0)).toHaveAttribute('aria-current', 'step');
+
+    await marks.nth(5).click();
+    await expect(marks.nth(5)).toHaveAttribute('aria-current', 'step', { timeout: 5000 });
+    // The glide lands the stage in view, not just the mark.
+    await page.waitForTimeout(1300);
+    const inView = await page.evaluate(() => {
+        const r = document.querySelectorAll('.lp-stage')[5].getBoundingClientRect();
+        return r.top < innerHeight / 2 && r.bottom > innerHeight / 2;
+    });
+    expect(inView).toBe(true);
+});
+
 test('the mesh draws from a worker where OffscreenCanvas allows it', async ({ page }) => {
     await page.goto('/');
     await page.waitForFunction(() => window.NeuralBG && window.NeuralBG.thread);

@@ -279,6 +279,8 @@ landing scale sits a step above the rest of the site because the figure beside
 it is most of a screen tall; at 360px wide there is no figure beside it, so the
 step pays for nothing and costs three wrapped lines a card.
 
+(Since the open layout, figure stages on phones are taller than a screen ON
+PURPOSE — see "The open layout". The figures below predate it.)
 Measured across 16 sizes from 1920×1080 down: **14 hold every stage inside one
 screen.** 360×640 and 320×568 do not (stage 1 at 106% and 124%, from 109% and
 142% before), and closing those would mean cutting copy rather than box — both
@@ -336,6 +338,50 @@ left-hand figure and had to learn a side:
 
 **Stage 3 is the one stage that is not a split**, and the only one whose panel
 is not beside the mesh — see "The network band" below.
+
+### The open layout
+
+The stages carry **no boxes**. Every stage used to be the same white frosted
+card floating on the mesh — eight in a row, a flat rhythm, and a frame
+competing with the figure beside it. The copy now sits on the page:
+
+- **The scrim is what keeps it legible.** `.lp-panel::before` (and
+  `.lp-hero-inner::before`) is a blurred box of `--scrim-rgb` at ~0.9 behind
+  the copy, so a wire crossing a letter is muted rather than drawn through it.
+  A blurred BOX, not a radial gradient: an ellipse that fits a block's sides
+  leaves its corners — the kicker, the last card — outside it. `--scrim-rgb`
+  is set per theme close to `--wash-core`, so the glow has no visible edge; the
+  first dark value (14,20,38) was darker than the wash's centre and showed as
+  a faint rectangle on the wide stages.
+- **The panel padding is still load-bearing** even with no box to fill: it is
+  the gutter between the copy and the centre line the figure respects.
+- **Cards are ruled rows** (hairline between entries, an arrow that slides on
+  hover), stats are open numbers between vertical rules, and a short rule leads
+  each kicker. Nothing on the page is boxed except the buttons and the ticker
+  chips. The short-viewport tiers restate card padding — keep the left padding
+  at 0 there, or the rows indent away from their heading.
+- **The hero title's second line is `.lp-hero-grad`**: bio purple into ai blue,
+  the two colours the mesh behind it is drawn in. Markup only; no copy change.
+- **The progress rail** (`.lp-rail`, built in `setupLandingScroll`) is one
+  tick per stage in the right gutter, the current one long. It is updated from
+  the existing scroll rAF and the settle glide — never a loop of its own — and
+  each tick glides to its stage with a 1100ms cap rather than the settle's 600,
+  because a rail jump can cross the whole page. Labels come from each stage's
+  kicker, so renaming a stage renames its tick. Hidden below 900px.
+
+**Below 900px the figure heads its stage.** Side by side there is no room, and
+full-width copy used to sit ON the figure, so phones saw the brain, the face
+and the arm as slivers at the screen edge. `neural-bg.js` now has a stacked
+mode (`STACK_BELOW` 900, the CSS breakpoint): lanes go to zero, a figure is
+centred in x at `STACK_CENTER_Y` (0.27) and fitted to `STACK_FIT_W/H`, and its
+cells shrink by `STACK_CELL` (0.68) because the figure is about half its
+desktop size while a cell is not. The figure stages and stage 3 get
+`padding-top: nav + 40vh` so the copy starts below it. Those stages are now
+deliberately taller than one screen on a phone, which is why the settle rests a
+stage taller than the viewport on its TOP rather than its centre — there the
+reference line is inside `PHASE_HOLD`, so the figure is fully formed when the
+stage lands. The two numbers are one control: move `STACK_CENTER_Y` or
+`STACK_FIT_H` and the 40vh wants moving too.
 
 ### What the copy is allowed to do
 
@@ -1434,15 +1480,15 @@ To benchmark either path, delete `HTMLCanvasElement.prototype
 time worker frames by wrapping `self.requestAnimationFrame` through
 Playwright's `worker.evaluate` — the page's own rAF no longer sees them.
 
-**The next cost is `backdrop-filter`, and it is a design call, not a bug.**
-`.lp-panel` blurs 14px over a canvas that changes every frame, so the blur is
-recomputed every frame across every visible panel. In this sandbox (software
-compositing) dropping the blur took page frames from 50ms to 33ms median and
-frames over 50ms from 52 to 3 on a full scroll. It was left in: without it the
-mesh shows sharp through the panel instead of frosted, at 0.72 or 0.84
-opacity alike, and that is a visible change to the look. If the landing
-redesign wants the frames, an opaque-enough panel without blur is where they
-are.
+**`backdrop-filter` is gone from the landing panels, and must not come back.**
+`.lp-panel` used to blur 14px over a canvas that changes every frame, so the
+blur was recomputed every frame across every visible panel. It went with the
+boxes in the open-layout redesign (see "The open layout" above). Measured on a
+full scroll, worker build, before and after: page frames 50ms -> 33ms median
+and frames over 50ms 52 -> 11 at 1440x900; on a 390x844 phone, p90 16.7ms and
+none over 50ms. A static `filter: blur()` on the scrim is fine — it blurs the
+element's own unchanging content and rasterises once. A *backdrop* filter over
+the mesh re-runs every frame.
 
 ### Performance: the LOAD path, which is a separate problem
 

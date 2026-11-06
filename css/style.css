@@ -55,6 +55,10 @@ a .icon, button .icon { stroke-width: 2.2; }
        --color-bg-tertiary instead only spanned 1.1% and did nothing. */
     --wash-core: #fdfeff;
     --wash-rim: #e2e8f1;
+    /* The landing copy sits on the page, not in a box (see .lp-panel), with a
+       soft glow of this colour behind it so the drifting mesh never crosses a
+       letter at full strength. Close to --wash-core, so the glow has no edge. */
+    --scrim-rgb: 250, 251, 254;
     --color-surface: #ffffff;
     --color-surface-rgb: 255, 255, 255;
     --color-border: #e1e4e8;
@@ -81,6 +85,7 @@ a .icon, button .icon { stroke-width: 2.2; }
     --color-bg-tertiary: #1e293b;
     --wash-core: #1b2740;
     --wash-rim: #080c18;
+    --scrim-rgb: 23, 33, 56;
     --color-surface: #131a30;
     --color-surface-rgb: 19, 26, 48;
     --color-border: #2a3552;
@@ -108,6 +113,7 @@ a .icon, button .icon { stroke-width: 2.2; }
         --color-bg-tertiary: #1e293b;
         --wash-core: #1b2740;
         --wash-rim: #080c18;
+        --scrim-rgb: 23, 33, 56;
         --color-surface: #131a30;
         --color-surface-rgb: 19, 26, 48;
         --color-border: #2a3552;
@@ -2979,6 +2985,12 @@ body.cmd-open { overflow: hidden; }
 .landing {
     position: relative;
     z-index: 1;
+    /* The text scrims (.lp-panel::before) bleed past their panels on purpose,
+       and on a phone the panel is the full width — clip, so a soft edge never
+       becomes a horizontal scroll. `clip` rather than `hidden` where supported:
+       it does not make .landing a scroll container. */
+    overflow-x: hidden;
+    overflow-x: clip;
 }
 
 /* A full screen each, because the stages settle to the centre of the viewport:
@@ -3044,13 +3056,19 @@ body.cmd-open { overflow: hidden; }
        it. The container's own max-width is what keeps the panel from growing
        without limit. */
     width: 50%;
-    /* The mesh is still visible behind the panel — a translucent surface keeps
-       type legible without hiding the animation entirely. */
-    background: rgba(var(--color-surface-rgb), 0.72);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-lg);
+    /* No box. Every stage used to be the same white card on the mesh — eight
+       in a row, a flat rhythm, and a frame competing with the figure beside it.
+       The copy now sits on the page itself and the scrim below keeps it
+       legible. The padding stays: it is the gutter between the copy and the
+       centre line the figure respects, not the inside of a box any more.
+
+       It also retired the most expensive thing on the page that was not the
+       canvas: a 14px backdrop-filter re-blurred under every panel on every
+       frame, because the mesh behind it never stops moving. Measured on a full
+       scroll in software compositing: page frames 50ms -> 33ms median, frames
+       over 50ms 52 -> 3. */
+    position: relative;
+    isolation: isolate;
     padding: 52px 56px;
 
     /* Panel type is sized off the PANEL, not the window. The split panel is
@@ -3062,6 +3080,23 @@ body.cmd-open { overflow: hidden; }
     container-type: inline-size;
 }
 .lp-panel-wide { width: min(92%, 960px); text-align: center; }
+
+/* The scrim: a soft field of page colour behind the copy, so a wire crossing a
+   letter is muted to a tenth rather than drawn through it. A BLURRED box, not a
+   radial gradient — a gradient fits an ellipse, and the corners of a block of
+   text (the kicker, the last card) fall outside any ellipse that fits its
+   sides. The blur is this element's own and its content never changes, so it
+   rasterises once; it is not a backdrop-filter and re-runs on nothing. */
+.lp-panel::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: 48px;
+    background: rgba(var(--scrim-rgb), 0.9);
+    filter: blur(32px);
+}
 
 /* A floor, not a height. Panel fill ran from 76% of the viewport on stage 1 to
    28% on stage 6, so the page lurched between crowded and empty; the boxes
@@ -3079,11 +3114,17 @@ body.cmd-open { overflow: hidden; }
    follows its column. A bare rem does neither — .lp-lead was pinned at
    1.14rem from 1920 down to 390, where it was the largest body text on the
    page; px would additionally ignore the reader. */
+/* A step larger than when the heading sat in a box: with no frame around the
+   copy, the heading is what holds the block together, and the figure beside it
+   is most of a screen tall. Balanced, so a two-line heading splits evenly
+   instead of leaving one word on the second line. */
 .lp-panel h2 {
-    font-size: clamp(1.9rem, 0.5rem + 5.4cqi, 2.6rem);
-    line-height: 1.12;
-    margin: 0 0 18px;
-    letter-spacing: -0.02em;
+    font-size: clamp(2rem, 0.4rem + 6.4cqi, 3.1rem);
+    line-height: 1.08;
+    margin: 0 0 20px;
+    letter-spacing: -0.03em;
+    font-weight: 750;
+    text-wrap: balance;
 }
 /* One mono label, one size. These were 0.84rem/0.14em and 0.8rem/0.18em
    doing the same job two stages apart. */
@@ -3094,12 +3135,27 @@ body.cmd-open { overflow: hidden; }
     text-transform: uppercase;
     margin: 0 0 14px;
 }
-.lp-kicker { color: var(--color-primary); }
+.lp-kicker {
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+/* A short rule ahead of the label: the one mark that says "a new section
+   starts here" now that no box edge does. */
+.lp-kicker::before {
+    content: '';
+    width: 28px;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.7;
+}
+.lp-panel-wide .lp-kicker { justify-content: center; }
 .lp-lead {
     color: var(--color-text-secondary);
-    font-size: clamp(1rem, 0.96rem + 0.34cqi, 1.14rem);
+    font-size: clamp(1.02rem, 0.96rem + 0.42cqi, 1.2rem);
     line-height: 1.62;
-    margin: 0 0 22px;
+    margin: 0 0 28px;
     /* The measure, in ch so it tracks the font size rather than a guess about
        the column. It bites in exactly the two places the column outgrows the
        type: the centred wide panels, which ran to 82 characters — the worst
@@ -3108,19 +3164,43 @@ body.cmd-open { overflow: hidden; }
        900px, where the split panel goes full width. The desktop split panel
        already sits just inside it and is untouched. */
     max-width: 50ch;
+    text-wrap: pretty;
 }
 .lp-panel-wide .lp-lead { margin-left: auto; margin-right: auto; }
 
 /* ── Hero ── */
 .lp-hero { min-height: 100vh; justify-content: center; text-align: center; position: relative; }
-.lp-hero-inner { max-width: 780px; }
+.lp-hero-inner { max-width: 880px; position: relative; isolation: isolate; }
+/* The hero sits on the busiest state the mesh has — the whole thing, drifting
+   — so it gets the same scrim as the panels, wider and fainter. */
+.lp-hero-inner::before {
+    content: '';
+    position: absolute;
+    inset: -8% -10%;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: 50%;
+    background: rgba(var(--scrim-rgb), 0.82);
+    filter: blur(48px);
+}
 .lp-eyebrow { color: var(--color-text-muted); margin-bottom: 20px; }
 .lp-hero-title {
-    font-size: clamp(2.4rem, 7vw, 4.6rem);
-    line-height: 1.05;
-    letter-spacing: -0.035em;
-    margin: 0 0 24px;
+    font-size: clamp(2.6rem, 7.4vw, 5.6rem);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    margin: 0 0 26px;
     font-weight: 800;
+}
+/* The two kinds of neuron the page is named for, carried into the title: bio
+   purple into ai blue, the same two colours the mesh behind it is drawn in. */
+.lp-hero-grad {
+    background: linear-gradient(100deg, rgb(168, 85, 247) 0%, rgb(124, 92, 246) 45%, var(--color-primary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    /* Descenders and the italic-free overhang of the last glyph sit outside the
+       line box; without this the clip shaves them. */
+    padding: 0 0.04em 0.08em;
 }
 .lp-hero-sub {
     font-size: clamp(1rem, 1.6vw, 1.18rem);
@@ -3131,6 +3211,7 @@ body.cmd-open { overflow: hidden; }
        over on the way down and the px cap holds the top. */
     max-width: min(560px, 48ch);
     margin: 0 auto 36px;
+    text-wrap: balance;
 }
 .lp-hero-actions, .lp-cta {
     display: flex;
@@ -3184,21 +3265,34 @@ body.cmd-open { overflow: hidden; }
 }
 
 /* ── Stage components ── */
-.lp-cards { display: grid; gap: 14px; }
+/* Ruled rows rather than boxes. A box per card inside a box per stage was two
+   frames deep; with the stage frame gone, a hairline between entries is enough
+   to separate them, and the arrow says what the box used to: this goes
+   somewhere. */
+.lp-cards { display: grid; gap: 0; border-top: 1px solid var(--color-border); }
 /* The cards are anchors into the category routes. They were <article>s while
    the copy was placeholder, and the hover below already lifted them and lit
    their border — so the card promised a click and had nothing behind it. */
 .lp-card {
     display: block;
+    position: relative;
     color: inherit;
     text-decoration: none;
-    padding: 20px 24px;
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-md);
-    background: rgba(var(--color-surface-rgb), 0.6);
-    transition: transform var(--transition), border-color var(--transition);
+    padding: 20px 48px 20px 0;
+    border-bottom: 1px solid var(--color-border);
+    transition: background-color var(--transition);
 }
-.lp-card:hover { transform: translateY(-3px); border-color: var(--color-primary); }
+.lp-card::after {
+    content: '→';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translate(0, -50%);
+    font-size: 1.15rem;
+    color: var(--color-text-muted);
+    transition: transform var(--transition), color var(--transition);
+}
+.lp-card:hover::after { transform: translate(6px, -50%); color: var(--color-primary); }
 .lp-card:hover h3 { color: var(--color-primary); }
 .lp-card h3 { transition: color var(--transition); }
 .lp-card:focus-visible {
@@ -3256,26 +3350,28 @@ body.cmd-open { overflow: hidden; }
    one set of external links inside a stage — the .lp-cta below them goes to the
    site's own routes, and the footer repeats the profiles — so they carry
    target/rel rather than the router. */
+/* Open numbers between vertical rules, the way the beats and eras already are
+   — the last boxes on the page went with the panel boxes. */
 .lp-stat {
     display: block;
     color: inherit;
     text-decoration: none;
-    padding: 28px 14px;
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-md);
-    background: rgba(var(--color-surface-rgb), 0.6);
-    transition: transform var(--transition), border-color var(--transition);
+    padding: 18px 14px;
+    border-left: 1px solid var(--color-border);
+    transition: background-color var(--transition);
 }
-.lp-stat:hover { transform: translateY(-3px); border-color: var(--color-primary); }
+.lp-stat:first-child { border-left: 0; }
+.lp-stat:hover .lp-stat-value { color: var(--color-primary-hover); }
+.lp-stat:hover .lp-stat-label { color: var(--color-text); }
 .lp-stat:focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 3px;
 }
 .lp-stat-value {
     display: block;
-    /* Capped at 2.8rem this tied with the heading above it (44.8 against 46.4)
-       and stage 2 had nothing leading it. */
-    font-size: clamp(1.7rem, 3vw, 2.3rem);
+    /* 2.8rem tied with the heading when the heading capped at 2.6rem; it caps
+       at 3.1rem now, so the count can be large without competing. */
+    font-size: clamp(2rem, 3.6vw, 2.8rem);
     font-weight: 800;
     letter-spacing: -0.03em;
     color: var(--color-primary);
@@ -3398,6 +3494,71 @@ body.cmd-open { overflow: hidden; }
 }
 .reveal.in-view { opacity: 1; transform: none; }
 
+/* ── Progress rail ──
+   One tick per stage down the right edge, the current one drawn long and in
+   the primary colour; the stage's name slides out beside a tick on hover or
+   focus. It lives in the outer gutter — the panels stop at the container's
+   padding, at least 3.2vw in from the edge — so it never sits on copy.
+   Set from the scroll handler in setupLandingScroll; no loop of its own. */
+.lp-rail {
+    position: fixed;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+.lp-rail-mark {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 32px;
+    height: 20px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+}
+.lp-rail-mark::after {
+    content: '';
+    width: 12px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--color-text-muted);
+    opacity: 0.5;
+    transition: width var(--transition), opacity var(--transition), background-color var(--transition);
+}
+.lp-rail-mark:hover::after { opacity: 0.9; width: 18px; }
+.lp-rail-mark[aria-current]::after {
+    width: 28px;
+    opacity: 1;
+    background: var(--color-primary);
+}
+.lp-rail-label {
+    position: absolute;
+    right: 40px;
+    white-space: nowrap;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    padding: 3px 8px;
+    border-radius: var(--radius-sm, 4px);
+    background: rgba(var(--scrim-rgb), 0.92);
+    opacity: 0;
+    transform: translateX(6px);
+    pointer-events: none;
+    transition: opacity var(--transition), transform var(--transition);
+}
+.lp-rail-mark:hover .lp-rail-label,
+.lp-rail-mark:focus-visible .lp-rail-label { opacity: 1; transform: none; }
+.lp-rail-mark:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; border-radius: 4px; }
+
 /* ── Responsive ──
    Below the split breakpoint the mesh has nowhere to evacuate to, so panels
    go full width and sit on a more opaque surface instead. */
@@ -3413,7 +3574,7 @@ body.cmd-open { overflow: hidden; }
     .lp-panel { padding: 34px 40px; }
     .lp-panel h2 { margin-bottom: 14px; }
     .lp-lead { margin-bottom: 18px; }
-    .lp-card { padding: 16px 22px; }
+    .lp-card { padding: 14px 44px 14px 0; }
 }
 
 /* Second tier: 720-high laptops, where stage 1 still ran 18px past the
@@ -3425,7 +3586,7 @@ body.cmd-open { overflow: hidden; }
 @media (max-height: 760px) {
     .lp-panel { padding: 28px 34px; }
     .lp-cards { gap: 12px; }
-    .lp-card { padding: 14px 20px; }
+    .lp-card { padding: 14px 44px 14px 0; }
 }
 
 @media (max-width: 900px) {
@@ -3447,8 +3608,20 @@ body.cmd-open { overflow: hidden; }
     /* The min-heights are a desktop balance device; stacked full-width panels
        set their own rhythm and a floor here only adds dead space. */
     .lp-split .lp-panel, .lp-split-left .lp-panel, .lp-full .lp-panel-wide { min-height: 0; }
-    .lp-panel { background: rgba(var(--color-surface-rgb), 0.88); }
     .lp-hero { min-height: 88vh; }
+    /* The figure HEADS its stage here. Side by side there is no room for it,
+       and full-width copy used to sit on top of it, so on a phone the brain,
+       the face and the arm were slivers at the screen edge behind the text.
+       neural-bg.js draws a figure centred in the top band of the screen below
+       900px (STACK_* in its CFG) and the copy starts underneath: 40vh of the
+       stage is the figure's. Stage 3's network band does the same. The settle
+       rests a stage this tall on its top, where the figure is held. */
+    .lp-stage.lp-split, .lp-stage.lp-split-left, .lp-stage.lp-band {
+        min-height: 100vh;
+        align-items: flex-start;
+        padding-top: calc(var(--nav-height, 56px) + 40vh);
+    }
+    .lp-rail { display: none; }
     /* The stats stay three across at every width. Stacking them was fine when
        they were the whole of stage 2, but on stage 6 they sit under a heading,
        a lead and a CTA, and three tall cards pushed the panel to 113% of the
@@ -3517,7 +3690,7 @@ body.cmd-open { overflow: hidden; }
     .lp-lead { margin-bottom: 12px; }
     .lp-kicker, .lp-eyebrow { margin-bottom: 8px; }
     .lp-cards { gap: 8px; }
-    .lp-card { padding: 10px 14px; }
+    .lp-card { padding: 10px 36px 10px 0; }
     .lp-panel-band { gap: 10px; }
     .lp-chart svg { height: 44px; }
     .lp-chart-axis { font-size: 0.62rem; }
@@ -3542,7 +3715,7 @@ body.cmd-open { overflow: hidden; }
     .lp-panel h2 { margin-bottom: 8px; }
     .lp-lead { margin-bottom: 12px; }
     .lp-cards { gap: 8px; }
-    .lp-card { padding: 10px 14px; }
+    .lp-card { padding: 10px 36px 10px 0; }
     .lp-card p { font-size: 0.88rem; }
     .lp-lead { font-size: 0.94rem; }
     .lp-panel h2 { font-size: clamp(1.5rem, 6.4vw, 1.9rem); }

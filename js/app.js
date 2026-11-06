@@ -1170,7 +1170,7 @@ async function renderLandingPage() {
         <section class="lp-stage lp-hero" data-stage="0">
             <div class="lp-hero-inner">
                 <p class="lp-eyebrow reveal">Learn · Iterate · Orchestrate</p>
-                <h1 class="lp-hero-title reveal">Empowering<br>Artificial Intelligence</h1>
+                <h1 class="lp-hero-title reveal">Empowering<br><span class="lp-hero-grad">Artificial Intelligence</span></h1>
                 <p class="lp-hero-sub reveal">Data you trust. Automation at scale. Productivity you can
                     measure.</p>
                 <div class="lp-hero-actions reveal">
@@ -1657,13 +1657,53 @@ function setupLandingScroll() {
         return LANDING_STAGES - 1;
     };
 
+    // ── Progress rail ──
+    // Nine full-screen stages gave no sense of where you were or how much was
+    // left. One mark per stage, the current one drawn long; each is a button
+    // that glides to its stage. It is updated from the scroll handler below,
+    // so it costs no loop of its own. Inside #landing, so the route takes it
+    // down with everything else; position: fixed escapes .landing's clip.
+    const rail = document.createElement('nav');
+    rail.className = 'lp-rail';
+    rail.setAttribute('aria-label', 'Sections');
+    rail.innerHTML = stages.map((el, i) => {
+        const kicker = el.querySelector('.lp-kicker');
+        const label = kicker ? kicker.textContent.replace(/^\s*\d+\s*—\s*/, '').trim() : 'Introduction';
+        const num = String(i).padStart(2, '0');
+        return `<button type="button" class="lp-rail-mark" data-i="${i}"
+            aria-label="${num} ${Utils.escapeHtml(label)}"><span class="lp-rail-label">${Utils.escapeHtml(label)}</span></button>`;
+    }).join('');
+    (document.getElementById('landing') || document.body).appendChild(rail);
+    const marks = Array.from(rail.querySelectorAll('.lp-rail-mark'));
+    let railAt = -1;
+    const markRail = (p) => {
+        const i = Math.max(0, Math.min(marks.length - 1, Math.floor(p)));
+        if (i === railAt) return;
+        if (railAt >= 0) marks[railAt].removeAttribute('aria-current');
+        marks[i].setAttribute('aria-current', 'step');
+        railAt = i;
+    };
+    rail.addEventListener('click', (e) => {
+        const btn = e.target.closest('.lp-rail-mark');
+        if (!btn) return;
+        const stops = stopPositions();
+        const target = stops[+btn.dataset.i];
+        if (target === undefined) return;
+        cancelSettle();
+        const y = window.scrollY || window.pageYOffset;
+        if (reduceMotion.matches) window.scrollTo({ top: target, behavior: 'instant' });
+        else glideTo(y, target, 1100);
+    });
+
     let ticking = false;
     const onScroll = () => {
         if (ticking) return;
         ticking = true;
         requestAnimationFrame(() => {
             ticking = false;
-            bg.setPhase(phaseFromScroll());
+            const p = phaseFromScroll();
+            bg.setPhase(p);
+            markRail(p);
         });
     };
 
@@ -1703,7 +1743,14 @@ function setupLandingScroll() {
         // Each stage centred, plus the end of the document. The end has to be
         // one of them — without it the last stage pulls back from the bottom
         // and the footer can never be reached.
-        const stops = bounds.map(b => Math.max(0, Math.min(max, b.top + b.height / 2 - half)));
+        // A stage taller than the screen rests on its TOP, not its centre.
+        // Centred, it shows its own middle — the start of the copy cut off above
+        // and, on a phone, the figure (which heads the stage there) half gone.
+        // At its top the reference line is still inside PHASE_HOLD, so the
+        // figure is fully formed when the stage lands.
+        const vh = window.innerHeight;
+        const stops = bounds.map(b => Math.max(0, Math.min(max,
+            b.height > vh + 1 ? b.top : b.top + b.height / 2 - half)));
         stops.push(max);
         return stops;
     };
@@ -1723,9 +1770,12 @@ function setupLandingScroll() {
     // longer SETTLE_MIN_MS/SETTLE_MAX_MS pay for.
     //
     // This rAF is transient and ends itself; it is not a second render loop.
-    const glideTo = (from, target) => {
+    // `maxMs` is longer for a jump from the progress rail, which can cross the
+    // whole page: at the settle's 600ms cap that would be thousands of pixels in
+    // a blink.
+    const glideTo = (from, target, maxMs = SETTLE_MAX_MS) => {
         const dist = target - from;
-        const ms = Math.min(SETTLE_MAX_MS, Math.max(SETTLE_MIN_MS, SETTLE_MIN_MS + Math.abs(dist) * 0.8));
+        const ms = Math.min(maxMs, Math.max(SETTLE_MIN_MS, SETTLE_MIN_MS + Math.abs(dist) * 0.8));
         const t0 = performance.now();
         settling = true;
         const step = () => {
@@ -1739,7 +1789,9 @@ function setupLandingScroll() {
             // Drive the phase from here too. Left to the scroll listener it
             // costs a frame to schedule and another for the canvas to draw it,
             // so through the whole glide the mesh trails the page it belongs to.
-            bg.setPhase(phaseFromScroll());
+            const p = phaseFromScroll();
+            bg.setPhase(p);
+            markRail(p);
             if (t < 1) settleRaf = requestAnimationFrame(step);
             else { settleRaf = 0; settling = false; }
         };
