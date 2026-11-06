@@ -1385,6 +1385,27 @@ phone's width), and on a stacked layout — where every lane is 0 and the kick's
 direction used to be a coin flip per cell, a shake rather than a tear — the two
 kinds part from each other instead.
 
+**An even frame rate beats a higher, uneven one — the engine paces itself.**
+Most Android phones refresh at 90-120Hz, so rAF asks for a frame every 8-11ms
+and a frame that runs slightly long is shown twice while its neighbours are
+shown once. That was the residual "slight jitter" on Android after the wiring
+fix. `paceSkip` / `paceVerdict` in `animate` draw on every k-th vsync: the
+display interval is the shortest gap rAF delivers, k starts at 1, steps up when
+more than a fifth of a 24-frame window lands late (120 -> 60 -> 40 -> 30fps on
+a 120Hz phone; never below ~30), and steps back down after a clean run, with
+the wait doubling each time a step down fails. Every update takes `dt` from
+frames actually drawn, so pacing changes the sampling, never the speed. Under
+a simulated slow device (14-22ms extra per frame) frame-to-frame interval
+changes fell from 35% to 16% at the same rate; unloaded it stays at k=1. A
+machine that keeps up never paces.
+
+**Off-screen cells and wires are skipped**, which is 12-17% of visible cells at
+any moment. Each cell carries `n.reach` (axon with its arbor, a dendrite with a
+far-end branch, or the glow) and is culled only when that whole reach is off
+the viewport; wires only when both ends are beyond the same edge, padded for
+the bio curve. Verified pixel-identical by rendering the same frozen state
+with and without culling on 390x844 and 1440x900: 0 differing values.
+
 **One thing to know before defending the mobile budget.** Below 900px the split
 layout stacks and the panel goes full width, so on a phone the figure sits
 BEHIND the copy and only a sliver shows at the edge — verified by capture on a

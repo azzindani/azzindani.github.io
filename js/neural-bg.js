@@ -1100,7 +1100,8 @@ function createEngine(ENV) {
         };
 
         if (isAI) {
-            // Random orientation for hex variety.
+            // Random orientation for hex variety. The halo is the widest part.
+            n.reach = radius * 2.2;
             return n;
         }
 
@@ -1161,6 +1162,14 @@ function createEngine(ENV) {
         };
 
         n.soma = buildSoma(n, radius, subtype, axonAngle);
+        // How far anything this cell draws can reach from its centre, at
+        // ps = pulse = 1: the axon with its terminal arbor, a dendrite with a
+        // sub-branch forking off its far end, or the glow. render() skips a
+        // cell whose reach is entirely off-screen — and only then, so the cut
+        // is invisible.
+        let dend = 0;
+        for (const d of n.dendrites) dend = Math.max(dend, d.length * 1.5);
+        n.reach = Math.max(n.axon.length * 1.25 + n.axon.terminalR, dend, radius * 3.2);
         return n;
     }
 
@@ -2056,6 +2065,12 @@ function createEngine(ENV) {
             const a = neurons[i], b = neurons[j];
             const sax = projSx[i], say = projSy[i], sa = projS[i];
             const sbx = projSx[j], sby = projSy[j], sb = projS[j];
+            // A wire wholly beyond one edge draws nothing. The pad covers the
+            // bio wire's curve (its bulge is a tenth of its span at most) and
+            // the widest stroke, active halo included.
+            const wpad = 0.1 * (Math.abs(sbx - sax) + Math.abs(sby - say)) + 8;
+            if ((sax < -wpad && sbx < -wpad) || (sax > W + wpad && sbx > W + wpad) ||
+                (say < -wpad && sby < -wpad) || (say > H + wpad && sby > H + wpad)) continue;
             const avgScale = (sa + sb) * 0.5;
             const distFalloff = conn.structured
                 ? 1                                  // diagram wiring, not proximity
@@ -2241,6 +2256,12 @@ function createEngine(ENV) {
             const glow = 1 + (n.formGlow - 1) * formAmount;
             const alpha = Math.min(0.95, Math.min(ps * 0.8, 0.85) * n.presence * glow * tissueBoost);
             if (r < 0.3 || alpha < 0.02) continue;
+            // Entirely off-screen: skip it. About 12-17% of visible cells at
+            // any moment, more on a phone, where wrap margins and perspective
+            // push the drifting mesh well past a narrow viewport. Pixel-for-
+            // pixel identical — the reach covers everything the cell draws.
+            const reach = n.reach * ps * pulse + (arrival > 0 ? 18 * ps : 0) + 2;
+            if (px < -reach || px > W + reach || py < -reach || py > H + reach) continue;
 
             // Arrival ring (fades outward)
             if (arrival > 0) {
@@ -2580,11 +2601,76 @@ function createEngine(ENV) {
     // interval at any frame rate.
     let connClock = 0, wiredEdges = null;
 
+    // ── Frame pacing: an EVEN rate beats a higher, uneven one ──
+    //
+    // Most Android phones refresh at 90 or 120Hz, so requestAnimationFrame
+    // asks for a frame every 8-11ms. A frame that takes a little longer than
+    // that is shown twice while its neighbours are shown once, and the motion
+    // comes out in uneven steps: reported as a slight jitter even after the
+    // frame rate itself had improved. The same happens on a 60Hz screen that
+    // can hold 45fps but not 60.
+    //
+    // So the engine draws on every k-th vsync and picks k from what it can
+    // actually hold. It starts at 1 (the display's own rate). If more than a
+    // fifth of a window of drawn frames arrive late, k steps up — on a 120Hz
+    // phone 120 -> 60 -> 40 -> 30fps, every frame on screen for the same time.
+    // After a long clean run it tries one step back down, waiting twice as
+    // long before the next try each time a step down fails, so a device on
+    // its limit does not oscillate. A machine that keeps up never leaves k=1.
+    //
+    // Motion is unaffected: every update takes dt from the frames actually
+    // drawn, so a skipped vsync changes the sampling, never the speed.
+    let vsync = 16.667;          // estimated display interval, ms
+    let lastRaf = 0;             // previous rAF callback, drawn or skipped
+    let paceK = 1;               // draw every paceK-th vsync
+    let paceDrawn = 0, paceLate = 0, paceClean = 0;
+    let paceRetryAt = 0, paceBackoff = 1;
+    const PACE_WINDOW = 24;      // drawn frames per verdict
+    const PACE_LATE_SHARE = 0.2; // late share that steps k up
+    const PACE_MAX_MS = 34;      // never pace below ~30fps
+    function resetPacing(now) {
+        lastRaf = 0;
+        paceDrawn = paceLate = paceClean = 0;
+        paceRetryAt = now + 2000;
+    }
+    // True when this vsync should be skipped rather than drawn.
+    function paceSkip(now) {
+        const raw = lastRaf ? now - lastRaf : 0;
+        lastRaf = now;
+        // The display interval is the SHORTEST gap rAF ever delivers; it
+        // creeps up slowly so a refresh-rate change is followed, not ignored.
+        if (raw > 4 && raw < 50) vsync = raw < vsync ? raw : vsync + (raw - vsync) * 0.002;
+        if (!lastTime || warmupFrames > 0) return false;
+        return now - lastTime < paceK * vsync - vsync * 0.5;
+    }
+    function paceVerdict(now, interval) {
+        if (warmupFrames > 0) return;
+        const target = paceK * vsync;
+        if (interval > target + vsync * 0.5) paceLate++;
+        if (++paceDrawn < PACE_WINDOW) return;
+        const lateShare = paceLate / paceDrawn;
+        paceDrawn = paceLate = 0;
+        if (lateShare > PACE_LATE_SHARE && (paceK + 1) * vsync <= PACE_MAX_MS) {
+            // A step down that failed straight away doubles the next wait.
+            if (paceClean === 0 && paceK > 1) paceBackoff = Math.min(paceBackoff * 2, 16);
+            paceK++;
+            paceClean = 0;
+            paceRetryAt = now + 3000 * paceBackoff;
+        } else if (lateShare === 0) {
+            paceClean++;
+            if (paceK > 1 && now > paceRetryAt) { paceK--; paceClean = 0; }
+        } else {
+            paceClean = 0;
+        }
+    }
+
     function animate(now) {
         frameQueued = false;
         if (paused || !active) return;
-        const frameMs = now - lastTime;
+        if (!reducedMotion && paceSkip(now)) { schedule(); return; }
+        const frameMs = lastTime ? now - lastTime : 16.667;
         const dt = Math.min(frameMs / 16.667, 3); // normalize to ~60fps, cap at 3
+        if (!reducedMotion && lastTime) paceVerdict(now, frameMs);
         lastTime = now;
 
         // Adaptive load shedding, in the order the costs actually rank.
@@ -2684,12 +2770,12 @@ function createEngine(ENV) {
             const next = !!on;
             if (next === active) return;
             active = next;
-            if (active) { lastTime = performance.now(); warmupFrames = 90; schedule(); }
+            if (active) { lastTime = 0; resetPacing(performance.now()); warmupFrames = 90; schedule(); }
             else render(performance.now());
         },
         setPaused(p) {
             paused = !!p;
-            if (!paused) { lastTime = performance.now(); schedule(); }
+            if (!paused) { lastTime = 0; resetPacing(performance.now()); schedule(); }
         },
         setTheme(dark) { darkTheme = !!dark; refreshInk(); },
         resize(w, h, ratio) {
