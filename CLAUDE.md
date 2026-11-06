@@ -1367,6 +1367,24 @@ If frame rate has to be bought again, take it from something that is not these
 four: signal spawn rate, the number bubbles, or the drifting stages' O(n²)
 wiring. Not from the figures.
 
+**The drifting wiring IS scaled, by screen size.** Raising
+`NEURON_COUNT_MOBILE` to 200 put the same 200 cells into a phone's quarter of a
+desktop's area, and proximity wiring joined any two within a fixed 220px, so
+each cell had ~4x the neighbours: the drifting mesh — the state BETWEEN figures
+— measured a median 2,140 and a peak 4,003 wires on a 390x844 phone against
+~900 at 1440x900. That was the jitter reported "during transition" on phones:
+canvas frame gaps p90 66ms, worst 133ms. `connDist` now scales
+`CONNECTION_DIST` by the cube root of the area against `CONNECTION_REF_AREA`
+(neighbours in a fixed-depth slab go as reach³/area), capped at 1, so a phone
+gets desktop wire density: median 641, frame gaps p90 33ms, worst 50-67, ~30%
+more canvas frames over the same swipes. Desktop at or above 1440x900 is
+unchanged. The figures carry their own edge lists and are untouched.
+
+The rupture kick scales by the same factor (~70px of travel was 18% of a
+phone's width), and on a stacked layout — where every lane is 0 and the kick's
+direction used to be a coin flip per cell, a shake rather than a tear — the two
+kinds part from each other instead.
+
 **One thing to know before defending the mobile budget.** Below 900px the split
 layout stacks and the panel goes full width, so on a phone the figure sits
 BEHIND the copy and only a sliver shows at the edge — verified by capture on a

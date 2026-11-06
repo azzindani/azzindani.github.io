@@ -62,7 +62,10 @@ function createEngine(ENV) {
         // dropping a level. See the measured mobile cost in CLAUDE.md.
         NEURON_COUNT_MOBILE: 200,
         AI_RATIO: 0.45,
+        // At the REFERENCE viewport. The live reach is connDist, scaled to the
+        // screen — see wiringReach().
         CONNECTION_DIST: 220,
+        CONNECTION_REF_AREA: 1440 * 900,
         MIN_NEIGHBORS: 3,
         SIGNAL_SPEED: 0.0085,
         SIGNAL_SPAWN_RATE: 0.018,
@@ -1301,6 +1304,28 @@ function createEngine(ENV) {
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
+    // ── Wiring reach, scaled to the screen ──
+    //
+    // Every viewport scatters the same 200 cells, and proximity wiring joined
+    // any two within a fixed 220px. On a 390x844 phone that is a quarter of a
+    // desktop's area holding the same cells, so each had ~4x the neighbours in
+    // reach: the drifting mesh — exactly the state BETWEEN figures — measured
+    // 2,000-4,000 wires on a phone against ~900 at 1440x900, and its frames
+    // were the slowest on the page by far. That was the jitter during every
+    // transition on a phone.
+    //
+    // The reach now scales with the cube root of the area (neighbours in a
+    // depth slab of fixed thickness go as reach^3 / area), so a smaller screen
+    // gets the same wire density as the reference, drawn proportionally finer.
+    // Capped at 1: a screen larger than the reference keeps 220. The figures
+    // supply their own edge lists and are untouched; this is the drifting
+    // stages' wiring, which the fidelity note names as fair game.
+    let connDist = CFG.CONNECTION_DIST;
+    function wiringReach() {
+        const k = Math.cbrt((W * H) / CFG.CONNECTION_REF_AREA);
+        connDist = CFG.CONNECTION_DIST * Math.min(1, k);
+    }
+
     // Viewport size and device ratio come from the bootstrap: a worker has no
     // window to read them from. It also sets the element's CSS size, because
     // the canvas this engine holds may be an OffscreenCanvas with no style.
@@ -1309,6 +1334,7 @@ function createEngine(ENV) {
         W = w;
         H = h;
         if (ratio) deviceRatio = ratio;
+        wiringReach();
         dpr = renderScale();
         // Shapes are sampled in viewport units, so they must be rebuilt and
         // re-assigned when the viewport changes.
@@ -1446,9 +1472,18 @@ function createEngine(ENV) {
             severed.push({ i: conn.i, j: conn.j, life: CFG.SEVER_FRAMES });
         }
 
-        const kick = CFG.RUPTURE_IMPULSE;
+        // Scaled with the wiring reach, so the tear covers the same share of
+        // the screen everywhere: ~70px of travel is 5% of a desktop and 18% of
+        // a phone, where it read as the whole mesh being shaken.
+        const kick = CFG.RUPTURE_IMPULSE * (connDist / CFG.CONNECTION_DIST);
+        // A stacked layout has no lanes, so every target is 0 and the direction
+        // fell to a coin flip per cell — a scatter, not a tear. There the two
+        // kinds part from each other instead.
+        const stack = stacked();
         for (const n of neurons) {
-            const dir = Math.sign((n.kind === 'ai' ? targets.aiX : targets.bioX) || 0) || (Math.random() < 0.5 ? -1 : 1);
+            const lane = n.kind === 'ai' ? targets.aiX : targets.bioX;
+            const dir = Math.sign(lane || 0)
+                || (stack ? (n.kind === 'ai' ? 1 : -1) : (Math.random() < 0.5 ? -1 : 1));
             n.vx += dir * kick * rand(0.5, 1.4);
             n.vy += rand(-kick, kick) * 0.7;
             n.vz += rand(-kick, kick) * 0.5;
@@ -1694,7 +1729,7 @@ function createEngine(ENV) {
             // formation slot, and to same-kind pairs, so it can never throw a
             // wire across the figure: ~90 ghosts is 4k pairs against 20k for
             // the full mesh, and the degree cap keeps a clump from mattting.
-            const gd2 = CFG.CONNECTION_DIST * CFG.CONNECTION_DIST;
+            const gd2 = connDist * connDist;
             const ghosts = [];
             for (let g = 0; g < neurons.length; g++) {
                 const n = neurons[g];
@@ -1720,7 +1755,7 @@ function createEngine(ENV) {
             return;
         }
 
-        const dist2 = CFG.CONNECTION_DIST * CFG.CONNECTION_DIST;
+        const dist2 = connDist * connDist;
         const N = neurons.length;
         // Bitset-style flat buffer for "is pair connected" — much cheaper than
         // a Set of composite keys.
@@ -2024,7 +2059,7 @@ function createEngine(ENV) {
             const avgScale = (sa + sb) * 0.5;
             const distFalloff = conn.structured
                 ? 1                                  // diagram wiring, not proximity
-                : Math.max(0.15, 1 - conn.dist / CFG.CONNECTION_DIST);
+                : Math.max(0.15, 1 - conn.dist / connDist);
             const lo = i < j ? i : j, hi = i < j ? j : i;
             const isActive = activeWires[lo * 10000 + hi] === 1;
 
