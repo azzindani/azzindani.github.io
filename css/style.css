@@ -3082,20 +3082,31 @@ body.cmd-open { overflow: hidden; }
 .lp-panel-wide { width: min(92%, 960px); text-align: center; }
 
 /* The scrim: a soft field of page colour behind the copy, so a wire crossing a
-   letter is muted to a tenth rather than drawn through it. A BLURRED box, not a
-   radial gradient — a gradient fits an ellipse, and the corners of a block of
-   text (the kicker, the last card) fall outside any ellipse that fits its
-   sides. The blur is this element's own and its content never changes, so it
-   rasterises once; it is not a backdrop-filter and re-runs on nothing. */
+   letter is muted to a tenth rather than drawn through it. A soft-edged
+   RECTANGLE, not a radial gradient — a gradient fits an ellipse, and the
+   corners of a block of text (the kicker, the last card) fall outside any
+   ellipse that fits its sides.
+
+   The soft edge is two linear masks intersected, not a filter: blur(32px) at a
+   phone's dpr 3 is a 96-device-pixel kernel rasterised over every tile a stage
+   brings on screen, which is exactly the moment a phone is busiest. A gradient
+   mask costs nothing to raster. --scrim-feather is how far in the fade runs. */
 .lp-panel::before {
+    --scrim-feather: 56px;
     content: '';
     position: absolute;
-    inset: 4px;
+    inset: -24px -32px;
     z-index: -1;
     pointer-events: none;
-    border-radius: 48px;
     background: rgba(var(--scrim-rgb), 0.9);
-    filter: blur(32px);
+    -webkit-mask-image:
+        linear-gradient(90deg, transparent, #000 var(--scrim-feather), #000 calc(100% - var(--scrim-feather)), transparent),
+        linear-gradient(180deg, transparent, #000 var(--scrim-feather), #000 calc(100% - var(--scrim-feather)), transparent);
+    -webkit-mask-composite: source-in;
+    mask-image:
+        linear-gradient(90deg, transparent, #000 var(--scrim-feather), #000 calc(100% - var(--scrim-feather)), transparent),
+        linear-gradient(180deg, transparent, #000 var(--scrim-feather), #000 calc(100% - var(--scrim-feather)), transparent);
+    mask-composite: intersect;
 }
 
 /* A floor, not a height. Panel fill ran from 76% of the viewport on stage 1 to
@@ -3176,12 +3187,13 @@ body.cmd-open { overflow: hidden; }
 .lp-hero-inner::before {
     content: '';
     position: absolute;
-    inset: -8% -10%;
+    inset: -14% -14%;
     z-index: -1;
     pointer-events: none;
-    border-radius: 50%;
-    background: rgba(var(--scrim-rgb), 0.82);
-    filter: blur(48px);
+    /* An ellipse is right here, unlike the panels: the hero is centred text
+       with no corners to cover. A gradient rather than a blur, for the reason
+       .lp-panel::before gives. */
+    background: radial-gradient(closest-side, rgba(var(--scrim-rgb), 0.84) 55%, rgba(var(--scrim-rgb), 0) 100%);
 }
 .lp-eyebrow { color: var(--color-text-muted); margin-bottom: 20px; }
 .lp-hero-title {
@@ -3483,7 +3495,23 @@ body.cmd-open { overflow: hidden; }
 
    setupLandingScroll() in js/app.js does it instead, by animating to the
    nearest stage once scrolling has actually stopped. Same alignment, no fight
-   during the gesture. */
+   during the gesture.
+
+   EXCEPT on touch screens, where native snap is exactly right and the JS
+   glide was the stutter: a fling ran out, the page paused, then moved again on
+   its own. setupLandingScroll puts .lp-snap on <html> for coarse pointers, on
+   the landing route only, and skips its own settle there. Every stage snaps by
+   its top; the footer by its bottom, or it could never be reached. A stage
+   taller than the screen (a phone's figure stages) can still be scrolled
+   through — browsers let you move freely inside a snap area larger than the
+   viewport. */
+html.lp-snap { scroll-snap-type: y mandatory; }
+html.lp-snap .lp-stage { scroll-snap-align: start; }
+/* The hero starts below #app's navbar padding, so its own snap point would be
+   56px down: mandatory snap then moved the page on LOAD. Its margin puts the
+   snap point at the very top. */
+html.lp-snap .lp-hero { scroll-margin-top: var(--nav-height, 56px); }
+html.lp-snap .footer { scroll-snap-align: end; }
 
 /* ── Reveal-on-scroll ── */
 .reveal {
@@ -3593,7 +3621,11 @@ body.cmd-open { overflow: hidden; }
     /* 72px top and bottom was 144px of a phone's screen spent on air. The top
        stays at --nav-height for the reason the height tier below gives; the
        bottom has nothing under it to clear. */
-    .lp-stage { min-height: auto; padding: 56px 18px 40px; }
+    /* One screen per stage again, now that stages are snapped as pages on a
+       touch screen: a short stage left the next one's heading peeking up from
+       the bottom of every stop. svh, so the stage fits the screen with the
+       browser's toolbars showing (vh is the LARGEST viewport on a phone). */
+    .lp-stage { min-height: 100vh; min-height: 100svh; padding: 56px 18px 40px; }
     .lp-split, .lp-split-left, .lp-full, .lp-band { justify-content: center; }
     .lp-band { align-items: center; }
     .lp-panel, .lp-panel-wide { width: 100%; max-width: 640px; padding: 28px 22px; }
@@ -3608,7 +3640,10 @@ body.cmd-open { overflow: hidden; }
     /* The min-heights are a desktop balance device; stacked full-width panels
        set their own rhythm and a floor here only adds dead space. */
     .lp-split .lp-panel, .lp-split-left .lp-panel, .lp-full .lp-panel-wide { min-height: 0; }
-    .lp-hero { min-height: 88vh; }
+    /* #app's navbar padding sits above the hero, so a full-screen hero made the
+       first snap area a screen and a nav tall — taller than the viewport, and
+       a snap area that tall lets the page rest anywhere inside it. */
+    .lp-hero { min-height: calc(100vh - var(--nav-height, 56px)); min-height: calc(100svh - var(--nav-height, 56px)); }
     /* The figure HEADS its stage here. Side by side there is no room for it,
        and full-width copy used to sit on top of it, so on a phone the brain,
        the face and the arm were slivers at the screen edge behind the text.
@@ -3618,6 +3653,7 @@ body.cmd-open { overflow: hidden; }
        rests a stage this tall on its top, where the figure is held. */
     .lp-stage.lp-split, .lp-stage.lp-split-left, .lp-stage.lp-band {
         min-height: 100vh;
+        min-height: 100svh;
         align-items: flex-start;
         padding-top: calc(var(--nav-height, 56px) + 40vh);
     }

@@ -1691,7 +1691,10 @@ function setupLandingScroll() {
         if (target === undefined) return;
         cancelSettle();
         const y = window.scrollY || window.pageYOffset;
+        // Under native snap a per-frame instant scrollTo would be re-snapped on
+        // every frame; a native smooth scroll to the snap point is not.
         if (reduceMotion.matches) window.scrollTo({ top: target, behavior: 'instant' });
+        else if (nativeSnap) window.scrollTo({ top: target, behavior: 'smooth' });
         else glideTo(y, target, 1100);
     });
 
@@ -1725,14 +1728,25 @@ function setupLandingScroll() {
     // line, so a centred stage rests at phase i + 0.5 — inside PHASE_HOLD,
     // where the formation is fully held rather than half-morphed.
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    // How far the settle is willing to reach, as a fraction of the gap between
-    // two stage centres. Past that the stop was deliberate and is left alone.
-    // The two are not equal: carrying someone the rest of the way they were
-    // already going reads as the gesture completing, while pulling them back
-    // reads as the page taking the scroll away from them, so the backward
-    // reach is half the forward one.
-    const SETTLE_REACH_FWD = 0.4;
-    const SETTLE_REACH_BACK = 0.2;
+    // ── Touch screens snap natively ──
+    // Everything below (the settle glide) is for wheels and trackpads. On a
+    // touch screen it was the source of the stutter: a swipe's momentum ran
+    // out, the page sat still for ~230ms, and then the glide started a SECOND
+    // motion to the stage — measured as a fling stopping at 605px and the page
+    // then moving on its own to 799 over the next 370ms. Stop, pause, move
+    // again reads as jitter however smooth each half is, and the glide is a
+    // scrollTo per frame on the main thread besides.
+    //
+    // CSS scroll-snap is the right tool there: the browser aims the fling AT
+    // the snap point, so momentum and snap are one motion, on the compositor.
+    // It was rejected for wheels (it re-snaps every wheel tick — see the
+    // "Section settling" note in CLAUDE.md), which is why it is scoped to
+    // coarse pointers and switched on per route with a class on <html>.
+    const nativeSnap = window.matchMedia('(pointer: coarse)').matches;
+    if (nativeSnap) {
+        document.documentElement.classList.add('lp-snap');
+        Cleanup.add(() => document.documentElement.classList.remove('lp-snap'));
+    }
     const SETTLE_MIN_MS = 260;
     const SETTLE_MAX_MS = 600;
     let settleTimer = 0, settleRaf = 0, settling = false;
@@ -1749,8 +1763,15 @@ function setupLandingScroll() {
         // At its top the reference line is still inside PHASE_HOLD, so the
         // figure is fully formed when the stage lands.
         const vh = window.innerHeight;
+        // Native snap aligns every stage by its top (scroll-snap-align: start),
+        // so a jump from the rail must aim there too or the browser re-snaps it.
         const stops = bounds.map(b => Math.max(0, Math.min(max,
-            b.height > vh + 1 ? b.top : b.top + b.height / 2 - half)));
+            nativeSnap || b.height > vh + 1 ? b.top : b.top + b.height / 2 - half)));
+        // The hero rests at the very top of the page. Its centred stop lands
+        // 56px down (it starts below the navbar padding), which made a page at
+        // the top read as already 56px past it — and the first wheel notch,
+        // only 44px further on, was pulled back.
+        if (stops.length) stops[0] = 0;
         stops.push(max);
         return stops;
     };
@@ -1793,31 +1814,67 @@ function setupLandingScroll() {
             bg.setPhase(p);
             markRail(p);
             if (t < 1) settleRaf = requestAnimationFrame(step);
-            else { settleRaf = 0; settling = false; }
+            else { settleRaf = 0; settling = false; lastY = target; }
         };
         settleRaf = requestAnimationFrame(step);
     };
 
+    // ── Which way, not how near ──
+    // The settle used to reach for the NEAREST stop within a bounded distance,
+    // and past that bound it left the page where it was. Both halves read
+    // badly: a stop just short of halfway was pulled BACK against the gesture,
+    // and a stop past the bound was stranded between two stages. Measured on a
+    // phone, three swipes out of four ended either reversed or stranded.
+    //
+    // It now follows the direction of travel. Once the page has moved more
+    // than SNAP_COMMIT of a gap (capped at SNAP_COMMIT_MAX px) past a stop, the
+    // gesture is read as "next" and completed; less than that is read as a
+    // nudge and returned. So one wheel notch or a short flick turns the page,
+    // a jiggle does not, and nothing is ever left between two stages.
+    const SNAP_COMMIT = 0.08;
+    const SNAP_COMMIT_MAX = 72;
+    let lastY = window.scrollY || window.pageYOffset, dir = 0;
+
     const settle = () => {
-        if (reduceMotion.matches || bounds.length < 2) return;
+        if (reduceMotion.matches || nativeSnap || bounds.length < 2) return;
         const y = window.scrollY || window.pageYOffset;
-        const stops = stopPositions();
-        let target = y, best = Infinity;
-        for (const s of stops) {
-            const d = Math.abs(s - y);
-            if (d < best) { best = d; target = s; }
+        let prev = -Infinity, next = Infinity;
+        for (const s of stopPositions()) {
+            if (s <= y + 1) { if (s > prev) prev = s; }
+            else if (s < next) next = s;
         }
-        // A stop the user chose, well away from any stage centre, stays put.
-        const spacing = Math.abs(stops[1] - stops[0]) || window.innerHeight;
-        const reach = spacing * (target >= y ? SETTLE_REACH_FWD : SETTLE_REACH_BACK);
-        if (best < 4 || best > reach) return;
+        if (prev !== -Infinity && y - prev < 2) return;        // already resting
+        let target;
+        if (prev === -Infinity) target = next;
+        else if (next === Infinity) target = prev;
+        else {
+            const commit = Math.min((next - prev) * SNAP_COMMIT, SNAP_COMMIT_MAX);
+            target = dir >= 0
+                ? (y - prev >= commit ? next : prev)
+                : (next - y >= commit ? prev : next);
+        }
+        if (Math.abs(target - y) < 2) return;
         glideTo(y, target);
     };
 
+    // When to settle. `scrollend` fires once the browser's own scrolling has
+    // finished — the last wheel notch's smooth animation, a trackpad's momentum
+    // — which a timer can only guess at: 180ms after the last scroll event
+    // either cut a slow trackpad glide short or waited on a fast one. The timer
+    // stays as the trigger where scrollend does not exist, and as a backstop
+    // where it does.
+    const hasScrollEnd = 'onscrollend' in window;
     const scheduleSettle = () => {
         if (settling) return;              // our own glide fires scroll events
+        const y = window.scrollY || window.pageYOffset;
+        if (y !== lastY) { dir = Math.sign(y - lastY); lastY = y; }
         clearTimeout(settleTimer);
-        settleTimer = setTimeout(settle, 180);
+        settleTimer = setTimeout(settle, hasScrollEnd ? 700 : 180);
+    };
+    const onScrollEnd = () => {
+        if (settling) return;
+        clearTimeout(settleTimer);
+        settleTimer = setTimeout(settle, 40);
     };
     // Any fresh input cancels a settle in flight, so it can never fight a user
     // who has started scrolling again.
@@ -1830,11 +1887,13 @@ function setupLandingScroll() {
     window.addEventListener('touchstart', cancelSettle, { passive: true });
     window.addEventListener('keydown', cancelSettle, { passive: true });
     window.addEventListener('scroll', scheduleSettle, { passive: true });
+    if (hasScrollEnd) window.addEventListener('scrollend', onScrollEnd, { passive: true });
 
     Cleanup.add(() => {
         window.removeEventListener('scroll', onScroll);
         window.removeEventListener('resize', measure);
         window.removeEventListener('scroll', scheduleSettle);
+        window.removeEventListener('scrollend', onScrollEnd);
         window.removeEventListener('wheel', cancelSettle);
         window.removeEventListener('touchstart', cancelSettle);
         window.removeEventListener('keydown', cancelSettle);

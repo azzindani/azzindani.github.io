@@ -321,3 +321,41 @@ test('leaving the landing page resets the background phase', async ({ page }) =>
     // Landing DOM is gone, so no stage elements remain to drive the canvas.
     await expect(page.locator('.lp-stage')).toHaveCount(0);
 });
+
+test('one wheel notch carries the landing page to the next stage', async ({ page }) => {
+    // Direction, not distance: a notch is well short of halfway, and used to be
+    // pulled back (or left stranded) rather than completed.
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/');
+    await expect(page.locator('.lp-hero')).toBeVisible({ timeout: 10000 });
+    await page.waitForTimeout(500);
+    await page.mouse.move(720, 450);
+    await page.mouse.wheel(0, 100);
+    await page.waitForTimeout(1800);
+    const offset = await page.evaluate(() => {
+        const r = document.querySelectorAll('.lp-stage')[1].getBoundingClientRect();
+        return Math.round(r.top + r.height / 2 - innerHeight / 2);
+    });
+    expect(Math.abs(offset)).toBeLessThan(3);
+});
+
+test.describe('on a touch screen', () => {
+    test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+
+    test('the landing page snaps natively and does not move on load', async ({ page }) => {
+        await page.goto('/');
+        await expect(page.locator('.lp-hero')).toBeVisible({ timeout: 10000 });
+        await page.waitForTimeout(800);
+        expect(await page.evaluate(() => document.documentElement.classList.contains('lp-snap'))).toBe(true);
+        expect(await page.evaluate(() => getComputedStyle(document.documentElement).scrollSnapType)).toContain('mandatory');
+        expect(await page.evaluate(() => scrollY)).toBe(0);
+    });
+
+    test('leaving the landing page drops the snap', async ({ page }) => {
+        await page.goto('/');
+        await expect(page.locator('.lp-hero')).toBeVisible({ timeout: 10000 });
+        await page.goto('/#/blog');
+        await page.locator('.feed-item').first().waitFor({ timeout: 10000 });
+        expect(await page.evaluate(() => document.documentElement.classList.contains('lp-snap'))).toBe(false);
+    });
+});

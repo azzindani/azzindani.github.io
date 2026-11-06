@@ -2724,11 +2724,50 @@ function isDarkTheme() {
     return attr === 'dark' || (attr !== 'light' && mqDark.matches);
 }
 
+// ── A canvas that ignores the phone's toolbars ──
+//
+// On a phone the address bar slides away as you scroll down and back as you
+// scroll up, and every slide fires `resize` with a new innerHeight. Each one
+// re-fitted the figure to the new height (it moved and rescaled under the
+// reader), reallocated the backing store, and stretched the old bitmap to the
+// new CSS size for a frame until the engine caught up — mid-scroll, which is
+// exactly when it was seen.
+//
+// So the canvas is sized to the LARGE viewport — the height with the toolbars
+// retracted — from the start. When the toolbars are showing it simply runs
+// under them. A height change only counts when the width changes too (a
+// rotation, a real window resize) or, on a desktop, when it is not a touch
+// screen's toolbar at all.
+const touchScreen = window.matchMedia('(pointer: coarse)').matches;
+let stableW = 0, stableH = 0;
+function largeViewportHeight() {
+    let lvh = 0;
+    if (window.CSS && CSS.supports && CSS.supports('height', '100lvh')) {
+        const probe = document.createElement('div');
+        probe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100lvh;visibility:hidden;pointer-events:none';
+        document.body.appendChild(probe);
+        lvh = probe.getBoundingClientRect().height;
+        probe.remove();
+    }
+    return Math.max(window.innerHeight, Math.round(lvh));
+}
+function viewportSize() {
+    const w = window.innerWidth, h = window.innerHeight;
+    if (w !== stableW || !stableH) {
+        stableW = w;
+        stableH = touchScreen ? largeViewportHeight() : h;
+    } else if (!touchScreen || h > stableH) {
+        stableH = h;
+    }
+    return { w: stableW, h: stableH };
+}
+
 // Everything the engine used to read from window and document, read once.
 function environment() {
+    const size = viewportSize();
     return {
-        width: window.innerWidth,
-        height: window.innerHeight,
+        width: size.w,
+        height: size.h,
         deviceRatio: window.devicePixelRatio || 1,
         isMobile: window.matchMedia('(max-width: 768px)').matches,
         reducedMotion,
@@ -2752,8 +2791,8 @@ let backend = null;
 // The element's CSS size. The engine cannot set it: in a worker it holds an
 // OffscreenCanvas, which has no style.
 function sizeElement(el) {
-    el.style.width = window.innerWidth + 'px';
-    el.style.height = window.innerHeight + 'px';
+    el.style.width = stableW + 'px';
+    el.style.height = stableH + 'px';
 }
 
 function startOnMainThread(el) {
@@ -2805,16 +2844,24 @@ function startInWorker(el) {
 function start() {
     const el = document.getElementById('neural-bg');
     if (!el) return;
+    viewportSize();
     sizeElement(el);
     if (canOffload) {
         try { backend = startInWorker(el); } catch (err) { backend = null; }
     }
     if (!backend) backend = startOnMainThread(document.getElementById('neural-bg'));
 
+    let lastW = stableW, lastH = stableH, lastRatio = window.devicePixelRatio || 1;
     window.addEventListener('resize', () => {
+        const { w, h } = viewportSize();
+        const ratio = window.devicePixelRatio || 1;
+        // A toolbar sliding lands here and changes nothing; only a real change
+        // of size or ratio reaches the engine, which clears the canvas.
+        if (w === lastW && h === lastH && ratio === lastRatio) return;
+        lastW = w; lastH = h; lastRatio = ratio;
         const cur = document.getElementById('neural-bg');
         if (cur) sizeElement(cur);
-        backend.resize(window.innerWidth, window.innerHeight, window.devicePixelRatio || 1);
+        backend.resize(w, h, ratio);
     });
     document.addEventListener('visibilitychange', () => backend.setPaused(document.hidden));
     const pushTheme = () => backend.setTheme(isDarkTheme());

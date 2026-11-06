@@ -1090,13 +1090,24 @@ Two separate causes, both measured at 1440×900:
   our frames back to the browser's easing and the two compound — which is how
   the "eased" version first measured *worse* than the one it replaced, at
   125px/frame.
-- **The reach is bounded, and it is not symmetric.** `SETTLE_REACH_FWD` (0.4 of
-  the gap between stage centres) and `SETTLE_REACH_BACK` (0.2); past those the
-  stop was deliberate and is left alone. Carrying someone the rest of the way
-  they were already going reads as the gesture completing; pulling them back
-  reads as the page taking the scroll away from them, so backward gets half the
-  budget. The cost is that a stop stranded mid-stage stays there — that is the
-  point, and it is what `proximity` snapping was reaching for.
+- **It follows DIRECTION, not distance.** This was a bounded reach to the
+  nearest stop (0.4 of a gap forward, 0.2 back, nothing past that), and both
+  halves read badly in use: a stop just short of halfway was pulled back
+  against the gesture, and a stop past the bound was stranded between two
+  stages. Now, once the page has moved `SNAP_COMMIT` (0.08 of a gap, capped at
+  `SNAP_COMMIT_MAX` 72px) past a stop in the direction of travel, the gesture
+  is completed to the next stop; less is a nudge and returns. One wheel notch
+  turns the page, a jiggle does not, and nothing is left between stages.
+  Measured at 1440x900: a 100px notch, a 40px nudge, five notches, twelve fast
+  60px ticks and a notch back up all rest exactly on a stage centre.
+- **The hero's stop is the page top (0), not its centre (56).** At its centre a
+  page at the very top read as 56px past the hero, so the first notch — 44px
+  further on — was pulled back.
+- **It fires on `scrollend`** where the browser has it, 40ms after; the 180ms
+  timer is the trigger elsewhere and a 700ms backstop where scrollend exists.
+  A fixed delay after the last scroll event either cut a slow trackpad glide
+  short or waited on a fast one; scrollend is when the browser's own scrolling,
+  momentum included, has actually finished.
 
 Four things it also has to get right:
 
@@ -1115,6 +1126,39 @@ Four things it also has to get right:
 Disabled under `prefers-reduced-motion`, and it lives inside
 `setupLandingScroll` so `Cleanup` removes it with the route — `html` is the
 scroll container for every page, and the feed must not settle.
+
+**Touch screens do not use any of this: they snap natively.** On a phone the
+glide WAS the stutter. Traced frame by frame with real touch input on a
+390x844 emulated phone: a swipe's momentum decelerated to a stop at 605px, the
+page sat still for ~230ms, then the glide started a second motion to 799. Stop,
+pause, move again is jitter however smooth each half is — and three swipes in
+four ended reversed or stranded besides. CSS `scroll-snap-type: y mandatory`
+is right here and wrong for wheels for the same reason: the browser aims a
+fling AT the snap point, so momentum and snap are one motion, on the
+compositor. Same trace after: every swipe lands exactly on the next stage top
+in one deceleration, no reversals.
+
+- Scoped by `.lp-snap` on `<html>`, set in `setupLandingScroll` for
+  `(pointer: coarse)` and removed by `Cleanup`, so no other route snaps.
+- Every stage snaps by its top; the footer by its bottom, or it is unreachable.
+  The hero carries `scroll-margin-top: nav` so its snap point is the page top —
+  without it mandatory snap moved the page 56px on load.
+- Phone stages are a full screen (`100svh`) again. With page snapping a short
+  stage left the next heading peeking up at every stop. The hero is
+  `100svh - nav`, because #app's navbar padding sits above it and a snap area
+  taller than the screen lets the page rest anywhere inside it.
+- A stage taller than the screen (a phone's figure stages) can still be read
+  to the bottom: browsers allow free scrolling inside an oversized snap area.
+- The rail jumps with a native smooth scroll to the stage TOP there — a
+  per-frame instant `scrollTo` would be re-snapped on every frame.
+
+**The canvas ignores the phone's toolbars.** The address bar sliding in and
+out fires `resize` with a new `innerHeight`, and each one re-fitted the figure
+(it moved and rescaled mid-scroll), reallocated the backing store, and showed
+the old bitmap stretched for a frame. On touch screens the canvas is sized to
+the LARGE viewport (`100lvh`, measured once by a probe) and runs under the
+toolbars when they show; only a width change re-sizes it. The bootstrap also
+skips any resize that changes nothing, which is most of them.
 
 Two details in `neural-bg.js` that are easy to break:
 
