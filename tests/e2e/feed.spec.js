@@ -262,7 +262,34 @@ test('scrolling drives the neural background phase', async ({ page }) => {
     const atBottom = await readPhase();
 
     expect(atBottom).toBeGreaterThan(atTop);
-    expect(atBottom).toBeLessThanOrEqual(6);
+    // Nine stages: the phase runs 0..9, part-way through the last stage at the
+    // bottom of the page (the engine clamps it to 8). This read <= 6 from the
+    // seven-stage page and failed from the day stages 7 and 8 landed.
+    expect(atBottom).toBeLessThan(9);
+});
+
+test('the mesh draws from a worker where OffscreenCanvas allows it', async ({ page }) => {
+    await page.goto('/');
+    await page.waitForFunction(() => window.NeuralBG && window.NeuralBG.thread);
+    expect(await page.evaluate(() => window.NeuralBG.thread)).toBe('worker');
+    await page.waitForFunction(() => window.NeuralBG.phaseCount === 9);
+});
+
+test('the mesh falls back to the main thread and still paints', async ({ page }) => {
+    // A browser without transferControlToOffscreen must get the same mesh,
+    // drawn where it always was.
+    await page.addInitScript(() => { delete HTMLCanvasElement.prototype.transferControlToOffscreen; });
+    await page.goto('/');
+    await page.waitForFunction(() => window.NeuralBG && window.NeuralBG.thread);
+    expect(await page.evaluate(() => window.NeuralBG.thread)).toBe('main');
+    const lit = await page.evaluate(() => {
+        const c = document.getElementById('neural-bg');
+        const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+        let n = 0;
+        for (let i = 3; i < d.length; i += 4) if (d[i] > 4) n++;
+        return n;
+    });
+    expect(lit).toBeGreaterThan(1000);
 });
 
 test('leaving the landing page resets the background phase', async ({ page }) => {

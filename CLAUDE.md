@@ -973,6 +973,7 @@ The contract between the two files is one function:
 ```js
 window.NeuralBG.setPhase(p)   // p = 0..6, continuous (PHASE_STOPS.length-1)
 window.NeuralBG.reset()       // back to phase 0 (called on route change)
+window.NeuralBG.thread        // 'worker' or 'main' — which thread draws
 ```
 
 `setupLandingScroll()` maps scroll offset to `p` using a mid-viewport
@@ -1241,6 +1242,8 @@ properties:
 - Signals travel along connections at `SIGNAL_SPEED`; bridge signals
   (AI ↔ bio) cascade once into a same-kind neighbour.
 - Pauses on `visibilitychange` to spare battery.
+- **Draws from a Worker** where OffscreenCanvas allows it, on the main thread
+  otherwise. See "Performance: off the main thread" below.
 - **Animates on the landing route only** — `NeuralBG.setActive()`, driven from
   `renderLandingPage` and its `Cleanup`. See the performance section below.
 
@@ -1370,6 +1373,76 @@ Two details that make that safe:
 Re-measure with a harness that scrolls in **wheel-sized steps** (60-80px, one
 per frame) rather than one shove — a big synthetic jump hides exactly the jank
 a reader feels, the same trap the scroll-snap testing fell into.
+
+### Performance: off the main thread
+
+**The canvas draws from a dedicated Worker.** `js/neural-bg.js` is both the
+bootstrap and the worker: loaded by app.js it starts itself again as a
+`Worker`, hands over the canvas with `transferControlToOffscreen()`, and
+`createEngine(ENV)` runs there. Without `transferControlToOffscreen` or a 2D
+`OffscreenCanvasRenderingContext2D` it runs the same engine on the main thread,
+and a worker that fails to *start* swaps in a fresh `<canvas>` (the old one has
+already been transferred) and does the same. Nothing about the drawing
+differs between the two; only the thread pays for it.
+
+Why this was the fix for "the scroll lags", rather than another drawing saving:
+the page's own scroll work — the settle glide's per-frame `scrollTo`, the
+scroll → phase mapping, the reveals — is main-thread work, and it was queued
+behind a frame of canvas drawing. Measured with wheel-sized steps down the
+landing page, 1440x900 at dpr 2:
+
+| | main-thread time per frame | 70px wheel steps processed in |
+| --- | --- | --- |
+| before | 41.4ms | 12.1s |
+| after | 2.4ms | 8.9s |
+| before, 4x CPU | 217.6ms | 47.1s |
+| after, 4x CPU | 8.5ms | 9.6s |
+| before, 390x844 phone, dpr 3 | 38.0ms, page frames 33.4ms median, 45 over 50ms | 7.1s |
+| after, same phone | 2.2ms, page frames **16.7ms** median, 1 over 50ms | 3.5s |
+
+CDP's CPU throttle may not slow the worker the way it slows the page, so read
+the 4x rows as what the MAIN thread gained, not as the canvas getting 25x
+faster. The phone rows are unthrottled.
+
+Rules that follow from the split:
+
+- **`createEngine` must not touch the DOM.** Everything it reads arrives in
+  `ENV` (size, device ratio, theme, reduced motion, mono font) and every later
+  change through its API (`resize`, `setTheme`, `setPaused`). The bootstrap
+  owns the listeners and the element's CSS size — an OffscreenCanvas has no
+  `style`.
+- **`window.NeuralBG` is a proxy.** In worker mode its calls are posted, so
+  nothing can read engine state back synchronously. `phaseCount` and `thread`
+  are filled in once an engine exists.
+- **One frame loop, ever.** Every (re)start goes through `schedule()`, which
+  refuses while a frame is queued. Before it, `setActive(false)` then
+  `setActive(true)` in one tick left the old frame queued beside a new one —
+  measured 57 → 96 → 102 `animate` calls a second over two re-renders, the
+  page falling from 57fps to 34 because the canvas was painted two and three
+  times per displayed frame. A hidden tab HOLDS its queued frame rather than
+  dropping it, so coming back used to add a loop the same way.
+- **Wiring is rebuilt the moment a figure's edge list appears or goes**, not on
+  the next `frameCount % 60`. That was a second at 60fps and two or three at
+  the rates this canvas actually ran at, so a figure assembled under the full
+  mesh's ~860 proximity wires and only snapped to its own edges well after it
+  arrived — the graphic visibly lagging the scroll, and in the most expensive
+  state there is. The periodic rebuild now counts `dt`, so it means the same
+  interval at any frame rate.
+
+To benchmark either path, delete `HTMLCanvasElement.prototype
+.transferControlToOffscreen` in an init script to force the main thread, and
+time worker frames by wrapping `self.requestAnimationFrame` through
+Playwright's `worker.evaluate` — the page's own rAF no longer sees them.
+
+**The next cost is `backdrop-filter`, and it is a design call, not a bug.**
+`.lp-panel` blurs 14px over a canvas that changes every frame, so the blur is
+recomputed every frame across every visible panel. In this sandbox (software
+compositing) dropping the blur took page frames from 50ms to 33ms median and
+frames over 50ms from 52 to 3 on a full scroll. It was left in: without it the
+mesh shows sharp through the panel instead of frosted, at 0.72 or 0.84
+opacity alike, and that is a visible change to the look. If the landing
+redesign wants the frames, an opaque-enough panel without blur is where they
+are.
 
 ### Performance: the LOAD path, which is a separate problem
 

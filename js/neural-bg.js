@@ -2,9 +2,22 @@
    3D Neural Network Background
    AI ↔ Human Brain Neuron Interconnection
    ============================================ */
-(function() {
-    'use strict';
+(function () {
+'use strict';
 
+// ── Where this runs ──
+//
+// The SAME file runs in two places. Loaded by app.js it is the main-thread
+// bootstrap at the bottom of this file; that bootstrap then starts it AGAIN as
+// a dedicated Worker, hands it the canvas with transferControlToOffscreen(),
+// and the engine below draws from there. See "Off the main thread" at the end.
+//
+// createEngine() therefore touches no DOM at all: everything it used to read
+// from window or document (viewport size, device ratio, theme, reduced motion,
+// the mono font) arrives in ENV, and later changes arrive through its API.
+const IN_WORKER = typeof document === 'undefined';
+
+function createEngine(ENV) {
     const CFG = {
         // 200, not 150. A head graph needs one cell per junction and the
         // reference has 89 of them; 150 yields ~75 bio cells, which cannot fill
@@ -863,76 +876,6 @@
         return { pts, edges };
     }
 
-    // ── Head figure construction ──
-    //
-    // Everything here works in the 0–100 authoring space and is built exactly
-    // once per shape. The layout is size-independent, so a resize only changes
-    // the scale applied at draw time — points never get reshuffled, which is
-    // what keeps the figure stable while the window is being dragged.
-    let hitCanvas = null, hitCtx = null;
-
-    function svgPathEl(d) {
-        const NS = 'http://www.w3.org/2000/svg';
-        const svg = document.createElementNS(NS, 'svg');
-        const el = document.createElementNS(NS, 'path');
-        el.setAttribute('d', d);
-        svg.appendChild(el);
-        return el;
-    }
-
-    // Points along a path, offset sideways by up to `jitter` so a fold seeds a
-    // band of tissue rather than a drawn line.
-    function samplePath(d, count, jitter) {
-        const out = [];
-        let el, len;
-        try {
-            el = svgPathEl(d);
-            len = el.getTotalLength();
-        } catch (e) { return out; }
-        if (!len) return out;
-        for (let i = 0; i < count; i++) {
-            const t = (i + 0.5) / count;
-            const p = el.getPointAtLength(len * t);
-            if (jitter) {
-                // Perpendicular to the local tangent, so the band follows the
-                // fold instead of smearing across it.
-                const q = el.getPointAtLength(Math.min(len, len * t + 0.5));
-                const dx = q.x - p.x, dy = q.y - p.y;
-                const m = Math.hypot(dx, dy) || 1;
-                const off = rand(-jitter, jitter);
-                out.push({ x: p.x - (dy / m) * off, y: p.y + (dx / m) * off });
-            } else {
-                out.push({ x: p.x, y: p.y });
-            }
-        }
-        return out;
-    }
-
-    // A spatial hash over the authoring box, used both to enforce minimum
-    // spacing while scattering and to find link candidates afterwards.
-    function makeGrid(cell) {
-        const buckets = new Map();
-        const key = (gx, gy) => gx * 1000 + gy;
-        return {
-            add(p, idx) {
-                const k = key(Math.floor(p.x / cell), Math.floor(p.y / cell));
-                const b = buckets.get(k);
-                if (b) b.push(idx); else buckets.set(k, [idx]);
-            },
-            near(p, radius, pts, fn) {
-                const r = Math.ceil(radius / cell);
-                const gx = Math.floor(p.x / cell), gy = Math.floor(p.y / cell);
-                for (let i = -r; i <= r; i++) {
-                    for (let j = -r; j <= r; j++) {
-                        const b = buckets.get(key(gx + i, gy + j));
-                        if (!b) continue;
-                        for (let k = 0; k < b.length; k++) fn(b[k], pts[b[k]]);
-                    }
-                }
-            },
-        };
-    }
-
     // Scroll positions (in phase units) at which the mesh visibly snaps apart.
     // These sit just past PHASE_HOLD, so the tear fires exactly when the stage
     // stops holding and starts morphing into the next one.
@@ -1022,8 +965,8 @@
     // page with a soft figure and never recovers, which is exactly the outcome
     // this file is no longer allowed to produce.
     let dprStep = 0;
-    const isMobile = window.matchMedia('(max-width: 768px)').matches;
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isMobile = !!ENV.isMobile;
+    const reducedMotion = !!ENV.reducedMotion;
     const neuronCount = reducedMotion
         ? Math.floor((isMobile ? CFG.NEURON_COUNT_MOBILE : CFG.NEURON_COUNT) * 0.5)
         : (isMobile ? CFG.NEURON_COUNT_MOBILE : CFG.NEURON_COUNT);
@@ -1038,21 +981,11 @@
 
     // Glowing tissue has a dark page to bloom against; on white it washes
     // out, so the light theme needs the points carrying more of it.
+    // The theme itself is watched by the bootstrap, which owns the DOM.
     let tissueBoost = 1;
+    let darkTheme = !!ENV.dark;
     function refreshInk() {
-        const attr = document.documentElement.getAttribute('data-theme');
-        const dark = attr === 'dark' || (attr !== 'light' &&
-            window.matchMedia('(prefers-color-scheme: dark)').matches);
-        tissueBoost = dark ? 1 : 1.45;
-    }
-
-    function watchTheme() {
-        refreshInk();
-        const mo = new MutationObserver(refreshInk);
-        mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-        const mq = window.matchMedia('(prefers-color-scheme: dark)');
-        if (mq.addEventListener) mq.addEventListener('change', refreshInk);
-        else if (mq.addListener) mq.addListener(refreshInk);
+        tissueBoost = darkTheme ? 1 : 1.45;
     }
 
     function rand(min, max) { return min + Math.random() * (max - min); }
@@ -1276,13 +1209,12 @@
 
     // ── Init ──
     function init() {
-        canvas = document.getElementById('neural-bg');
+        canvas = ENV.canvas;
         if (!canvas) return;
         ctx = canvas.getContext('2d');
         dpr = renderScale();
 
-        resize();
-        window.addEventListener('resize', resize);
+        resize(ENV.width, ENV.height, ENV.deviceRatio);
 
         // Spawn neurons. The ai/bio split is EXACT, not a coin flip per cell.
         //
@@ -1316,33 +1248,26 @@
         zSortedIdx = new Int32Array(neuronCount);
         for (let i = 0; i < neuronCount; i++) zSortedIdx[i] = i;
 
-        // Cache the font string once — getComputedStyle() inside the render
-        // loop forces style/layout work every frame.
-        const monoFamily = (getComputedStyle(document.documentElement)
-            .getPropertyValue('--font-mono') || 'monospace').trim();
+        // The font string is resolved once, by the bootstrap — reading a
+        // custom property is a style lookup, and a worker cannot do it at all.
+        const monoFamily = ENV.monoFamily || 'monospace';
         bubbleFontCache = `500 11px ${monoFamily}, 'JetBrains Mono', monospace`;
 
-        // Visibility handler
-        document.addEventListener('visibilitychange', () => {
-            paused = document.hidden;
-            if (!paused && active) { lastTime = performance.now(); requestAnimationFrame(animate); }
-        });
-
-        watchTheme();
+        refreshInk();
 
         lastTime = performance.now();
         // One frame unconditionally, so a reading route gets the mesh as a
         // still texture. The loop itself only runs once a route asks for it.
         buildConnections();
         render(lastTime);
-        if (active) requestAnimationFrame(animate);
+        schedule();
     }
 
     // The backing-store scale: the display's own ratio, capped, and stepped
     // down again by the adaptive loop. Never ABOVE the device ratio — painting
     // more pixels than the screen can show is pure waste.
     function renderScale() {
-        const device = window.devicePixelRatio || 1;
+        const device = deviceRatio || 1;
         return Math.min(device, CFG.DPR_STEPS[dprStep]);
     }
 
@@ -1359,9 +1284,14 @@
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
-    function resize() {
-        W = window.innerWidth;
-        H = window.innerHeight;
+    // Viewport size and device ratio come from the bootstrap: a worker has no
+    // window to read them from. It also sets the element's CSS size, because
+    // the canvas this engine holds may be an OffscreenCanvas with no style.
+    let deviceRatio = ENV.deviceRatio || 1;
+    function resize(w, h, ratio) {
+        W = w;
+        H = h;
+        if (ratio) deviceRatio = ratio;
         dpr = renderScale();
         // Shapes are sampled in viewport units, so they must be rebuilt and
         // re-assigned when the viewport changes.
@@ -1369,8 +1299,6 @@
         if (formShapeName) assignFormationTargets(formShapeName);
         canvas.width = W * dpr;
         canvas.height = H * dpr;
-        canvas.style.width = W + 'px';
-        canvas.style.height = H + 'px';
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
@@ -2553,7 +2481,49 @@
     }
 
     // ── Animation Loop ──
+    // ── Frame scheduling: ONE loop, ever ──
+    //
+    // Every path that (re)starts the loop goes through schedule(), and
+    // schedule() refuses while a frame is already queued. Before this, each
+    // caller queued its own requestAnimationFrame, and two of them could
+    // overlap with the loop that was already running:
+    //
+    //   - setActive(false) then setActive(true) in the same tick — the route
+    //     tearing down and rebuilding the landing page — left the old frame
+    //     still queued, and it saw `active` true again when it fired. Measured:
+    //     57 animate calls a second, then 96 after one re-render and 102 after
+    //     two, while the page fell from 57fps to 34. The canvas was being
+    //     painted two and three times per displayed frame.
+    //   - Hiding the tab does not drop a queued frame, it holds it. Coming back
+    //     queued a second one beside it, so every tab switch could add a loop.
+    //
+    // Workers have requestAnimationFrame where OffscreenCanvas does; the
+    // timeout is only for an engine that has neither.
+    let frameQueued = false;
+    const raf = typeof requestAnimationFrame === 'function'
+        ? (f) => requestAnimationFrame(f)
+        : (f) => setTimeout(() => f(performance.now()), 16);
+    function schedule() {
+        if (frameQueued || paused || !active) return;
+        frameQueued = true;
+        raf(animate);
+    }
+
+    // Wiring is rebuilt on a clock, and IMMEDIATELY whenever the figure's own
+    // edge list comes or goes. It used to wait for the next frameCount % 60,
+    // i.e. a full second at 60fps and two or three at the frame rates this
+    // canvas actually ran at, so a figure assembled under the drifting mesh's
+    // 860 proximity wires — bridges thrown right across the screen — and only
+    // snapped to its own 168-300 edges well after it had arrived. That reads
+    // as the graphic lagging the scroll, and it was also the most expensive
+    // state there is: the figure's cells AND the full mesh's wiring at once.
+    //
+    // The clock counts dt (frames at 60fps), not frames, so it means the same
+    // interval at any frame rate.
+    let connClock = 0, wiredEdges = null;
+
     function animate(now) {
+        frameQueued = false;
         if (paused || !active) return;
         const frameMs = now - lastTime;
         const dt = Math.min(frameMs / 16.667, 3); // normalize to ~60fps, cap at 3
@@ -2617,7 +2587,10 @@
         if (!reducedMotion) updateNeurons(dt);
 
         frameCount++;
-        if (frameCount % CFG.CONN_RECALC_INTERVAL === 0) {
+        connClock += dt;
+        if (connClock >= CFG.CONN_RECALC_INTERVAL || formEdges !== wiredEdges) {
+            connClock = 0;
+            wiredEdges = formEdges;
             buildConnections();
             cullOrphanSignals();
         }
@@ -2629,19 +2602,22 @@
         render(now);
 
         // Throttle to ~30fps when motion is reduced (still draw, but cheaper).
+        // The frame stays marked as queued across the timeout, so nothing can
+        // slip a second loop in while it waits.
         if (reducedMotion) {
-            setTimeout(() => requestAnimationFrame(animate), 33);
+            frameQueued = true;
+            setTimeout(() => { frameQueued = false; schedule(); }, 33);
         } else {
-            requestAnimationFrame(animate);
+            schedule();
         }
     }
 
-    // ── Public API ──
-    // The landing page drives `setPhase` from scroll position; every other
-    // route resets to phase 0 so the mesh returns to its normal full state.
-    window.NeuralBG = {
+    // ── Engine API ──
+    // What the bootstrap drives, on whichever thread the engine lives. The
+    // page itself only ever sees window.NeuralBG, defined further down.
+    return {
+        init,
         setPhase,
-        reset() { setPhase(0); },
         // Called by the router: true on the landing route, false everywhere
         // else. Going idle paints one last frame so the canvas keeps its
         // texture rather than blanking, then stops the loop entirely — the
@@ -2650,17 +2626,208 @@
             const next = !!on;
             if (next === active) return;
             active = next;
-            if (active) { lastTime = performance.now(); warmupFrames = 90; requestAnimationFrame(animate); }
+            if (active) { lastTime = performance.now(); warmupFrames = 90; schedule(); }
             else render(performance.now());
         },
+        setPaused(p) {
+            paused = !!p;
+            if (!paused) { lastTime = performance.now(); schedule(); }
+        },
+        setTheme(dark) { darkTheme = !!dark; refreshInk(); },
+        resize(w, h, ratio) {
+            if (!canvas) return;
+            resize(w, h, ratio);
+            // Resizing clears the backing store; an idle canvas would stay
+            // blank until the next route asked for a frame.
+            if (!active) render(performance.now());
+        },
         phaseCount: PHASE_STOPS.length,
-        reducedMotion,
     };
+}
 
-    // ── Start ──
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
+
+// ════════════════════════════════════════════════════════════════════
+// Off the main thread
+// ════════════════════════════════════════════════════════════════════
+//
+// The engine draws from a dedicated Worker wherever the browser can hand it
+// the canvas (transferControlToOffscreen + a 2D OffscreenCanvas context), and
+// on the main thread everywhere else. Nothing about the drawing changes — it is
+// the same engine, the same frame, the same pixels — only the thread it costs.
+//
+// Why it matters more than any single drawing saving: the page's own scroll
+// work runs on the main thread too. Measured at 1440x900, dpr 2, a scroll down
+// the landing page spent ~42ms of main-thread time per frame, 37 of them in the
+// canvas, so the settle glide (a scrollTo per frame), the scroll -> phase
+// mapping and every reveal were all queued behind a frame of drawing. That is
+// the latency that reads as the page lagging the wheel. With the engine in a
+// worker the main thread only maps scroll to a number and posts it.
+//
+// The worker is THIS file again: one fetch, already in the HTTP cache, and no
+// second copy of the engine to keep in step.
+
+if (IN_WORKER) {
+    let engine = null;
+    self.onmessage = (e) => {
+        const m = e.data || {};
+        if (m.type === 'init') {
+            m.env.canvas = m.canvas;
+            engine = createEngine(m.env);
+            engine.init();
+            self.postMessage({ type: 'ready', phaseCount: engine.phaseCount });
+            return;
+        }
+        if (!engine) return;
+        switch (m.type) {
+            case 'phase':  engine.setPhase(m.p); break;
+            case 'active': engine.setActive(m.on); break;
+            case 'paused': engine.setPaused(m.paused); break;
+            case 'theme':  engine.setTheme(m.dark); break;
+            case 'resize': engine.resize(m.w, m.h, m.ratio); break;
+        }
+    };
+    return;
+}
+
+// ── Main thread: the bootstrap, and the page-facing API ──
+
+// Captured now: currentScript is only set while this script first executes.
+const scriptSrc = document.currentScript && document.currentScript.src;
+const mqDark = window.matchMedia('(prefers-color-scheme: dark)');
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function isDarkTheme() {
+    const attr = document.documentElement.getAttribute('data-theme');
+    return attr === 'dark' || (attr !== 'light' && mqDark.matches);
+}
+
+// Everything the engine used to read from window and document, read once.
+function environment() {
+    return {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        deviceRatio: window.devicePixelRatio || 1,
+        isMobile: window.matchMedia('(max-width: 768px)').matches,
+        reducedMotion,
+        dark: isDarkTheme(),
+        monoFamily: (getComputedStyle(document.documentElement)
+            .getPropertyValue('--font-mono') || 'monospace').trim(),
+    };
+}
+
+const canOffload = !!scriptSrc
+    && typeof Worker === 'function'
+    && typeof HTMLCanvasElement !== 'undefined'
+    && typeof HTMLCanvasElement.prototype.transferControlToOffscreen === 'function'
+    && typeof OffscreenCanvasRenderingContext2D !== 'undefined';
+
+// What the page last asked for, so whichever backend ends up drawing — or a
+// fallback that replaces a worker that never started — begins in that state.
+const wanted = { phase: 0, active: false };
+let backend = null;
+
+// The element's CSS size. The engine cannot set it: in a worker it holds an
+// OffscreenCanvas, which has no style.
+function sizeElement(el) {
+    el.style.width = window.innerWidth + 'px';
+    el.style.height = window.innerHeight + 'px';
+}
+
+function startOnMainThread(el) {
+    const env = environment();
+    env.canvas = el;
+    const engine = createEngine(env);
+    engine.init();
+    if (wanted.phase) engine.setPhase(wanted.phase);
+    engine.setActive(wanted.active);
+    api.phaseCount = engine.phaseCount;
+    api.thread = 'main';
+    return engine;
+}
+
+function startInWorker(el) {
+    const worker = new Worker(scriptSrc);
+    let off;
+    try { off = el.transferControlToOffscreen(); }
+    catch (err) { worker.terminate(); return null; }
+    worker.postMessage({ type: 'init', canvas: off, env: environment() }, [off]);
+    let ready = false;
+    worker.onmessage = (e) => {
+        if (e.data && e.data.type === 'ready') { ready = true; api.phaseCount = e.data.phaseCount; }
+    };
+    // A worker that fails to START (blocked, 404, a throw during init) has
+    // already taken the canvas with it — a transferred canvas cannot be drawn
+    // from this side again. A fresh element takes its place and the engine runs
+    // here instead, so the mesh is never simply missing.
+    worker.onerror = (e) => {
+        if (ready) return;
+        if (e && e.preventDefault) e.preventDefault();
+        worker.terminate();
+        const fresh = el.cloneNode(false);
+        el.replaceWith(fresh);
+        sizeElement(fresh);
+        backend = startOnMainThread(fresh);
+    };
+    api.thread = 'worker';
+    const post = (m) => worker.postMessage(m);
+    return {
+        setPhase(p) { post({ type: 'phase', p }); },
+        setActive(on) { post({ type: 'active', on }); },
+        setPaused(p) { post({ type: 'paused', paused: p }); },
+        setTheme(dark) { post({ type: 'theme', dark }); },
+        resize(w, h, ratio) { post({ type: 'resize', w, h, ratio }); },
+    };
+}
+
+function start() {
+    const el = document.getElementById('neural-bg');
+    if (!el) return;
+    sizeElement(el);
+    if (canOffload) {
+        try { backend = startInWorker(el); } catch (err) { backend = null; }
     }
+    if (!backend) backend = startOnMainThread(document.getElementById('neural-bg'));
+
+    window.addEventListener('resize', () => {
+        const cur = document.getElementById('neural-bg');
+        if (cur) sizeElement(cur);
+        backend.resize(window.innerWidth, window.innerHeight, window.devicePixelRatio || 1);
+    });
+    document.addEventListener('visibilitychange', () => backend.setPaused(document.hidden));
+    const pushTheme = () => backend.setTheme(isDarkTheme());
+    new MutationObserver(pushTheme).observe(document.documentElement,
+        { attributes: true, attributeFilter: ['data-theme'] });
+    if (mqDark.addEventListener) mqDark.addEventListener('change', pushTheme);
+    else if (mqDark.addListener) mqDark.addListener(pushTheme);
+}
+
+// ── Public API ──
+// The landing page drives `setPhase` from scroll position; every other route
+// resets to phase 0 so the mesh returns to its normal full state. The calls are
+// the same whichever thread draws; in a worker they are posted, not run.
+const api = window.NeuralBG = {
+    setPhase(p) {
+        wanted.phase = p;
+        if (backend) backend.setPhase(p);
+    },
+    reset() {
+        wanted.phase = 0;
+        if (backend) backend.setPhase(0);
+    },
+    setActive(on) {
+        wanted.active = !!on;
+        if (backend) backend.setActive(!!on);
+    },
+    // Filled in once an engine exists; nothing in the page reads it.
+    phaseCount: undefined,
+    reducedMotion,
+    // 'worker' or 'main' — which thread is drawing. For diagnostics and tests.
+    thread: null,
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+} else {
+    start();
+}
 })();
